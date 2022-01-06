@@ -399,7 +399,7 @@ function synth_new()
   self.saw=pat.saw
   local pd=pat.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
-  self._med=1.0125-0.0127*(pd*pd*pd*pd+1)
+  self._med=0.9995-0.0120*pd*pd*pd*pd
   self._nt=0
   self._nl=note_len
   self._ac=false
@@ -991,8 +991,8 @@ function ui_new()
      spr(self.sprites[id],w.x,w.y,1,1)
     end
    else
-    local t,bg,fg=split(sp)
-    rectfill(w.x)
+    local t,bg,fg=unpack_split(sp)
+    rectfill(w.x,w.y,wx+7,wy+7,bg)
     print(t,w.x+1,w.y+1,fg)
    end
   end
