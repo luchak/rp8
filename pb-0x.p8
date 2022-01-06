@@ -38,7 +38,9 @@ function _init()
  --extcmd('set_title', 'pb-0x')
 
  ui=ui_new()
- seq=seq_new()
+ seq=seq_load([[
+pb0x{song={loop_len=4,loop_start=1,},pats={cy={1={dec=0.6406,lev=0.5,tun=0.6875,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=1,14=0,15=0,16=0,},},},b1={1={dec=0.5,saw=false,steps={1=0,2=0,3=1,4=0,5=0,6=0,7=1,8=2,9=0,10=0,11=1,12=0,13=0,14=3,15=1,16=0,},lev=0.5,res=0.8125,cut=0.2031,env=0.5,notes={1=7,2=7,3=7,4=7,5=7,6=7,7=7,8=19,9=7,10=7,11=7,12=7,13=7,14=5,15=7,16=7,},acc=0.5,},2={dec=0.5,saw=true,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,lev=0.5,env=0.5,acc=0.5,cut=0.5,},},b0={1={dec=0.2969,saw=true,steps={1=1,2=0,3=1,4=3,5=1,6=1,7=1,8=1,9=0,10=1,11=0,12=0,13=0,14=1,15=0,16=0,},lev=0.5,res=0.625,cut=0.2656,env=0.3438,notes={1=19,2=19,3=31,4=14,5=15,6=19,7=22,8=19,9=19,10=19,11=19,12=19,13=19,14=26,15=19,16=19,},acc=0.5,},3={dec=0.5,saw=true,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,lev=0.5,env=0.5,acc=0.5,cut=0.5,},},bd={1={dec=0.5,lev=0.5,tun=0.5,steps={1=2,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=2,10=0,11=0,12=0,13=2,14=0,15=0,16=0,},},},sd={1={dec=0.1875,lev=0.6094,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=1,11=0,12=1,13=2,14=0,15=0,16=0,},},},pc={1={dec=0,lev=0.4844,tun=0.3906,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=1,10=2,11=0,12=1,13=0,14=0,15=1,16=0,},},},hh={1={dec=0.6875,lev=0.4062,tun=0.4375,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=1,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},},},},mixer={b0_od=0.5156,b1_od=0,drum_fx=0,comp_thresh=0.3438,delay_time=0.5,drum_od=0.5156,b1_lev=0.5468,b1_fx=0,drum_lev=0.5469,lev=0.5,tempo=0.5,b0_lev=0.5469,delay_fb=0.5,shuffle=0.3125,b0_fx=0.5156,},} 
+ ]])
  
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',32)
@@ -795,7 +797,7 @@ drum_synths=split('bd,sd,hh,cy,pc')
 
 copy_bufs={}
 
-function seq_new()
+function seq_new(savedata)
  local s=parse[[{
   pats={},
   transport={
@@ -866,7 +868,7 @@ function seq_next_note(seq)
  local t=seq.transport
  t.note+=1
  if (t.note>16) seq_next_bar(seq)
- local nl=sample_rate*(15/(90+64*seq.tempo))
+ local nl=sample_rate*(15/(90+64*seq.mixer.tempo))
  local shuf_diff=nl*seq.mixer.shuffle*0.33
  if (t.note&1>0) shuf_diff=-shuf_diff
  seq.internal.note_len=flr(0.5+nl+shuf_diff)
@@ -899,7 +901,7 @@ end
 
 function seq_load(str)
  if (sub(str,1,4)!='pb0x') return nil
- return seq_new(parse(str))
+ return seq_new(parse(sub(str,5)))
 end
 
 function seq_get(seq,syn,par)
@@ -1151,7 +1153,7 @@ function step_btn_new(x,y,syn,step,sprites)
  return {
   x=x,y=y,syn=syn,step=step,sprites=sprites,n=#sprites-1,
   get_sprite=function(self,seq)
-   if (seq.playing and seq.now==self.step) return self.sprites[self.n+1]
+   if (seq.transport.playing and seq.transport.note==self.step) return self.sprites[self.n+1]
    local v=seq_get(seq,self.syn,'steps')[self.step]
    return self.sprites[v+1]
   end,
@@ -1246,7 +1248,7 @@ function transport_number_new(x,y,w,key)
  return {
 	 x=x,y=y,w=w,key=key,noinput=true,
 	 get_sprite=function(self,seq)
-	  if seq.song_mode then
+	  if seq.transport.song_mode then
 	   return '12,'..self.w..',0,15'
 	  else
 	   return '--,'..self.w..',0,15'
