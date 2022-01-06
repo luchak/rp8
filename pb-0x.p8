@@ -443,7 +443,7 @@ function synth_new()
 
   if (self._ac) self.env+=pat.acc
   if self._lsl then
-   self.todpr=0.025
+   self.todpr=0.012
   else
    self.todpr=0.995
    self._mr=true
@@ -805,7 +805,8 @@ function seq_new(savedata)
    bar=1,
    note=1,
    playing=false,
-   recording=false
+   recording=false,
+   looping=false
   },
   view={
    drum="bd",
@@ -1244,12 +1245,12 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
  }
 end
 
-function transport_number_new(x,y,w,key)
+function transport_number_new(x,y,w,obj,key)
  return {
-	 x=x,y=y,w=w,key=key,noinput=true,
+	 x=x,y=y,w=w,obj=obj,key=key,noinput=true,
 	 get_sprite=function(self,seq)
 	  if seq.transport.song_mode then
-	   return '12,'..self.w..',0,15'
+	   return tostr(seq_get(seq,self.obj,self.key))..','..self.w..',0,15'
 	  else
 	   return '--,'..self.w..',0,15'
    end
@@ -1372,16 +1373,16 @@ function header_ui_init(ui,yp)
   end
  end
  ui:add_widget(
-  transport_number_new(24,yp,16,'song_pos')
+  transport_number_new(24,yp,16,'transport','bar')
  )
  ui:add_widget(
-  transport_number_new(56,yp,8,'now')
+  transport_number_new(56,yp,8,'transport','note')
  )
  ui:add_widget(
-  transport_number_new(80,yp,16,'loop_start')
+  transport_number_new(80,yp,16,'song','loop_start')
  )
  ui:add_widget(
-  transport_number_new(104,yp,8,'loop_len')
+  transport_number_new(104,yp,8,'song','loop_len')
  )
  
 end
