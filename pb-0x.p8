@@ -9,16 +9,16 @@ _smoothcpu=-1
 semitone=2^(1/12)
 
 function copy_seq()
- printh(stringify(seq),'@clip')
+ printh(seq_save(seq),'@clip')
 end
 
 function paste_seq()
  local pd=stat(4)
  if (pd!='') then
-  seq_load(seq,pd)
+  seq=seq_load(pd)
+  seq_helper.seq=seq
  end
 end
-
 
 rec_menuitem=4
 audio_rec=false
@@ -36,13 +36,9 @@ end
 function _init()
  cls()
  --extcmd('set_title', 'pb-0x')
-  
+
  ui=ui_new()
  seq=seq_new()
- seq_load(seq,[[
- {playing=true,drum="bd",b1_pat=1,b1_fx=0,drum_next=1,lev=0.6875,b1_od=0,comp_thresh=0.3125,hh={dec=0.5312,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=0,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},lev=0.5157,tun=0.5781,},pbl1="b0",b1_next=1,b1_lev=0.5,cy={dec=0.3125,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=2,8=0,9=0,10=0,11=0,12=1,13=0,14=0,15=0,16=0,},lev=0.3281,tun=1,},drum_pat=1,pbl2="b1",tempo=0.5,drum_fx=0.3125,b0_pat=1,b0_fx=0.6875,ch={steps={1=0,2=1,3=2,4=0,5=0,6=0,7=2,8=0,9=0,10=1,11=2,12=1,13=0,14=0,15=2,16=1,},lev=0.65,tune=0.5,dec=0.425,tun=0.525,},drum_lev=0.5,sd={steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=2,14=0,15=1,16=1,},lev=0.6,tune=0.5,dec=0.3,tun=0.4,},pc={dec=0.3125,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=1,8=1,9=1,10=1,11=0,12=2,13=0,14=1,15=1,16=1,},lev=0.5,tun=0.5781,},bd={steps={1=2,2=0,3=0,4=1,5=2,6=0,7=0,8=0,9=2,10=1,11=0,12=0,13=2,14=0,15=0,16=0,},lev=0.6594,tune=0.5,dec=0.425,tun=0.3749,},b0={acc=0.375,cut=0.4158,lev=0.4249,saw=false,ovr=true,dly=false,dec=0.3688,steps={1=3,2=1,3=1,4=3,5=1,6=0,7=1,8=0,9=2,10=0,11=3,12=1,13=0,14=3,15=1,16=1,},env=1,notes={1=14,2=27,3=26,4=14,5=29,6=14,7=29,8=14,9=14,10=26,11=29,12=28,13=14,14=26,15=24,16=21,},res=0.5907,},b0_od=0.2968,shuffle=0,b1={acc=0.5,cut=0.2096,lev=0.3499,saw=false,ovr=false,dly=false,dec=0.1813,steps={1=1,2=1,3=0,4=2,5=1,6=3,7=1,8=0,9=1,10=3,11=1,12=0,13=0,14=0,15=1,16=0,},env=0.3531,notes={1=2,2=14,3=2,4=2,5=2,6=5,7=2,8=14,9=2,10=14,11=2,12=14,13=2,14=2,15=2,16=14,},res=0.5,},drum_od=0,delay_fb=0.6562,delay_time=0.2969,note_len=678,now=3,b0_lev=0.2656,pats={cy={1={dec=0.3125,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=2,8=0,9=0,10=0,11=0,12=1,13=0,14=0,15=0,16=0,},lev=0.3281,tun=1,},2={dec=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,tun=0.5,},},pc={1={dec=0.3125,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=1,8=1,9=1,10=1,11=0,12=2,13=0,14=1,15=1,16=1,},lev=0.5,tun=0.5781,},2={dec=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,tun=0.5,},},hh={1={dec=0.5312,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=0,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},lev=0.5157,tun=0.5781,},2={dec=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,tun=0.5,},},sd={1={steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=2,14=0,15=1,16=1,},lev=0.6,tune=0.5,dec=0.3,tun=0.4,},2={dec=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,tun=0.5,},},bd={1={steps={1=2,2=0,3=0,4=1,5=2,6=0,7=0,8=0,9=2,10=1,11=0,12=0,13=2,14=0,15=0,16=0,},lev=0.6594,tune=0.5,dec=0.425,tun=0.3749,},2={dec=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,tun=0.5,},},b0={1={acc=0.375,cut=0.4158,lev=0.4249,saw=false,ovr=true,dly=false,dec=0.3688,steps={1=3,2=1,3=1,4=3,5=1,6=0,7=1,8=0,9=2,10=0,11=3,12=1,13=0,14=3,15=1,16=1,},env=1,notes={1=14,2=27,3=26,4=14,5=29,6=14,7=29,8=14,9=14,10=26,11=29,12=28,13=14,14=26,15=24,16=21,},res=0.5907,},2={acc=0.5,cut=0.5,lev=0.5,saw=true,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},env=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},res=0.5,},},b1={1={acc=0.5,cut=0.2096,lev=0.3499,saw=false,ovr=false,dly=false,dec=0.1813,steps={1=1,2=1,3=0,4=2,5=1,6=3,7=1,8=0,9=1,10=3,11=1,12=0,13=0,14=0,15=1,16=0,},env=0.3531,notes={1=2,2=14,3=2,4=2,5=2,6=5,7=2,8=14,9=2,10=14,11=2,12=14,13=2,14=2,15=2,16=14,},res=0.5,},},},b0_next=1,}
- ]])
- seq.now=1
  
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',32)
@@ -73,8 +69,13 @@ function _init()
  comp=comp_new(mixer,0.5,4,0.05,0.005)
  seq_helper=seq_helper_new(
   seq,comp,function()
-   if (not seq.playing) return
-   local now,nl=seq.now,seq.note_len
+   local st,si,sv,sm=
+    seq.transport,
+    seq.internal,
+    seq.view,
+    seq.mixer
+   if (not st.playing) return
+   local now,nl=st.note,si.note_len
    pbl0:note(seq.b0,now,nl)
    pbl1:note(seq.b1,now,nl)
    kick:note(seq.bd,now,nl)
@@ -82,21 +83,21 @@ function _init()
    hh:note(seq.hh,now,nl)
    cy:note(seq.cy,now,nl)
    perc:note(seq.pc,now,nl)
-   mixer.lev=seq.lev*3
-   delay.l=(0.9*seq.delay_time+0.1)*sample_rate
-   delay.fb=sqrt(seq.delay_fb)*0.95
+   mixer.lev=sm.lev*3
+   delay.l=(0.9*sm.delay_time+0.1)*sample_rate
+   delay.fb=sqrt(sm.delay_fb)*0.95
 
    local ms=mixer.srcs
-   ms.b0.lev=seq.b0_lev
-   ms.b1.lev=seq.b1_lev
-   ms.drum.lev=seq.drum_lev*2
-   ms.b0.od=seq.b0_od
-   ms.b1.od=seq.b1_od
-   ms.drum.od=seq.drum_od
-   ms.b0.fx=seq.b0_fx^2*0.8
-   ms.b1.fx=seq.b1_fx^2*0.8
-   ms.drum.fx=seq.drum_fx^2*0.8
-   comp.thresh=0.1+0.9*seq.comp_thresh
+   ms.b0.lev=sm.b0_lev
+   ms.b1.lev=sm.b1_lev
+   ms.drum.lev=sm.drum_lev*2
+   ms.b0.od=sm.b0_od
+   ms.b1.od=sm.b1_od
+   ms.drum.od=sm.drum_od
+   ms.b0.fx=sm.b0_fx^2*0.8
+   ms.b1.fx=sm.b1_fx^2*0.8
+   ms.drum.fx=sm.drum_fx^2*0.8
+   comp.thresh=0.1+0.9*sm.comp_thresh
    
    seq_next_note(seq)
   end
@@ -120,7 +121,7 @@ init_wait_frames=6
 function _update60()
  audio_update()
  if init_wait_frames<=0 then
-  if (not seq.playing) then
+  if (not seq.transport.playing) then
    seq_next_bar(seq)
   end
   ui:update(seq)
@@ -146,6 +147,7 @@ end
 function getbin(v,l,h,n)
  return flr((v-l)/((h+0.0001)-l)*n)
 end
+
 -->8
 -- utils
 
@@ -155,6 +157,18 @@ function newbuf(n)
   b[i]=0
  end
  return b
+end
+
+function pick(t,keys)
+ local r={}
+ for k in all(keys) do
+  r[k]=t[k]
+ end
+ return r
+end
+
+function die(msg)
+ assert(false,msg)
 end
 
 function merge_tables(base,new)
@@ -208,6 +222,11 @@ function is_digit(c)
  return (c>='0' and c<='9') or c=='.' 
 end
 
+-- this is super fragile
+-- can easily hang the program!
+-- make sure to always use
+-- double quotes in serialized
+-- data, single quotes will hang
 function _parse(input)
  repeat
   c=input()
@@ -767,6 +786,10 @@ end
 n_off,n_on,n_ac,n_sl,n_ac_sl=0,1,2,3,4
 d_off,d_on,d_ac=0,1,2
 
+save_keys=parse[[
+{1="pats",2="mixer",3="song",}
+]]
+
 all_synths=split('b0,b1,bd,sd,hh,cy,pc')
 drum_synths=split('bd,sd,hh,cy,pc')
 
@@ -775,37 +798,52 @@ copy_bufs={}
 function seq_new()
  local s=parse[[{
   pats={},
-  now=1,
-  base_note_len=750,
-  note_len=750,
-  drum="bd",
-  b0_next=1,
-  b1_next=1,
-  drum_next=1,
-  b0_bank=1,
-  b1_bank=1,
-  drum_bank=1,
-  playing=false,
-  tempo=0.5,
-  shuffle=0,
-  lev=0.5,
-  delay_time=0.5,
-  delay_fb=0.5,
-  b0_lev=0.5,
-  b0_od=0,
-  b0_fx=0,
-  b1_lev=0.5,
-  b1_od=0,
-  b1_fx=0,
-  drum_lev=0.5,
-  drum_od=0,
-  drum_fx=0,
-  comp_thresh=1.0,
-  song_mode=false,
-  song_pos=1,
-  loop_start=1,
-  loop_len=1
+  transport={
+   song_mode=false,
+   bar=1,
+   note=1,
+   playing=false,
+   recording=false
+  },
+  view={
+   drum="bd",
+   b0_next=1,
+   b1_next=1,
+   drum_next=1,
+   b0_pat=1,
+   b1_pat=1,
+   drum_pat=1,
+   b0_bank=1,
+   b1_bank=1,
+   drum_bank=1,
+  },
+  internal={
+   base_note_len=750,
+   note_len=750,
+  },
+  mixer={
+   tempo=0.5,
+   shuffle=0,
+   lev=0.5,
+   delay_time=0.5,
+   delay_fb=0.5,
+   b0_lev=0.5,
+   b0_od=0,
+   b0_fx=0,
+   b1_lev=0.5,
+   b1_od=0,
+   b1_fx=0,
+   drum_lev=0.5,
+   drum_od=0,
+   drum_fx=0,
+   comp_thresh=1.0
+  },
+  song={
+   loop_start=1,
+   loop_len=4,
+  }
  }]]
+ if (savedata) merge_tables(s,pick(savedata,save_keys))
  seq_next_bar(s)
  return s
 end
@@ -825,47 +863,55 @@ function seq_get_or_create_pat(seq,syn,idx,factory)
 end
 
 function seq_next_note(seq)
- seq.now+=1
- if (seq.now>16) seq_next_bar(seq)
+ local t=seq.transport
+ t.note+=1
+ if (t.note>16) seq_next_bar(seq)
  local nl=sample_rate*(15/(90+64*seq.tempo))
- local shuf_diff=nl*seq.shuffle*0.33
- if (seq.now&1>0) shuf_diff=-shuf_diff
- seq.note_len=flr(0.5+nl+shuf_diff)
- seq.base_note_len=nl
+ local shuf_diff=nl*seq.mixer.shuffle*0.33
+ if (t.note&1>0) shuf_diff=-shuf_diff
+ seq.internal.note_len=flr(0.5+nl+shuf_diff)
+ seq.internal.base_note_len=nl
 end
 
 function seq_next_bar(seq)
+ local v=seq.view
+ local b0n,b1n,dn=v.b0_next,v.b1_next,v.drum_next
  seq_get_or_create_pat(
-  seq,'b0',seq.b0_next,pbl_pat_new
+  seq,'b0',b0n,pbl_pat_new
  )
- seq.b0_pat=seq.b0_next
+ v.b0_pat=seq.b0n
  seq_get_or_create_pat(
-  seq,'b1',seq.b1_next,pbl_pat_new
+  seq,'b1',b1n,pbl_pat_new
  )
- seq.b1_pat=seq.b1_next
+ v.b1_pat=b1n
  for drum in all(drum_synths) do
   seq_get_or_create_pat(
-   seq,drum,seq.drum_next,drum_pat_new
+   seq,drum,v.drum_next,drum_pat_new
   )
  end
- seq.drum_pat=seq.drum_next
- seq.now=1
+ v.drum_pat=v.drum_next
+ seq.transport.note=1
 end
 
-function seq_load(seq,str)
- local now,ds,p=seq.now,seq.drum,seq.playing
- merge_tables(seq,parse(str))
- seq.now,seq.drum,seq.playing=now,ds,p
+function seq_save(seq)
+ return 'pb0x'..stringify(pick(seq,save_keys))
+end
+
+function seq_load(str)
+ if (sub(str,1,4)!='pb0x') return nil
+ return seq_new(parse(str))
 end
 
 function seq_get(seq,syn,par)
  if (not syn) return seq[par]
- if (syn=='drum') syn=seq[syn]
+ if (syn=='drum') syn=seq.view[syn]
+ assert(seq[syn],syn)
  return seq[syn][par]
 end
 
 function seq_set(seq,syn,par,v)
- if (syn=='drum') syn=seq[syn]
+ if (syn=='drum') syn=seq.view[syn]
+ assert(syn,syn)
  if (not syn) seq[par]=v else seq[syn][par]=v
 end
 
@@ -920,9 +966,9 @@ function seq_helper_new(seq,root,note_fn)
   seq=seq,
   root=root,
   note_fn=note_fn,
-  t=seq.note_len,
+  t=seq.internal.note_len,
   update=function(self,b,first,last)
-   local p,nl=first,self.seq.note_len
+   local p,nl=first,self.seq.internal.note_len
    while p<last do
     if self.t>=nl then
      self.t=0
@@ -1181,17 +1227,17 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
   s_next=s_next, pib=pib,
   w=5,
   get_sprite=function(self,seq)
-   local bank=seq_get(seq,nil,self.bank_par)
-   local x=seq_get(seq,nil,self.par)
-   local xlast=seq_get(seq,nil,self.last_par)
+   local bank=seq_get(seq,'view',self.bank_par)
+   local x=seq_get(seq,'view',self.par)
+   local xlast=seq_get(seq,'view',self.last_par)
    local val=(bank-1)*bank_size+self.pib
    if (x==val and xlast!=x) return self.s_next
    return trn(x==val,self.s_on,self.s_off)
   end,
   input=function(self,seq)
-   local bank=seq_get(seq,nil,self.bank_par)
+   local bank=seq_get(seq,'view',self.bank_par)
    local val=(bank-1)*bank_size+self.pib
-   seq_set(seq,nil,self.par,val)
+   seq_set(seq,'view',self.par,val)
   end
  }
 end
@@ -1273,7 +1319,7 @@ function pirc_ui_init(ui,key,yp)
   pc={x=112,s=158}
  }]]) do
   ui:add_widget(
-   radio_btn_new(d.x,yp+16,nil,'drum',k,d.s,d.s+1)
+   radio_btn_new(d.x,yp+16,'view','drum',k,d.s,d.s+1)
   )
   ui:add_widget(
    dial_new(d.x+8,yp+16,k,'lev',100,12)
@@ -1292,15 +1338,15 @@ end
 function header_ui_init(ui,yp)
  local function hdial(x,y,p)
  ui:add_widget(
-  dial_new(x,yp+y,nil,p,116,12)
+  dial_new(x,yp+y,'mixer',p,116,12)
  )
  end
 
  ui:add_widget(
-  toggle_new(0,yp,nil,'playing',6,7)
+  toggle_new(0,yp,'transport','playing',6,7)
  )
  ui:add_widget(
-  toggle_new(16,yp,nil,'song_mode',142,143)
+  toggle_new(16,yp,'transport','song_mode',142,143)
  )
  hdial(0,8,'tempo')
  hdial(16,8,'lev')
@@ -1315,7 +1361,7 @@ function header_ui_init(ui,yp)
   hdial(xp+16,16,pt..'_fx')
 
   ui:add_widget(
-   spin_btn_new(xp,yp+24,nil,pt..'_bank',{208,209,210,211})
+   spin_btn_new(xp,yp+24,'view',pt..'_bank',{208,209,210,211})
   )
   for i=1,4 do
    ui:add_widget(
