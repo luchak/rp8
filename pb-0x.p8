@@ -82,7 +82,7 @@ function _init()
    hh:note(seq.hh,now,nl)
    cy:note(seq.cy,now,nl)
    perc:note(seq.pc,now,nl)
-   mixer.lev=seq.lev*2
+   mixer.lev=seq.lev*3
    delay.l=(0.9*seq.delay_time+0.1)*sample_rate
    delay.fb=sqrt(seq.delay_fb)*0.95
 
@@ -701,11 +701,11 @@ function mixer_new(srcs,fx,lev)
    end
 
    for k,src in pairs(self.srcs) do
-    local slev,od,fx=src.lev,src.od,src.fx
+    local slev,od,fx=src.lev,src.od*src.od,src.fx
     src.obj:update(tmp,first,last)
-    local odf=0.3+15.7*od
+    local odf=0.3+31.7*od
     --local odfi=1/(4*(atan2(odf,1)-0.75))
-    local odfi=(1+0.7*od)/odf
+    local odfi=(1+1.8*od)/odf
     for i=first,last do
      local x=mid(-1,tmp[i]*odf,1)
      x=slev*odfi*(x-0.148148*x*x*x)
