@@ -423,7 +423,7 @@ function synth_new()
   self.ovr=pat.ovr
   self.lev=pat.lev*0.6
   self.env=pat.env*0.95+0.05
-  self.acc=pat.acc
+  self.acc=pat.acc*2.7+0.3
   self.saw=pat.saw
   local pd=pat.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
@@ -728,7 +728,7 @@ function mixer_new(srcs,fx,lev)
     src.obj:update(tmp,first,last)
     local odf=0.3+31.7*od
     --local odfi=1/(4*(atan2(odf,1)-0.75))
-    local odfi=(1+1.8*od)/odf
+    local odfi=(1+3*od)/odf
     for i=first,last do
      local x=mid(-1,tmp[i]*odf,1)
      x=slev*odfi*(x-0.148148*x*x*x)
