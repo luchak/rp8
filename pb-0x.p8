@@ -367,11 +367,12 @@ end
 -- audio gen
 
 fc_min=150
-fc_oct=3
+fc_oct=4
 fr_min=0.1
-fr_rng=3.8-fr_min
+fr_rng=4.2-fr_min
 env_oct=3.0
-rise_inc=1/16
+rise_inc=1/20
+--fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
 function synth_new()
  -- simple saw wave synth
@@ -385,7 +386,7 @@ function synth_new()
   fc=0.5,
   fr=3.6,
   os=4,
-  osfc=0.7,
+  osfc=0.72,
   ovr=false,
   lev=0.5,
   env=0.5,
@@ -409,21 +410,27 @@ function synth_new()
   _nl=900,
   _ac=false,
   _sl=false,
-  _lsl=false
+  _lsl=false,
+  _lastdn={},
+  _thisdn={}
  }]]
 
+ for i=1,4 do
+  obj._lastdn[i]=0
+  obj._thisdn[i]=0
+ end
  
  obj.note=function(self,pat,step,note_len)
   local patstep=pat.steps[step]
 
-  self.fc=fc_min*(2^(fc_oct*pat.cut))
-  self.fc*=6.283/self.os
-  self.fc/=sample_rate
+  self.fc=(fc_min/sample_rate)*(2^(fc_oct*pat.cut))
+  self.fc/=self.os
+  log('c '..self.fc)
   self.fr=pat.res*pat.res*fr_rng+fr_min
   self.ovr=pat.ovr
   self.lev=pat.lev*0.6
-  self.env=pat.env*0.95+0.05
-  self.acc=pat.acc*2.7+0.3
+  self.env=pat.env*pat.env+0.1
+  self.acc=pat.acc*1.7+0.3
   self.saw=pat.saw
   local pd=pat.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
@@ -464,7 +471,11 @@ function synth_new()
   local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
   for i=first,last do
-   local fc=min(0.8,fcb*(1+((me*env)<<2)))
+   local fc=0.5*min(0.33/os,fcb+((me*env)>>4))
+   local prefc=fc*2*6.283
+   local tan=-sin(fc)/cos(fc)
+   fc=1.88*tan/(tan+1)
+   log('a '..fc..' '..prefc)
    if gate then
     ae+=(1-ae)>>2
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
@@ -480,19 +491,23 @@ function synth_new()
    odp+=todpr*(todp-odp)
    self._nt+=1
    for j=1,os do
+    dn=0
     local osc=(op>>4)
     if not saw then
      osc=(osc>>2)+0.5+((osc&0x8000)>>15)
     end
-    up+=osfc*(osc-up)
+    --up+=osfc*(osc-up)
+    up=osc
     local x=up-fr*(f4-up)
-    local xc=mid(-1,xc,1)
+    --local xc=mid(-1,xc,1)
+    local xc=4*(atan2(1.5708*x,1)-0.75)
     x=xc+(x-xc)*0.9840
         
     f1+=(x-f1)*fc
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
+  
     dn+=osfc*(f4-dn)
     op+=odp
     if (op>16) op-=32
