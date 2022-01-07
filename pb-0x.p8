@@ -386,7 +386,7 @@ function synth_new()
   fc=0.5,
   fr=3.6,
   os=4,
-  osfc=0.72,
+  osfc=0.99,
   env=0.5,
   acc=0.5,
   saw=false,
@@ -421,11 +421,8 @@ function synth_new()
  obj.note=function(self,pat,step,note_len)
   local patstep=pat.steps[step]
 
-  self.fc=(fc_min/sample_rate)*(2^(fc_oct*pat.cut))
-  self.fc/=self.os
-  log('c '..self.fc)
+  self.fc=(fc_min/sample_rate)*(2^(fc_oct*pat.cut))/self.os
   self.fr=pat.res*pat.res*fr_rng+fr_min
-  self.ovr=pat.ovr
   self.env=pat.env*pat.env+0.1
   self.acc=pat.acc*1.7+0.3
   self.saw=pat.saw
@@ -468,7 +465,7 @@ function synth_new()
   local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
   for i=first,last do
-   local fc=min(0.35/os,fcb+((me*env)>>4))
+   local fc=min(0.4/os,fcb+((me*env)>>4))
    -- very very janky dewarping
    -- arbitrary scaling constant
    -- is 0.75*2*pi because???   
@@ -496,8 +493,7 @@ function synth_new()
     --up+=osfc*(osc-up)
     up=osc
     local x=up-fr*(f4-up)
-    --local xc=mid(-1,xc,1)
-    local xc=4*(atan2(1.5708*x,1)-0.75)
+    local xc=mid(-1,xc,1)
     x=xc+(x-xc)*0.9840
         
     f1+=(x-f1)*fc
