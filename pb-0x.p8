@@ -386,7 +386,6 @@ function synth_new()
   fc=0.5,
   fr=3.6,
   os=4,
-  osfc=0.99,
   env=0.5,
   acc=0.5,
   saw=false,
@@ -424,7 +423,7 @@ function synth_new()
   self.fc=(fc_min/sample_rate)*(2^(fc_oct*pat.cut))/self.os
   self.fr=pat.res*pat.res*fr_rng+fr_min
   self.env=pat.env*pat.env+0.1
-  self.acc=pat.acc*1.7+0.3
+  self.acc=pat.acc*1.7+0.1
   self.saw=pat.saw
   local pd=pat.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
@@ -460,12 +459,12 @@ function synth_new()
   local todp,todpr=self.todp,self.todpr
   local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
   local fr,fcb=self.fr,self.fc
-  local os,up,dn,osfc=self.os,self._up,self._dn,self.osfc
+  local os,up,dn=self.os
   local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
   local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
   for i=first,last do
-   local fc=min(0.4/os,fcb+((me*env)>>4))
+   local fc=min(0.37/os,fcb+((me*env)>>4))
    -- very very janky dewarping
    -- arbitrary scaling constant
    -- is 0.75*2*pi because???   
@@ -490,9 +489,7 @@ function synth_new()
     if not saw then
      osc=(osc>>2)+0.5+((osc&0x8000)>>15)
     end
-    --up+=osfc*(osc-up)
-    up=osc
-    local x=up-fr*(f4-up)
+    local x=osc-fr*(f4-osc)
     local xc=mid(-1,xc,1)
     x=xc+(x-xc)*0.9840
         
@@ -501,11 +498,10 @@ function synth_new()
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
   
-    dn+=osfc*(f4-dn)
     op+=odp
     if (op>16) op-=32
    end
-   local out=dn*ae
+   local out=f4*ae
    if (ac) out*=1+acc*me
    b[i]=out>>2
   end
