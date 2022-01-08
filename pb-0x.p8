@@ -51,7 +51,7 @@ pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7
  
  pbl0,pbl1=synth_new(),synth_new()
  kick,snare,hh,cy,perc=
-  sweep_new(0.1008,0.0126,0.12,0.7,0.7,0.4),
+  sweep_new(0.092,0.0126,0.12,0.7,0.7,0.4),
   snare_new(),
   hh_cy_new(1,0.8,0.75,0.35,-1,2),
   hh_cy_new(1.3,0.5,0.5,0.18,0.3,0.8),
@@ -445,7 +445,7 @@ function synth_new()
 
   if (self._ac) self.env+=pat.acc
   if self._lsl then
-   self.todpr=0.012
+   self.todpr=0.015
   else
    self.todpr=0.995
    self._mr=true
