@@ -490,9 +490,9 @@ function synth_new()
      osc=(osc>>2)+0.5+((osc&0x8000)>>15)
     end
     local x=osc-fr*(f4-osc)
-    local xc=mid(-1,xc,1)
+    local xc=mid(-1,x,1)
     x=xc+(x-xc)*0.9840
-        
+
     f1+=(x-f1)*fc
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
@@ -1456,7 +1456,7 @@ function header_ui_init(ui,yp)
   197
  )
  ui:add_widget(
-  transport_number_new(64,yp,8,'transport','note')
+  transport_number_new(64,yp,8,'transport','step')
  )
  song_only(
   toggle_new(80,yp,'song','looping',193,194),
