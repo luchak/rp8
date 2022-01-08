@@ -39,7 +39,7 @@ function _init()
 
  ui=ui_new()
  state=state_load([[
-pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=1,11=0,12=1,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},b0={1={cut=0.2968,acc=0.5,notes={1=19,2=19,3=31,4=14,5=15,6=19,7=22,8=19,9=19,10=19,11=19,12=19,13=19,14=26,15=19,16=19,},dec=0.3438,lev=0.5,res=0.5,saw=true,env=0.6406,steps={1=1,2=0,3=1,4=3,5=1,6=1,7=1,8=1,9=0,10=1,11=0,12=0,13=0,14=1,15=0,16=0,},},3={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},b1={1={cut=0.2031,acc=0.5,notes={1=7,2=7,3=7,4=7,5=7,6=7,7=7,8=19,9=7,10=7,11=7,12=7,13=7,14=5,15=7,16=7,},dec=0.5,lev=0.5,res=0.8125,saw=false,env=0.5,steps={1=0,2=0,3=1,4=0,5=0,6=0,7=1,8=2,9=0,10=0,11=1,12=0,13=0,14=3,15=1,16=0,},},2={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},cy={1={lev=0.5,dec=0.6406,tun=0.6875,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=1,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},bd={1={lev=0.5,dec=0.5,tun=0.5,steps={1=2,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=2,10=0,11=0,12=0,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},pc={1={lev=0.3906,dec=0,tun=0.5781,steps={1=1,2=0,3=0,4=0,5=0,6=2,7=0,8=0,9=1,10=2,11=0,12=1,13=0,14=0,15=1,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},hh={1={lev=0.4062,dec=0.6875,tun=0.4375,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=1,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},},song={loop_len=4,loop_start=1,},mixer={drum_fx=0.2969,b0_lev=0.4844,b0_od=0.5156,delay_time=0.2969,comp_thresh=0.4375,delay_fb=0.625,tempo=0.5,drum_lev=0.5469,lev=0.6562,b1_od=0,b1_lev=0.5468,b1_fx=0,b0_fx=0.625,drum_od=0.5156,shuffle=0.3125,},}
+pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=1,11=0,12=1,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},b0={1={cut=0.2968,acc=0.5,notes={1=19,2=19,3=31,4=14,5=15,6=19,7=22,8=19,9=19,10=19,11=19,12=19,13=19,14=26,15=19,16=19,},dec=0.3438,lev=0.5,res=0.5,saw=true,env=0.6406,steps={1=1,2=0,3=1,4=3,5=1,6=1,7=1,8=1,9=0,10=1,11=0,12=0,13=0,14=1,15=0,16=0,},},3={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},b1={1={cut=0.2031,acc=0.5,notes={1=7,2=7,3=7,4=7,5=7,6=7,7=7,8=19,9=7,10=7,11=7,12=7,13=7,14=5,15=7,16=7,},dec=0.5,lev=0.5,res=0.8125,saw=false,env=0.5,steps={1=0,2=0,3=1,4=0,5=0,6=0,7=1,8=2,9=0,10=0,11=1,12=0,13=0,14=3,15=1,16=0,},},2={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},cy={1={lev=0.5,dec=0.6406,tun=0.6875,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=1,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},bd={1={lev=0.5,dec=0.5,tun=0.5,steps={1=2,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=2,10=0,11=0,12=0,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},pc={1={lev=0.3906,dec=0,tun=0.5781,steps={1=1,2=0,3=0,4=0,5=0,6=2,7=0,8=0,9=1,10=2,11=0,12=1,13=0,14=0,15=1,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},hh={1={lev=0.4062,dec=0.6875,tun=0.4375,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=1,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},},song={loop_len=4,loop_start=1,},seq={drum_fx=0.2969,b0_lev=0.4844,b0_od=0.5156,delay_time=0.2969,comp_thresh=0.4375,delay_fb=0.625,tempo=0.5,drum_lev=0.5469,lev=0.6562,b1_od=0,b1_lev=0.5468,b1_fx=0,b0_fx=0.625,drum_od=0.5156,shuffle=0.3125,},}
  ]])
  
  header_ui_init(ui,0)
@@ -75,7 +75,7 @@ pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7
     state.transport,
     state.internal,
     state.view,
-    state.mixer
+    state.seq
    if (not st.playing) return
    local now,nl=st.step,si.note_len
    if (sm.b0_on) pbl0:note(state.b0,now,nl)
@@ -795,7 +795,7 @@ n_off,n_on,n_ac,n_sl,n_ac_sl=0,1,2,3,4
 d_off,d_on,d_ac=0,1,2
 
 save_keys=parse[[
-{1="pats",2="mixer",3="song",}
+{1="pats",2="seq",3="song",}
 ]]
 
 all_synths=split('b0,b1,bd,sd,hh,cy,pc')
@@ -815,7 +815,7 @@ copy_bufs={}
 --  _next,_pat,_bank: here or not?
 -- internal:
 --  not saved
--- mixer:
+-- seq:
 --  saved
 --  applies to pattern mode
 -- [synth states]:
@@ -852,7 +852,7 @@ function state_new(savedata)
    base_note_len=750,
    note_len=750,
   },
-  mixer={
+  seq={
    tempo=0.5,
    shuffle=0,
    lev=0.5,
@@ -922,15 +922,15 @@ function state_next_note(state)
  local t=state.transport
  t.step+=1
  if (t.step>16) state_next_bar(state)
- local nl=sample_rate*(15/(90+64*state.mixer.tempo))
- local shuf_diff=nl*state.mixer.shuffle*0.33
+ local nl=sample_rate*(15/(90+64*state.seq.tempo))
+ local shuf_diff=nl*state.seq.shuffle*0.33
  if (t.step&1>0) shuf_diff=-shuf_diff
  state.internal.note_len=flr(0.5+nl+shuf_diff)
  state.internal.base_note_len=nl
 end
 
 function state_next_bar(state)
- local v,m=state.view,state.mixer
+ local v,m=state.view,state.seq
  local b0n,b1n,dn=v.b0_next,v.b1_next,v.drum_next
  state_get_or_create_pat(
   state,'b0',b0n,pbl_pat_new
@@ -1270,7 +1270,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
   get_sprite=function(self,state)
    local bank=state:get('view',self.bank_par)
    local x=state:get('view',self.par)
-   local xlast=state:get('mixer',self.last_par)
+   local xlast=state:get('seq',self.last_par)
    local val=(bank-1)*bank_size+self.pib
    if (x==val and xlast!=x) return self.s_next
    return trn(x==val,self.s_on,self.s_off)
@@ -1400,7 +1400,7 @@ end
 function header_ui_init(ui,yp)
  local function hdial(x,y,p)
  ui:add_widget(
-  dial_new(x,yp+y,'mixer',p,116,12)
+  dial_new(x,yp+y,'seq',p,116,12)
  )
  end
  
@@ -1429,7 +1429,7 @@ function header_ui_init(ui,yp)
 
  for pt,xp in pairs({b0=32,b1=64,drum=96}) do
   ui:add_widget(
-   toggle_new(xp+8,yp+8,'mixer',pt..'_on',22,38)
+   toggle_new(xp+8,yp+8,'seq',pt..'_on',22,38)
   )
   hdial(xp+16,8,pt..'_lev')
   hdial(xp,16,pt..'_od')
