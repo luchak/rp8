@@ -803,6 +803,32 @@ drum_synths=split('bd,sd,hh,cy,pc')
 
 copy_bufs={}
 
+-- patterns:
+--  saved
+--  changes applied instantly
+--  not used directly
+--  same in song/pat mode
+-- transport:
+--  not saved
+-- view:
+--  not saved
+--  _next,_pat,_bank: here or not?
+-- internal:
+--  not saved
+-- mixer:
+--  saved
+--  applies to pattern mode
+-- [synth states]:
+--  present directly on seq
+--  not saved
+--  applies to pattern mode
+-- song:
+--  saved
+--  applies to song mode
+--
+-- move pat idx to mixer
+-- and access indirectly?
+-- how to store next pat? 
 function seq_new(savedata)
  local s=parse[[{
   pats={},
@@ -857,6 +883,7 @@ function seq_new(savedata)
  }]]
  if (savedata) merge_tables(s,pick(savedata,save_keys))
 
+ 
 
  s.get=function(self,syn,par)
   if (syn=='drum') syn=self.view[syn]
