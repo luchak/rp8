@@ -852,29 +852,6 @@ function state_new(savedata)
    base_note_len=750,
    note_len=750,
   },
-  seq={
-   tempo=0.5,
-   shuffle=0,
-   lev=0.5,
-   delay_time=0.5,
-   delay_fb=0.5,
-   bo_on=true,
-   b0_lev=0.5,
-   b0_on=0,
-   b0_fx=0,
-   b1_on=true,
-   b1_lev=0.5,
-   b1_od=0,
-   b1_fx=0,
-   drum_on=true,
-   drum_lev=0.5,
-   drum_od=0,
-   drum_fx=0,
-   comp_thresh=1.0,
-   b0_pat=1,
-   b1_pat=1,
-   drum_pat=1,
-  },
   song={
    loop_start=1,
    loop_len=4,
@@ -882,6 +859,8 @@ function state_new(savedata)
    bars={}
   }
  }]]
+ 
+ s.seq=seq_new()
  if (savedata) merge_tables(s,pick(savedata,save_keys))
 
  
@@ -956,6 +935,32 @@ function state_load(str)
  return state_new(parse(sub(str,5)))
 end
 
+function seq_new()
+  return parse[[{
+   tempo=0.5,
+   shuffle=0,
+   lev=0.5,
+   delay_time=0.5,
+   delay_fb=0.5,
+   bo_on=true,
+   b0_lev=0.5,
+   b0_on=0,
+   b0_fx=0,
+   b1_on=true,
+   b1_lev=0.5,
+   b1_od=0,
+   b1_fx=0,
+   drum_on=true,
+   drum_lev=0.5,
+   drum_od=0,
+   drum_fx=0,
+   comp_thresh=1.0,
+   b0_pat=1,
+   b1_pat=1,
+   drum_pat=1,
+  }]]
+end
+
 function pbl_pat_new()
  local pat=parse[[{
   saw=true,
@@ -981,7 +986,7 @@ function transpose_pat(pat,d)
  for i=1,16 do
   pat.notes[i]=mid(0,pat.notes[i]+d,35)
  end
-end 
+end
 
 function drum_pat_new()
  local pat=parse[[{
