@@ -77,7 +77,7 @@ pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7
     seq.view,
     seq.mixer
    if (not st.playing) return
-   local now,nl=st.note,si.note_len
+   local now,nl=st.step,si.note_len
    if (sm.b0_on) pbl0:note(seq.b0,now,nl)
    if (sm.b1_on) pbl1:note(seq.b1,now,nl)
    if sm.drum_on then
@@ -809,7 +809,7 @@ function seq_new(savedata)
   transport={
    song_mode=false,
    bar=1,
-   note=1,
+   step=1,
    playing=false,
    recording=false
   },
@@ -892,11 +892,11 @@ end
 
 function seq_next_note(seq)
  local t=seq.transport
- t.note+=1
- if (t.note>16) seq_next_bar(seq)
+ t.step+=1
+ if (t.step>16) seq_next_bar(seq)
  local nl=sample_rate*(15/(90+64*seq.mixer.tempo))
  local shuf_diff=nl*seq.mixer.shuffle*0.33
- if (t.note&1>0) shuf_diff=-shuf_diff
+ if (t.step&1>0) shuf_diff=-shuf_diff
  seq.internal.note_len=flr(0.5+nl+shuf_diff)
  seq.internal.base_note_len=nl
 end
@@ -920,7 +920,7 @@ function seq_next_bar(seq)
  v.drum_pat=v.drum_next
  if (seq.transport.song_mode and seq.transport.playing) seq.transport.bar+=1
  if (seq.song.looping and seq.transport.playing and seq.transport.bar==(seq.song.loop_start+seq.song.loop_len)) seq.transport.bar=seq.song.loop_start
- if (seq.transport.playing) seq.transport.note=1
+ if (seq.transport.playing) seq.transport.step=1
 end
 
 function seq_load(str)
@@ -1164,7 +1164,7 @@ function step_btn_new(x,y,syn,step,sprites)
  return {
   x=x,y=y,syn=syn,step=step,sprites=sprites,n=#sprites-1,
   get_sprite=function(self,seq)
-   if (seq.transport.playing and seq.transport.note==self.step) return self.sprites[self.n+1]
+   if (seq.transport.playing and seq.transport.step==self.step) return self.sprites[self.n+1]
    local v=seq:get(self.syn,'steps')[self.step]
    return self.sprites[v+1]
   end,
