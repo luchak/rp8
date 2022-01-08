@@ -844,9 +844,6 @@ function seq_new(savedata)
    b0_next=1,
    b1_next=1,
    drum_next=1,
-   b0_pat=1,
-   b1_pat=1,
-   drum_pat=1,
    b0_bank=1,
    b1_bank=1,
    drum_bank=1,
@@ -873,12 +870,16 @@ function seq_new(savedata)
    drum_lev=0.5,
    drum_od=0,
    drum_fx=0,
-   comp_thresh=1.0
+   comp_thresh=1.0,
+   b0_pat=1,
+   b1_pat=1,
+   drum_pat=1,
   },
   song={
    loop_start=1,
    loop_len=4,
    looping=true,
+   bars={}
   }
  }]]
  if (savedata) merge_tables(s,pick(savedata,save_keys))
@@ -929,22 +930,22 @@ function seq_next_note(seq)
 end
 
 function seq_next_bar(seq)
- local v=seq.view
+ local v,m=seq.view,seq.mixer
  local b0n,b1n,dn=v.b0_next,v.b1_next,v.drum_next
  seq_get_or_create_pat(
   seq,'b0',b0n,pbl_pat_new
  )
- v.b0_pat=b0n
+ m.b0_pat=b0n
  seq_get_or_create_pat(
   seq,'b1',b1n,pbl_pat_new
  )
- v.b1_pat=b1n
+ m.b1_pat=b1n
  for drum in all(drum_synths) do
   seq_get_or_create_pat(
    seq,drum,v.drum_next,drum_pat_new
   )
  end
- v.drum_pat=v.drum_next
+ m.drum_pat=v.drum_next
  if (seq.transport.song_mode and seq.transport.playing) seq.transport.bar+=1
  if (seq.song.looping and seq.transport.playing and seq.transport.bar==(seq.song.loop_start+seq.song.loop_len)) seq.transport.bar=seq.song.loop_start
  if (seq.transport.playing) seq.transport.step=1
@@ -1269,7 +1270,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
   get_sprite=function(self,seq)
    local bank=seq:get('view',self.bank_par)
    local x=seq:get('view',self.par)
-   local xlast=seq:get('view',self.last_par)
+   local xlast=seq:get('mixer',self.last_par)
    local val=(bank-1)*bank_size+self.pib
    if (x==val and xlast!=x) return self.s_next
    return trn(x==val,self.s_on,self.s_off)
@@ -1314,9 +1315,6 @@ function wrap_disable(w,syn,key,s_disable)
  }
  w.__index=w
  setmetatable(obj,w)
- assert(w.x)
- assert(obj.update)
- assert(obj.x)
  return obj
 end
 
