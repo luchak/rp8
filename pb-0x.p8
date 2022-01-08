@@ -366,8 +366,8 @@ end
 -->8
 -- audio gen
 
-fc_min=120
-fc_oct=4
+fc_min=100
+fc_oct=4.25
 fr_min=0.1
 fr_rng=4.2-fr_min
 env_oct=3.0
@@ -427,7 +427,7 @@ function synth_new()
   self.saw=pat.saw
   local pd=pat.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
-  self._med=0.9994-0.0117*pd*pd*pd*pd
+  self._med=0.999-0.01*pd*pd*pd*pd
   self._nt=0
   self._nl=note_len
   self._ac=false
