@@ -8,6 +8,10 @@ _maxcpu=0
 _smoothcpu=-1
 semitone=2^(1/12)
 
+function log(s)
+ printh(s,'log')
+end
+
 function copy_state()
  printh(state:save(),'@clip')
 end
@@ -71,13 +75,11 @@ pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7
  comp=comp_new(mixer,0.5,4,0.05,0.005)
  seq_helper=seq_helper_new(
   state,comp,function()
-   local st,si,sv,sm=
+   local st,sm=
     state.transport,
-    state.internal,
-    state.view,
     state.seq
    if (not st.playing) return
-   local now,nl=st.step,si.note_len
+   local now,nl=st.step,st.note_len
    if (sm.b0_on) pbl0:note(state.b0,now,nl)
    if (sm.b1_on) pbl1:note(state.b1,now,nl)
    if sm.drum_on then
@@ -175,7 +177,13 @@ function die(msg)
  assert(false,msg)
 end
 
-function merge_tables(base,new)
+function copy_table(t)
+ return merge_tables({},t)
+end
+
+function merge_tables(base,new,copy)
+ if (copy) base=copy_table(base)
+ if (not new) return base
  for k,v in pairs(new) do
   if type(v)=='table' then
    if type(base[k])=='table' then
@@ -207,12 +215,13 @@ function stringify(v)
 end
 
 function make_reader(s)
- local p=0
+ local p,n=0,#s
  return function(undo)
   if undo then
    p-=1
   else
    p+=1
+   if (p>n) return ''
    return sub(s,p,p)
   end
  end
@@ -226,6 +235,10 @@ function is_digit(c)
  return (c>='0' and c<='9') or c=='.' 
 end
 
+function is_whitespace(c)
+ return c==' ' or c=='\n' or c=='\t'
+end
+
 -- this is super fragile
 -- can easily hang the program!
 -- make sure to always use
@@ -234,7 +247,7 @@ end
 function _parse(input)
  repeat
   c=input()
- until c!=' ' and c!='\n'
+ until not is_whitespace(c)
  if c=='"' then
   local s=''
   repeat
@@ -255,7 +268,7 @@ function _parse(input)
   local t={}
   repeat
    c=input()
-   while c==' ' or c=='\n' or c==',' do
+   while is_whitespace(c) or c==',' do
     c=input()
    end
    if (c=='}') return t
@@ -275,16 +288,31 @@ function _parse(input)
   for i=1,4 do input() end
   return false
  else
-  assert(false, 'cannot parse, c='..c)
+  assert(false, 'cannot parse, c="'..c..'"')
  end
 end
 
+parse[[{
+ active={
+	 b0={
+	  on=true,
+	  pat=1,
+	 },
+	 b1={
+	  on=true,
+	  pat=1,
+	 },
+	 drum={
+	  on=true,
+	  pat=1,
+	 },
+ },
+}]]
+
+
+
 function unpack_split(...)
  return unpack(split(...))
-end
-
-function log(s)
- printh(s,'log')
 end
 
 function trn(c,t,f)
@@ -795,9 +823,10 @@ n_off,n_on,n_ac,n_sl,n_ac_sl=0,1,2,3,4
 d_off,d_on,d_ac=0,1,2
 
 save_keys=parse[[
-{1="pats",2="seq",3="song",}
+{1="pats",2="pat_seq",3="song",}
 ]]
 
+all_pats=split('b0,b1,drum')
 all_synths=split('b0,b1,bd,sd,hh,cy,pc')
 drum_synths=split('bd,sd,hh,cy,pc')
 
@@ -809,11 +838,6 @@ copy_bufs={}
 --  not used directly
 --  same in song/pat mode
 -- transport:
---  not saved
--- view:
---  not saved
---  _next,_pat,_bank: here or not?
--- internal:
 --  not saved
 -- seq:
 --  saved
@@ -829,105 +853,273 @@ copy_bufs={}
 -- move pat idx to mixer
 -- and access indirectly?
 -- how to store next pat? 
+--
+-- messages stored in a buffer
+-- applied on note? or immediate?
+-- 
+-- knob changes should be
+-- visible immediately
+--
+-- in song mode, accumulate
+-- controls into "record buffer"
+-- apply various parts of that
+-- as necessary
+--
+-- bar/note functions both
+-- update the current seq
+-- from the song and update the
+-- record buffer as necessary
+
 function state_new(savedata)
  local s=parse[[{
   pats={},
   transport={
-   song_mode=false,
    bar=1,
-   step=1,
+   tick=1,
    playing=false,
-   recording=false
-  },
-  view={
+   recording=false,
+   base_note_len=750,
+   note_len=750,
    drum="bd",
-   b0_next=1,
-   b1_next=1,
-   drum_next=1,
    b0_bank=1,
    b1_bank=1,
    drum_bank=1,
-  },
-  internal={
-   base_note_len=750,
-   note_len=750,
+   b0_next=1,
+   b1_next=1,
+   drum_next=1
   },
   song={
+   song_mode=false,
    loop_start=1,
    loop_len=4,
    looping=true,
-   bars={}
-  }
+   bar_seqs={},
+   default_seq={},
+  },
+  pending={},
+  pat_seq={},
+  seq={}
  }]]
+
+ -- to fill:
+ -- pat_seq
+ -- song.default_seq
+ -- seq
+ 
+ -- seq-typed things:
+ --  pending
+ --  pat_seq
+ --  seq
+ --  song.bar_seqs[x][y]
+
+ -- format of song.bar_seqs:
+ -- bar_seqs[x][y] ->
+ --  tick y at bar x
+ -- only tick 1 should have
+ -- pattern changes
+ --
+ -- these bar seqs are fragments
+ -- applied onto default_seq
  
  s.seq=seq_new()
+ s.pat_seq=seq_new()
+ s.song.default_seq=seq_new()
  if (savedata) merge_tables(s,pick(savedata,save_keys))
 
- 
-
- s.get=function(self,syn,par)
-  if (syn=='drum') syn=self.view[syn]
-  return self[syn][par]
+ s.toggle_playing=function(self)
+  local t=s.transport
+  if t.playing then
+   if (t.recording) self:toggle_recording()
+   t.tick=1
+  end
+  t.playing=not t.playing
  end
 
- s.set=function(self,syn,par,v)
-  if (syn=='drum') syn=self.view[syn]
-  self[syn][par]=v
+ s.toggle_recording=function(self)
+  local t=s.transport
+  t.recording=(not t.recording) and t.song_mode
+  if not t.recording then
+   t.pending={}
+  end
  end
- 
+
+ s.toggle_song_mode=function(self)
+  local song=s.song
+  if (song.playing) self:toggle_playing()
+  song.song_mode=not song.song_mode
+  self.transport.tick=1
+  self:load_bar_seq()
+ end
+
+ s._init_bar=function(self)
+  local song=self.song
+  local t=self.transport
+  if song.song mode then
+   if t.recording then
+    self:_apply_pending(true,true)
+   end
+   self.seq=merge_tables(
+    song.default_seq,
+    self:_get_song_seq(t.bar,1),
+    true
+   )
+  else
+   self._apply_pending(true)
+   self.seq=copy_table(self.pat_seq)
+  end
+  self:_sync_pat('b0','b0')
+  self:_sync_pat('b1','b1')
+  self:_sync_pat('drum','bd')
+  self:_sync_pat('drum','sd')
+  self:_sync_pat('drum','hh')
+  self:_sync_pat('drum','cy')
+  self:_sync_pat('drum','pr')
+
+  self:_init_tick()
+ end
+
+ s._sync_pat=function(self,pat_syn,syn)
+  -- todo: just synthesize these on
+  -- load? can we avoid saving
+  -- them in that case?
+  local syn_pats=self.pats[syn]
+  if not syn_pats then
+   syn_pats={}
+   self.pats[syn]=syn_pats
+  end
+  local pat_idx=self.seq.bar[pat_syn].pat
+  local pat=syn_pats[pat_idx]
+  if not pat then
+   if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
+   syn_pats[idx]=pat
+  end
+  self.pats[syn]=pat
+ end
+
+ s._get_song_seq=function(self,bar,step,create)
+  local bar_seqs=self.song.bar_seqs[bar]
+  if not bar_seqs then
+   bar_seqs={}
+   if (create) self.song.bar_seqs[bar]=bar_seqs
+  end
+  local seq=bar_seqs[step]
+  if not seq then
+   seq={}
+   if (create) bar_seqs[step]=seq
+  end
+  return seq
+ end
+
+ s._apply_pending=function(self,apply_bar,keep)
+  local song,t=self.song_mode,self.transport
+  local target=self.pat_seq
+  if (song) target=self:_get_song_seq(t.bar,t.tick,true)
+  assert(target, 'apply target not found')
+  if apply_bar then
+   merge_tables(target, self.pending)
+   if (not keep) self.pending={}
+  else
+   merge_tables(target, pick(self.pending, {'tick'}))
+   if (not keep) self.pending.tick=nil
+  end
+ end
+
+ s.go_to_bar=function(self,bar)
+  assert(self.song.song_mode, 'navigation outside of song mode')
+  local t=self.transport
+  t.bar=bar
+  t.tick=1
+  self:_init_bar()
+ end
+
+ s.next_tick=function(self)
+  local song,t=self.song,self.transport
+  t.tick+=1
+
+  -- dump pending changes if we're
+  -- not recording
+  if (song.song_mode and not t.recording) self.pending={}
+
+  if t.tick>16 then
+   -- end of bar
+   if song.song_mode then
+    -- next bar
+    local bar=t.bar+1
+    if t.playing and song.looping and bar==song.loop_start+song.loop_len then
+     -- clear pending before
+     -- go_to_bar so we don't
+     -- apply changes on loop
+     self.pending={}
+     bar=song.loop_start
+    end
+    self:go_to_bar(bar)
+   else
+    -- pattern mode, re-init pattern bar
+    self:_init_bar()
+   end
+  else
+   -- same bar
+   self:_apply_pending(false,t.recording)
+   if (song.song_mode) merge_tables(
+    self.seq,
+    self:_get_song_seq(t.bar,t.tick)
+   )
+   self:_init_tick()
+  end
+
+ end
+
+ s._init_tick=function(self)
+  local t=self.transport
+  local m=self.seq.tick.mixer
+  local nl=sample_rate*(15/(90+64*m.tempo))
+  local shuf_diff=nl*m.shuffle*0.33
+  if (t.step&1>0) shuf_diff=-shuf_diff
+  t.note_len=flr(0.5+nl+shuf_diff)
+  t.base_note_len=nl
+ end
+
+ s._apply_diff=function(self,diff)
+  local t,song=self.transport,self.song
+  merge_tables(self.seq,diff)
+  merge_tables(self.pending,diff)
+  if (not t.playing) and (t.recording or not song.song_mode) then
+   self._apply_pending(true,t.recording)
+  end
+ end
+
+ s.set_tick_param=function(self,syn,key,val)
+  local t={tick={[syn]={[key]=val}}}
+  self:_apply_diff(t)
+ end
+
+ s.set_bar_param=function(self,syn,key,val)
+  local t={bar={[syn]={[key]=val}}}
+  self:_apply_diff(t)
+ end
+
+ s.set_pat_param=function(self,syn,key,idx,val)
+  -- assume pats are aliased, always editing current
+  if (syn=='drum') syn=self.transport.drum
+  self[syn][key][idx]=val
+ end
+
+ s.get_pat_param=function(self,syn,key,idx)
+  -- assume pats are aliased, always editing current
+  if (syn=='drum') syn=self.transport.drum
+  return self[syn][key][idx]
+ end
+
+ s.set_bank=function(self,syn,bank)
+  self.transport[syn..'_bank']=bank
+ end
+
  s.save=function(self)
   return 'pb0x'..stringify(pick(self,save_keys))
  end
 
- state_next_bar(s)
+ s:_init_bar()
  return s
-end
-
-function state_get_or_create_pat(state,syn,idx,factory)
- syn_pats=state.pats[syn]
- if not syn_pats then
-  syn_pats={}
-  state.pats[syn]=syn_pats
- end
- pat=syn_pats[idx]
- if not pat then
-  pat=factory()
-  syn_pats[idx]=pat
- end
- state[syn]=pat
-end
-
-function state_next_note(state)
- local t=state.transport
- t.step+=1
- if (t.step>16) state_next_bar(state)
- local nl=sample_rate*(15/(90+64*state.seq.tempo))
- local shuf_diff=nl*state.seq.shuffle*0.33
- if (t.step&1>0) shuf_diff=-shuf_diff
- state.internal.note_len=flr(0.5+nl+shuf_diff)
- state.internal.base_note_len=nl
-end
-
-function state_next_bar(state)
- local v,m=state.view,state.seq
- local b0n,b1n,dn=v.b0_next,v.b1_next,v.drum_next
- state_get_or_create_pat(
-  state,'b0',b0n,pbl_pat_new
- )
- m.b0_pat=b0n
- state_get_or_create_pat(
-  state,'b1',b1n,pbl_pat_new
- )
- m.b1_pat=b1n
- for drum in all(drum_synths) do
-  state_get_or_create_pat(
-   state,drum,v.drum_next,drum_pat_new
-  )
- end
- m.drum_pat=v.drum_next
- if (state.transport.song_mode and state.transport.playing) state.transport.bar+=1
- if (state.song.looping and state.transport.playing and state.transport.bar==(state.song.loop_start+state.song.loop_len)) state.transport.bar=state.song.loop_start
- if (state.transport.playing) state.transport.step=1
 end
 
 function state_load(str)
@@ -935,50 +1127,100 @@ function state_load(str)
  return state_new(parse(sub(str,5)))
 end
 
-function seq_new()
-  return parse[[{
+seq_proto=parse[[{
+ tick={
+  mixer={
    tempo=0.5,
    shuffle=0,
    lev=0.5,
    delay_time=0.5,
    delay_fb=0.5,
-   bo_on=true,
    b0_lev=0.5,
-   b0_on=0,
+   b0_od=0,
    b0_fx=0,
-   b1_on=true,
    b1_lev=0.5,
    b1_od=0,
    b1_fx=0,
-   drum_on=true,
    drum_lev=0.5,
    drum_od=0,
    drum_fx=0,
    comp_thresh=1.0,
-   b0_pat=1,
-   b1_pat=1,
-   drum_pat=1,
-  }]]
+  },
+  b0={
+   saw=true,
+   lev=0.5,
+   cut=0.5,
+   res=0.5,
+   env=0.5,
+   dec=0.5,
+   acc=0.5,
+  },
+  b1={
+   saw=true,
+   lev=0.5,
+   cut=0.5,
+   res=0.5,
+   env=0.5,
+   dec=0.5,
+   acc=0.5,
+  },
+  bd={
+   tun=0.5,
+   dec=0.5,
+   lev=0.5,
+  },
+  sd={
+   tun=0.5,
+   dec=0.5,
+   lev=0.5,
+  },
+  hh={
+   tun=0.5,
+   dec=0.5,
+   lev=0.5,
+  },
+  cy={
+   tun=0.5,
+   dec=0.5,
+   lev=0.5,
+  },
+  pc={
+   tun=0.5,
+   dec=0.5,
+   lev=0.5,
+  },
+ },
+ bar={
+  b0={
+   on=true,
+   pat=1,
+  },
+  b1={
+   on=true,
+   pat=1,
+  },
+  drum={
+   on=true,
+   pat=1,
+  },
+ },
+}]]
+
+function seq_new()
+ return copy_table(seq_proto)
 end
 
 function pbl_pat_new()
- local pat=parse[[{
-  saw=true,
-  lev=0.5,
-  cut=0.5,
-  res=0.5,
-  env=0.5,
-  dec=0.5,
-  acc=0.5,
+ local pat={
   notes={},
-  steps={}
- }]]
- 
+  steps={},
+ }
+
  for i=1,16 do
   pat.notes[i]=19
   pat.steps[i]=n_off
  end
- 
+
  return pat
 end
 
@@ -989,12 +1231,9 @@ function transpose_pat(pat,d)
 end
 
 function drum_pat_new()
- local pat=parse[[{
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
-  steps={}
- }]]
+ local pat={
+  steps={},
+ }
  
  for i=1,16 do
   pat.steps[i]=n_off
@@ -1012,9 +1251,9 @@ function seq_helper_new(state,root,note_fn)
   state=state,
   root=root,
   note_fn=note_fn,
-  t=state.internal.note_len,
+  t=state.transport.note_len,
   update=function(self,b,first,last)
-   local p,nl=first,self.state.internal.note_len
+   local p,nl=first,self.state.transport.note_len
    while p<last do
     if self.t>=nl then
      self.t=0
@@ -1218,7 +1457,7 @@ function dial_new(x,y,syn,par,s0,bins)
   end,
   input=function(self,state,b)
    local x=state:get(self.syn,self.par)
-   x=mid(0,1,x+trn(b>0,0.015625,-0.015625))
+   x=mid(0,1,x+trn(b>0,1/64,-1/64))
    state:set(self.syn,self.par,x)
   end
  }
@@ -1273,17 +1512,17 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
   s_next=s_next, pib=pib,
   w=5,
   get_sprite=function(self,state)
-   local bank=state:get('view',self.bank_par)
-   local x=state:get('view',self.par)
+   local bank=state:get('transport',self.bank_par)
+   local x=state:get('transport',self.par)
    local xlast=state:get('seq',self.last_par)
    local val=(bank-1)*bank_size+self.pib
    if (x==val and xlast!=x) return self.s_next
    return trn(x==val,self.s_on,self.s_off)
   end,
   input=function(self,state)
-   local bank=state:get('view',self.bank_par)
+   local bank=state:get('transport',self.bank_par)
    local val=(bank-1)*bank_size+self.pib
-   state:set('view',self.par,val)
+   state:set('transport',self.par,val)
   end
  }
 end
@@ -1386,7 +1625,7 @@ function pirc_ui_init(ui,key,yp)
   pc={x=112,s=158}
  }]]) do
   ui:add_widget(
-   radio_btn_new(d.x,yp+16,'view','drum',k,d.s,d.s+1)
+   radio_btn_new(d.x,yp+16,'transport','drum',k,d.s,d.s+1)
   )
   ui:add_widget(
    dial_new(d.x+8,yp+16,k,'lev',100,12)
@@ -1441,7 +1680,7 @@ function header_ui_init(ui,yp)
   hdial(xp+16,16,pt..'_fx')
 
   ui:add_widget(
-   spin_btn_new(xp,yp+24,'view',pt..'_bank',{208,209,210,211})
+   spin_btn_new(xp,yp+24,'transport',pt..'_bank',{208,209,210,211})
   )
   for i=1,4 do
    ui:add_widget(
