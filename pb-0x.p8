@@ -1046,9 +1046,9 @@ function state_new(savedata)
  end
 
  s._apply_pending=function(self,apply_bar,keep)
-  local song,t=self.song_mode,self.transport
+  local song_mode,t=self.song.song_mode,self.transport
   local target=self.pat_seq
-  if (song) target=self:_get_song_seq(t.bar,t.tick,true)
+  if (song_mode) target=self:_get_song_seq(t.bar,t.tick,true)
   assert(target, 'apply target not found')
   if apply_bar then
    merge_tables(target, self.pending)
@@ -1062,7 +1062,7 @@ function state_new(savedata)
  s.go_to_bar=function(self,bar)
   assert(self.song.song_mode, 'navigation outside of song mode')
   local t=self.transport
-  t.bar=bar
+  t.bar=mid(1,bar,999)
   t.tick=1
   self:_init_bar()
  end
@@ -1121,7 +1121,10 @@ function state_new(savedata)
   if (dt) merge_tables(self.seq.tick,dt)
   merge_tables(self.pending,diff)
   if (not t.playing) and (t.recording or not song.song_mode) then
+   log('app imm',stringify(diff),stringify(self.pending))
    self:_apply_pending(true,t.recording)
+   -- pick up new changes
+   self:_init_bar()
   end
  end
 
@@ -1286,9 +1289,9 @@ end
 function state_make_set(a,b,c)
  assert(b,a)
  if c then
-  return function(s,v) assert(v,a..' '..b..' '..c) s[a][b][c]=v end
+  return function(s,v) assert(v!=nil,a..' '..b..' '..c) s[a][b][c]=v end
  end
- return function(s,v) assert(v,a..' '..b) s[a][b]=v end
+ return function(s,v) assert(v!=nil,a..' '..b) s[a][b]=v end
 end
 
 function state_make_get(a,b,c)
@@ -1760,7 +1763,7 @@ function header_ui_init(ui,yp)
  song_only(
   momentary_new(56,yp,192,
    function(state,b)
-    state.transport.bar=mid(1,state.transport.bar+b,255)
+    state:go_to_bar(state.transport.bar+b)
    end
   ),
   197
