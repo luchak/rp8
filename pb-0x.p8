@@ -11,7 +11,7 @@ semitone=2^(1/12)
 function log(a,b,c,d,e,f)
  local s=''
  for ss in all({a,b,c,d,e,f}) do
-  s..=ss..' '
+  s..=tostr(ss)..' '
  end
  printh(s,'log')
 end
@@ -971,7 +971,7 @@ function state_new(savedata)
 
  s.toggle_recording=function(self)
   local t=s.transport
-  t.recording=(not t.recording) and t.song_mode
+  t.recording=(not t.recording) and s.song.song_mode
   if not t.recording then
    t.pending={}
   end
@@ -979,15 +979,15 @@ function state_new(savedata)
 
  s.toggle_song_mode=function(self)
   local song=s.song
-  if (song.playing) self:toggle_playing()
+  if (self.transport.playing) self:toggle_playing()
   song.song_mode=not song.song_mode
-  self.transport.tick=1
-  self:load_bar_seq()
+  self:_init_bar()
  end
 
  s._init_bar=function(self)
   local song=self.song
   local t=self.transport
+  t.tick=1
   if song.song_mode then
    if t.recording then
     self:_apply_pending(true,true)
@@ -1286,9 +1286,9 @@ end
 function state_make_set(a,b,c)
  assert(b,a)
  if c then
-  return function(s,v) assert(v) s[a][b][c]=v end
+  return function(s,v) assert(v,a..' '..b..' '..c) s[a][b][c]=v end
  end
- return function(s,v) assert(v) s[a][b]=v end
+ return function(s,v) assert(v,a..' '..b) s[a][b]=v end
 end
 
 function state_make_get(a,b,c)
@@ -1502,9 +1502,9 @@ function step_btn_new(x,y,syn,step,sprites)
    return sprites[v+1]
   end,
   input=function(self,state,b)
-   local st,s=state:get_pat(syn).steps,self.step
-   st[s]+=b
-   st[s]=(st[s]+n)%n
+   local st=state:get_pat(syn).steps
+   st[step]+=b
+   st[step]=(st[step]+n)%n
   end
  }
 end
@@ -1551,10 +1551,10 @@ function radio_btn_new(x,y,val,s_off,s_on,get,set)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   return trn(get(state)==self.val,self.s_on,self.s_off)
+   return trn(get(state)==val,s_on,s_off)
   end,
   input=function(self,state)
-   set(state,self.val)
+   set(state,val)
   end
  }
 end
@@ -1576,7 +1576,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
   input=function(self,state)
    local bank=get_bank(state)
    local val=(bank-1)*bank_size+pib
-   set_pat(val)
+   set_pat(state,val)
   end
  }
 end
@@ -1766,7 +1766,7 @@ function header_ui_init(ui,yp)
   197
  )
  ui:add_widget(
-  transport_number_new(64,yp,8,'transport','step')
+  transport_number_new(64,yp,8,'transport','tick')
  )
  song_only(
   toggle_new(80,yp,193,194,state_make_get_set('song','looping')),
