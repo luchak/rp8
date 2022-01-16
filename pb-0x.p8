@@ -8,7 +8,11 @@ _maxcpu=0
 _smoothcpu=-1
 semitone=2^(1/12)
 
-function log(s)
+function log(a,b,c,d,e,f)
+ local s=''
+ for ss in all({a,b,c,d,e,f}) do
+  s..=ss..' '
+ end
  printh(s,'log')
 end
 
@@ -42,9 +46,10 @@ function _init()
  --extcmd('set_title', 'pb-0x')
 
  ui=ui_new()
- state=state_load([[
-pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=1,11=0,12=1,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},b0={1={cut=0.2968,acc=0.5,notes={1=19,2=19,3=31,4=14,5=15,6=19,7=22,8=19,9=19,10=19,11=19,12=19,13=19,14=26,15=19,16=19,},dec=0.3438,lev=0.5,res=0.5,saw=true,env=0.6406,steps={1=1,2=0,3=1,4=3,5=1,6=1,7=1,8=1,9=0,10=1,11=0,12=0,13=0,14=1,15=0,16=0,},},3={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},b1={1={cut=0.2031,acc=0.5,notes={1=7,2=7,3=7,4=7,5=7,6=7,7=7,8=19,9=7,10=7,11=7,12=7,13=7,14=5,15=7,16=7,},dec=0.5,lev=0.5,res=0.8125,saw=false,env=0.5,steps={1=0,2=0,3=1,4=0,5=0,6=0,7=1,8=2,9=0,10=0,11=1,12=0,13=0,14=3,15=1,16=0,},},2={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},cy={1={lev=0.5,dec=0.6406,tun=0.6875,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=1,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},bd={1={lev=0.5,dec=0.5,tun=0.5,steps={1=2,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=2,10=0,11=0,12=0,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},pc={1={lev=0.3906,dec=0,tun=0.5781,steps={1=1,2=0,3=0,4=0,5=0,6=2,7=0,8=0,9=1,10=2,11=0,12=1,13=0,14=0,15=1,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},hh={1={lev=0.4062,dec=0.6875,tun=0.4375,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=1,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},},song={loop_len=4,loop_start=1,},seq={drum_fx=0.2969,b0_lev=0.4844,b0_od=0.5156,delay_time=0.2969,comp_thresh=0.4375,delay_fb=0.625,tempo=0.5,drum_lev=0.5469,lev=0.6562,b1_od=0,b1_lev=0.5468,b1_fx=0,b0_fx=0.625,drum_od=0.5156,shuffle=0.3125,},}
- ]])
+ --state=state_load([[
+--pb0x{pats={sd={1={lev=0.6094,dec=0.1875,tun=0.5,steps={1=0,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=0,10=1,11=0,12=1,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},b0={1={cut=0.2968,acc=0.5,notes={1=19,2=19,3=31,4=14,5=15,6=19,7=22,8=19,9=19,10=19,11=19,12=19,13=19,14=26,15=19,16=19,},dec=0.3438,lev=0.5,res=0.5,saw=true,env=0.6406,steps={1=1,2=0,3=1,4=3,5=1,6=1,7=1,8=1,9=0,10=1,11=0,12=0,13=0,14=1,15=0,16=0,},},3={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},b1={1={cut=0.2031,acc=0.5,notes={1=7,2=7,3=7,4=7,5=7,6=7,7=7,8=19,9=7,10=7,11=7,12=7,13=7,14=5,15=7,16=7,},dec=0.5,lev=0.5,res=0.8125,saw=false,env=0.5,steps={1=0,2=0,3=1,4=0,5=0,6=0,7=1,8=2,9=0,10=0,11=1,12=0,13=0,14=3,15=1,16=0,},},2={cut=0.5,acc=0.5,env=0.5,dec=0.5,notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19,},res=0.5,saw=true,lev=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},},},cy={1={lev=0.5,dec=0.6406,tun=0.6875,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=1,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},bd={1={lev=0.5,dec=0.5,tun=0.5,steps={1=2,2=0,3=0,4=0,5=2,6=0,7=0,8=0,9=2,10=0,11=0,12=0,13=2,14=0,15=0,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},pc={1={lev=0.3906,dec=0,tun=0.5781,steps={1=1,2=0,3=0,4=0,5=0,6=2,7=0,8=0,9=1,10=2,11=0,12=1,13=0,14=0,15=1,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},hh={1={lev=0.4062,dec=0.6875,tun=0.4375,steps={1=0,2=0,3=2,4=0,5=0,6=0,7=2,8=1,9=0,10=0,11=2,12=0,13=0,14=0,15=2,16=0,},},2={tun=0.5,steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0,},lev=0.5,dec=0.5,},},},song={loop_len=4,loop_start=1,},seq={drum_fx=0.2969,b0_lev=0.4844,b0_od=0.5156,delay_time=0.2969,comp_thresh=0.4375,delay_fb=0.625,tempo=0.5,drum_lev=0.5469,lev=0.6562,b1_od=0,b1_lev=0.5468,b1_fx=0,b0_fx=0.625,drum_od=0.5156,shuffle=0.3125,},}
+-- ]])
+ state=state_new()
  
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',32)
@@ -127,9 +132,6 @@ init_wait_frames=6
 function _update60()
  audio_update()
  if init_wait_frames<=0 then
-  if (not state.transport.playing) then
-   state_next_bar(state)
-  end
   ui:update(state)
   audio_set_root(seq_helper)
  else
@@ -177,12 +179,34 @@ function die(msg)
  assert(false,msg)
 end
 
+function table_get(t,path)
+ for i=1,#path do
+  if (not t) break
+  t=t[path[i]]
+ end
+ return t
+end
+
+function table_set(t,path,val)
+ local v,n=t,#path
+ for i=1,n-1 do
+  local k=path[i]
+  local v=t[k]
+  if not v then
+   v={}
+   t[k]=v
+  end
+  t=v
+ end
+ t[path[n]]=val
+end
+
 function copy_table(t)
  return merge_tables({},t)
 end
 
-function merge_tables(base,new,copy)
- if (copy) base=copy_table(base)
+function merge_tables(base,new,do_copy)
+ if (do_copy) base=copy_table(base)
  if (not new) return base
  for k,v in pairs(new) do
   if type(v)=='table' then
@@ -207,9 +231,14 @@ function stringify(v)
  elseif t=='table' then
   local s='{'
   for k,v in pairs(v) do
+   assert(k)
    s=s..k..'='..stringify(v)..','
   end
   return s..'}'
+ elseif t==nil then
+  return '[nil]'
+ elseif t=='function' then
+  return '[function]'
  end
  -- skip nil, functions, etc.
 end
@@ -954,7 +983,7 @@ function state_new(savedata)
  s._init_bar=function(self)
   local song=self.song
   local t=self.transport
-  if song.song mode then
+  if song.song_mode then
    if t.recording then
     self:_apply_pending(true,true)
    end
@@ -964,7 +993,7 @@ function state_new(savedata)
     true
    )
   else
-   self._apply_pending(true)
+   self:_apply_pending(true)
    self.seq=copy_table(self.pat_seq)
   end
   self:_sync_pat('b0','b0')
@@ -974,6 +1003,7 @@ function state_new(savedata)
   self:_sync_pat('drum','hh')
   self:_sync_pat('drum','cy')
   self:_sync_pat('drum','pr')
+  assert(self.b0)
 
   self:_init_tick()
  end
@@ -991,9 +1021,9 @@ function state_new(savedata)
   local pat=syn_pats[pat_idx]
   if not pat then
    if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
-   syn_pats[idx]=pat
+   syn_pats[pat_idx]=pat
   end
-  self.pats[syn]=pat
+  self[syn]=pat
  end
 
  s._get_song_seq=function(self,bar,step,create)
@@ -1060,10 +1090,12 @@ function state_new(savedata)
   else
    -- same bar
    self:_apply_pending(false,t.recording)
-   if (song.song_mode) merge_tables(
-    self.seq,
-    self:_get_song_seq(t.bar,t.tick)
-   )
+   if song.song_mode then
+    merge_tables(
+     self.seq,
+     self:_get_song_seq(t.bar,t.tick)
+    )
+   end
    self:_init_tick()
   end
 
@@ -1074,40 +1106,24 @@ function state_new(savedata)
   local m=self.seq.tick.mixer
   local nl=sample_rate*(15/(90+64*m.tempo))
   local shuf_diff=nl*m.shuffle*0.33
-  if (t.step&1>0) shuf_diff=-shuf_diff
+  if (t.tick&1>0) shuf_diff=-shuf_diff
   t.note_len=flr(0.5+nl+shuf_diff)
   t.base_note_len=nl
  end
 
  s._apply_diff=function(self,diff)
-  local t,song=self.transport,self.song
-  merge_tables(self.seq,diff)
+  local t,song,dt=self.transport,self.song,diff.tick
+  if (dt) merge_tables(self.seq.tick,dt)
   merge_tables(self.pending,diff)
   if (not t.playing) and (t.recording or not song.song_mode) then
-   self._apply_pending(true,t.recording)
+   self:_apply_pending(true,t.recording)
   end
  end
 
- s.set_tick_param=function(self,syn,key,val)
-  local t={tick={[syn]={[key]=val}}}
-  self:_apply_diff(t)
- end
-
- s.set_bar_param=function(self,syn,key,val)
-  local t={bar={[syn]={[key]=val}}}
-  self:_apply_diff(t)
- end
-
- s.set_pat_param=function(self,syn,key,idx,val)
+ s.get_pat=function(self,syn)
   -- assume pats are aliased, always editing current
   if (syn=='drum') syn=self.transport.drum
-  self[syn][key][idx]=val
- end
-
- s.get_pat_param=function(self,syn,key,idx)
-  -- assume pats are aliased, always editing current
-  if (syn=='drum') syn=self.transport.drum
-  return self[syn][key][idx]
+  return self[syn]
  end
 
  s.set_bank=function(self,syn,bank)
@@ -1118,7 +1134,7 @@ function state_new(savedata)
   return 'pb0x'..stringify(pick(self,save_keys))
  end
 
- s:_init_bar()
+ s._init_bar(s)
  return s
 end
 
@@ -1241,6 +1257,42 @@ function drum_pat_new()
  
  return pat
 end
+
+function split_path(path)
+ if (type(path)=='string') path=split(path,'.')
+ return path
+end
+
+function state_make_get_set_param(cat,syn,key)
+ assert(cat and syn)
+ if (not key) cat,syn,key='tick',cat,syn
+ return 
+  function(state) return state.seq[cat][syn][key] end,
+  function(state,val) state:_apply_diff({[cat]={[syn]={[key]=val}}}) end
+ 
+end
+
+function state_make_get_set(a,b,c)
+ return 
+  state_make_get(a,b,c),
+  state_make_set(a,b,c)
+end
+
+function state_make_set(a,b,c)
+ assert(b,a)
+ if c then
+  return function(s,v) assert(v) s[a][b][c]=v end
+ end
+ return function(s,v) assert(v) s[a][b]=v end
+end
+
+function state_make_get(a,b,c)
+ assert(b,a)
+ if (c) return function(s) return s[a][b][c] end
+ return function(s) return s[a][b] end
+end
+
+state_is_song_mode=state_make_get('song','song_mode')
 
 -- passthrough audio generator
 -- that splits blocks to allow
@@ -1405,156 +1457,148 @@ end
 
 function pbl_note_btn_new(x,y,syn,step)
  return {
-  x=x,y=y,syn=syn,step=step,
+  x=x,y=y,
   get_sprite=function(self,state)
-   local ns=state:get(self.syn,'notes')
-   local n=ns[self.step]
-   return 64+n
+   local n=state:get_pat(syn).notes
+   return 64+n[step]
   end,
   input=function(self,state,b)
-   local n,s=state:get(self.syn,'notes'),self.step
-   n[s]=mid(0,35,n[s]+b)
+   local n=state:get_pat(syn).notes
+   n[step]=mid(0,35,n[step]+b)
   end
  }
 end
 
-function spin_btn_new(x,y,syn,par,sprites)
+function spin_btn_new(x,y,sprites,get,set)
+ local n=#sprites
  return {
-  x=x,y=y,syn=syn,par=par,sprites=sprites,n=#sprites,
+  x=x,y=y,
   get_sprite=function(self,state)
-   local v=state:get(self.syn,self.par)
-   return self.sprites[v]
+   return sprites[get(state)]
   end,
   input=function(self,state,b)
-   local v=state:get(self.syn,self.par)
-   state:set(self.syn,self.par,mid(1,v+b,self.n))
+   set(state,mid(1,get(state)+b,n))
   end
  }
 end
 
 function step_btn_new(x,y,syn,step,sprites)
+ -- last sprite in list is the
+ -- "this step is active" sprite
+ local n=#sprites-1
  return {
-  x=x,y=y,syn=syn,step=step,sprites=sprites,n=#sprites-1,
+  x=x,y=y,
   get_sprite=function(self,state)
-   if (state.transport.playing and state.transport.step==self.step) return self.sprites[self.n+1]
-   local v=state:get(self.syn,'steps')[self.step]
-   return self.sprites[v+1]
+   local t=state.transport
+   if (t.playing and t.tick==step) return sprites[n+1]
+   local v=state:get_pat(syn).steps[step]
+   return sprites[v+1]
   end,
   input=function(self,state,b)
-   local st,s=state:get(self.syn,'steps'),self.step
+   local st,s=state:get_pat(syn).steps,self.step
    st[s]+=b
-   st[s]=(st[s]+self.n)%self.n
+   st[s]=(st[s]+n)%n
   end
  }
 end
 
-function dial_new(x,y,syn,par,s0,bins)
+function dial_new(x,y,s0,bins,get,set)
+ bins-=0.0001
  return {
-  x=x,y=y,syn=syn,par=par,s0=s0,bins=bins-0.0001,
+  x=x,y=y,
   get_sprite=function(self,state)
-   local x=state:get(self.syn,self.par)
-   return self.s0+x*self.bins
+   return s0+get(state)*bins
   end,
   input=function(self,state,b)
-   local x=state:get(self.syn,self.par)
-   x=mid(0,1,x+trn(b>0,1/64,-1/64))
-   state:set(self.syn,self.par,x)
+   local x=mid(0,1,get(state)+trn(b>0,1/64,-1/64))
+   set(state,x)
   end
  }
 end
 
-function toggle_new(x,y,syn,par,s_off,s_on)
+function toggle_new(x,y,s_off,s_on,get,set)
  return {
-  x=x,y=y,syn=syn,par=par,s_on=s_on,s_off=s_off,
+  x=x,y=y,
   get_sprite=function(self,state)
-   local x=state:get(self.syn,self.par)
-   return trn(x,self.s_on,self.s_off)
+   return trn(get(state),s_on,s_off)
   end,
   input=function(self,state)
-   local x=state:get(self.syn,self.par)
-   state:set(self.syn,self.par,not x)   
+   set(state,not get(state))
   end
  }
 end
 
 function momentary_new(x,y,s,cb)
  return {
-  x=x,y=y,cb=cb,par=par,s=s,
-  get_sprite=function(self,state)
+  x=x,y=y,
+  get_sprite=function()
    return s
   end,
   input=function(self,state,b)
-   self.cb(state,b)
+   cb(state,b)
   end
  }
 end
 
-function radio_btn_new(x,y,syn,par,val,s_off,s_on)
+function radio_btn_new(x,y,val,s_off,s_on,get,set)
  return {
-  x=x,y=y,syn=syn,par=par,val=val,s_on=s_on,s_off=s_off,
+  x=x,y=y,
   get_sprite=function(self,state)
-   local x=state:get(self.syn,self.par)
-   return trn(x==self.val,self.s_on,self.s_off)
+   return trn(get(state)==self.val,self.s_on,self.s_off)
   end,
   input=function(self,state)
-   state:set(self.syn,self.par,self.val)
+   set(state,self.val)
   end
  }
 end
 
 function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
+ local get_bank=state_make_get('transport',syn..'_bank')
+ local get_pat,set_pat=state_make_get_set_param('bar',syn,'pat')
  return {
-  x=x,y=y,syn=syn,
-  par=syn..'_next',
-  bank_par=syn..'_bank',
-  last_par=syn..'_pat',
-  s_off=s_off,s_on=s_on,
-  s_next=s_next, pib=pib,
-  w=5,
+  x=x,y=y,w=5,
   get_sprite=function(self,state)
-   local bank=state:get('transport',self.bank_par)
-   local x=state:get('transport',self.par)
-   local xlast=state:get('seq',self.last_par)
-   local val=(bank-1)*bank_size+self.pib
-   if (x==val and xlast!=x) return self.s_next
-   return trn(x==val,self.s_on,self.s_off)
+   local bank=get_bank(state)
+   local pat=get_pat(state)
+   local pending=state.pending.bar
+   pending=pending and pending[syn] and pending[syn].pat
+   local val=(bank-1)*bank_size+pib
+   if (pending==val and pending!=pat) return s_next
+   return trn(pat==val,s_on,s_off)
   end,
   input=function(self,state)
-   local bank=state:get('transport',self.bank_par)
-   local val=(bank-1)*bank_size+self.pib
-   state:set('transport',self.par,val)
+   local bank=get_bank(state)
+   local val=(bank-1)*bank_size+pib
+   set_pat(val)
   end
  }
 end
 
 function transport_number_new(x,y,w,obj,key)
+ local get=state_make_get(obj,key)
  return {
-	 x=x,y=y,w=w,obj=obj,key=key,noinput=true,
+	 x=x,y=y,w=w,noinput=true,
 	 get_sprite=function(self,state)
-	  if state.transport.song_mode then
-	   return tostr(state:get(self.obj,self.key))..','..self.w..',0,15'
+	  if state.song.song_mode then
+	   return tostr(get(state))..','..w..',0,15'
 	  else
-	   return '--,'..self.w..',0,15'
+	   return '--,'..w..',0,15'
    end
   end,
   update=function() end
  }
 end
 
-function wrap_disable(w,syn,key,s_disable)
+function wrap_disable(w,s_disable,get_enabled)
  local obj={
   get_sprite=function(self,state)
-   local enabled=state:get(syn,key)
-   if enabled then
+   if get_enabled(state) then
     self.noinput=false
     return w:get_sprite(state)
    else
     self.noinput=true
     return s_disable
    end
-  end,
-  update=function(self,state,b)
-   return w:input(state,b)
   end,
  }
  w.__index=w
@@ -1598,12 +1642,15 @@ function pbl_ui_init(ui,key,yp)
   acc=112
  }]]) do
   ui:add_widget(
-   dial_new(x,yp+0,key,k,43,21)
+   dial_new(
+    x,yp+0,43,21,
+    state_make_get_set_param(key,k)
+   )
   )
  end
 
  ui:add_widget(
-  toggle_new(16,yp+0,key,'saw',2,3)
+  toggle_new(16,yp+0,2,3,state_make_get_set_param(key,'saw'))
  )
  
  map(0,4,0,yp,16,2)
@@ -1625,16 +1672,16 @@ function pirc_ui_init(ui,key,yp)
   pc={x=112,s=158}
  }]]) do
   ui:add_widget(
-   radio_btn_new(d.x,yp+16,'transport','drum',k,d.s,d.s+1)
+   radio_btn_new(d.x,yp+16,k,d.s,d.s+1,state_make_get_set('transport','drum'))
   )
   ui:add_widget(
-   dial_new(d.x+8,yp+16,k,'lev',100,12)
+   dial_new(d.x+8,yp+16,100,12,state_make_get_set_param(k,'lev'))
   )
   ui:add_widget(
-   dial_new(d.x,yp,k,'tun',100,12)
+   dial_new(d.x,yp,100,12,state_make_get_set_param(k,'tun'))
   )
   ui:add_widget(
-   dial_new(d.x+8,yp,k,'dec',100,12)
+   dial_new(d.x+8,yp,100,12,state_make_get_set_param(k,'dec'))
   )
 
  end
@@ -1644,24 +1691,36 @@ end
 function header_ui_init(ui,yp)
  local function hdial(x,y,p)
  ui:add_widget(
-  dial_new(x,yp+y,'seq',p,116,12)
+  dial_new(x,yp+y,116,12,state_make_get_set_param('mixer',p))
  )
  end
  
  local function song_only(w,s_disable)
   ui:add_widget(
-   wrap_disable(w,'transport','song_mode',s_disable)
+   wrap_disable(w,s_disable,state_is_song_mode)
   )
  end
 
  ui:add_widget(
-  toggle_new(16,yp,'transport','playing',6,7)
+  toggle_new(
+   16,yp,6,7,
+   state_make_get('transport','playing'),
+   function(s) s:toggle_playing() end
+  )
  )
  ui:add_widget(
-  toggle_new(32,yp,'transport','song_mode',142,143)
+  toggle_new(
+   32,yp,142,143,
+   state_is_song_mode,
+   function(s) s:toggle_song_mode() end
+  )
  )
  song_only(
-  toggle_new(24,yp,'transport','recording',231,232),
+  toggle_new(
+   24,yp,231,232,
+   state_make_get('transport','recording'),
+   function(s) s:toggle_recording() end
+  ),
   233
  )
  hdial(0,8,'tempo')
@@ -1673,14 +1732,14 @@ function header_ui_init(ui,yp)
 
  for pt,xp in pairs({b0=32,b1=64,drum=96}) do
   ui:add_widget(
-   toggle_new(xp+8,yp+8,'seq',pt..'_on',22,38)
+   toggle_new(xp+8,yp+8,22,38,state_make_get_set_param('bar',pt,'on'))
   )
   hdial(xp+16,8,pt..'_lev')
   hdial(xp,16,pt..'_od')
   hdial(xp+16,16,pt..'_fx')
 
   ui:add_widget(
-   spin_btn_new(xp,yp+24,'transport',pt..'_bank',{208,209,210,211})
+   spin_btn_new(xp,yp+24,{208,209,210,211},state_make_get_set('transport',pt..'_bank'))
   )
   for i=1,4 do
    ui:add_widget(
@@ -1703,7 +1762,7 @@ function header_ui_init(ui,yp)
   transport_number_new(64,yp,8,'transport','step')
  )
  song_only(
-  toggle_new(80,yp,'song','looping',193,194),
+  toggle_new(80,yp,193,194,state_make_get_set('song','looping')),
   195
  )
  ui:add_widget(
