@@ -80,20 +80,23 @@ function _init()
  comp=comp_new(mixer,0.5,4,0.05,0.005)
  seq_helper=seq_helper_new(
   state,comp,function()
-   local st,sm=
+   local tr,song,sb,st=
     state.transport,
-    state.seq
-   if (not st.playing) return
-   local now,nl=st.step,st.note_len
-   if (sm.b0_on) pbl0:note(state.b0,now,nl)
-   if (sm.b1_on) pbl1:note(state.b1,now,nl)
-   if sm.drum_on then
-    kick:note(state.bd,now,nl)
-    snare:note(state.sd,now,nl)
-    hh:note(state.hh,now,nl)
-    cy:note(state.cy,now,nl)
-    perc:note(state.pc,now,nl)
+    state.song,
+    state.seq.bar,
+    state.seq.tick
+   if (not tr.playing) return
+   local now,nl=tr.tick,tr.note_len
+   if (sb.b0.on) pbl0:note(state.b0,st.b0,now,nl)
+   if (sb.b1.on) pbl1:note(state.b1,st.b1,now,nl)
+   if sb.drum.on then
+    kick:note(state.bd,st.bd,now,nl)
+    snare:note(state.sd,st.sd,now,nl)
+    hh:note(state.hh,st.hh,now,nl)
+    cy:note(state.cy,st.cy,now,nl)
+    perc:note(state.pc,st.pc,now,nl)
    end
+   local sm=st.mixer
    mixer.lev=sm.lev*3
    delay.l=(0.9*sm.delay_time+0.1)*sample_rate
    delay.fb=sqrt(sm.delay_fb)*0.95
@@ -110,7 +113,7 @@ function _init()
    ms.drum.fx=sm.drum_fx^2*0.8
    comp.thresh=0.1+0.9*sm.comp_thresh
    
-   state_next_note(state)
+   state:next_tick()
   end
  )
  
@@ -474,15 +477,17 @@ function synth_new()
   obj._thisdn[i]=0
  end
  
- obj.note=function(self,pat,step,note_len)
+ obj.note=function(self,pat,par,step,note_len)
+  assert(step>=1,step)
+  assert(step<=16,step)
   local patstep=pat.steps[step]
 
-  self.fc=(fc_min/sample_rate)*(2^(fc_oct*pat.cut))/self.os
-  self.fr=pat.res*pat.res*fr_rng+fr_min
-  self.env=pat.env*pat.env+0.1
-  self.acc=pat.acc*1.9+0.1
-  self.saw=pat.saw
-  local pd=pat.dec-1
+  self.fc=(fc_min/sample_rate)*(2^(fc_oct*par.cut))/self.os
+  self.fr=par.res*par.res*fr_rng+fr_min
+  self.env=par.env*par.env+0.1
+  self.acc=par.acc*1.9+0.1
+  self.saw=par.saw
+  local pd=par.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
   self._med=0.999-0.01*pd*pd*pd*pd
   self._nt=0
@@ -500,7 +505,7 @@ function synth_new()
   --ordered for numeric safety
   self.todp=((f/self.os)<<5)/sample_rate
 
-  if (self._ac) self.env+=pat.acc
+  if (self._ac) self.env+=par.acc
   if self._lsl then
    self.todpr=0.015
   else
@@ -583,14 +588,14 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   detune=1.0
  }]]
  
- obj.note=function(self,pat,step,note_len)
+ obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
   if (s!=d_off) then
-   self.detune=2^(1.5*pat.tun-0.75)
+   self.detune=2^(1.5*par.tun-0.75)
    self.op,self.dp=0,_dp0*self.detune
-   self.ae=pat.lev*pat.lev*boost*trn(s==d_ac,1.5,0.6)
+   self.ae=par.lev*par.lev*boost*trn(s==d_ac,1.5,0.6)
    self.aemax=0.5*self.ae
-   self.ted=0.5*((te_base-te_scale*pat.dec)^4)
+   self.ted=0.5*((te_base-te_scale*par.dec)^4)
    self.aed=1-ae_ratio*self.ted
   end
  end
@@ -625,19 +630,19 @@ function snare_new()
   aemax=0.4
  }]]
  
- obj.note=function(self,pat,step,note_len)
+ obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
   if (s!=d_off) then
-   self.detune=2^(2*pat.tun-1)
+   self.detune=2^(2*par.tun-1)
    self.op,self.dp=0,self.dp0*self.detune
    self.aes,self.aen=0.7,0.4
    if (s==d_ac) self.aes,self.aen=1.5,0.85
-   self.aes+=(pat.tun-0.5)*-0.2
-   self.aen+=(pat.tun-0.5)*0.2
-   self.aes*=pat.lev*pat.lev
-   self.aen*=pat.lev*pat.lev
+   self.aes+=(par.tun-0.5)*-0.2
+   self.aen+=(par.tun-0.5)*0.2
+   self.aes*=par.lev*par.lev
+   self.aen*=par.lev*par.lev
    self.aemax=self.aes*0.5
-   local pd4=(0.65-0.25*pat.dec)^4
+   local pd4=(0.65-0.25*par.dec)^4
    self.aesd=1-0.1*pd4
    self.aend=1-0.04*pd4
   end
@@ -677,14 +682,14 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
   detune=1
  }]]
  
- obj.note=function(self,pat,step,note_len)
+ obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
   if (s!=d_off) then
    self.op,self.dp=0,self.dp0
-   self.ae=pat.lev*pat.lev*trn(s==d_ac,2.0,0.8)
+   self.ae=par.lev*par.lev*trn(s==d_ac,2.0,0.8)
  
-   self.detune=2^(tbase+tscale*pat.tun)
-   local pd4=(dbase-dscale*pat.dec)
+   self.detune=2^(tbase+tscale*par.tun)
+   local pd4=(dbase-dscale*par.dec)
    pd4*=pd4*pd4*pd4
    
    self.aed=1-0.04*pd4
@@ -1002,7 +1007,7 @@ function state_new(savedata)
   self:_sync_pat('drum','sd')
   self:_sync_pat('drum','hh')
   self:_sync_pat('drum','cy')
-  self:_sync_pat('drum','pr')
+  self:_sync_pat('drum','pc')
   assert(self.b0)
 
   self:_init_tick()
@@ -1316,6 +1321,8 @@ function seq_helper_new(state,root,note_fn)
     self.t+=n
     p+=n
    end
+   -- todo: enable this?
+   --if (not self.state.transport.playing) self.t=0
   end
  }
 end
