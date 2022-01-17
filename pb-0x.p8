@@ -612,6 +612,7 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj=parse[[{
   ae=0.0,
   f1=0.0,
+  f2=0.0,
   op1=0.0,
   odp1=14745.6,
   op2=0.0,
@@ -639,7 +640,7 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
  end
 
  obj.subupdate=function(self,b,first,last)
-  local ae,f1=self.ae,self.f1
+  local ae,f1,f2=self.ae,self.f1,self.f2
   local op1,op2,op3,op4=self.op1,self.op2,self.op3,self.op4
   local odp1,odp2,odp3,odp4=self.odp1*self.detune,self.odp2*self.detune,self.odp3*self.detune,self.odp4*self.detune
   local aed,tlev,nlev=self.aed,_tlev,_nlev
@@ -652,15 +653,16 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
    osc+=(op4&0x8000)>>16
 
    local r=nlev*(rnd()-0.5)+tlev*osc
-   f1+=0.9999*(r-f1)
+   f1+=0.8*(r-f1)
+   f2+=0.8*(f1-f2)
    ae*=aed
-   b[i]+=ae*((r-f1)<<10)
+   b[i]+=ae*((r-f2)>>1)
    op1+=odp1
    op2+=odp2
    op3+=odp3
    op4+=odp4
   end
-  self.ae,self.f1=ae,f1
+  self.ae,self.f1,self.f2=ae,f1,f2
   self.op1,self.op2,self.op3,self.op4=op1,op2,op3,op4
  end
  
