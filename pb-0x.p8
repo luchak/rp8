@@ -1325,7 +1325,7 @@ function seq_helper_new(state,root,note_fn)
     p+=n
    end
    -- todo: enable this?
-   --if (not self.state.transport.playing) self.t=0
+   if (not self.state.transport.playing) self.t=0
   end
  }
 end
