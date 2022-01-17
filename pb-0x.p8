@@ -728,7 +728,7 @@ end
 -->8
 -- audio fx
 
-buf_max=sample_rate*4
+buf_max=0x7fff
 
 function delay_new(src,l,fb)
  local obj={
@@ -1276,23 +1276,13 @@ function state_make_get_set_param(cat,syn,key)
   function(state,val) state:_apply_diff(cat, {[syn]={[key]=val}}) end
 end
 
-function state_make_get_set(a,b,c)
+function state_make_get_set(a,b)
  return 
-  state_make_get(a,b,c),
-  state_make_set(a,b,c)
-end
-
-function state_make_set(a,b,c)
- assert(b,a)
- if c then
-  return function(s,v) assert(v!=nil,a..' '..b..' '..c) s[a][b][c]=v end
- end
- return function(s,v) assert(v!=nil,a..' '..b) s[a][b]=v end
+  state_make_get(a,b),
+  function(s,v) s[a][b]=v end
 end
 
 function state_make_get(a,b,c)
- assert(b,a)
- if (c) return function(s) return s[a][b][c] end
  return function(s) return s[a][b] end
 end
 
