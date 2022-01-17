@@ -188,10 +188,11 @@ function merge_tables(base,new,do_copy)
  if (not new) return base
  for k,v in pairs(new) do
   if type(v)=='table' then
-   if type(base[k])=='table' then
-    merge_tables(base[k],v)
+   local bk=base[k]
+   if type(bk)=='table' then
+    merge_tables(bk,v)
    else
-    base[k]=merge_tables({},v)
+    base[k]=copy_table(v)
    end
   else
    base[k]=v
@@ -209,7 +210,6 @@ function stringify(v)
  elseif t=='table' then
   local s='{'
   for k,v in pairs(v) do
-   assert(k)
    s=s..k..'='..stringify(v)..','
   end
   return s..'}'
@@ -292,36 +292,18 @@ function _parse(input)
   for i=1,4 do input() end
   return false
  else
-  assert(false, 'cannot parse, c="'..c..'"')
+  die('cannot parse, c="'..c..'"')
  end
 end
 
-parse[[{
- active={
-	 b0={
-	  on=true,
-	  pat=1,
-	 },
-	 b1={
-	  on=true,
-	  pat=1,
-	 },
-	 drum={
-	  on=true,
-	  pat=1,
-	 },
- },
-}]]
-
-
-
-function unpack_split(...)
- return unpack(split(...))
+function unpack_split(s)
+ return unpack(split(s))
 end
 
 function trn(c,t,f)
- if (c) return t else return f
+ return (c and t) or f
 end
+
 -->8
 -- audio driver
 
@@ -352,7 +334,6 @@ function audio_fillchunk()
  local n,c=_schunk,deli(_empty,1)
  local b,cm1=_chunkbuf,c-1
  if (_root_obj) _root_obj:update(b,1,n)
- local minx,maxx=32767,-32767
  for i=1,n do
   local x=mid(-1,b[i],1)
   x-=0.148148*x*x*x
@@ -426,8 +407,6 @@ function synth_new()
   _f2=0,
   _f3=0,
   _f4=0,
-  _up=0,
-  _dn=0,
   _me=0,
   _med=0.99,
   _ae=0,
@@ -440,15 +419,8 @@ function synth_new()
   _ac=false,
   _sl=false,
   _lsl=false,
-  _lastdn={},
-  _thisdn={}
  }]]
 
- for i=1,4 do
-  obj._lastdn[i]=0
-  obj._thisdn[i]=0
- end
- 
  obj.note=function(self,pat,par,step,note_len)
   assert(step>=1,step)
   assert(step<=16,step)
@@ -493,7 +465,7 @@ function synth_new()
   local todp,todpr=self.todp,self.todpr
   local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
   local fr,fcb=self.fr,self.fc
-  local os,up,dn=self.os
+  local os=self.os
   local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
   local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
@@ -501,7 +473,7 @@ function synth_new()
    local fc=min(0.37/os,fcb+((me*env)>>4))
    -- very very janky dewarping
    -- arbitrary scaling constant
-   -- is 0.75*2*pi because???   
+   -- is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
    if gate then
     ae+=(1-ae)>>2
@@ -518,7 +490,6 @@ function synth_new()
    odp+=todpr*(todp-odp)
    self._nt+=1
    for j=1,os do
-    dn=0
     local osc=(op>>4)
     if not saw then
      osc=(osc>>2)+0.5+((osc&0x8000)>>15)
@@ -541,7 +512,6 @@ function synth_new()
   end
   self.op,self.odp=op,odp
   self._f1,self._f2,self._f3,self._f4=f1,f2,f3,f4
-  self._up,self._dn=up,dn
   self._me,self._ae,self._mr=me,ae,mr
   self._gate=gate
  end
@@ -643,13 +613,13 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
   ae=0.0,
   f1=0.0,
   op1=0.0,
-  odp1=0.45,
+  odp1=14745.6,
   op2=0.0,
-  odp2=0.52,
+  odp2=17039.36,
   op3=0.0,
-  odp3=0.47,
+  odp3=15400.96,
   op4=0.0,
-  odp4=0.485,
+  odp4=15892.48,
   aed=0.995,
   detune=1
  }]]
@@ -659,15 +629,15 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
   if (s!=d_off) then
    self.op,self.dp=0,self.dp0
    self.ae=par.lev*par.lev*trn(s==d_ac,2.0,0.8)
- 
+
    self.detune=2^(tbase+tscale*par.tun)
    local pd4=(dbase-dscale*par.dec)
    pd4*=pd4*pd4*pd4
-   
+
    self.aed=1-0.04*pd4
   end
  end
- 
+
  obj.subupdate=function(self,b,first,last)
   local ae,f1=self.ae,self.f1
   local op1,op2,op3,op4=self.op1,self.op2,self.op3,self.op4
@@ -686,13 +656,9 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
    ae*=aed
    b[i]+=ae*((r-f1)<<10)
    op1+=odp1
-   if (op1>1) op1-=2
    op2+=odp2
-   if (op2>1) op2-=2
    op3+=odp3
-   if (op3>1) op3-=2
    op4+=odp4
-   if (op4>1) op4-=2
   end
   self.ae,self.f1=ae,f1
   self.op1,self.op2,self.op3,self.op4=op1,op2,op3,op4
