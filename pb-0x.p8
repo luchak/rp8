@@ -679,22 +679,25 @@ function delay_new(src,l,fb)
   p=1,
   src=src,
   l=l,
-  fb=fb
+  fb=fb,
+  f1=0
  }
  
  obj.update=function(self,b,first,last)
   if (self.src) self.src:update(b,first,last)
   local dl,l,fb,p=self.dl,min(self.l,buf_max),self.fb,self.p
+  local f1=self.f1
   for i=first,last do
- 	 local x,y=b[i],dl[p]
- 	 if (abs(y) < 0.0001) y=0
- 	 b[i]=y
- 	 y=x+fb*y
- 	 dl[p]=y
- 	 p+=1
- 	 if (p>l) p=1
+   local x,y=b[i],dl[p]
+   if (abs(y) < 0.0001) y=0
+   b[i]=y
+   y=x+fb*y
+   f1+=0.08*(y-f1)
+   dl[p]=y-(f1>>2)
+   p+=1
+   if (p>l) p=1
   end
-  self.p=p
+  self.p,self.f1=p,f1
  end
  
  return obj
