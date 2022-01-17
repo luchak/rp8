@@ -120,6 +120,7 @@ function _init()
   seq_helper.state=state
  end)
  menuitem(rec_menuitem, 'start recording', start_rec)
+ menuitem(5, 'toggle output lpf', function() poke(0x5f36,(@0x5f36)^^0x20) end)
  
  log('starting audio...')
  audio_init()
