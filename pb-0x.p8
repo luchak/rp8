@@ -179,28 +179,6 @@ function die(msg)
  assert(false,msg)
 end
 
-function table_get(t,path)
- for i=1,#path do
-  if (not t) break
-  t=t[path[i]]
- end
- return t
-end
-
-function table_set(t,path,val)
- local v,n=t,#path
- for i=1,n-1 do
-  local k=path[i]
-  local v=t[k]
-  if not v then
-   v={}
-   t[k]=v
-  end
-  t=v
- end
- t[path[n]]=val
-end
-
 function copy_table(t)
  return merge_tables({},t)
 end
@@ -235,12 +213,9 @@ function stringify(v)
    s=s..k..'='..stringify(v)..','
   end
   return s..'}'
- elseif t==nil then
-  return '[nil]'
- elseif t=='function' then
-  return '[function]'
+ else
+  die('unsupported type in stringify')
  end
- -- skip nil, functions, etc.
 end
 
 function make_reader(s)
