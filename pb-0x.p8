@@ -436,13 +436,11 @@ function synth_new()
   self._med=0.999-0.01*pd*pd*pd*pd
   self._nt=0
   self._nl=note_len
-  self._ac=false
   self._lsl=self._sl
-  self._sl=false
   self._gate=false
   if (patstep==n_off) return
-  if (patstep==n_ac or patstep==n_ac_sl) self._ac=true
-  if (patstep==n_sl or patstep==n_ac_sl) self._sl=true
+  self._ac=patstep==n_ac or patstep==n_ac_sl
+  self._sl=patstep==n_sl or patstep==n_ac_sl
  
   self._gate=true
   local f=55*(semitone^(pat.notes[step]+3))
@@ -1007,6 +1005,7 @@ function state_new(savedata)
    self.pending.tick={}
   else
    merge_tables(target, self.pending.tick)
+   -- need to clear anything automated that's in bar but not in tick
    if (not keep) self.pending.tick={}
   end
  end
