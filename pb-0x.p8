@@ -80,23 +80,22 @@ function _init()
  comp=comp_new(mixer,0.5,4,0.05,0.005)
  seq_helper=seq_helper_new(
   state,comp,function()
-   local tr,song,sb,st=
+   local tr,song,sq=
     state.transport,
     state.song,
-    state.seq.bar,
-    state.seq.tick
+    state.seq
    if (not tr.playing) return
    local now,nl=tr.tick,tr.note_len
-   if (sb.b0.on) pbl0:note(state.b0,st.b0,now,nl)
-   if (sb.b1.on) pbl1:note(state.b1,st.b1,now,nl)
-   if sb.drum.on then
-    kick:note(state.bd,st.bd,now,nl)
-    snare:note(state.sd,st.sd,now,nl)
-    hh:note(state.hh,st.hh,now,nl)
-    cy:note(state.cy,st.cy,now,nl)
-    perc:note(state.pc,st.pc,now,nl)
+   if (sq.b0.on) pbl0:note(state.b0,sq.b0,now,nl)
+   if (sq.b1.on) pbl1:note(state.b1,sq.b1,now,nl)
+   if sq.drum.on then
+    kick:note(state.bd,sq.bd,now,nl)
+    snare:note(state.sd,sq.sd,now,nl)
+    hh:note(state.hh,sq.hh,now,nl)
+    cy:note(state.cy,sq.cy,now,nl)
+    perc:note(state.pc,sq.pc,now,nl)
    end
-   local sm=st.mixer
+   local sm=sq.mixer
    mixer.lev=sm.lev*3
    delay.l=(0.9*sm.delay_time+0.1)*sample_rate
    delay.fb=sqrt(sm.delay_fb)*0.95
@@ -930,7 +929,10 @@ function state_new(savedata)
    bar_seqs={},
    default_seq={},
   },
-  pending={},
+  pending={
+   bar={},
+   tick={}
+  },
   pat_seq={},
   seq={}
  }]]
@@ -973,7 +975,7 @@ function state_new(savedata)
   local t=s.transport
   t.recording=(not t.recording) and s.song.song_mode
   if not t.recording then
-   t.pending={}
+   self:_reset_pending()
   end
  end
 
@@ -1008,7 +1010,6 @@ function state_new(savedata)
   self:_sync_pat('drum','hh')
   self:_sync_pat('drum','cy')
   self:_sync_pat('drum','pc')
-  assert(self.b0)
 
   self:_init_tick()
  end
@@ -1022,7 +1023,8 @@ function state_new(savedata)
    syn_pats={}
    self.pats[syn]=syn_pats
   end
-  local pat_idx=self.seq.bar[pat_syn].pat
+  assert(self.seq[pat_syn],pat_syn)
+  local pat_idx=self.seq[pat_syn].pat
   local pat=syn_pats[pat_idx]
   if not pat then
    if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
@@ -1045,17 +1047,23 @@ function state_new(savedata)
   return seq
  end
 
+ s._reset_pending=function(self)
+  self.pending={bar={},tick={}}
+ end
+
  s._apply_pending=function(self,apply_bar,keep)
   local song_mode,t=self.song.song_mode,self.transport
   local target=self.pat_seq
   if (song_mode) target=self:_get_song_seq(t.bar,t.tick,true)
   assert(target, 'apply target not found')
   if apply_bar then
-   merge_tables(target, self.pending)
-   if (not keep) self.pending={}
+   merge_tables(self.pending.bar, self.pending.tick)
+   merge_tables(target, self.pending.bar)
+   if (not keep) self:_reset_pending()
+   self.pending.tick={}
   else
-   merge_tables(target, pick(self.pending, {'tick'}))
-   if (not keep) self.pending.tick=nil
+   merge_tables(target, self.pending.tick)
+   if (not keep) self.pending.tick={}
   end
  end
 
@@ -1073,7 +1081,7 @@ function state_new(savedata)
 
   -- dump pending changes if we're
   -- not recording
-  if (song.song_mode and not t.recording) self.pending={}
+  if (song.song_mode and not t.recording) self:_reset_pending()
 
   if t.tick>16 then
    -- end of bar
@@ -1084,7 +1092,7 @@ function state_new(savedata)
      -- clear pending before
      -- go_to_bar so we don't
      -- apply changes on loop
-     self.pending={}
+     self:_reset_pending()
      bar=song.loop_start
     end
     self:go_to_bar(bar)
@@ -1108,7 +1116,7 @@ function state_new(savedata)
 
  s._init_tick=function(self)
   local t=self.transport
-  local m=self.seq.tick.mixer
+  local m=self.seq.mixer
   local nl=sample_rate*(15/(90+64*m.tempo))
   local shuf_diff=nl*m.shuffle*0.33
   if (t.tick&1>0) shuf_diff=-shuf_diff
@@ -1116,12 +1124,11 @@ function state_new(savedata)
   t.base_note_len=nl
  end
 
- s._apply_diff=function(self,diff)
-  local t,song,dt=self.transport,self.song,diff.tick
-  if (dt) merge_tables(self.seq.tick,dt)
-  merge_tables(self.pending,diff)
+ s._apply_diff=function(self,cat,diff)
+  local t,song=self.transport,self.song
+  if (cat=='tick') merge_tables(self.seq,diff)
+  merge_tables(self.pending[cat],diff)
   if (not t.playing) and (t.recording or not song.song_mode) then
-   log('app imm',stringify(diff),stringify(self.pending))
    self:_apply_pending(true,t.recording)
    -- pick up new changes
    self:_init_bar()
@@ -1152,82 +1159,74 @@ function state_load(str)
 end
 
 seq_proto=parse[[{
- tick={
-  mixer={
-   tempo=0.5,
-   shuffle=0,
-   lev=0.5,
-   delay_time=0.5,
-   delay_fb=0.5,
-   b0_lev=0.5,
-   b0_od=0,
-   b0_fx=0,
-   b1_lev=0.5,
-   b1_od=0,
-   b1_fx=0,
-   drum_lev=0.5,
-   drum_od=0,
-   drum_fx=0,
-   comp_thresh=1.0,
-  },
-  b0={
-   saw=true,
-   lev=0.5,
-   cut=0.5,
-   res=0.5,
-   env=0.5,
-   dec=0.5,
-   acc=0.5,
-  },
-  b1={
-   saw=true,
-   lev=0.5,
-   cut=0.5,
-   res=0.5,
-   env=0.5,
-   dec=0.5,
-   acc=0.5,
-  },
-  bd={
-   tun=0.5,
-   dec=0.5,
-   lev=0.5,
-  },
-  sd={
-   tun=0.5,
-   dec=0.5,
-   lev=0.5,
-  },
-  hh={
-   tun=0.5,
-   dec=0.5,
-   lev=0.5,
-  },
-  cy={
-   tun=0.5,
-   dec=0.5,
-   lev=0.5,
-  },
-  pc={
-   tun=0.5,
-   dec=0.5,
-   lev=0.5,
-  },
+ mixer={
+  tempo=0.5,
+  shuffle=0,
+  lev=0.5,
+  delay_time=0.5,
+  delay_fb=0.5,
+  b0_lev=0.5,
+  b0_od=0,
+  b0_fx=0,
+  b1_lev=0.5,
+  b1_od=0,
+  b1_fx=0,
+  drum_lev=0.5,
+  drum_od=0,
+  drum_fx=0,
+  comp_thresh=1.0,
  },
- bar={
-  b0={
-   on=true,
-   pat=1,
-  },
-  b1={
-   on=true,
-   pat=1,
-  },
-  drum={
-   on=true,
-   pat=1,
-  },
+ b0={
+  on=true,
+  pat=1,
+  saw=true,
+  lev=0.5,
+  cut=0.5,
+  res=0.5,
+  env=0.5,
+  dec=0.5,
+  acc=0.5,
  },
+ b1={
+  on=true,
+  pat=1,
+  saw=true,
+  lev=0.5,
+  cut=0.5,
+  res=0.5,
+  env=0.5,
+  dec=0.5,
+  acc=0.5,
+ },
+ bd={
+  tun=0.5,
+  dec=0.5,
+  lev=0.5,
+ },
+ sd={
+  tun=0.5,
+  dec=0.5,
+  lev=0.5,
+ },
+ hh={
+  tun=0.5,
+  dec=0.5,
+  lev=0.5,
+ },
+ cy={
+  tun=0.5,
+  dec=0.5,
+  lev=0.5,
+ },
+ pc={
+  tun=0.5,
+  dec=0.5,
+  lev=0.5,
+ },
+ drum={
+  on=true,
+  pat=1,
+ }
 }]]
 
 function seq_new()
@@ -1275,9 +1274,8 @@ function state_make_get_set_param(cat,syn,key)
  assert(cat and syn)
  if (not key) cat,syn,key='tick',cat,syn
  return 
-  function(state) return state.seq[cat][syn][key] end,
-  function(state,val) state:_apply_diff({[cat]={[syn]={[key]=val}}}) end
- 
+  function(state) return state.seq[syn][key] end,
+  function(state,val) state:_apply_diff(cat, {[syn]={[key]=val}}) end
 end
 
 function state_make_get_set(a,b,c)
