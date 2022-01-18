@@ -419,7 +419,7 @@ function synth_new()
   _nl=900,
   _ac=false,
   _sl=false,
-  _lsl=false,
+  _lsl=false
  }]]
 
  obj.note=function(self,pat,par,step,note_len)
@@ -493,11 +493,16 @@ function synth_new()
    self._nt+=1
    for j=1,os do
     local osc=(op>>7)
-    if not saw then
-     local sq=(osc&0x8000)>>>15
-     osc=1-sq-osc+((sq*osc)<<1)
+    if saw then
+     osc=(osc>>1)+0.5
+     osc*=osc*osc
+     osc=(osc<<1)-1/2
+    else
+     local sq=(osc&0x8000)>>>14
+     osc=sq*(osc-0.5)-osc+1
+     osc*=osc*osc
      -- osc -> osc
-     -- 1-osc => sq-sq*osc => (1-sq)*(1-osc)+sq*osc => 1-sq-osc+2*sq*osc
+     -- 1-osc => sq-sq*osc => (1-sq)*(1-osc)+sq*osc => 1-sq-osc+2*sq*osc => 2*sq*(osc-0.5)-osc+1
      -- 1 if osc is negative, 0 if pos
     end
     local x=osc-fr*(f4-osc)
@@ -512,9 +517,9 @@ function synth_new()
     op+=dodp
     if (op>128) op-=256
    end
-   local out=f4*ae
+   local out=(f4*ae)>>2
    if (ac) out*=1+acc*me
-   b[i]=out>>2
+   b[i]=out
   end
   self.op,self.odp=op,odp
   self._f1,self._f2,self._f3,self._f4=f1,f2,f3,f4
