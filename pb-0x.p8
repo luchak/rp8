@@ -494,12 +494,13 @@ function synth_new()
     local osc=(op>>7)
     if saw then
      osc=1-((osc>>1)+0.5)
-     osc*=osc*osc
+     osc*=osc
      osc=(osc<<1)-1/2
     else
      local sq=(osc&0x8000)>>>14
      osc=sq*(osc-0.5)-osc+1
-     osc*=osc*osc
+     local mask=osc>>31
+     osc*=(mask^^osc)-mask
      -- osc -> osc
      -- 1-osc => sq-sq*osc => (1-sq)*(1-osc)+sq*osc => 1-sq-osc+2*sq*osc => 2*sq*(osc-0.5)-osc+1
      -- 1 if osc is negative, 0 if pos
