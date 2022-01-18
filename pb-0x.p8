@@ -517,7 +517,7 @@ function synth_new()
     if (op>128) op-=256
    end
    local out=(f4*ae)>>2
-   if (ac) out*=1+acc*me
+   if (ac) out+=acc*me*out
    b[i]=out
   end
   self.op,self.odp=op,odp
