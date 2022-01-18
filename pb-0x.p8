@@ -439,9 +439,9 @@ function synth_new()
   self._lsl=self._sl
   self._gate=false
   self.detune=semitone^(flr(24*(par.tun-0.5)+0.5))
-  if (patstep==n_off) return
   self._ac=patstep==n_ac or patstep==n_ac_sl
   self._sl=patstep==n_sl or patstep==n_ac_sl
+  if (patstep==n_off) return
  
   self._gate=true
   local f=55*(semitone^(pat.notes[step]+3))
