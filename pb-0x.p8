@@ -427,7 +427,7 @@ function synth_new()
   local patstep=pat.steps[step]
 
   self.fc=(fc_min/sample_rate)*(2^(fc_oct*par.cut))/self.os
-  self.fr=par.res*par.res*fr_rng+fr_min
+  self.fr=par.res*fr_rng+fr_min
   self.env=par.env*par.env+0.1
   self.acc=par.acc*1.9+0.1
   self.saw=par.saw
