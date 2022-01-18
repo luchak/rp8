@@ -494,7 +494,11 @@ function synth_new()
    for j=1,os do
     local osc=(op>>7)
     if not saw then
-     osc=(osc>>2)+0.5+((osc&0x8000)>>15)
+     local sq=(osc&0x8000)>>>15
+     osc=1-sq-osc+((sq*osc)<<1)
+     -- osc -> osc
+     -- 1-osc => sq-sq*osc => (1-sq)*(1-osc)+sq*osc => 1-sq-osc+2*sq*osc
+     -- 1 if osc is negative, 0 if pos
     end
     local x=osc-fr*(f4-osc)
     local xc=mid(-1,x,1)
