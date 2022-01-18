@@ -113,6 +113,7 @@ function _init()
   end
  )
  
+ poke(0x5f36,(@0x5f36)|0x20)
  menuitem(1, 'save to clip', copy_state)
  menuitem(2, 'load from clip', paste_state)
  menuitem(3, 'clear seq', function()
@@ -495,7 +496,7 @@ function synth_new()
     if saw then
      osc=1-((osc>>1)+0.5)
      osc*=osc
-     osc=(osc<<1)-1/2
+     osc=(osc<<1)-(2/3)
     else
      local sq=(osc&0x8000)>>>14
      osc=sq*(osc-0.5)-osc+1
