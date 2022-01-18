@@ -384,7 +384,6 @@ fc_oct=4.25
 fr_min=0.1
 fr_rng=4.2-fr_min
 env_oct=3.0
-rise_inc=1/20
 --fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
 function synth_new()
@@ -483,7 +482,7 @@ function synth_new()
     ae*=aed
    end
    if mr then
-    me+=rise_inc
+    me+=(1-me)>>2
     mr=not (me>0.99)
    else
     me*=med
@@ -494,7 +493,7 @@ function synth_new()
    for j=1,os do
     local osc=(op>>7)
     if saw then
-     osc=(osc>>1)+0.5
+     osc=1-((osc>>1)+0.5)
      osc*=osc*osc
      osc=(osc<<1)-1/2
     else
