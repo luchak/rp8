@@ -1721,8 +1721,28 @@ function header_ui_init(ui,yp)
  ui:add_widget(
   transport_number_new(64,yp,16,'song','loop_start')
  )
+ song_only(
+  momentary_new(80,yp,192,
+   function(state,b)
+    local s=state.song
+    local ns=s.loop_start+b
+    s.loop_start=mid(1,ns,999)
+    s.loop_len=mid(1,s.loop_len,1000-ns)
+   end
+  ),
+  197
+ )
  ui:add_widget(
   transport_number_new(88,yp,8,'song','loop_len')
+ )
+ song_only(
+  momentary_new(96,yp,192,
+   function(state,b)
+    local s=state.song
+    s.loop_len=mid(1,s.loop_len+b,1000-s.loop_start)
+   end
+  ),
+  197
  )
  
 end
