@@ -122,9 +122,8 @@ function _init()
  end)
  menuitem(rec_menuitem, 'start recording', start_rec)
  menuitem(5, 'toggle output lpf', function() poke(0x5f36,(@0x5f36)^^0x20) end)
- 
- log('starting audio...')
- audio_init()
+
+ log('init complete')
 end
 
 -- give audio time to settle
@@ -319,29 +318,25 @@ _bufpadding=4*_schunk
 _chunkbuf=newbuf(_schunk)
 sample_rate=5512
 
-function audio_init()
-end
-
 function audio_set_root(obj)
  _root_obj=obj
 end
 
 function audio_dochunk()
- local n,c=_schunk,0x4300
- local b,cm1=_chunkbuf,c-1
- if (_root_obj) _root_obj:update(b,1,n)
- for i=1,n do
+ local buf=_chunkbuf
+ if (_root_obj) _root_obj:update(buf,1,_schunk)
+ for i=1,_schunk do
   -- soft saturation to make
   -- clipping less unpleasant
-  local x=mid(-1,b[i],1)
+  local x=mid(-1,buf[i],1)
   x-=0.148148*x*x*x
   -- add dither to keep delay
   -- tails somewhat nicer
   -- also ensure that e(0) is
   -- on a half-integer value
-  poke(cm1+i,flr((x<<7)+0.375+(rnd()>>2))+128)
+  poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
  end
- serial(0x808,c,_schunk)
+ serial(0x808,0x4300,_schunk)
 end
 
 function audio_update()
