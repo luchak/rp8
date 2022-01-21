@@ -314,25 +314,20 @@ end
 -- to avoid jitter problems
 -- on machines i have tested on
 _schunk=96
-_nchunk=4
 _tgtchunks=1
+_bufpadding=4*_schunk
 _chunkbuf=newbuf(_schunk)
 sample_rate=5512
 
 function audio_init()
- _empty={}
- _full={}
- for i=0,_nchunk-1 do
-  add(_empty,0x4300+i*_schunk)
- end
 end
 
 function audio_set_root(obj)
  _root_obj=obj
 end
 
-function audio_fillchunk()
- local n,c=_schunk,deli(_empty,1)
+function audio_dochunk()
+ local n,c=_schunk,0x4300
  local b,cm1=_chunkbuf,c-1
  if (_root_obj) _root_obj:update(b,1,n)
  for i=1,n do
@@ -346,36 +341,28 @@ function audio_fillchunk()
   -- on a half-integer value
   poke(cm1+i,flr((x<<7)+0.375+(rnd()>>2))+128)
  end
-
- add(_full,c)
-end
-
-function audio_sendchunk()
- local c=deli(_full,1)
  serial(0x808,c,_schunk)
- add(_empty,c)
 end
 
 function audio_update()
- local req,newchunks=stat(109)-stat(108),0
- local empty,full,n=_empty,_full,_schunk
+ local bufsize,inbuf,newchunks=stat(109),stat(108),0
+ log(bufsize, inbuf)
+ local n=_schunk
 
  --assert(#empty+#full==_nchunk)
- while req>0 do
-  if #full==0 then
-   log('behind')
-   audio_fillchunk()
-   newchunks+=1
-  end
-  audio_sendchunk()
-  req-=n
+ while inbuf<bufsize do
+  log('behind')
+  audio_dochunk()
+  newchunks+=1
+  inbuf+=n
  end
- 
+
  -- always generate at least 1
  -- chunk if there is space
  -- and time
- if newchunks<_tgtchunks and #empty>0 and stat(1)<0.8 then
-  audio_fillchunk()
+ if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.8 then
+  audio_dochunk()
+  inbuf+=n
   newchunks+=1
  end 
 end
