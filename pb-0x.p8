@@ -336,6 +336,8 @@ function audio_fillchunk()
  local b,cm1=_chunkbuf,c-1
  if (_root_obj) _root_obj:update(b,1,n)
  for i=1,n do
+  -- soft saturation to make
+  -- clipping less unpleasant
   local x=mid(-1,b[i],1)
   x-=0.148148*x*x*x
   -- add dither to keep delay
