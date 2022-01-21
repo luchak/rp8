@@ -736,11 +736,11 @@ function mixer_new(srcs,fx,lev)
     for i=first,last do
      local x=mid(-1,tmp[i]*odf,1)
      x=slev*odfi*(x-0.148148*x*x*x)
-				 b[i]+=x*lev
+     b[i]+=x*lev
      fxbuf[i]+=x*fx
     end
    end
-   
+
    self.fx:update(fxbuf,first,last)
    for i=first,last do
     b[i]+=fxbuf[i]*lev
@@ -768,7 +768,7 @@ function comp_new(src,thresh,ratio,att,rel)
    local makeup=max(1,0.67/((0.67-thresh)*ratio+thresh))
    for i=first,last do
     -- avoid divide-by-zero
-    local x=abs(b[i])+0.0001
+    local x=abs(b[i])+0x0.0001
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
@@ -801,6 +801,15 @@ save_keys=parse[[
 all_pats=split('b0,b1,drum')
 all_synths=split('b0,b1,bd,sd,hh,cy,pc')
 drum_synths=split('bd,sd,hh,cy,pc')
+syn_groups=parse[[{
+ bd="drum",
+ sd="drum",
+ hh="drum",
+ cy="drum",
+ pc="drum",
+ b0="b0",
+ b1="b1",
+}]]
 
 copy_bufs={}
 
@@ -895,7 +904,7 @@ function state_new(savedata)
  --
  -- these bar seqs are fragments
  -- applied onto default_seq
- 
+
  s.seq=seq_new()
  s.pat_seq=seq_new()
  s.song.default_seq=seq_new()
@@ -942,13 +951,10 @@ function state_new(savedata)
    self:_apply_pending(true)
    self.seq=copy_table(self.pat_seq)
   end
-  self:_sync_pat('b0','b0')
-  self:_sync_pat('b1','b1')
-  self:_sync_pat('drum','bd')
-  self:_sync_pat('drum','sd')
-  self:_sync_pat('drum','hh')
-  self:_sync_pat('drum','cy')
-  self:_sync_pat('drum','pc')
+
+  for syn,group in pairs(syn_groups) do
+   self:_sync_pat(group,syn)
+  end
 
   self:_init_tick()
  end
@@ -1057,8 +1063,8 @@ function state_new(savedata)
  s._init_tick=function(self)
   local t=self.transport
   local m=self.seq.mixer
-  local nl=sample_rate*(15/(90+64*m.tempo))
-  local shuf_diff=nl*m.shuf*0.33
+  local nl=sample_rate*(15/(56+128*m.tempo))
+  local shuf_diff=nl*m.shuf*0.5
   if (t.tick&1>0) shuf_diff=-shuf_diff
   t.note_len=flr(0.5+nl+shuf_diff)
   t.base_note_len=nl
@@ -1441,7 +1447,7 @@ function step_btn_new(x,y,syn,step,sprites)
 end
 
 function dial_new(x,y,s0,bins,get,set)
- bins-=0.0001
+ bins-=0x0.0001
  return {
   x=x,y=y,
   get_sprite=function(self,state)
