@@ -440,10 +440,10 @@ function synth_new()
    self.todpr=0.995
    self._mr=true
   end
-  
+
   self._nt=0
  end
- 
+
  obj.update=function(self,b,first,last)
   local odp,op=self.odp,self.op
   local todp,todpr=self.todp,self.todpr
@@ -498,7 +498,7 @@ function synth_new()
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
-  
+
     op+=dodp
     if (op>128) op-=256
    end
@@ -511,33 +511,33 @@ function synth_new()
   self._me,self._ae,self._mr=me,ae,mr
   self._gate=gate
  end
- 
+
  return obj
 end
 
 function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  local obj=parse[[{
   op=0,
-  dp=0.1,
+  dp=6553.6,
   ae=0.0,
   aemax=0.6,
   aed=0.995,
   ted=0.05,
   detune=1.0
  }]]
- 
+
  obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
   if (s!=d_off) then
    self.detune=2^(1.5*par.tun-0.75)
-   self.op,self.dp=0,_dp0*self.detune
+   self.op,self.dp=0,(_dp0<<16)*self.detune
    self.ae=par.lev*par.lev*boost*trn(s==d_ac,1.5,0.6)
    self.aemax=0.5*self.ae
    self.ted=0.5*((te_base-te_scale*par.dec)^4)
    self.aed=1-ae_ratio*self.ted
   end
  end
- 
+
  obj.subupdate=function(self,b,first,last)
   local op,dp,dp1,ae,aed,ted=self.op,self.dp,_dp1*self.detune,self.ae,self.aed,self.ted
   local aemax,boost=self.aemax
@@ -545,8 +545,7 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   if (op>=1) op-=1
-   b[i]+=min(ae,aemax)*sin(op)
+   b[i]+=min(ae,aemax)*sin((op>>16)+0.5)
   end
   self.op,self.dp,self.ae=op,dp,ae
  end
