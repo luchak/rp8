@@ -239,14 +239,10 @@ end
 
 function make_reader(s)
  local p,n=0,#s
- return function(undo)
-  if undo then
-   p-=1
-  else
-   p+=1
-   if (p>n) return ''
-   return sub(s,p,p)
-  end
+ return function(inc)
+  p+=inc or 1
+  if (p>n) return ''
+  return sub(s,p,p)
  end
 end
 
@@ -286,7 +282,7 @@ function _parse(input)
    local d=is_digit(c)
    if (d) s=s..c
   until not d
-  input{}
+  input(-1)
   return tonum(s)
  elseif c=='{' then
   local t={}
@@ -306,10 +302,10 @@ function _parse(input)
    t[k]=_parse(input)
   until c==''
  elseif c=='t' then
-  for i=1,3 do input() end
+  input(3)
   return true
  elseif c=='f' then
-  for i=1,4 do input() end
+  input(4)
   return false
  else
   die('cannot parse, c="'..c..'"')
