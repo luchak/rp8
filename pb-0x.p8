@@ -69,7 +69,7 @@ function _init()
   delay,
   1.0
  )
- comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.005')
+ comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.008')
  seq_helper=seq_helper_new(
   state,comp,function()
    local tr,song,sq=
