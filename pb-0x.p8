@@ -1096,6 +1096,52 @@ function state_new(savedata)
   return 'pb0x'..stringify(pick(self,save_keys))
  end
 
+ s.cut_seq=function(self)
+  self:copy_seq()
+  local song=self.song
+  local bs=song.bar_seqs
+  local ls,ll,nbs=song.loop_start,song.loop_len,{}
+  for i,b in pairs(bs) do
+   if i>=ls then
+    if i>=ls+ll then
+     nbs[i-ll]=b
+    end
+   else
+    nbs[i]=b
+   end
+  end
+ end
+
+ s.copy_seq=function(self)
+  local c,song={},self.song
+  if song.song_mode then
+   for i=1,song.loop_len do
+    local bar=i+song.loop_start-1
+    c[i]={
+     merge_table(song.default_seq,self:_get_song_seq(bar,1),true)
+    }
+    for j=2,16 do
+     local tick_seq=(song.bar_seqs[bar] or {})[j]
+     if (tick_seq) c[i][j]=copy_table(tick_seq)
+    end
+   end
+  else
+   c[1]={
+    copy_table(self.seq)
+   }
+  end
+  copy_buf_seq=c
+ end
+
+ s.paste_seq=function(self,auto_only)
+  if song.song_mode then
+  else
+  end
+ end
+
+ s.insert_seq=function(self)
+ end
+
  s._init_bar(s)
  return s
 end
