@@ -1116,6 +1116,7 @@ function state_new(savedata)
 
  s.paste_seq=function(self)
   if (not copy_buf_seq) return
+  if (self.transport.playing) self:toggle_playing()
   local song,n=self.song,#copy_buf_seq
   if song.song_mode then
    for i=0,song.loop_len-1 do
@@ -1129,6 +1130,8 @@ function state_new(savedata)
  end
 
  s.insert_seq=function(self)
+  if (not copy_buf_seq) return
+  if (self.transport.playing) self:toggle_playing()
   local song=self.song
   local bs,ls,ll,nbs=
    song.bar_seqs,
