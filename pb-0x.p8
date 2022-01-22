@@ -1115,6 +1115,7 @@ function state_new(savedata)
  end
 
  s.paste_seq=function(self)
+  if (not copy_buf_seq) return
   local song,n=self.song,#copy_buf_seq
   if song.song_mode then
    for i=0,song.loop_len-1 do
@@ -1128,6 +1129,21 @@ function state_new(savedata)
  end
 
  s.insert_seq=function(self)
+  local song=self.song
+  local bs,ls,ll,nbs=
+   song.bar_seqs,
+   song.loop_start,
+   song.loop_len,
+   {}
+  for i,b in pairs(bs) do
+   if i>=ls then
+    nbs[i+ll]=b
+   else
+    nbs[i]=b
+   end
+  end
+  song.bar_seqs=nbs
+  self:paste_seq()
  end
 
  s._init_bar(s)
@@ -1741,6 +1757,12 @@ function header_ui_init(ui,yp)
    state:paste_seq()
   end
  ))
+ song_only(momentary_new(
+  8,yp+16,243,
+  function()
+   state:insert_seq()
+  end
+ ),201)
 
  for s in all(parse[[{
   1="16,8,tempo",
