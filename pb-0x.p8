@@ -192,7 +192,7 @@ function diff_tables(base,diff)
   if type(v)=='table' and type(dk)=='table' then
    diff_tables(v,dk)
    if (is_empty(v)) base[k]=nil
-  else
+  elseif dk then
    base[k]=nil
   end
  end
@@ -972,23 +972,23 @@ function state_new(savedata)
 
  s._apply_pending=function(self,apply_bar,keep)
   local song_mode,t=self.song.song_mode,self.transport
-  local target=self.pat_seq
+  local target,pending=self.pat_seq,self.pending
   if (song_mode) target=self:_get_song_seq(t.bar,t.tick,true)
   assert(target, 'apply target not found')
   if apply_bar then
-   merge_tables(self.pending.bar, self.pending.tick)
-   merge_tables(target, self.pending.bar)
+   merge_tables(pending.bar, pending.tick)
+   merge_tables(target, pending.bar)
    if song_mode then
     for i=2,16 do
-     diff_tables(self:_get_song_seq(t.bar,i),self.pending.bar)
+     diff_tables(self:_get_song_seq(t.bar,i),pending.bar)
     end
    end
    if (not keep) self:_reset_pending()
-   self.pending.tick={}
+   pending.tick={}
   else
-   merge_tables(target, self.pending.tick)
+   merge_tables(target, pending.tick)
    -- need to clear anything automated that's in bar but not in tick
-   if (not keep) self.pending.tick={}
+   if (not keep) pending.tick={}
   end
  end
 
@@ -1048,9 +1048,9 @@ function state_new(savedata)
  end
 
  s._apply_diff=function(self,cat,diff)
-  local t,song=self.transport,self.song
+  local t,song,pending=self.transport,self.song,self.pending
   if (cat=='tick') merge_tables(self.seq,diff)
-  merge_tables(self.pending[cat],diff)
+  merge_tables(pending[cat],diff)
   if (not t.playing) and (t.recording or not song.song_mode) then
    self:_apply_pending(true,t.recording)
    -- pick up new changes
