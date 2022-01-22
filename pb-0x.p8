@@ -1,14 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 34
 __lua__
--- pb-0x
+-- rp-8
 -- by luchak
 
 semitone=2^(1/12)
 
-function log(a,b,c,d,e,f)
+function log(a,b,c,d)
  local s=''
- for ss in all({a,b,c,d,e,f}) do
+ for ss in all({a,b,c,d}) do
   s..=tostr(ss)..' '
  end
  printh(s,'log')
@@ -20,7 +20,7 @@ end
 
 function paste_state()
  local pd=stat(4)
- if (pd!='') then
+ if pd!='' then
   state=state_load(pd)
   seq_helper.state=state
  end
@@ -31,11 +31,11 @@ audio_rec=false
 function start_rec()
  audio_rec=true
  menuitem(rec_menuitem, 'stop recording', stop_rec)
- extcmd('audio_rec')
+ extcmd'audio_rec'
 end
 
 function stop_rec()
- if (audio_rec) extcmd('audio_end')
+ if (audio_rec) extcmd'audio_end'
  menuitem(rec_menuitem, 'start recording', start_rec)
 end
 
@@ -43,25 +43,22 @@ function _init()
  cls()
  --extcmd('set_title', 'pb-0x')
 
- ui=ui_new()
- state=state_new()
- 
+ ui,state=ui_new(),state_new()
+
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',32)
  pbl_ui_init(ui,'b1',64)
  pirc_ui_init(ui,'drum',96)
- map(unpack_split('0,8,0,96,16,4'))
- map(unpack_split('32,0,0,0,16,4'))
- 
+
  pbl0,pbl1=synth_new(),synth_new()
  kick,snare,hh,cy,perc=
-  sweep_new(unpack_split('0.092,0.0126,0.12,0.7,0.7,0.4')),
+  sweep_new(unpack_split'0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
-  hh_cy_new(unpack_split('1,0.8,0.75,0.35,-1,2')),
-  hh_cy_new(unpack_split('1.3,0.5,0.5,0.18,0.3,0.8')),
-  sweep_new(unpack_split('0.12,0.06,0.2,1,0.85,0.6'))
+  hh_cy_new(unpack_split'1,0.8,0.75,0.35,-1,2'),
+  hh_cy_new(unpack_split'1.3,0.5,0.5,0.18,0.3,0.8'),
+  sweep_new(unpack_split'0.12,0.06,0.2,1,0.85,0.6')
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
- delay=delay_new(nil,3000,0)
+ delay=delay_new(3000,0)
 
  mixer=mixer_new(
   {
@@ -72,7 +69,7 @@ function _init()
   delay,
   1.0
  )
- comp=comp_new(mixer,unpack_split('0.5,4,0.05,0.005'))
+ comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.005')
  seq_helper=seq_helper_new(
   state,comp,function()
    local tr,song,sq=
@@ -110,7 +107,7 @@ function _init()
    state:next_tick()
   end
  )
- 
+
  poke(0x5f36,(@0x5f36)|0x20)
  menuitem(1, 'save to clip', copy_state)
  menuitem(2, 'load from clip', paste_state)
@@ -121,7 +118,7 @@ function _init()
  menuitem(rec_menuitem, 'start recording', start_rec)
  menuitem(5, 'toggle output lpf', function() poke(0x5f36,(@0x5f36)^^0x20) end)
 
- log('init complete')
+ log'init complete'
 end
 
 -- give audio time to settle
@@ -191,7 +188,7 @@ function merge_tables(base,new,do_copy)
 end
 
 function is_empty(t)
- for _,_ in pairs(t) do
+ for _ in pairs(t) do
   return false
  end
  return true
@@ -218,11 +215,11 @@ function stringify(v)
  elseif t=='table' then
   local s='{'
   for k,v in pairs(v) do
-   s=s..k..'='..stringify(v)..','
+   s..=k..'='..stringify(v)..','
   end
   return s..'}'
  else
-  die('unsupported type in stringify')
+  die'unsupported type in stringify'
  end
 end
 
@@ -262,14 +259,14 @@ function _parse(input)
   repeat
    c=input()
    if (c=='"') return s
-   s=s..c
+   s..=c
   until false
  elseif c=='-' or is_digit(c) then
   local s=c
   repeat
    c=input()
    local d=is_digit(c)
-   if (d) s=s..c
+   if (d) s..=c
   until not d
   input(-1)
   return tonum(s)
@@ -285,7 +282,7 @@ function _parse(input)
    repeat
     c=input()
     if (c=='=') break
-    k=k..c
+    k..=c
    until false
    k=tonum(k) or k
    t[k]=_parse(input)
@@ -317,10 +314,8 @@ end
 -- 96 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
-_schunk=96
-_tgtchunks=1
-_bufpadding=4*_schunk
-_chunkbuf=newbuf(_schunk)
+_schunk,_tgtchunks=96,1
+_bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512
 
 function audio_set_root(obj)
@@ -346,13 +341,12 @@ end
 
 function audio_update()
  local bufsize,inbuf,newchunks=stat(109),stat(108),0
- local n=_schunk
 
  while inbuf<bufsize do
-  log('behind')
+  log'behind'
   audio_dochunk()
   newchunks+=1
-  inbuf+=n
+  inbuf+=_schunk
  end
 
  -- always generate at least 1
@@ -360,18 +354,13 @@ function audio_update()
  -- and time
  if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.8 then
   audio_dochunk()
-  inbuf+=n
+  inbuf+=_schunk
   newchunks+=1
- end 
+ end
 end
 -->8
 -- audio gen
 
-fc_min=100
-fc_oct=4.25
-fr_min=0.1
-fr_rng=4.2-fr_min
-env_oct=3.0
 --fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
 function synth_new()
@@ -410,27 +399,24 @@ function synth_new()
  }]]
 
  obj.note=function(self,pat,par,step,note_len)
-  assert(step>=1,step)
-  assert(step<=16,step)
   local patstep=pat.steps[step]
 
-  self.fc=(fc_min/sample_rate)*(2^(fc_oct*par.cut))/self.os
-  self.fr=par.res*fr_rng+fr_min
+  self.fc=(100/sample_rate)*(2^(4.25*par.cut))/self.os
+  self.fr=par.res*4.1+0.1
   self.env=par.env*par.env+0.1
   self.acc=par.acc*1.9+0.1
   self.saw=par.saw
   local pd=par.dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
   self._med=0.999-0.01*pd*pd*pd*pd
-  self._nt=0
-  self._nl=note_len
+  self._nt,self._nl=0,note_len
   self._lsl=self._sl
   self._gate=false
   self.detune=semitone^(flr(24*(par.tun-0.5)+0.5))
   self._ac=patstep==n_ac or patstep==n_ac_sl
   self._sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off) return
- 
+
   self._gate=true
   local f=55*(semitone^(pat.notes[step]+3))
   --ordered for numeric safety
@@ -453,7 +439,7 @@ function synth_new()
   local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
   local fr,fcb,os=self.fr,self.fc,self.os
   local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
-  local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
+  local env,saw,lev,acc=self.env,self.saw,self.lev,self.acc
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
   for i=first,last do
    local fc=min(0.37/os,fcb+((me*env)>>4))
@@ -477,11 +463,11 @@ function synth_new()
    local dodp=odp*detune
    self._nt+=1
    for j=1,os do
-    local osc=(op>>7)
+    local osc=op>>7
     if saw then
-     osc=1-((osc>>1)+0.5)
+     osc=0.5-(osc>>1)
      osc*=osc
-     osc=(osc<<1)-(2/3)
+     osc=(osc<<1)-0.66667
     else
      local sq=(osc&0x8000)>>>14
      osc=sq*(osc-0.5)-osc+1
@@ -528,7 +514,7 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
 
  obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
-  if (s!=d_off) then
+  if s!=d_off then
    self.detune=2^(1.5*par.tun-0.75)
    self.op,self.dp=0,(_dp0<<16)*self.detune
    self.ae=par.lev*par.lev*boost*trn(s==d_ac,1.5,0.6)
@@ -540,12 +526,12 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
 
  obj.subupdate=function(self,b,first,last)
   local op,dp,dp1,ae,aed,ted=self.op,self.dp,_dp1*self.detune,self.ae,self.aed,self.ted
-  local aemax,boost=self.aemax
+  local aemax=self.aemax
   for i=first,last do
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   b[i]+=min(ae,aemax)*sin((op>>16)+0.5)
+   b[i]+=min(ae,aemax)*sin(0.5+(op>>16))
   end
   self.op,self.dp,self.ae=op,dp,ae
  end
@@ -569,7 +555,7 @@ function snare_new()
  
  obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
-  if (s!=d_off) then
+  if s!=d_off then
    self.detune=2^(2*par.tun-1)
    self.op,self.dp=0,self.dp0*self.detune
    self.aes,self.aen=0.7,0.4
@@ -622,7 +608,7 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
  
  obj.note=function(self,pat,par,step,note_len)
   local s=pat.steps[step]
-  if (s!=d_off) then
+  if s!=d_off then
    self.op,self.dp=0,self.dp0
    self.ae=par.lev*par.lev*trn(s==d_ac,2.0,0.8)
 
@@ -660,7 +646,7 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
   self.ae,self.f1,self.f2=ae,f1,f2
   self.op1,self.op2,self.op3,self.op4=op1,op2,op3,op4
  end
- 
+
  return obj
 end
 -->8
@@ -668,18 +654,16 @@ end
 
 buf_max=0x7fff
 
-function delay_new(src,l,fb)
+function delay_new(l,fb)
  local obj={
   dl=newbuf(buf_max),
   p=1,
-  src=src,
   l=l,
   fb=fb,
   f1=0
  }
 
  obj.update=function(self,b,first,last)
-  if (self.src) self.src:update(b,first,last)
   local dl,l,fb,p=self.dl,self.l,self.fb,self.p
   local f1=self.f1
   for i=first,last do
@@ -772,8 +756,7 @@ function comp_new(src,thresh,ratio,att,rel)
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
-    local g=makeup
-    local te=thresh/env
+    local g,te=makeup,thresh/env
     if (env>thresh) g*=te+ratio*(1-te)
     b[i]*=g
    end
@@ -791,15 +774,15 @@ end
 -- rides?) notes are obviously
 -- note level
 
-n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split('0,1,2,3,4,0,1,2')
+n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
 save_keys=parse[[
 {1="pats",2="pat_seq",3="song",}
 ]]
 
-all_pats=split('b0,b1,drum')
-all_synths=split('b0,b1,bd,sd,hh,cy,pc')
-drum_synths=split('bd,sd,hh,cy,pc')
+all_pats=split'b0,b1,drum'
+all_synths=split'b0,b1,bd,sd,hh,cy,pc'
+drum_synths=split'bd,sd,hh,cy,pc'
 syn_groups=parse[[{
  bd="drum",
  sd="drum",
@@ -1065,10 +1048,9 @@ function state_new(savedata)
  s._init_tick=function(self)
   local t,m=self.transport,self.seq.mixer
   local nl=sample_rate*(15/(56+128*m.tempo))
-  local shuf_diff=nl*m.shuf*0.5
-  if (t.tick&1>0) shuf_diff=-shuf_diff
-  t.note_len=flr(0.5+nl+shuf_diff)
-  t.base_note_len=nl
+  local shuf_diff=nl*m.shuf*(0.5-(t.tick&1))
+  t.note_len,t.base_note_len=
+   flr(0.5+nl+shuf_diff),nl
  end
 
  s._apply_diff=function(self,cat,diff)
@@ -1093,14 +1075,17 @@ function state_new(savedata)
  end
 
  s.save=function(self)
-  return 'pb0x'..stringify(pick(self,save_keys))
+  return 'rp80'..stringify(pick(self,save_keys))
  end
 
  s.cut_seq=function(self)
   self:copy_seq()
   local song=self.song
-  local bs=song.bar_seqs
-  local ls,ll,nbs=song.loop_start,song.loop_len,{}
+  local bs,ls,ll,nbs=
+   song.bar_seqs,
+   song.loop_start,
+   song.loop_len,
+   {}
   for i,b in pairs(bs) do
    if i>=ls then
     if i>=ls+ll then
@@ -1147,7 +1132,7 @@ function state_new(savedata)
 end
 
 function state_load(str)
- if (sub(str,1,4)!='pb0x') return nil
+ if (sub(str,1,4)!='rp80') return nil
  return state_new(parse(sub(str,5)))
 end
 
@@ -1233,8 +1218,7 @@ function pbl_pat_new()
  }
 
  for i=1,16 do
-  pat.notes[i]=19
-  pat.steps[i]=n_off
+  pat.notes[i],pat.steps[i]=19,n_off
  end
 
  return pat
@@ -1250,17 +1234,12 @@ function drum_pat_new()
  local pat={
   steps={},
  }
- 
+
  for i=1,16 do
   pat.steps[i]=n_off
  end
- 
- return pat
-end
 
-function split_path(path)
- if (type(path)=='string') path=split(path,'.')
- return path
+ return pat
 end
 
 function state_make_get_set_param(cat,syn,key)
@@ -1304,7 +1283,6 @@ function seq_helper_new(state,root,note_fn)
     self.t+=n
     p+=n
    end
-   -- todo: enable this?
    if (not self.state.transport.playing) self.t=0
   end
  }
@@ -1323,8 +1301,7 @@ ui_reps=parse[[{
 --31=true
 
 function ui_new()
- local obj={
-  focus=nil,
+ local obj=parse[[{
   widgets={},
   sprites={},
   dirty={},
@@ -1332,12 +1309,13 @@ function ui_new()
   by_tile={},
   has_tiles_x={},
   has_tiles_y={}
- }
- 
+ }]]
+ -- obj.focus
+
  local function get_tile(tx,ty)
   return tx+(ty<<5)
  end
- 
+
  obj.add_widget=function(self,w)
   local widgets=self.widgets
   add(widgets,w)
@@ -1350,7 +1328,7 @@ function ui_new()
   self.has_tiles_x[w.tx]=true
   self.has_tiles_y[w.ty]=true
  end
- 
+
  obj.draw=function(self,state)
   for id,w in pairs(self.widgets) do
    local ns=w:get_sprite(state)
@@ -1373,15 +1351,15 @@ function ui_new()
      spr(self.sprites[id],wx,wy,1,1)
     end
    else
-    local t,tw,bg,fg=unpack_split(sp)
-    t=tostr(t)
+    local ts,tw,bg,fg=unpack_split(sp)
+    ts=tostr(ts)
     rectfill(wx,wy,wx+tw,wy+7,bg)
-    print(t,wx+tw-(#t*4),wy+1,fg)
+    print(ts,wx+tw-(#ts*4),wy+1,fg)
    end
   end
   self.dirty={}
   local f=self.focus
-  if (f==nil) return
+  -- skip nil check
   palt(0,true)
   if f.w then
    sspr(8,88,f.w,8,f.x,f.y)
@@ -1393,7 +1371,7 @@ function ui_new()
  obj.update=function(self,state)
   local holds,btns=self.holds,{}
   for b in all(ui_btns) do
-   if (btn(b)) then
+   if btn(b) then
     local h=holds[b]+1
     holds[b]=h
     btns[b]=ui_reps[h] or h>=31
@@ -1416,8 +1394,8 @@ function ui_new()
   end
  end
 
- local search_diffs=split('0,-1,1,-2,2')
- obj.move_focus=function(self,is_h,dir) 
+ local search_diffs=split'0,-1,1,-2,2'
+ obj.move_focus=function(self,is_h,dir)
   local f,lim=self.focus,trn(dir>0,31,0)
 
   local has_tiles,ta,tb,sha,shb
@@ -1449,8 +1427,7 @@ function pbl_note_btn_new(x,y,syn,step)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   local n=state:get_pat(syn).notes
-   return 64+n[step]
+   return 64+state:get_pat(syn).notes[step]
   end,
   input=function(self,state,b)
    local n=state:get_pat(syn).notes
@@ -1500,7 +1477,7 @@ function dial_new(x,y,s0,bins,get,set)
    return s0+get(state)*bins
   end,
   input=function(self,state,b)
-   local x=mid(0,1,get(state)+trn(b>0,1/64,-1/64))
+   local x=mid(0,1,get(state)+trn(b>0,0.015625,-0.015625))
    set(state,x)
   end
  }
@@ -1602,10 +1579,10 @@ function pbl_ui_init(ui,key,yp)
    pbl_note_btn_new(xp,yp+24,key,i)
   )
   ui:add_widget(
-   step_btn_new(xp,yp+16,key,i,split('16,17,33,18,34,32'))
+   step_btn_new(xp,yp+16,key,i,split'16,17,33,18,34,32')
   )
  end
- 
+
  ui:add_widget(
   momentary_new(16,yp+8,26,function(state,b)
    transpose_pat(state[key],b)
@@ -1622,7 +1599,7 @@ function pbl_ui_init(ui,key,yp)
    if (v) merge_tables(state[key],v)
   end)
  )
- 
+
  for k,x in pairs(parse[[{
   tun=40,
   cut=56,
@@ -1633,16 +1610,16 @@ function pbl_ui_init(ui,key,yp)
  }]]) do
   ui:add_widget(
    dial_new(
-    x,yp+0,43,21,
+    x,yp,43,21,
     state_make_get_set_param(key,k)
    )
   )
  end
 
  ui:add_widget(
-  toggle_new(16,yp+0,2,3,state_make_get_set_param(key,'saw'))
+  toggle_new(16,yp,2,3,state_make_get_set_param(key,'saw'))
  )
- 
+
  map(0,4,0,yp,16,2)
 end
 
@@ -1651,7 +1628,7 @@ function pirc_ui_init(ui,key,yp)
  for i=1,16 do
   local xp=(i-1)*8
   ui:add_widget(
-   step_btn_new(xp,yp+24,key,i,split('19,21,20,35'))
+   step_btn_new(xp,yp+24,key,i,split'19,21,20,35')
   )
  end
  for k,d in pairs(parse[[{
@@ -1704,7 +1681,7 @@ function header_ui_init(ui,yp)
   dial_new(x,yp+y,116,12,state_make_get_set_param('mixer',p))
  )
  end
- 
+
  local function song_only(w,s_disable)
   ui:add_widget(
    wrap_disable(w,s_disable,state_is_song_mode)
@@ -1743,32 +1720,37 @@ function header_ui_init(ui,yp)
   5
  )
 
- hdial(16,8,'tempo')
- hdial(32,8,'lev')
- hdial(32,16,'comp_thresh')
- hdial(16,16,'shuf')
- hdial(16,24,'dl_t')
- hdial(32,24,'dl_fb')
+ for s in all(parse[[{
+  1="16,8,tempo",
+  2="32,8,lev",
+  3="32,16,comp_thresh",
+  4="16,16,shuf",
+  5="16,24,dl_t",
+  6="32,24,dl_fb",
+ }]]) do
+  hdial(unpack_split(s))
+ end
 
- for pt,yp in pairs({b0=yp+8,b1=yp+16,drum=yp+24}) do
+ for pt,ypc in pairs(parse[[{b0=8,b1=16,drum=24}]]) do
+  ypc+=yp
   ui:add_widget(
-   toggle_new(64,yp,22,38,state_make_get_set_param('bar',pt,'on'))
+   toggle_new(64,ypc,22,38,state_make_get_set_param('bar',pt,'on'))
   )
-  hdial(104,yp,pt..'_lev')
-  hdial(112,yp,pt..'_od')
-  hdial(120,yp,pt..'_fx')
+  hdial(104,ypc,pt..'_lev')
+  hdial(112,ypc,pt..'_od')
+  hdial(120,ypc,pt..'_fx')
 
   ui:add_widget(
-   spin_btn_new(72,yp,split('208,209,210,211'),state_make_get_set('transport',pt..'_bank'))
+   spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set('transport',pt..'_bank'))
   )
   for i=1,6 do
    ui:add_widget(
-    pat_btn_new(75+i*4,yp,pt,6,i,127+i,133+i,163+i)
+    pat_btn_new(75+i*4,ypc,pt,6,i,127+i,133+i,163+i)
    )
   end
  end
  ui:add_widget(
-  transport_number_new(32,yp,16,'transport','bar')
+  transport_number_new(32,yp,unpack_split'16,transport,bar')
  )
  song_only(
   momentary_new(48,yp,192,
@@ -1783,7 +1765,7 @@ function header_ui_init(ui,yp)
   195
  )
  ui:add_widget(
-  transport_number_new(64,yp,16,'song','loop_start')
+  transport_number_new(64,yp,unpack_split'16,song,loop_start')
  )
  song_only(
   momentary_new(80,yp,192,
@@ -1797,7 +1779,7 @@ function header_ui_init(ui,yp)
   197
  )
  ui:add_widget(
-  transport_number_new(88,yp,8,'song','loop_len')
+  transport_number_new(88,yp,unpack_split'8,song,loop_len')
  )
  song_only(
   momentary_new(96,yp,192,
@@ -1808,7 +1790,9 @@ function header_ui_init(ui,yp)
   ),
   197
  )
- 
+
+ -- last 0 should be yp
+ map(unpack_split'32,0,0,0,16,4')
 end
 
 __gfx__
