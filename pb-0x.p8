@@ -268,6 +268,7 @@ end
 -- double quotes in serialized
 -- data, single quotes will hang
 function _parse(input)
+ local c
  repeat
   c=input()
  until not is_whitespace(c)
