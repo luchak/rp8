@@ -4,8 +4,6 @@ __lua__
 -- pb-0x
 -- by luchak
 
-_maxcpu=0
-_smoothcpu=-1
 semitone=2^(1/12)
 
 function log(a,b,c,d,e,f)
@@ -57,11 +55,11 @@ function _init()
  
  pbl0,pbl1=synth_new(),synth_new()
  kick,snare,hh,cy,perc=
-  sweep_new(0.092,0.0126,0.12,0.7,0.7,0.4),
+  sweep_new(unpack_split('0.092,0.0126,0.12,0.7,0.7,0.4')),
   snare_new(),
-  hh_cy_new(1,0.8,0.75,0.35,-1,2),
-  hh_cy_new(1.3,0.5,0.5,0.18,0.3,0.8),
-  sweep_new(0.12,0.06,0.2,1,0.85,0.6)
+  hh_cy_new(unpack_split('1,0.8,0.75,0.35,-1,2')),
+  hh_cy_new(unpack_split('1.3,0.5,0.5,0.18,0.3,0.8')),
+  sweep_new(unpack_split('0.12,0.06,0.2,1,0.85,0.6'))
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
  delay=delay_new(nil,3000,0)
 
@@ -74,7 +72,7 @@ function _init()
   delay,
   1.0
  )
- comp=comp_new(mixer,0.5,4,0.05,0.005)
+ comp=comp_new(mixer,unpack_split('0.5,4,0.05,0.005'))
  seq_helper=seq_helper_new(
   state,comp,function()
    local tr,song,sq=
@@ -108,7 +106,7 @@ function _init()
    ms.b1.fx=sm.b1_fx^2*0.8
    ms.drum.fx=sm.drum_fx^2*0.8
    comp.thresh=0.1+0.9*sm.comp_thresh
-   
+
    state:next_tick()
   end
  )
@@ -141,19 +139,10 @@ end
 
 function _draw()
  ui:draw(state)
- 
- local cpu=stat(1)
- _maxcpu=max(cpu,_maxcpu)
- if (_smoothcpu<0) _smoothcpu=cpu
- _smoothcpu+=0.02*(cpu-_smoothcpu)
+
  --rectfill(0,0,30,6,0)
- --print(_smoothcpu,0,0,7)
  --print(stat(0),0,0,7)
  palt(0,false)
-end
-
-function getbin(v,l,h,n)
- return flr((v-l)/((h+0.0001)-l)*n)
 end
 
 -->8
@@ -251,7 +240,7 @@ function parse(s)
 end
 
 function is_digit(c)
- return (c>='0' and c<='9') or c=='.' 
+ return (c>='0' and c<='9') or c=='.'
 end
 
 function is_whitespace(c)
@@ -274,7 +263,7 @@ function _parse(input)
    c=input()
    if (c=='"') return s
    s=s..c
-  until c==''
+  until false
  elseif c=='-' or is_digit(c) then
   local s=c
   repeat
@@ -297,10 +286,10 @@ function _parse(input)
     c=input()
     if (c=='=') break
     k=k..c
-   until c==''
+   until false
    k=tonum(k) or k
    t[k]=_parse(input)
-  until c==''
+  until false
  elseif c=='t' then
   input(3)
   return true
@@ -359,7 +348,6 @@ function audio_update()
  local bufsize,inbuf,newchunks=stat(109),stat(108),0
  local n=_schunk
 
- --assert(#empty+#full==_nchunk)
  while inbuf<bufsize do
   log('behind')
   audio_dochunk()
@@ -460,15 +448,13 @@ function synth_new()
  end
 
  obj.update=function(self,b,first,last)
-  local odp,op=self.odp,self.op
+  local odp,op,detune=self.odp,self.op,self.detune
   local todp,todpr=self.todp,self.todpr
   local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
-  local fr,fcb=self.fr,self.fc
-  local os=self.os
+  local fr,fcb,os=self.fr,self.fc,self.os
   local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
   local env,saw,lev,acc,ovr=self.env,self.saw,self.lev,self.acc,self.ovr
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
-  local detune=self.detune
   for i=first,last do
    local fc=min(0.37/os,fcb+((me*env)>>4))
    -- very very janky dewarping
@@ -521,10 +507,9 @@ function synth_new()
    if (ac) out+=acc*me*out
    b[i]=out
   end
-  self.op,self.odp=op,odp
+  self.op,self.odp,self._gate=op,odp,gate
   self._f1,self._f2,self._f3,self._f4=f1,f2,f3,f4
   self._me,self._ae,self._mr=me,ae,mr
-  self._gate=gate
  end
 
  return obj
@@ -692,10 +677,10 @@ function delay_new(src,l,fb)
   fb=fb,
   f1=0
  }
- 
+
  obj.update=function(self,b,first,last)
   if (self.src) self.src:update(b,first,last)
-  local dl,l,fb,p=self.dl,min(self.l,buf_max),self.fb,self.p
+  local dl,l,fb,p=self.dl,self.l,self.fb,self.p
   local f1=self.f1
   for i=first,last do
    local x,y=b[i],dl[p]
@@ -709,7 +694,7 @@ function delay_new(src,l,fb)
   end
   self.p,self.f1=p,f1
  end
- 
+
  return obj
 end
 
@@ -783,7 +768,7 @@ function comp_new(src,thresh,ratio,att,rel)
    local makeup=max(1,0.67/((0.67-thresh)*ratio+thresh))
    for i=first,last do
     -- avoid divide-by-zero
-    local x=abs(b[i])+0x0.0001
+    local x=abs(b[i])+0x0.0010
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
@@ -806,8 +791,7 @@ end
 -- rides?) notes are obviously
 -- note level
 
-n_off,n_on,n_ac,n_sl,n_ac_sl=0,1,2,3,4
-d_off,d_on,d_ac=0,1,2
+n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split('0,1,2,3,4,0,1,2')
 
 save_keys=parse[[
 {1="pats",2="pat_seq",3="song",}
@@ -825,8 +809,6 @@ syn_groups=parse[[{
  b0="b0",
  b1="b1",
 }]]
-
-copy_bufs={}
 
 -- patterns:
 --  saved
@@ -1081,8 +1063,7 @@ function state_new(savedata)
  end
 
  s._init_tick=function(self)
-  local t=self.transport
-  local m=self.seq.mixer
+  local t,m=self.transport,self.seq.mixer
   local nl=sample_rate*(15/(56+128*m.tempo))
   local shuf_diff=nl*m.shuf*0.5
   if (t.tick&1>0) shuf_diff=-shuf_diff
@@ -1237,15 +1218,14 @@ function split_path(path)
 end
 
 function state_make_get_set_param(cat,syn,key)
- assert(cat and syn)
  if (not key) cat,syn,key='tick',cat,syn
- return 
+ return
   function(state) return state.seq[syn][key] end,
   function(state,val) state:_apply_diff(cat, {[syn]={[key]=val}}) end
 end
 
 function state_make_get_set(a,b)
- return 
+ return
   state_make_get(a,b),
   function(s,v) s[a][b]=v end
 end
@@ -1389,7 +1369,8 @@ function ui_new()
    self.focus=new_focus
   end
  end
- 
+
+ local search_diffs=split('0,-1,1,-2,2')
  obj.move_focus=function(self,is_h,dir) 
   local f,lim=self.focus,trn(dir>0,31,0)
 
@@ -1402,8 +1383,7 @@ function ui_new()
    ta,tb,sha,shb=f.ty,f.tx,5,0
   end
 
-  local diffs={0,-1,1,-2,2}
-  for db in all(diffs) do
+  for db in all(search_diffs) do
    local sb=tb+db
    if has_tiles[sb] then
     for sa=ta+dir,lim,dir do
@@ -1412,10 +1392,10 @@ function ui_new()
     end
    end
   end
-  
+
   return f
  end
- 
+
  return obj
 end
 
@@ -1522,8 +1502,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
  return {
   x=x,y=y,w=5,
   get_sprite=function(self,state)
-   local bank=get_bank(state)
-   local pat=get_pat(state)
+   local bank,pat=get_bank(state),get_pat(state)
    local pending=state.pending.bar
    pending=pending and pending[syn] and pending[syn].pat
    local val=(bank-1)*bank_size+pib
@@ -1541,12 +1520,12 @@ end
 function transport_number_new(x,y,w,obj,key)
  local get=state_make_get(obj,key)
  return {
-	 x=x,y=y,w=w,noinput=true,
-	 get_sprite=function(self,state)
-	  if state.song.song_mode then
-	   return tostr(get(state))..','..w..',0,15'
-	  else
-	   return '--,'..w..',0,15'
+  x=x,y=y,w=w,noinput=true,
+  get_sprite=function(self,state)
+   if state.song.song_mode then
+    return tostr(get(state))..','..w..',0,15'
+   else
+    return '--,'..w..',0,15'
    end
   end,
   update=function() end
@@ -1588,12 +1567,12 @@ function pbl_ui_init(ui,key,yp)
  )
  ui:add_widget(
   momentary_new(0,yp+8,28,function(state,b)
-   copy_bufs['pbl']=merge_tables({},state[key])
+   copy_buf_pbl=merge_tables({},state[key])
   end)
  )
  ui:add_widget(
   momentary_new(8,yp+8,27,function(state,b)
-   local v=copy_bufs['pbl']
+   local v=copy_buf_pbl
    if (v) merge_tables(state[key],v)
   end)
  )
@@ -1649,25 +1628,25 @@ function pirc_ui_init(ui,key,yp)
    dial_new(d.x+8,yp,100,12,state_make_get_set_param(k,'dec'))
   )
 
- ui:add_widget(
-  momentary_new(0,yp+16,11,function(state,b)
-   local v={}
-   for syn in all(drum_synths) do
-    v[syn]=copy_table(state[syn])
-   end
-   copy_bufs['pirc']=v
-  end)
- )
- ui:add_widget(
-  momentary_new(8,yp+16,10,function(state,b)
-   local b=copy_bufs['pirc']
-   if b then
-    for k,v in pairs(b) do
-     merge_tables(state[k],v)
+  ui:add_widget(
+   momentary_new(0,yp+16,11,function(state,b)
+    local v={}
+    for syn in all(drum_synths) do
+     v[syn]=copy_table(state[syn])
     end
-   end
-  end)
- )
+    copy_buf_pirc=v
+   end)
+  )
+  ui:add_widget(
+   momentary_new(8,yp+16,10,function(state,b)
+    local b=copy_buf_pirc
+    if b then
+     for k,v in pairs(b) do
+      merge_tables(state[k],v)
+     end
+    end
+   end)
+  )
 
  end
  map(0,8,0,yp,16,4)
@@ -1717,6 +1696,7 @@ function header_ui_init(ui,yp)
   ),
   5
  )
+
  hdial(16,8,'tempo')
  hdial(32,8,'lev')
  hdial(32,16,'comp_thresh')
@@ -1733,7 +1713,7 @@ function header_ui_init(ui,yp)
   hdial(120,yp,pt..'_fx')
 
   ui:add_widget(
-   spin_btn_new(72,yp,{208,209,210,211},state_make_get_set('transport',pt..'_bank'))
+   spin_btn_new(72,yp,split('208,209,210,211'),state_make_get_set('transport',pt..'_bank'))
   )
   for i=1,6 do
    ui:add_widget(
