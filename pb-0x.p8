@@ -517,7 +517,7 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  end
 
  obj.subupdate=function(self,b,first,last)
-  local op,dp,dp1,ae,aed,ted=self.op,self.dp,_dp1*self.detune,self.ae,self.aed,self.ted
+  local op,dp,dp1,ae,aed,ted=self.op,self.dp,(_dp1<<16)*self.detune,self.ae,self.aed,self.ted
   local aemax=self.aemax
   for i=first,last do
    op+=dp
