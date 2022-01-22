@@ -145,14 +145,6 @@ end
 -->8
 -- utils
 
-function newbuf(n)
- local b={}
- for i=1,n do
-  b[i]=0
- end
- return b
-end
-
 function pick(t,keys)
  local r={}
  for k in all(keys) do
@@ -652,16 +644,18 @@ end
 -->8
 -- audio fx
 
-buf_max=0x7fff
-
 function delay_new(l,fb)
  local obj={
-  dl=newbuf(buf_max),
+  dl={},
   p=1,
   l=l,
   fb=fb,
   f1=0
  }
+
+ for i=1,0x7fff do
+  obj.dl[i]=0
+ end
 
  obj.update=function(self,b,first,last)
   local dl,l,fb,p=self.dl,self.l,self.fb,self.p
@@ -702,8 +696,8 @@ function mixer_new(srcs,fx,lev)
   srcs=srcs,
   fx=fx,
   lev=lev,
-  tmp=newbuf(buf_max),
-  fxbuf=newbuf(buf_max),
+  tmp={},
+  fxbuf={},
   update=function(self,b,first,last)
    local fxbuf,tmp,lev=self.fxbuf,self.tmp,self.lev
    for i=first,last do
