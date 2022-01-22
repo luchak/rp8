@@ -201,6 +201,25 @@ function merge_tables(base,new,do_copy)
  return base
 end
 
+function is_empty(t)
+ for _,_ in pairs(t) do
+  return false
+ end
+ return true
+end
+
+function diff_tables(base,diff)
+ for k,v in pairs(base) do
+  local dk=diff[k]
+  if type(v)=='table' and type(dk)=='table' then
+   diff_tables(v,dk)
+   if (is_empty(v)) base[k]=nil
+  else
+   base[k]=nil
+  end
+ end
+end
+
 function stringify(v)
  local t=type(v)
  if t=='number' or t=='boolean' then
@@ -1003,6 +1022,11 @@ function state_new(savedata)
   if apply_bar then
    merge_tables(self.pending.bar, self.pending.tick)
    merge_tables(target, self.pending.bar)
+   if song_mode then
+    for i=2,16 do
+     diff_tables(self:_get_song_seq(t.bar,i),self.pending.bar)
+    end
+   end
    if (not keep) self:_reset_pending()
    self.pending.tick={}
   else
