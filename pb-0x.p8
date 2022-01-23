@@ -4,8 +4,6 @@ __lua__
 -- rp-8
 -- by luchak
 
-semitone=2^(1/12)
-
 function log(a,b,c,d)
  local s=''
  for ss in all({a,b,c,d}) do
@@ -14,11 +12,21 @@ function log(a,b,c,d)
  printh(s,'log')
 end
 
+semitone=2^(1/12)
+
+-- give audio time to settle
+-- before starting synthesis
+pause_frames=6
+
 function copy_state()
+ pause_frames=2
+ audio_set_root(nil)
  printh(state:save(),'@clip')
 end
 
 function paste_state()
+ pause_frames=2
+ audio_set_root(nil)
  local pd=stat(4)
  if pd!='' then
   state=state_load(pd)
@@ -121,16 +129,13 @@ function _init()
  log'init complete'
 end
 
--- give audio time to settle
--- before starting synthesis
-init_wait_frames=6
 function _update60()
  audio_update()
- if init_wait_frames<=0 then
+ if pause_frames<=0 then
   ui:update(state)
   audio_set_root(seq_helper)
  else
-  init_wait_frames-=1
+  pause_frames-=1
  end
 end
 
@@ -316,7 +321,13 @@ end
 
 function audio_dochunk()
  local buf=_chunkbuf
- if (_root_obj) _root_obj:update(buf,1,_schunk)
+ if _root_obj then
+  _root_obj:update(buf,1,_schunk)
+ else
+  for i=1,_schunk do
+   buf[i]=0
+  end
+ end
  for i=1,_schunk do
   -- soft saturation to make
   -- clipping less unpleasant
