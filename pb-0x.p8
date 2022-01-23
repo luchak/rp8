@@ -58,13 +58,13 @@ function _init()
  pbl_ui_init(ui,'b1',64)
  pirc_ui_init(ui,'drum',96)
 
- pbl0,pbl1=synth_new(),synth_new()
+ pbl0,pbl1=synth_new('b0'),synth_new('b1')
  kick,snare,hh,cy,perc=
-  sweep_new(unpack_split'0.092,0.0126,0.12,0.7,0.7,0.4'),
-  snare_new(),
-  hh_cy_new(unpack_split'1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'1.3,0.5,0.5,0.18,0.3,0.8'),
-  sweep_new(unpack_split'0.12,0.06,0.2,1,0.85,0.6')
+  sweep_new(unpack_split'bd,0.092,0.0126,0.12,0.7,0.7,0.4'),
+  snare_new('sd'),
+  hh_cy_new(unpack_split'hh,1,0.8,0.75,0.35,-1,2'),
+  hh_cy_new(unpack_split'cy,1.3,0.5,0.5,0.18,0.3,0.8'),
+  sweep_new(unpack_split'pc,0.12,0.06,0.2,1,0.85,0.6')
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
  delay=delay_new(3000,0)
 
@@ -86,31 +86,30 @@ function _init()
     state.seq
    if (not tr.playing) return
    local now,nl=tr.tick,tr.note_len
-   if (sq.b0.on) pbl0:note(state.b0,sq.b0,now,nl)
-   if (sq.b1.on) pbl1:note(state.b1,sq.b1,now,nl)
-   if sq.drum.on then
-    kick:note(state.bd,sq.bd,now,nl)
-    snare:note(state.sd,sq.sd,now,nl)
-    hh:note(state.hh,sq.hh,now,nl)
-    cy:note(state.cy,sq.cy,now,nl)
-    perc:note(state.pc,sq.pc,now,nl)
+   if (sq.b0_on) pbl0:note(state.b0,sq,now,nl)
+   if (sq.b1_on) pbl1:note(state.b1,sq,now,nl)
+   if sq.drum_on then
+    kick:note(state.bd,sq,now,nl)
+    snare:note(state.sd,sq,now,nl)
+    hh:note(state.hh,sq,now,nl)
+    cy:note(state.cy,sq,now,nl)
+    perc:note(state.pc,sq,now,nl)
    end
-   local sm=sq.mixer
-   mixer.lev=sm.lev*3
-   delay.l=(0.9*sm.dl_t+0.1)*sample_rate
-   delay.fb=sqrt(sm.dl_fb)*0.95
+   mixer.lev=sq.mix_lev*3
+   delay.l=(0.9*sq.mix_dl_t+0.1)*sample_rate
+   delay.fb=sqrt(sq.mix_dl_fb)*0.95
 
    local ms=mixer.srcs
-   ms.b0.lev=sm.b0_lev
-   ms.b1.lev=sm.b1_lev
-   ms.drum.lev=sm.drum_lev*2
-   ms.b0.od=sm.b0_od
-   ms.b1.od=sm.b1_od
-   ms.drum.od=sm.drum_od
-   ms.b0.fx=sm.b0_fx^2*0.8
-   ms.b1.fx=sm.b1_fx^2*0.8
-   ms.drum.fx=sm.drum_fx^2*0.8
-   comp.thresh=0.1+0.9*sm.comp_thresh
+   ms.b0.lev=sq.b0_lev
+   ms.b1.lev=sq.b1_lev
+   ms.drum.lev=sq.drum_lev*2
+   ms.b0.od=sq.b0_od
+   ms.b1.od=sq.b1_od
+   ms.drum.od=sq.drum_od
+   ms.b0.fx=sq.b0_fx^2*0.8
+   ms.b1.fx=sq.b1_fx^2*0.8
+   ms.drum.fx=sq.drum_fx^2*0.8
+   comp.thresh=0.1+0.9*sq.mix_comp_thresh
 
    state:next_tick()
   end
@@ -154,6 +153,14 @@ function pick(t,keys)
  local r={}
  for k in all(keys) do
   r[k]=t[k]
+ end
+ return r
+end
+
+function pick_prefix(t,prefix,suffixes)
+ local r={}
+ for s in all(suffixes) do
+  r[s]=t[prefix..'_'..s]
  end
  return r
 end
@@ -367,7 +374,11 @@ end
 
 --fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
-function synth_new()
+syn_pars,drum_pars=
+ split'cut,res,env,acc,dec,tun,saw',
+ split'lev,tun,dec'
+
+function synth_new(name)
  -- simple saw wave synth
  -- filter:
  --  karlsen fast ladder iii
@@ -404,8 +415,10 @@ function synth_new()
   _lsl=false
  }]]
 
- obj.note=function(self,pat,par,step,note_len)
-  local patstep=pat.steps[step]
+ obj.note=function(self,pat,seq,step,note_len)
+  local patstep,par=
+   pat.steps[step],
+   pick_prefix(seq,name,syn_pars)
 
   self.fc=(100/sample_rate)*(2^(4*par.cut))/self.os
   self.fr=par.res*4.4+0.1
@@ -502,7 +515,7 @@ function synth_new()
  return obj
 end
 
-function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
+function sweep_new(name,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  local obj=parse[[{
   op=0,
   dp=6553.6,
@@ -513,8 +526,8 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   detune=1.0
  }]]
 
- obj.note=function(self,pat,par,step,note_len)
-  local s=pat.steps[step]
+ obj.note=function(self,pat,seq,step,note_len)
+  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
   if s!=d_off then
    self.detune=2^(1.5*par.tun-0.75)
    self.op,self.dp=0,(_dp0<<16)*self.detune
@@ -536,11 +549,11 @@ function sweep_new(_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   end
   self.op,self.dp,self.ae=op,dp,ae
  end
- 
+
  return obj
 end
 
-function snare_new()
+function snare_new(name)
  local obj=parse[[{
   dp0=0.08,
   dp1=0.042,
@@ -554,8 +567,8 @@ function snare_new()
   aemax=0.4
  }]]
  
- obj.note=function(self,pat,par,step,note_len)
-  local s=pat.steps[step]
+ obj.note=function(self,pat,seq,step,note_len)
+  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
   if s!=d_off then
    self.detune=2^(2*par.tun-1)
    self.op,self.dp=0,self.dp0*self.detune
@@ -590,7 +603,7 @@ function snare_new()
  return obj
 end
 
-function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
+function hh_cy_new(name,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj=parse[[{
   ae=0.0,
   f1=0.0,
@@ -607,8 +620,8 @@ function hh_cy_new(_nlev,_tlev,dbase,dscale,tbase,tscale)
   detune=1
  }]]
  
- obj.note=function(self,pat,par,step,note_len)
-  local s=pat.steps[step]
+ obj.note=function(self,pat,seq,step,note_len)
+  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
   if s!=d_off then
    self.op,self.dp=0,self.dp0
    self.ae=par.lev*par.lev*trn(s==d_ac,2.0,0.8)
@@ -951,8 +964,7 @@ function state_new(savedata)
    syn_pats={}
    self.pats[syn]=syn_pats
   end
-  assert(self.seq[pat_syn],pat_syn)
-  local pat_idx=self.seq[pat_syn].pat
+  local pat_idx=self.seq[pat_syn..'_pat']
   local pat=syn_pats[pat_idx]
   if not pat then
    if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
@@ -1049,9 +1061,9 @@ function state_new(savedata)
  end
 
  s._init_tick=function(self)
-  local t,m=self.transport,self.seq.mixer
-  local nl=sample_rate*(15/(56+128*m.tempo))
-  local shuf_diff=nl*m.shuf*(0.5-(t.tick&1))
+  local t,sq=self.transport,self.seq
+  local nl=sample_rate*(15/(56+128*sq.mix_tempo))
+  local shuf_diff=nl*sq.mix_shuf*(0.5-(t.tick&1))
   t.note_len,t.base_note_len=
    flr(0.5+nl+shuf_diff),nl
  end
@@ -1168,74 +1180,56 @@ function state_load(str)
 end
 
 seq_proto=parse[[{
- mixer={
-  tempo=0.5,
-  shuf=0,
-  lev=0.5,
-  dl_t=0.5,
-  dl_fb=0.5,
-  b0_lev=0.5,
-  b0_od=0,
-  b0_fx=0,
-  b1_lev=0.5,
-  b1_od=0,
-  b1_fx=0,
-  drum_lev=0.5,
-  drum_od=0,
-  drum_fx=0,
-  comp_thresh=1.0,
- },
- b0={
-  on=true,
-  pat=1,
-  saw=true,
-  tun=0.5,
-  cut=0.5,
-  res=0.5,
-  env=0.5,
-  dec=0.5,
-  acc=0.5,
- },
- b1={
-  on=true,
-  pat=1,
-  saw=true,
-  tun=0.5,
-  cut=0.5,
-  res=0.5,
-  env=0.5,
-  dec=0.5,
-  acc=0.5,
- },
- bd={
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
- },
- sd={
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
- },
- hh={
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
- },
- cy={
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
- },
- pc={
-  tun=0.5,
-  dec=0.5,
-  lev=0.5,
- },
- drum={
-  on=true,
-  pat=1,
- }
+ mix_tempo=0.5,
+ mix_shuf=0,
+ mix_lev=0.5,
+ mix_dl_t=0.5,
+ mix_dl_fb=0.5,
+ mix_comp_thresh=1.0,
+ b0_lev=0.5,
+ b0_od=0,
+ b0_fx=0,
+ b0_on=true,
+ b0_pat=1,
+ b0_saw=true,
+ b0_tun=0.5,
+ b0_cut=0.5,
+ b0_res=0.5,
+ b0_env=0.5,
+ b0_dec=0.5,
+ b0_acc=0.5,
+ b1_lev=0.5,
+ b1_od=0,
+ b1_fx=0,
+ b1_on=true,
+ b1_pat=1,
+ b1_saw=true,
+ b1_tun=0.5,
+ b1_cut=0.5,
+ b1_res=0.5,
+ b1_env=0.5,
+ b1_dec=0.5,
+ b1_acc=0.5,
+ drum_lev=0.5,
+ drum_od=0,
+ drum_fx=0,
+ drum_on=true,
+ drum_pat=1,
+ bd_tun=0.5,
+ bd_dec=0.5,
+ bd_lev=0.5,
+ sd_tun=0.5,
+ sd_dec=0.5,
+ sd_lev=0.5,
+ hh_tun=0.5,
+ hh_dec=0.5,
+ hh_lev=0.5,
+ cy_tun=0.5,
+ cy_dec=0.5,
+ cy_lev=0.5,
+ pc_tun=0.5,
+ pc_dec=0.5,
+ pc_lev=0.5,
 }]]
 
 function seq_new()
@@ -1275,9 +1269,10 @@ end
 
 function state_make_get_set_param(cat,syn,key)
  if (not key) cat,syn,key='tick',cat,syn
+ key=syn..'_'..key
  return
-  function(state) return state.seq[syn][key] end,
-  function(state,val) state:_apply_diff(cat, {[syn]={[key]=val}}) end
+  function(state) return state.seq[key] end,
+  function(state,val) state:_apply_diff(cat, {[key]=val}) end
 end
 
 function state_make_get_set(a,b)
@@ -1707,9 +1702,9 @@ function pirc_ui_init(ui,key,yp)
 end
 
 function header_ui_init(ui,yp)
- local function hdial(x,y,p)
+ local function hdial(x,y,s,p)
  ui:add_widget(
-  dial_new(x,yp+y,116,12,state_make_get_set_param('mixer',p))
+  dial_new(x,yp+y,116,12,state_make_get_set_param(s,p))
  )
  end
 
@@ -1777,12 +1772,12 @@ function header_ui_init(ui,yp)
  ),201)
 
  for s in all(parse[[{
-  1="16,8,tempo",
-  2="32,8,lev",
-  3="32,16,comp_thresh",
-  4="16,16,shuf",
-  5="16,24,dl_t",
-  6="32,24,dl_fb",
+  1="16,8,mix,tempo",
+  2="32,8,mix,lev",
+  3="32,16,mix,comp_thresh",
+  4="16,16,mix,shuf",
+  5="16,24,mix,dl_t",
+  6="32,24,mix,dl_fb",
  }]]) do
   hdial(unpack_split(s))
  end
@@ -1792,9 +1787,9 @@ function header_ui_init(ui,yp)
   ui:add_widget(
    toggle_new(64,ypc,22,38,state_make_get_set_param('bar',pt,'on'))
   )
-  hdial(104,ypc,pt..'_lev')
-  hdial(112,ypc,pt..'_od')
-  hdial(120,ypc,pt..'_fx')
+  hdial(104,ypc,pt,'lev')
+  hdial(112,ypc,pt,'od')
+  hdial(120,ypc,pt,'fx')
 
   ui:add_widget(
    spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set('transport',pt..'_bank'))
