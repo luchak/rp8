@@ -783,21 +783,12 @@ end
 -->8
 -- state
 
--- a pattern has both top-level
--- and note-level data. all
--- synth params exist at top
--- level. (with note-level over-
--- rides?) notes are obviously
--- note level
-
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
 save_keys=parse[[
 {1="pats",2="pat_seq",3="song",}
 ]]
 
-all_pats=split'b0,b1,drum'
-all_synths=split'b0,b1,bd,sd,hh,cy,pc'
 drum_synths=split'bd,sd,hh,cy,pc'
 syn_groups=parse[[{
  bd="drum",
