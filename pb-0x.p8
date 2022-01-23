@@ -142,8 +142,8 @@ end
 function _draw()
  ui:draw(state)
 
- --rectfill(0,0,30,6,0)
- --print(stat(0),0,0,7)
+ rectfill(0,0,30,6,0)
+ print(stat(0),0,0,7)
  palt(0,false)
 end
 
@@ -192,6 +192,7 @@ function is_empty(t)
 end
 
 function diff_tables(base,diff)
+ if (not (diff and base)) return
  for k,v in pairs(base) do
   local dk=diff[k]
   if type(v)=='table' and type(dk)=='table' then
@@ -964,12 +965,12 @@ function state_new(savedata)
   local bar_seqs=self.song.bar_seqs[bar]
   if not bar_seqs then
    bar_seqs={}
-   if (create) self.song.bar_seqs[bar]=bar_seqs
+   if (create) self.song.bar_seqs[bar]=bar_seqs else return nil
   end
   local seq=bar_seqs[step]
   if not seq then
    seq={}
-   if (create) bar_seqs[step]=seq
+   if (create) bar_seqs[step]=seq else return nil
   end
   return seq
  end
