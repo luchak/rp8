@@ -306,7 +306,7 @@ end
 -- 96 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
-_schunk,_tgtchunks=96,1
+_schunk,_tgtchunks=96,2
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512
 
@@ -376,6 +376,8 @@ function synth_new()
   _f2=0,
   _f3=0,
   _f4=0,
+  _fosc=0,
+  _ffb=0,
   _me=0,
   _med=0.99,
   _ae=0,
@@ -393,8 +395,8 @@ function synth_new()
  obj.note=function(self,pat,par,step,note_len)
   local patstep=pat.steps[step]
 
-  self.fc=(100/sample_rate)*(2^(4.25*par.cut))/self.os
-  self.fr=par.res*4.1+0.1
+  self.fc=(100/sample_rate)*(2^(4*par.cut))/self.os
+  self.fr=par.res*4.4+0.1
   self.env=par.env*par.env+0.1
   self.acc=par.acc*1.9+0.1
   self.saw=par.saw
@@ -433,6 +435,7 @@ function synth_new()
   local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
   local env,saw,lev,acc=self.env,self.saw,self.lev,self.acc
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
+  local fosc,ffb=self._fosc,self._ffb
   for i=first,last do
    local fc=min(0.37/os,fcb+((me*env)>>4))
    -- very very janky dewarping
@@ -456,20 +459,13 @@ function synth_new()
    self._nt+=1
    for j=1,os do
     local osc=op>>7
-    if saw then
-     osc=0.5-(osc>>1)
-     osc*=osc
-     osc=(osc<<1)-0.66667
-    else
-     local sq=(osc&0x8000)>>>14
-     osc=sq*(osc-0.5)-osc+1
-     local mask=osc>>31
-     osc*=(mask^^osc)-mask
-     -- osc -> osc
-     -- 1-osc => sq-sq*osc => (1-sq)*(1-osc)+sq*osc => 1-sq-osc+2*sq*osc => 2*sq*(osc-0.5)-osc+1
-     -- 1 if osc is negative, 0 if pos
+    if not saw then
+     osc=0.5+((osc&0x8000)>>15)
     end
-    local x=osc-fr*(f4-osc)
+    fosc+=(osc-fosc)>>5
+    osc-=fosc
+    ffb+=(f4-ffb)>>5
+    local x=osc-fr*(f4-ffb-osc)
     local xc=mid(-1,x,1)
     x=xc+(x-xc)*0.9840
 
@@ -488,6 +484,7 @@ function synth_new()
   self.op,self.odp,self._gate=op,odp,gate
   self._f1,self._f2,self._f3,self._f4=f1,f2,f3,f4
   self._me,self._ae,self._mr=me,ae,mr
+  self._fosc,self._ffb=fosc,ffb
  end
 
  return obj
@@ -708,7 +705,7 @@ function mixer_new(srcs,fx,lev)
    for k,src in pairs(self.srcs) do
     local slev,od,fx=src.lev,src.od*src.od,src.fx
     src.obj:update(tmp,first,last)
-    local odf=0.3+31.7*od
+    local odf=0.3+23.7*od
     --local odfi=1/(4*(atan2(odf,1)-0.75))
     local odfi=(1+3*od)/odf
     for i=first,last do
