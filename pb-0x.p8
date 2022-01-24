@@ -474,7 +474,7 @@ function synth_new()
     if not saw then
      osc=0.5+((osc&0x8000)>>15)
     end
-    fosc+=(osc-fosc)>>5
+    fosc+=(osc-fosc)*0.025
     osc-=fosc
     ffb+=(f4-ffb)>>5
     local x=osc-fr*(f4-ffb-osc)
