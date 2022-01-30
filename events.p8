@@ -3,6 +3,7 @@ version 34
 __lua__
 -- event sequencer test
 
+#include utils.lua
 #include events.lua
 
 function printarray(t)
