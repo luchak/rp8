@@ -68,7 +68,19 @@ function stringify(v)
  if t=='number' or t=='boolean' then
   return tostr(v)
  elseif t=='string' then
-  return '"'..v..'"'
+  local s='"'
+  for i=1,#v do
+   local c=sub(v,i,i)
+   local o=ord(c)
+   -- escape control chars, ", and \
+   if o<16 or o==34 or o==92 then
+    s..='\\'..chr(o+35)
+   else
+    s..=c
+   end
+  end
+  s..='"'
+  return s
  elseif t=='table' then
   local s='{'
   for k,v in pairs(v) do
@@ -116,7 +128,11 @@ function _parse(input)
   repeat
    c=input()
    if (c=='"') return s
-   s..=c
+   if c=='\\' then
+    s..=chr(ord(input())-35)
+   else
+    s..=c
+   end
   until false
  elseif c=='-' or is_digit(c) then
   local s=c
