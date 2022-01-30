@@ -1,58 +1,3 @@
-local function event_enc(t,k,v)
- return t | (k>>>8) | (v>>>16)
-end
-
-local function event_dec(e)
- return e&0xffff,(e&0x0.ff)<<8,(e&0x0.00ff)<<16
-end
-
-function enc_byte_array(a)
- local adjusted={}
- for i=1,#a do
-  adjusted[i]=a[i]+40
- end
- return chr(unpack(adjusted))
-end
-
-function dec_byte_array(s)
- local a={}
- for i=1,#s do
-  a[i]=ord(s,i)-40
- end
- return a
-end
-
-function map(a,f)
- local r={}
- for k,v in pairs(a) do
-  r[k]=f(v)
- end
- return r
-end
-
-function copy_table(t)
- return merge_tables({},t)
-end
-
-function merge_tables(base,new,do_copy)
- if (do_copy) base=copy_table(base)
- if (not new) return base
- for k,v in pairs(new) do
-  if type(v)=='table' then
-   local bk=base[k]
-   if type(bk)=='table' then
-    merge_tables(bk,v)
-   else
-    base[k]=copy_table(v)
-   end
-  else
-   base[k]=v
-  end
- end
- return base
-end
-
-
 --[[
  each chunk contains (1) a rollup of the current state at its start, and (2) an _unsorted_ array of events (conflict: later wins)
  when a chunk is loaded, we scan its whole list of events and stick them in a table indexed by tick.
@@ -73,7 +18,10 @@ function timeline_new(default_start)
   override_params={},
   default_start=enc_byte_array(default_start),
   recording=false,
-  has_override=false
+  has_override=false,
+  loop_start=1,
+  loop_len=4,
+  looping=false
  }
 
  timeline.load_bar=function(self,i)
@@ -91,17 +39,21 @@ function timeline_new(default_start)
    self.bars[i]=bar_data
   end
 
-  self.bar_events=map(bar_data.events,dec_byte_array)
+  self.bar_events=map_table(bar_data.events,dec_byte_array)
   self.state=copy_table(self.bar_start)
   self.bar=1
   self.tick=1
  end
 
- timeline.next_tick=function(self,i,next_bar)
+ timeline.next_tick=function(self,i)
   self.tick+=1
   local tick=self.tick
   local op=self.override_params
-  if (tick>16) return self:load_bar(next_bar)
+  if tick>16 then
+   if self.looping and self.bar==self.loop_start+self.loop_end-1 then
+    return self:load_bar(next_bar)
+   end
+  end
   for k,v in pairs(self.bar_events) do
    self.state[k]=v[tick]
   end
@@ -109,16 +61,17 @@ function timeline_new(default_start)
   local bars,bar,bar_events=self.bars,self.bar,self.bar_events
   if self.recording then
    for k,v in pairs(op) do
-    local ek=bar_events[k]
-    if not ek then
-     local s=self.bar_start[k]
-     ek={}
-     for i=1,16 do
-      ek[i]=s
+    local ek,bsk=bar_events[k],self.bar_start[k]
+    if v!=bsk then
+     if not ek then
+      ek={}
+      for i=1,16 do
+       ek[i]=bsk
+      end
+      bar_events[k]=ek
      end
-     bar_events[k]=ek
+     ek[tick]=v
     end
-    ek[tick]=v
    end
    if tick==16 then
     self:_finalize_bar()
@@ -131,7 +84,7 @@ function timeline_new(default_start)
   assert(self.bars[self.bar])
   assert(self.bar_start)
   assert(self.bar_events)
-  self.bars[self.bar].events=map(self.bar_events,enc_byte_array)
+  self.bars[self.bar].events=map_table(self.bar_events,enc_byte_array)
  end
 
  -- add to overrides
@@ -141,12 +94,68 @@ function timeline_new(default_start)
  end
 
  timeline.toggle_recording=function(self)
-  if self.recording then
+  local sr=self.recording
+  if sr then
    if (self.has_override) self:_finalize_bar()
    self.override_params={}
    self.has_override=false
   end
-  self.recording=not self.recording
+  self.recording=not sr
+ end
+
+ timeline.cut_seq=function(self)
+  assert(not self.recording)
+  local c=self:copy_seq(cut_start,cut_end)
+  local nbs={}
+  for i,b in pairs(self.bars) do
+   if i>=cut_start then
+    if i>=cut_end then
+     nbs[i-ll]=b
+    end
+   else
+    nbs[i]=b
+   end
+  end
+  self.bars=nbs
+  self:load_bar(self.bar)
+  return c
+ end
+
+ timeline.copy_seq=function(self)
+  local c,bars={},self.bars
+  for i=1,self.loop_len do
+   local bar=i+self.loop_start-1
+   c[i]={
+    copy_table(bars[bar])
+   }
+  end
+  return c
+ end
+
+ timeline.paste_seq=function(self,seq)
+  local n=#seq
+  for i=0,self.loop_len-1 do
+   local bar=self.loop_start+i
+   self.bars[bar]=copy_table(seq[i%n+1])
+  end
+  self:load_bar(self.bar)
+ end
+
+ timeline.insert_seq=function(self,seq)
+  local bs,ls,ll,nbs=
+   self.bars,
+   self.loop_start,
+   self.loop_len,
+   {}
+  for i,b in pairs(bs) do
+   if i>=ls then
+    nbs[i+ll]=b
+   else
+    nbs[i]=b
+   end
+  end
+  self.bars=nbs
+  self:paste_seq(seq)
  end
 
  return timeline
