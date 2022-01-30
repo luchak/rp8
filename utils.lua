@@ -1,6 +1,14 @@
 -->8
 -- utils
 
+function log(a,b,c,d)
+ local s=''
+ for ss in all({a,b,c,d}) do
+  s..=tostr(ss)..' '
+ end
+ printh(s,'log')
+end
+
 function pick(t,keys)
  local r={}
  for k in all(keys) do
