@@ -4,14 +4,6 @@ __lua__
 -- rp-8
 -- by luchak
 
-function log(a,b,c,d)
- local s=''
- for ss in all({a,b,c,d}) do
-  s..=tostr(ss)..' '
- end
- printh(s,'log')
-end
-
 semitone=2^(1/12)
 
 -- give audio time to settle
