@@ -828,6 +828,7 @@ function state_new(savedata)
  end
 
  s.load_bar=function(self,i)
+  assert(self.patch)
   local tl=self.tl
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
@@ -919,7 +920,7 @@ function state_new(savedata)
 
  s.cut_seq=function(self)
   copy_buf_seq=self.tl:cut_seq()
-  self.tl:load_bar()
+  self:load_bar()
  end
 
  s.copy_seq=function(self)
@@ -939,7 +940,7 @@ function state_new(savedata)
   local n=#copy_buf_seq
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
-   self.tl:load_bar()
+   self:load_bar()
   else
    self.pat_seq=dec_byte_array(copy_buf_seq[1].start)
   end
@@ -949,7 +950,7 @@ function state_new(savedata)
   if (not copy_buf_seq) return
   if (self.playing) self:toggle_playing()
   self.tl:insert_seq(copy_buf_seq)
-   self.tl:load_bar()
+  self:load_bar()
  end
 
  s:load_bar()
