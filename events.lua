@@ -16,22 +16,20 @@ function timeline_new(default_start, savedata)
  local timeline={
   bars={},
   override_params={},
-  default_start=enc_byte_array(default_start),
+  default_bar={start=enc_byte_array(default_start),events={}},
   recording=false,
   has_override=false,
   loop_start=1,
   loop_len=4,
-  looping=false
+  looping=false,
+  bar=1
  }
 
  if (savedata) merge_tables(timeline, savedata)
 
  timeline.load_bar=function(self,patch,i)
   i=i or self.bar
-  local bar_data=self.bars[i] or {
-   start=self.default_start,
-   events={}
-  }
+  local bar_data=self.bars[i] or copy_table(self.default_bar)
   local op=self.override_params
   self.bar_start=merge_tables(dec_byte_array(bar_data.start),op)
   merge_tables(patch,self.bar_start)
@@ -129,10 +127,9 @@ function timeline_new(default_start, savedata)
   local c,bars={},self.bars
   for i=1,self.loop_len do
    local bar=i+self.loop_start-1
-   c[i]={
-    copy_table(bars[bar])
-   }
+   c[i]=copy_table(bars[bar] or self.default_bar)
   end
+  log('copied',stringify(c))
   return c
  end
 
@@ -158,11 +155,13 @@ function timeline_new(default_start, savedata)
    end
   end
   self.bars=nbs
+  log('nbs',stringify(self.bars))
   self:paste_seq(seq)
+  log('post paste',stringify(self.bars))
  end
 
  timeline.get_serializable=function(self)
-  return pick(self, parse[[{1="bars",2="default_start",3="loop_start",4="loop_len",5="looping"}]])
+  return pick(self, parse[[{1="bars",2="default_bar",3="loop_start",4="loop_len",5="looping"}]])
  end
 
  return timeline

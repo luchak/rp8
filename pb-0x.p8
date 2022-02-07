@@ -854,8 +854,8 @@ function state_new(savedata)
   local tl=self.tl
   if self.playing then
    if (tl.recording) tl:toggle_recording()
-   self:load_bar()
   end
+  self:load_bar()
   t.playing=not t.playing
  end
 
@@ -1532,7 +1532,7 @@ function header_ui_init(ui,yp)
   end
  end
  ui:add_widget(
-  transport_number_new(32,yp,unpack_split'16,bar')
+  transport_number_new(32,yp,unpack_split'16,tl,bar')
  )
  song_only(
   momentary_new(48,yp,192,
