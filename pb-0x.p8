@@ -46,8 +46,8 @@ function _init()
  ui,state=ui_new(),state_new()
 
  header_ui_init(ui,0)
- pbl_ui_init(ui,'b0',32)
- pbl_ui_init(ui,'b1',64)
+ pbl_ui_init(ui,'b0',7,32)
+ pbl_ui_init(ui,'b1',19,64)
  pirc_ui_init(ui,'drum',96)
 
  pbl0,pbl1=synth_new('b0'),synth_new('b1')
@@ -617,7 +617,19 @@ end
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
+pat_groups=split'b0,b1,drum'
 drum_synths=split'bd,sd,hh,cy,pc'
+
+syn_base_idx=parse[[{
+ b0=7,
+ b1=19,
+ drum=31,
+ bd=36,
+ sd=39,
+ hh=42,
+ cy=45,
+ pc=48,
+}]]
 
 pat_param_idx=parse[[{
  b0=11,
@@ -794,6 +806,7 @@ function state_new(savedata)
  s.pat_patch=copy_table(default_seq)
  s.patch={}
  s.pat_seqs={}
+ s.pat_status={}
  if savedata then
   s.tl=timeline_new(savedata.tl)
   s.pat_patch=savedata.pat_patch
@@ -873,10 +886,13 @@ function state_new(savedata)
     if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
     syn_pats[pat_idx]=pat
    end
-   self.pat_seqs[syn]={
-    seq=pat,
-    on=patch[param_idx-1],
-    idx=pat_idx,
+   self.pat_seqs[syn]=pat
+  end
+  for group in all(pat_groups) do
+   local base=syn_base_idx[group]
+   self.pat_status[group]={
+    on=base+3,
+    idx=base+4,
    }
   end
  end
@@ -889,7 +905,7 @@ function state_new(savedata)
  s.get_pat=function(self,syn)
   -- assume pats are aliased, always editing current
   if (syn=='drum') syn=self.transport.drum
-  return self.pat_seqs[syn].seq
+  return self.pat_seqs[syn]
  end
 
  s.set_bank=function(self,syn,bank)
@@ -980,10 +996,16 @@ function drum_pat_new()
  return pat
 end
 
-function state_make_get_set_param(cat,idx)
+function state_make_get_set_param(idx)
  return
-  function(state) return state.patch[key] end,
-  function(state,val) state:_apply_diff(cat, {[key]=val}) end
+  function(state) return state.patch[idx] end,
+  function(state,val) state:_apply_diff(idx,val) end
+end
+
+function state_make_get_set_param_bool(idx)
+ return
+  function(state) return state.patch[idx]>0 end,
+  function(state,val) state:_apply_diff(idx,(val and 128) or 0) end
 end
 
 function state_make_get_set(a,b)
@@ -1211,10 +1233,10 @@ function dial_new(x,y,s0,bins,get,set)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   return s0+get(state)*bins
+   return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
-   local x=mid(0,1,get(state)+trn(b>0,0.015625,-0.015625))
+   local x=mid(0,128,get(state)+(b<<1))
    set(state,x)
   end
  }
@@ -1227,7 +1249,7 @@ function toggle_new(x,y,s_off,s_on,get,set)
    return trn(get(state),s_on,s_off)
   end,
   input=function(self,state)
-   set(state,not get(state))
+   set(state,get(state))
   end
  }
 end
@@ -1258,13 +1280,12 @@ end
 
 function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
  local get_bank=state_make_get('transport',syn..'_bank')
- local get_pat,set_pat=state_make_get_set_param('bar',syn,'pat')
+ local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  return {
   x=x,y=y,w=5,
   get_sprite=function(self,state)
-   local bank,pat=get_bank(state),get_pat(state)
-   local pending=state.pending.bar
-   pending=pending and pending[syn] and pending[syn].pat
+   local bank,pending=get_bank(state),get_pat(state)
+   local pat=state.pat_status[syn].idx
    local val=(bank-1)*bank_size+pib
    if (pending==val and pending!=pat) return s_next
    return trn(pat==val,s_on,s_off)
@@ -1282,7 +1303,7 @@ function transport_number_new(x,y,w,obj,key)
  return {
   x=x,y=y,w=w,noinput=true,
   get_sprite=function(self,state)
-   if state.song.song_mode then
+   if state.song_mode then
     return tostr(get(state))..','..w..',0,15'
    else
     return '--,'..w..',0,15'
@@ -1309,7 +1330,7 @@ function wrap_disable(w,s_disable,get_enabled)
  return obj
 end
 
-function pbl_ui_init(ui,key,yp)
+function pbl_ui_init(ui,key,base_idx,yp)
  for i=1,16 do
   local xp=(i-1)*8
   ui:add_widget(
@@ -1327,34 +1348,34 @@ function pbl_ui_init(ui,key,yp)
  )
  ui:add_widget(
   momentary_new(0,yp+8,28,function(state,b)
-   copy_buf_pbl=merge_tables({},state[key])
+   copy_buf_pbl=copy_table(state:get_pat(key))
   end)
  )
  ui:add_widget(
   momentary_new(8,yp+8,27,function(state,b)
    local v=copy_buf_pbl
-   if (v) merge_tables(state[key],v)
+   if (v) merge_tables(state:get_pat(key),v)
   end)
  )
 
  for k,x in pairs(parse[[{
-  tun=40,
-  cut=56,
-  res=72,
-  env=88,
-  dec=104,
-  acc=120
+  6=40,
+  7=56,
+  8=72,
+  9=88,
+  10=104,
+  11=120
  }]]) do
   ui:add_widget(
    dial_new(
     x,yp,43,21,
-    state_make_get_set_param(key,k)
+    state_make_get_set_param(base_idx+k)
    )
   )
  end
 
  ui:add_widget(
-  toggle_new(16,yp,2,3,state_make_get_set_param(key,'saw'))
+  toggle_new(16,yp,2,3,state_make_get_set_param_bool(base_idx+5))
  )
 
  map(0,4,0,yp,16,2)
@@ -1369,30 +1390,33 @@ function pirc_ui_init(ui,key,yp)
   )
  end
  for k,d in pairs(parse[[{
-  bd={x=16,s=150},
-  sd={x=40,s=152},
-  hh={x=64,s=154},
-  cy={x=88,s=156},
-  pc={x=112,s=158}
+  bd={x=16,s=150,b=36},
+  sd={x=40,s=152,b=39},
+  hh={x=64,s=154,b=42},
+  cy={x=88,s=156,b=45},
+  pc={x=112,s=158,b=48}
  }]]) do
   ui:add_widget(
    radio_btn_new(d.x,yp+16,k,d.s,d.s+1,state_make_get_set('transport','drum'))
   )
+  -- lev
   ui:add_widget(
-   dial_new(d.x+8,yp+16,100,12,state_make_get_set_param(k,'lev'))
+   dial_new(d.x+8,yp+16,100,12,state_make_get_set_param(d.b+2))
   )
+  -- tun
   ui:add_widget(
-   dial_new(d.x,yp,100,12,state_make_get_set_param(k,'tun'))
+   dial_new(d.x,yp,100,12,state_make_get_set_param(d.b+0))
   )
+  -- dec
   ui:add_widget(
-   dial_new(d.x+8,yp,100,12,state_make_get_set_param(k,'dec'))
+   dial_new(d.x+8,yp,100,12,state_make_get_set_param(d.b+1))
   )
 
   ui:add_widget(
    momentary_new(0,yp+16,11,function(state,b)
     local v={}
     for syn in all(drum_synths) do
-     v[syn]=copy_table(state[syn])
+     v[syn]=copy_table(state:get_pat(syn))
     end
     copy_buf_pirc=v
    end)
@@ -1402,7 +1426,7 @@ function pirc_ui_init(ui,key,yp)
     local b=copy_buf_pirc
     if b then
      for k,v in pairs(b) do
-      merge_tables(state[k],v)
+      merge_tables(state:get_pat(k),v)
      end
     end
    end)
@@ -1413,9 +1437,9 @@ function pirc_ui_init(ui,key,yp)
 end
 
 function header_ui_init(ui,yp)
- local function hdial(x,y,s,p)
+ local function hdial(x,y,idx)
  ui:add_widget(
-  dial_new(x,yp+y,116,12,state_make_get_set_param(s,p))
+  dial_new(x,yp+y,116,12,state_make_get_set_param(idx))
  )
  end
 
@@ -1483,24 +1507,25 @@ function header_ui_init(ui,yp)
  ),201)
 
  for s in all(parse[[{
-  1="16,8,mix,tempo",
-  2="32,8,mix,lev",
-  3="32,16,mix,comp_thresh",
-  4="16,16,mix,shuf",
-  5="16,24,mix,dl_t",
-  6="32,24,mix,dl_fb",
+  1="16,8,1",
+  2="32,8,3",
+  3="32,16,6",
+  4="16,16,2",
+  5="16,24,4",
+  6="32,24,5",
  }]]) do
   hdial(unpack_split(s))
  end
 
  for pt,ypc in pairs(parse[[{b0=8,b1=16,drum=24}]]) do
+  local base_idx=syn_base_idx[pt]
   ypc+=yp
   ui:add_widget(
-   toggle_new(64,ypc,22,38,state_make_get_set_param('bar',pt,'on'))
+   toggle_new(64,ypc,22,38,state_make_get_set_param(base_idx+3))
   )
-  hdial(104,ypc,pt,'lev')
-  hdial(112,ypc,pt,'od')
-  hdial(120,ypc,pt,'fx')
+  hdial(104,ypc,base_idx)
+  hdial(112,ypc,base_idx+1)
+  hdial(120,ypc,base_idx+2)
 
   ui:add_widget(
    spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set('transport',pt..'_bank'))
