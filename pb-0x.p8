@@ -72,12 +72,11 @@ function _init()
  comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.008')
  seq_helper=seq_helper_new(
   state,comp,function()
-   local tr,song,sq=
-    state.transport,
+   local song,sq=
     state.song,
     state.seq
-   if (not tr.playing) return
-   local now,nl=tr.tick,tr.note_len
+   if (not state.playing) return
+   local now,nl=state.tick,state.note_len
    if (sq.b0_on) pbl0:note(state.b0,sq,now,nl)
    if (sq.b1_on) pbl1:note(state.b1,sq,now,nl)
    if sq.drum_on then
@@ -788,17 +787,14 @@ default_seq=parse[[{
 function state_new(savedata)
  local s=parse[[{
   pat_storage={},
-  transport={
-   bar=1,
-   tick=1,
-   playing=false,
-   base_note_len=750,
-   note_len=750,
-   drum="bd",
-   b0_bank=1,
-   b1_bank=1,
-   drum_bank=1,
-  },
+  tick=1,
+  playing=false,
+  base_note_len=750,
+  note_len=750,
+  drum_sel="bd",
+  b0_bank=1,
+  b1_bank=1,
+  drum_bank=1,
   song_mode=false,
  }]]
 
@@ -819,15 +815,15 @@ function state_new(savedata)
   if self.song_mode then
    self.tl:record_event(k,v)
   else
-   self.pat_seq[k]=v
+   self.patch[k]=v
   end
  end
 
  s._init_tick=function(self)
-  local t,patch=self.transport,self.patch
+  local patch=self.patch
   local nl=sample_rate*(15/(56+patch[1]))
-  local shuf_diff=nl*patch[2]*(0.5-(t.tick&1))
-  t.note_len,t.base_note_len=
+  local shuf_diff=nl*patch[2]*(0.5-(self.tick&1))
+  self.note_len,self.base_note_len=
    flr(0.5+nl+shuf_diff),nl
  end
 
@@ -835,7 +831,7 @@ function state_new(savedata)
   local tl=self.tl
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
-   self.bar,self.tick=tl.bar,tl.tick
+   self.tick=tl.tick
   else
    self.patch=copy_table(self.pat_patch)
    self.tick=1
@@ -855,8 +851,8 @@ function state_new(savedata)
  end
 
  s.toggle_playing=function(self)
-  local t,tl=self.transport,self.tl
-  if t.playing then
+  local tl=self.tl
+  if self.playing then
    if (tl.recording) tl:toggle_recording()
    self:load_bar()
   end
@@ -869,7 +865,7 @@ function state_new(savedata)
 
  s.toggle_song_mode=function(self)
   self.song_mode=not self.song_mode
-  if (self.transport.playing) self:toggle_playing()
+  if (self.playing) self:toggle_playing()
  end
 
  s._sync_pats=function(self)
@@ -904,12 +900,12 @@ function state_new(savedata)
 
  s.get_pat=function(self,syn)
   -- assume pats are aliased, always editing current
-  if (syn=='drum') syn=self.transport.drum
+  if (syn=='drum') syn=self.drum_sel
   return self.pat_seqs[syn]
  end
 
  s.set_bank=function(self,syn,bank)
-  self.transport[syn..'_bank']=bank
+  self[syn..'_bank']=bank
  end
 
  s.save=function(self)
@@ -939,7 +935,7 @@ function state_new(savedata)
 
  s.paste_seq=function(self)
   if (not copy_buf_seq) return
-  if (self.transport.playing) self:toggle_playing()
+  if (self.playing) self:toggle_playing()
   local n=#copy_buf_seq
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
@@ -951,7 +947,7 @@ function state_new(savedata)
 
  s.insert_seq=function(self)
   if (not copy_buf_seq) return
-  if (self.transport.playing) self:toggle_playing()
+  if (self.playing) self:toggle_playing()
   self.tl:insert_seq(copy_buf_seq)
    self.tl:load_bar()
  end
@@ -1005,17 +1001,17 @@ end
 function state_make_get_set_param_bool(idx)
  return
   function(state) return state.patch[idx]>0 end,
-  function(state,val) state:_apply_diff(idx,(val and 128) or 0) end
+  function(state,val) state:_apply_diff(idx,trn(val,128, 0)) end
 end
 
 function state_make_get_set(a,b)
  return
   state_make_get(a,b),
-  function(s,v) s[a][b]=v end
+  function(s,v) if (b) s[a][b]=v else s[a]=v end
 end
 
 function state_make_get(a,b)
- return function(s) return s[a][b] end
+ return function(s) if (b) return s[a][b] else return s[a] end
 end
 
 state_is_song_mode=function(state) return state.song_mode end
@@ -1029,9 +1025,9 @@ function seq_helper_new(state,root,note_fn)
   state=state,
   root=root,
   note_fn=note_fn,
-  t=state.transport.note_len,
+  t=state.note_len,
   update=function(self,b,first,last)
-   local p,nl=first,self.state.transport.note_len
+   local p,nl=first,self.state.note_len
    while p<last do
     if self.t>=nl then
      self.t=0
@@ -1042,7 +1038,7 @@ function seq_helper_new(state,root,note_fn)
     self.t+=n
     p+=n
    end
-   if (not self.state.transport.playing) self.t=0
+   if (not self.state.playing) self.t=0
   end
  }
 end
@@ -1215,8 +1211,7 @@ function step_btn_new(x,y,syn,step,sprites)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   local t=state.transport
-   if (t.playing and t.tick==step) return sprites[n+1]
+   if (state.playing and state.tick==step) return sprites[n+1]
    local v=state:get_pat(syn).steps[step]
    return sprites[v+1]
   end,
@@ -1279,7 +1274,7 @@ function radio_btn_new(x,y,val,s_off,s_on,get,set)
 end
 
 function pat_btn_new(x,y,syn,bank_size,pib,s_off,s_on,s_next)
- local get_bank=state_make_get('transport',syn..'_bank')
+ local get_bank=state_make_get(syn..'_bank')
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  return {
   x=x,y=y,w=5,
@@ -1397,7 +1392,7 @@ function pirc_ui_init(ui,key,yp)
   pc={x=112,s=158,b=48}
  }]]) do
   ui:add_widget(
-   radio_btn_new(d.x,yp+16,k,d.s,d.s+1,state_make_get_set('transport','drum'))
+   radio_btn_new(d.x,yp+16,k,d.s,d.s+1,state_make_get_set('drum_sel'))
   )
   -- lev
   ui:add_widget(
@@ -1452,7 +1447,7 @@ function header_ui_init(ui,yp)
  ui:add_widget(
   toggle_new(
    0,yp,6,7,
-   state_make_get('transport','playing'),
+   state_make_get('playing'),
    function(s) s:toggle_playing() end
   )
  )
@@ -1466,7 +1461,7 @@ function header_ui_init(ui,yp)
  song_only(
   toggle_new(
    8,yp,231,232,
-   state_make_get('transport','recording'),
+   state_make_get('recording'),
    function(s) s:toggle_recording() end
   ),
   233
@@ -1528,7 +1523,7 @@ function header_ui_init(ui,yp)
   hdial(120,ypc,base_idx+2)
 
   ui:add_widget(
-   spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set('transport',pt..'_bank'))
+   spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set(pt..'_bank'))
   )
   for i=1,6 do
    ui:add_widget(
@@ -1537,22 +1532,22 @@ function header_ui_init(ui,yp)
   end
  end
  ui:add_widget(
-  transport_number_new(32,yp,unpack_split'16,transport,bar')
+  transport_number_new(32,yp,unpack_split'16,bar')
  )
  song_only(
   momentary_new(48,yp,192,
    function(state,b)
-    state:go_to_bar(state.transport.bar+b)
+    state:go_to_bar(state.tl.bar+b)
    end
   ),
   197
  )
  song_only(
-  toggle_new(56,yp,193,194,state_make_get_set('song','looping')),
+  toggle_new(56,yp,193,194,state_make_get_set('tl','looping')),
   195
  )
  ui:add_widget(
-  transport_number_new(64,yp,unpack_split'16,song,loop_start')
+  transport_number_new(64,yp,unpack_split'16,tl,loop_start')
  )
  song_only(
   momentary_new(80,yp,192,
@@ -1566,7 +1561,7 @@ function header_ui_init(ui,yp)
   197
  )
  ui:add_widget(
-  transport_number_new(88,yp,unpack_split'8,song,loop_len')
+  transport_number_new(88,yp,unpack_split'8,tl,loop_len')
  )
  song_only(
   momentary_new(96,yp,192,
