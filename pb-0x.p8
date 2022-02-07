@@ -609,25 +609,131 @@ function comp_new(src,thresh,ratio,att,rel)
   end
  }
 end
+
+#include events.lua
+
 -->8
 -- state
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
-save_keys=parse[[
-{1="pats",2="pat_seq",3="song",}
-]]
-
 drum_synths=split'bd,sd,hh,cy,pc'
-syn_groups=parse[[{
- bd="drum",
- sd="drum",
- hh="drum",
- cy="drum",
- pc="drum",
- b0="b0",
- b1="b1",
+
+pat_param_idx=parse[[{
+ b0=11,
+ b1=23,
+ bd=35,
+ sd=35,
+ hh=35,
+ cy=35,
+ pc=35
 }]]
+
+-- float values: 0=>0,128=>1
+-- bool values: 0=>false,128 (or any nonzero)=>true
+-- int values: identity map
+default_seq=parse[[{
+1=64,
+2=0,
+3=64,
+4=64,
+5=64,
+6=128,
+7=64,
+8=0,
+9=0,
+10=128,
+11=128,
+12=128,
+13=64,
+14=64,
+15=64,
+16=64,
+17=64,
+18=64,
+19=64,
+20=0,
+21=0,
+22=128,
+23=128,
+24=128,
+25=64,
+26=64,
+27=64,
+28=64,
+29=64,
+30=64,
+31=64,
+32=0,
+33=0,
+34=128,
+35=1,
+36=64,
+37=64,
+38=64,
+39=64,
+40=64,
+41=64,
+42=64,
+43=64,
+44=64,
+45=64,
+46=64,
+47=64,
+48=64,
+49=64,
+50=64,
+}]]
+ -- 01 mix_tempo=0.5,
+ -- 02 mix_shuf=0,
+ -- 03 mix_lev=0.5,
+ -- 04 mix_dl_t=0.5,
+ -- 05 mix_dl_fb=0.5,
+ -- 06 mix_comp_thresh=1.0,
+ -- 07 b0_lev=0.5,
+ -- 08 b0_od=0,
+ -- 09 b0_fx=0,
+ -- 10 b0_on=true,
+ -- 11 b0_pat=1,
+ -- 12 b0_saw=true,
+ -- 13 b0_tun=0.5,
+ -- 14 b0_cut=0.5,
+ -- 15 b0_res=0.5,
+ -- 16 b0_env=0.5,
+ -- 17 b0_dec=0.5,
+ -- 18 b0_acc=0.5,
+ -- 19 b1_lev=0.5,
+ -- 20 b1_od=0,
+ -- 21 b1_fx=0,
+ -- 22 b1_on=true,
+ -- 23 b1_pat=1,
+ -- 24 b1_saw=true,
+ -- 25 b1_tun=0.5,
+ -- 26 b1_cut=0.5,
+ -- 27 b1_res=0.5,
+ -- 28 b1_env=0.5,
+ -- 29 b1_dec=0.5,
+ -- 30 b1_acc=0.5,
+ -- 31 drum_lev=0.5,
+ -- 32 drum_od=0,
+ -- 33 drum_fx=0,
+ -- 34 drum_on=true,
+ -- 35 drum_pat=1,
+ -- 36 bd_tun=0.5,
+ -- 37 bd_dec=0.5,
+ -- 38 bd_lev=0.5,
+ -- 39 sd_tun=0.5,
+ -- 40 sd_dec=0.5,
+ -- 41 sd_lev=0.5,
+ -- 42 hh_tun=0.5,
+ -- 43 hh_dec=0.5,
+ -- 44 hh_lev=0.5,
+ -- 45 cy_tun=0.5,
+ -- 46 cy_dec=0.5,
+ -- 47 cy_lev=0.5,
+ -- 48 pc_tun=0.5,
+ -- 49 pc_dec=0.5,
+ -- 50 pc_lev=0.5,
 
 -- patterns:
 --  saved
@@ -669,240 +775,121 @@ syn_groups=parse[[{
 
 function state_new(savedata)
  local s=parse[[{
-  pats={},
+  pat_storage={},
   transport={
    bar=1,
    tick=1,
    playing=false,
-   recording=false,
    base_note_len=750,
    note_len=750,
    drum="bd",
    b0_bank=1,
    b1_bank=1,
    drum_bank=1,
-   b0_next=1,
-   b1_next=1,
-   drum_next=1
   },
-  song={
-   song_mode=false,
-   loop_start=1,
-   loop_len=4,
-   looping=true,
-   bar_seqs={},
-   default_seq={},
-  },
-  pending={
-   bar={},
-   tick={}
-  },
-  pat_seq={},
-  seq={}
+  song_mode=false,
  }]]
 
- -- to fill:
- -- pat_seq
- -- song.default_seq
- -- seq
- 
- -- seq-typed things:
- --  pending
- --  pat_seq
- --  seq
- --  song.bar_seqs[x][y]
+ s.tl=timeline_new(default_seq)
+ s.pat_patch=copy_table(default_seq)
+ s.patch={}
+ s.pat_seqs={}
+ if savedata then
+  s.tl=timeline_new(savedata.tl)
+  s.pat_patch=savedata.pat_patch
+  s.song_mode=savedata.song_mode
+  s.pat_storage=savedata.pat_storage
+ end
 
- -- format of song.bar_seqs:
- -- bar_seqs[x][y] ->
- --  tick y at bar x
- -- only tick 1 should have
- -- pattern changes
- --
- -- these bar seqs are fragments
- -- applied onto default_seq
+ s._apply_diff=function(self,k,v)
+  self.patch[k]=v
+  if self.song_mode then
+   self.tl:record_event(k,v)
+  else
+   self.pat_seq[k]=v
+  end
+ end
 
- s.seq=seq_new()
- s.pat_seq=seq_new()
- s.song.default_seq=seq_new()
- if (savedata) merge_tables(s,pick(savedata,save_keys))
+ s._init_tick=function(self)
+  local t,patch=self.transport,self.patch
+  local nl=sample_rate*(15/(56+patch[1]))
+  local shuf_diff=nl*patch[2]*(0.5-(t.tick&1))
+  t.note_len,t.base_note_len=
+   flr(0.5+nl+shuf_diff),nl
+ end
+
+ s.load_bar=function(self,i)
+  local tl=self.tl
+  if self.song_mode then
+   self.tl:load_bar(self.patch,i)
+   self.bar,self.tick=tl.bar,tl.tick
+  else
+   self.patch=copy_table(self.pat_patch)
+   self.tick=1
+  end
+  self:_sync_pats()
+  self:_init_tick()
+ end
+
+ s.next_tick=function(self)
+  if self.song_mode then
+   self.tl:next_tick(self.patch)
+   self.bar,self.tick=tl.bar,tl.tick
+  else
+   self.tick+=1
+  end
+  self:_init_tick()
+ end
 
  s.toggle_playing=function(self)
-  local t=s.transport
+  local t,tl=self.transport,self.tl
   if t.playing then
-   if (t.recording) self:toggle_recording()
-   t.tick=1
+   if (tl.recording) tl:toggle_recording()
+   self:load_bar()
   end
   t.playing=not t.playing
  end
 
  s.toggle_recording=function(self)
-  local t=s.transport
-  t.recording=(not t.recording) and s.song.song_mode
-  if not t.recording then
-   self:_reset_pending()
-  end
+  self.tl:toggle_recording()
  end
 
  s.toggle_song_mode=function(self)
-  local song=s.song
+  self.song_mode=not self.song_mode
   if (self.transport.playing) self:toggle_playing()
-  song.song_mode=not song.song_mode
-  self:_init_bar()
  end
 
- s._init_bar=function(self)
-  local song=self.song
-  local t=self.transport
-  t.tick=1
-  if song.song_mode then
-   if t.recording then
-    self:_apply_pending(true,true)
+ s._sync_pats=function(self)
+  local ps,patch=self.pat_storage,self.patch
+  for syn,param_idx in pairs(pat_param_idx) do
+   local syn_pats=ps[syn]
+   if not syn_pats then
+    syn_pats={}
+    self.pat_storage[syn]=syn_pats
    end
-   self.seq=merge_tables(
-    song.default_seq,
-    self:_get_song_seq(t.bar,1),
-    true
-   )
-  else
-   self:_apply_pending(true)
-   self.seq=copy_table(self.pat_seq)
-  end
-
-  for syn,group in pairs(syn_groups) do
-   self:_sync_pat(group,syn)
-  end
-
-  self:_init_tick()
- end
-
- s._sync_pat=function(self,pat_syn,syn)
-  -- todo: just synthesize these on
-  -- load? can we avoid saving
-  -- them in that case?
-  local syn_pats=self.pats[syn]
-  if not syn_pats then
-   syn_pats={}
-   self.pats[syn]=syn_pats
-  end
-  local pat_idx=self.seq[pat_syn..'_pat']
-  local pat=syn_pats[pat_idx]
-  if not pat then
-   if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
-   syn_pats[pat_idx]=pat
-  end
-  self[syn]=pat
- end
-
- s._get_song_seq=function(self,bar,step,create)
-  local bar_seqs=self.song.bar_seqs[bar]
-  if not bar_seqs then
-   bar_seqs={}
-   if (create) self.song.bar_seqs[bar]=bar_seqs else return nil
-  end
-  local seq=bar_seqs[step]
-  if not seq then
-   seq={}
-   if (create) bar_seqs[step]=seq else return nil
-  end
-  return seq
- end
-
- s._reset_pending=function(self)
-  self.pending={bar={},tick={}}
- end
-
- s._apply_pending=function(self,apply_bar,keep)
-  local song_mode,t=self.song.song_mode,self.transport
-  local target,pending=self.pat_seq,self.pending
-  if (song_mode) target=self:_get_song_seq(t.bar,t.tick,true)
-  assert(target, 'apply target not found')
-  if apply_bar then
-   merge_tables(pending.bar, pending.tick)
-   merge_tables(target, pending.bar)
-   if song_mode then
-    for i=2,16 do
-     diff_tables(self:_get_song_seq(t.bar,i),pending.bar)
-    end
+   local pat_idx=patch[param_idx]
+   local pat=syn_pats[pat_idx]
+   if not pat then
+    if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
+    syn_pats[pat_idx]=pat
    end
-   if (not keep) self:_reset_pending()
-   pending.tick={}
-  else
-   merge_tables(target, pending.tick)
-   -- need to clear anything automated that's in bar but not in tick
-   if (not keep) pending.tick={}
+   self.pat_seqs[syn]={
+    seq=pat,
+    on=patch[param_idx-1],
+    idx=pat_idx,
+   }
   end
  end
 
  s.go_to_bar=function(self,bar)
   assert(self.song.song_mode, 'navigation outside of song mode')
-  local t=self.transport
-  t.bar=mid(1,bar,999)
-  t.tick=1
-  self:_init_bar()
- end
-
- s.next_tick=function(self)
-  local song,t=self.song,self.transport
-  t.tick+=1
-
-  -- dump pending changes if we're
-  -- not recording
-  if (song.song_mode and not t.recording) self:_reset_pending()
-
-  if t.tick>16 then
-   -- end of bar
-   if song.song_mode then
-    -- next bar
-    local bar=t.bar+1
-    if t.playing and song.looping and bar==song.loop_start+song.loop_len then
-     -- clear pending before
-     -- go_to_bar so we don't
-     -- apply changes on loop
-     self:_reset_pending()
-     bar=song.loop_start
-    end
-    self:go_to_bar(bar)
-   else
-    -- pattern mode, re-init pattern bar
-    self:_init_bar()
-   end
-  else
-   -- same bar
-   self:_apply_pending(false,t.recording)
-   if song.song_mode then
-    merge_tables(
-     self.seq,
-     self:_get_song_seq(t.bar,t.tick)
-    )
-   end
-   self:_init_tick()
-  end
-
- end
-
- s._init_tick=function(self)
-  local t,sq=self.transport,self.seq
-  local nl=sample_rate*(15/(56+128*sq.mix_tempo))
-  local shuf_diff=nl*sq.mix_shuf*(0.5-(t.tick&1))
-  t.note_len,t.base_note_len=
-   flr(0.5+nl+shuf_diff),nl
- end
-
- s._apply_diff=function(self,cat,diff)
-  local t,song,pending=self.transport,self.song,self.pending
-  if (cat=='tick') merge_tables(self.seq,diff)
-  merge_tables(pending[cat],diff)
-  if (not t.playing) and (t.recording or not song.song_mode) then
-   self:_apply_pending(true,t.recording)
-   -- pick up new changes
-   self:_init_bar()
-  end
+  self:load_bar(mid(1,bar,999))
  end
 
  s.get_pat=function(self,syn)
   -- assume pats are aliased, always editing current
   if (syn=='drum') syn=self.transport.drum
-  return self[syn]
+  return self.pat_seqs[syn].seq
  end
 
  s.set_bank=function(self,syn,bank)
@@ -910,150 +897,56 @@ function state_new(savedata)
  end
 
  s.save=function(self)
-  return 'rp80'..stringify(pick(self,save_keys))
+  return 'rp80'..stringify({
+   tl=self.tl:get_serializable(),
+   song_mode=self.song_mode,
+   pat_patch=self.pat_patch,
+   pat_storage=self.pat_storage
+  })
  end
 
  s.cut_seq=function(self)
-  self:copy_seq()
-  local song=self.song
-  local bs,ls,ll,nbs=
-   song.bar_seqs,
-   song.loop_start,
-   song.loop_len,
-   {}
-  for i,b in pairs(bs) do
-   if i>=ls then
-    if i>=ls+ll then
-     nbs[i-ll]=b
-    end
-   else
-    nbs[i]=b
-   end
-  end
-  song.bar_seqs=nbs
-  self:_init_bar()
+  copy_buf_seq=self.tl:cut_seq()
+  self.tl:load_bar()
  end
 
  s.copy_seq=function(self)
-  local c,song={},self.song
-  if song.song_mode then
-   for i=1,song.loop_len do
-    local bar=i+song.loop_start-1
-    c[i]={
-     merge_tables(song.default_seq,self:_get_song_seq(bar,1),true)
-    }
-    for j=2,16 do
-     local tick_seq=(song.bar_seqs[bar] or {})[j]
-     if (tick_seq) c[i][j]=copy_table(tick_seq)
-    end
-   end
+  if self.song_mode then
+   copy_buf_seq=self.tl:copy_seq()
   else
-   c[1]={
-    copy_table(self.seq)
-   }
+   copy_buf_seq={{
+    start=enc_byte_array(self.pat_seq),
+    events={}
+   }}
   end
-  copy_buf_seq=c
  end
 
  s.paste_seq=function(self)
   if (not copy_buf_seq) return
   if (self.transport.playing) self:toggle_playing()
-  local song,n=self.song,#copy_buf_seq
-  if song.song_mode then
-   for i=0,song.loop_len-1 do
-    local bar=song.loop_start+i
-    song.bar_seqs[bar]=copy_table(copy_buf_seq[i%n+1])
-   end
+  local n=#copy_buf_seq
+  if self.song_mode then
+   self.tl:paste_seq(copy_buf_seq)
+   self.tl:load_bar()
   else
-   self.pat_seq=copy_table(copy_buf_seq[1][1])
+   self.pat_seq=dec_byte_array(copy_buf_seq[1].start)
   end
-  self:_init_bar()
  end
 
  s.insert_seq=function(self)
   if (not copy_buf_seq) return
   if (self.transport.playing) self:toggle_playing()
-  local song=self.song
-  local bs,ls,ll,nbs=
-   song.bar_seqs,
-   song.loop_start,
-   song.loop_len,
-   {}
-  for i,b in pairs(bs) do
-   if i>=ls then
-    nbs[i+ll]=b
-   else
-    nbs[i]=b
-   end
-  end
-  song.bar_seqs=nbs
-  self:paste_seq()
+  self.tl:insert_seq(copy_buf_seq)
+   self.tl:load_bar()
  end
 
- s._init_bar(s)
+ s:load_bar()
  return s
 end
 
 function state_load(str)
  if (sub(str,1,4)!='rp80') return nil
  return state_new(parse(sub(str,5)))
-end
-
-seq_proto=parse[[{
- mix_tempo=0.5,
- mix_shuf=0,
- mix_lev=0.5,
- mix_dl_t=0.5,
- mix_dl_fb=0.5,
- mix_comp_thresh=1.0,
- b0_lev=0.5,
- b0_od=0,
- b0_fx=0,
- b0_on=true,
- b0_pat=1,
- b0_saw=true,
- b0_tun=0.5,
- b0_cut=0.5,
- b0_res=0.5,
- b0_env=0.5,
- b0_dec=0.5,
- b0_acc=0.5,
- b1_lev=0.5,
- b1_od=0,
- b1_fx=0,
- b1_on=true,
- b1_pat=1,
- b1_saw=true,
- b1_tun=0.5,
- b1_cut=0.5,
- b1_res=0.5,
- b1_env=0.5,
- b1_dec=0.5,
- b1_acc=0.5,
- drum_lev=0.5,
- drum_od=0,
- drum_fx=0,
- drum_on=true,
- drum_pat=1,
- bd_tun=0.5,
- bd_dec=0.5,
- bd_lev=0.5,
- sd_tun=0.5,
- sd_dec=0.5,
- sd_lev=0.5,
- hh_tun=0.5,
- hh_dec=0.5,
- hh_lev=0.5,
- cy_tun=0.5,
- cy_dec=0.5,
- cy_lev=0.5,
- pc_tun=0.5,
- pc_dec=0.5,
- pc_lev=0.5,
-}]]
-
-function seq_new()
- return copy_table(seq_proto)
 end
 
 function pbl_pat_new()
@@ -1087,11 +980,9 @@ function drum_pat_new()
  return pat
 end
 
-function state_make_get_set_param(cat,syn,key)
- if (not key) cat,syn,key='tick',cat,syn
- key=syn..'_'..key
+function state_make_get_set_param(cat,idx)
  return
-  function(state) return state.seq[key] end,
+  function(state) return state.patch[key] end,
   function(state,val) state:_apply_diff(cat, {[key]=val}) end
 end
 
@@ -1101,11 +992,11 @@ function state_make_get_set(a,b)
   function(s,v) s[a][b]=v end
 end
 
-function state_make_get(a,b,c)
+function state_make_get(a,b)
  return function(s) return s[a][b] end
 end
 
-state_is_song_mode=state_make_get('song','song_mode')
+state_is_song_mode=function(state) return state.song_mode end
 
 -- passthrough audio generator
 -- that splits blocks to allow

@@ -12,7 +12,7 @@
 -- everything is passed in as a number array
 -- a new bar is just an array of n_params numbers
 -- an event is a (param, value) pair
-function timeline_new(default_start)
+function timeline_new(default_start, savedata)
  local timeline={
   bars={},
   override_params={},
@@ -24,40 +24,45 @@ function timeline_new(default_start)
   looping=false
  }
 
- timeline.load_bar=function(self,i)
+ if (savedata) merge_tables(timeline, savedata)
+
+ timeline.load_bar=function(self,patch,i)
+  i=i or self.bar
   local bar_data=self.bars[i] or {
    start=self.default_start,
    events={}
   }
   local op=self.override_params
   self.bar_start=merge_tables(dec_byte_array(bar_data.start),op)
+  merge_tables(patch,self.bar_start)
   if self.recording then
    bar_data.start=enc_byte_array(self.bar_start)
-   for k,_ in pairs(self.override_params) do
+   for k,_ in pairs(op) do
     bar_data.events[k]=nil
    end
    self.bars[i]=bar_data
   end
 
   self.bar_events=map_table(bar_data.events,dec_byte_array)
-  self.state=copy_table(self.bar_start)
   self.bar=1
   self.tick=1
  end
 
- timeline.next_tick=function(self,i)
+ timeline.next_tick=function(self,patch)
   self.tick+=1
   local tick=self.tick
   local op=self.override_params
   if tick>16 then
    if self.looping and self.bar==self.loop_start+self.loop_end-1 then
-    return self:load_bar(next_bar)
+    self:load_bar(next_bar,patch,self.loop_start)
+   else
+    self:load_bar(next_bar,patch,self.bar+1)
    end
   end
   for k,v in pairs(self.bar_events) do
-   self.state[k]=v[tick]
+   patch[k]=v[tick]
   end
-  merge_tables(self.state,op)
+  merge_tables(patch,op)
   local bars,bar,bar_events=self.bars,self.bar,self.bar_events
   if self.recording then
    for k,v in pairs(op) do
@@ -80,7 +85,6 @@ function timeline_new(default_start)
  end
 
  timeline._finalize_bar=function(self)
-  print('finalize bar '..self.bar)
   assert(self.bars[self.bar])
   assert(self.bar_start)
   assert(self.bar_events)
@@ -91,6 +95,7 @@ function timeline_new(default_start)
  -- if recording, set in bar events
  timeline.record_event=function(self,k,v)
   self.override_params[k]=v
+  self.has_override=true
  end
 
  timeline.toggle_recording=function(self)
@@ -117,7 +122,6 @@ function timeline_new(default_start)
    end
   end
   self.bars=nbs
-  self:load_bar(self.bar)
   return c
  end
 
@@ -138,7 +142,6 @@ function timeline_new(default_start)
    local bar=self.loop_start+i
    self.bars[bar]=copy_table(seq[i%n+1])
   end
-  self:load_bar(self.bar)
  end
 
  timeline.insert_seq=function(self,seq)
@@ -156,6 +159,10 @@ function timeline_new(default_start)
   end
   self.bars=nbs
   self:paste_seq(seq)
+ end
+
+ timeline.get_serializable=function(self)
+  return pick(self, parse[[{1="bars",2="default_start",3="loop_start",4="loop_len",5="looping"}]])
  end
 
  return timeline

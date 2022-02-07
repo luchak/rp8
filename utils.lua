@@ -1,10 +1,10 @@
 -->8
 -- utils
 
-function log(a,b,c,d)
+function log(...)
  local s=''
- for ss in all({a,b,c,d}) do
-  s..=tostr(ss)..' '
+ for arg in all({...}) do
+  s..=tostr(arg)..' '
  end
  printh(s,'log')
 end
