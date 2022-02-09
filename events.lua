@@ -29,7 +29,6 @@ function timeline_new(default_start, savedata)
 
  timeline.load_bar=function(self,patch,i)
   i=i or self.bar
-  assert(type(i)=='number')
   local bar_data=self.bars[i] or copy_table(self.default_bar)
   local op=self.override_params
   self.bar_start=merge_tables(dec_byte_array(bar_data.start),op)
@@ -84,7 +83,7 @@ function timeline_new(default_start, savedata)
  end
 
  timeline._finalize_bar=function(self)
-  assert(self.bars[self.bar])
+  if (not self.bars[self.bar]) self.bars[self.bar]=copy_table(self.default_bar)
   assert(self.bar_start)
   assert(self.bar_events)
   self.bars[self.bar].events=map_table(self.bar_events,enc_byte_array)
