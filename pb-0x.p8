@@ -842,7 +842,6 @@ function state_new(savedata)
  end
 
  s.load_bar=function(self,i)
-  assert(self.patch)
   local tl=self.tl
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
@@ -912,7 +911,7 @@ function state_new(savedata)
  end
 
  s.go_to_bar=function(self,bar)
-  assert(self.song.song_mode, 'navigation outside of song mode')
+  assert(self.song_mode, 'navigation outside of song mode')
   self:load_bar(mid(1,bar,999))
  end
 
@@ -1479,7 +1478,7 @@ function header_ui_init(ui,yp)
  song_only(
   toggle_new(
    8,yp,231,232,
-   state_make_get('recording'),
+   state_make_get('tl','recording'),
    function(s) s:toggle_recording() end
   ),
   233
@@ -1488,7 +1487,7 @@ function header_ui_init(ui,yp)
   momentary_new(
    16,yp,5,
    function()
-    state:go_to_bar(trn(state.song.looping,state.song.loop_start,1))
+    state:go_to_bar(trn(state.tl.looping,state.tl.loop_start,1))
    end
   ),
   5
