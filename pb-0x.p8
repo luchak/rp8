@@ -1352,7 +1352,7 @@ function pbl_ui_init(ui,key,base_idx,yp)
 
  ui:add_widget(
   momentary_new(16,yp+8,26,function(state,b)
-   transpose_pat(state[key],b)
+   transpose_pat(state.pat_seqs[key],b)
   end)
  )
  ui:add_widget(
