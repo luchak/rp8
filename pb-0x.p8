@@ -153,7 +153,7 @@ end
 -- 96 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
-_schunk,_tgtchunks=96,2
+_schunk,_tgtchunks=96,1
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512
 
@@ -197,7 +197,7 @@ function audio_update()
  -- always generate at least 1
  -- chunk if there is space
  -- and time
- if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.8 then
+ if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding then
   audio_dochunk()
   inbuf+=_schunk
   newchunks+=1
