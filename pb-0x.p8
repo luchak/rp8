@@ -660,7 +660,7 @@ default_seq=parse[[{
 8=0,
 9=0,
 10=128,
-11=128,
+11=1,
 12=128,
 13=64,
 14=64,
@@ -674,7 +674,7 @@ default_seq=parse[[{
 22=0,
 23=0,
 24=128,
-25=128,
+25=1,
 26=128,
 27=64,
 28=64,
@@ -906,7 +906,7 @@ function state_new(savedata)
    local base=syn_base_idx[group]
    self.pat_status[group]={
     on=patch[base+3]>0,
-    idx=base+4,
+    idx=patch[base+4],
    }
   end
  end
