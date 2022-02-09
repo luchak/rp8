@@ -638,6 +638,7 @@ syn_base_idx=parse[[{
 pat_param_idx=parse[[{
  b0=11,
  b1=25,
+ drum=39,
  bd=39,
  sd=39,
  hh=39,
@@ -828,6 +829,7 @@ function state_new(savedata)
   if self.song_mode then
    self.tl:record_event(k,v)
   else
+   self.pat_patch[k]=v
    self.patch[k]=v
   end
  end
@@ -835,7 +837,7 @@ function state_new(savedata)
  s._init_tick=function(self)
   local patch=self.patch
   local nl=sample_rate*(15/(56+patch[1]))
-  local shuf_diff=nl*patch[2]*(0.5-(self.tick&1))
+  local shuf_diff=nl*(patch[2]>>7)*(0.5-(self.tick&1))
   self.note_len,self.base_note_len=flr(0.5+nl+shuf_diff),nl
  end
 
@@ -854,12 +856,13 @@ function state_new(savedata)
  end
 
  s.next_tick=function(self)
+  local tl=self.tl
   if self.song_mode then
-   self.tl:next_tick(self.patch)
+   tl:next_tick(self.patch)
    self.bar,self.tick=tl.bar,tl.tick
   else
    self.tick+=1
-   if (self.tick>16) self.tick=1
+   if (self.tick>16) self:load_bar()
   end
   self:_init_tick()
  end
@@ -880,6 +883,7 @@ function state_new(savedata)
  s.toggle_song_mode=function(self)
   self.song_mode=not self.song_mode
   if (self.playing) self:toggle_playing()
+  self:load_bar()
  end
 
  s._sync_pats=function(self)
@@ -901,7 +905,7 @@ function state_new(savedata)
   for group in all(pat_groups) do
    local base=syn_base_idx[group]
    self.pat_status[group]={
-    on=base+3,
+    on=patch[base+3]>0,
     idx=base+4,
    }
   end
@@ -941,7 +945,7 @@ function state_new(savedata)
    copy_buf_seq=self.tl:copy_seq()
   else
    copy_buf_seq={{
-    start=enc_byte_array(self.pat_seq),
+    start=enc_byte_array(self.pat_patch),
     events={}
    }}
   end
@@ -953,10 +957,10 @@ function state_new(savedata)
   local n=#copy_buf_seq
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
-   self:load_bar()
   else
-   self.pat_seq=dec_byte_array(copy_buf_seq[1].start)
+   self.pat_patch=dec_byte_array(copy_buf_seq[1].start)
   end
+  self:load_bar()
  end
 
  s.insert_seq=function(self)
@@ -1015,7 +1019,7 @@ end
 function state_make_get_set_param_bool(idx)
  return
   function(state) return state.patch[idx]>0 end,
-  function(state,val) state:_apply_diff(idx,trn(val,128, 0)) end
+  function(state,val) state:_apply_diff(idx,trn(val,128,0)) end
 end
 
 function state_make_get_set(a,b)
@@ -1258,7 +1262,7 @@ function toggle_new(x,y,s_off,s_on,get,set)
    return trn(get(state),s_on,s_off)
   end,
   input=function(self,state)
-   set(state,get(state))
+   set(state,not get(state))
   end
  }
 end
@@ -1399,11 +1403,11 @@ function pirc_ui_init(ui,key,yp)
   )
  end
  for k,d in pairs(parse[[{
-  bd={x=16,s=150,b=36},
-  sd={x=40,s=152,b=39},
-  hh={x=64,s=154,b=42},
-  cy={x=88,s=156,b=45},
-  pc={x=112,s=158,b=48}
+  bd={x=16,s=150,b=40},
+  sd={x=40,s=152,b=43},
+  hh={x=64,s=154,b=46},
+  cy={x=88,s=156,b=49},
+  pc={x=112,s=158,b=52}
  }]]) do
   ui:add_widget(
    radio_btn_new(d.x,yp+16,k,d.s,d.s+1,state_make_get_set('drum_sel'))
@@ -1530,7 +1534,7 @@ function header_ui_init(ui,yp)
   local base_idx=syn_base_idx[pt]
   ypc+=yp
   ui:add_widget(
-   toggle_new(64,ypc,22,38,state_make_get_set_param(base_idx+3))
+   toggle_new(64,ypc,22,38,state_make_get_set_param_bool(base_idx+3))
   )
   hdial(104,ypc,base_idx)
   hdial(112,ypc,base_idx+1)
