@@ -21,7 +21,7 @@ function timeline_new(default_start, savedata)
   has_override=false,
   loop_start=1,
   loop_len=4,
-  looping=false,
+  looping=true,
   bar=1
  }
 
@@ -29,6 +29,7 @@ function timeline_new(default_start, savedata)
 
  timeline.load_bar=function(self,patch,i)
   i=i or self.bar
+  assert(type(i)=='number')
   local bar_data=self.bars[i] or copy_table(self.default_bar)
   local op=self.override_params
   self.bar_start=merge_tables(dec_byte_array(bar_data.start),op)
@@ -42,7 +43,7 @@ function timeline_new(default_start, savedata)
   end
 
   self.bar_events=map_table(bar_data.events,dec_byte_array)
-  self.bar=1
+  self.bar=i
   self.tick=1
  end
 
@@ -51,10 +52,10 @@ function timeline_new(default_start, savedata)
   local tick=self.tick
   local op=self.override_params
   if tick>16 then
-   if self.looping and self.bar==self.loop_start+self.loop_end-1 then
-    self:load_bar(next_bar,patch,self.loop_start)
+   if self.looping and self.bar==self.loop_start+self.loop_len-1 then
+    self:load_bar(patch,self.loop_start)
    else
-    self:load_bar(next_bar,patch,self.bar+1)
+    self:load_bar(patch,self.bar+1)
    end
   end
   for k,v in pairs(self.bar_events) do
