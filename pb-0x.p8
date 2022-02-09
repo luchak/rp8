@@ -47,16 +47,16 @@ function _init()
 
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',7,32)
- pbl_ui_init(ui,'b1',19,64)
+ pbl_ui_init(ui,'b1',21,64)
  pirc_ui_init(ui,'drum',96)
 
- pbl0,pbl1=synth_new('b0'),synth_new('b1')
+ pbl0,pbl1=synth_new('b0',7),synth_new('b1',21)
  kick,snare,hh,cy,perc=
-  sweep_new(unpack_split'bd,0.092,0.0126,0.12,0.7,0.7,0.4'),
+  sweep_new(unpack_split'bd,40,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new('sd'),
-  hh_cy_new(unpack_split'hh,1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'cy,1.3,0.5,0.5,0.18,0.3,0.8'),
-  sweep_new(unpack_split'pc,0.12,0.06,0.2,1,0.85,0.6')
+  hh_cy_new(unpack_split'hh,46,1,0.8,0.75,0.35,-1,2'),
+  hh_cy_new(unpack_split'cy,49,1.3,0.5,0.5,0.18,0.3,0.8'),
+  sweep_new(unpack_split'pc,52,0.12,0.06,0.2,1,0.85,0.6')
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
  delay=delay_new(3000,0)
 
@@ -72,35 +72,41 @@ function _init()
  comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.008')
  seq_helper=seq_helper_new(
   state,comp,function()
-   local song,sq=
-    state.song,
-    state.seq
+   local patch,pseq,pstat=
+    state.patch,
+    state.pat_seqs,
+    state.pat_status
    if (not state.playing) return
    local now,nl=state.tick,state.note_len
-   if (sq.b0_on) pbl0:note(state.b0,sq,now,nl)
-   if (sq.b1_on) pbl1:note(state.b1,sq,now,nl)
-   if sq.drum_on then
-    kick:note(state.bd,sq,now,nl)
-    snare:note(state.sd,sq,now,nl)
-    hh:note(state.hh,sq,now,nl)
-    cy:note(state.cy,sq,now,nl)
-    perc:note(state.pc,sq,now,nl)
+   if (pstat.b0.on) pbl0:note(pseq.b0,patch,now,nl)
+   if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
+   if pstat.drum.on then
+    kick:note(pseq.bd,patch,now,nl)
+    snare:note(pseq.sd,patch,now,nl)
+    hh:note(pseq.hh,patch,now,nl)
+    cy:note(pseq.cy,patch,now,nl)
+    perc:note(pseq.pc,patch,now,nl)
    end
-   mixer.lev=sq.mix_lev*3
-   delay.l=(0.9*sq.mix_dl_t+0.1)*sample_rate
-   delay.fb=sqrt(sq.mix_dl_fb)*0.95
+
+   local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
+   local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
+   local b1_lev,b1_od,b1_fx=unpack_patch(patch,21,23)
+   local drum_lev,drum_od,drum_fx=unpack_patch(patch,35,37)
+   mixer.lev=mix_lev*3
+   delay.l=(0.9*dl_t+0.1)*sample_rate
+   delay.fb=sqrt(dl_fb)*0.95
 
    local ms=mixer.srcs
-   ms.b0.lev=sq.b0_lev
-   ms.b1.lev=sq.b1_lev
-   ms.drum.lev=sq.drum_lev*2
-   ms.b0.od=sq.b0_od
-   ms.b1.od=sq.b1_od
-   ms.drum.od=sq.drum_od
-   ms.b0.fx=sq.b0_fx^2*0.8
-   ms.b1.fx=sq.b1_fx^2*0.8
-   ms.drum.fx=sq.drum_fx^2*0.8
-   comp.thresh=0.1+0.9*sq.mix_comp_thresh
+   ms.b0.lev=b0_lev
+   ms.b1.lev=b1_lev
+   ms.drum.lev=drum_lev*2
+   ms.b0.od=b0_od
+   ms.b1.od=b1_od
+   ms.drum.od=drum_od
+   ms.b0.fx=b0_fx^2*0.8
+   ms.b1.fx=b1_fx^2*0.8
+   ms.drum.fx=drum_fx^2*0.8
+   comp.thresh=0.1+0.9*comp_thresh
 
    state:next_tick()
   end
@@ -132,8 +138,8 @@ end
 function _draw()
  ui:draw(state)
 
- rectfill(0,0,30,6,0)
- print(stat(0),0,0,7)
+ --rectfill(0,0,30,6,0)
+ --print(stat(0),0,0,7)
  palt(0,false)
 end
 
@@ -202,11 +208,7 @@ end
 
 --fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
-syn_pars,drum_pars=
- split'cut,res,env,acc,dec,tun,saw',
- split'lev,tun,dec'
-
-function synth_new(name)
+function synth_new(name,base)
  -- simple saw wave synth
  -- filter:
  --  karlsen fast ladder iii
@@ -243,23 +245,23 @@ function synth_new(name)
   _lsl=false
  }]]
 
- obj.note=function(self,pat,seq,step,note_len)
-  local patstep,par=
-   pat.steps[step],
-   pick_prefix(seq,name,syn_pars)
+ obj.note=function(self,pat,patch,step,note_len)
+  assert(step<=16)
+  local patstep=pat.steps[step]
+  local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
-  self.fc=(100/sample_rate)*(2^(4*par.cut))/self.os
-  self.fr=par.res*4.4+0.1
-  self.env=par.env*par.env+0.1
-  self.acc=par.acc*1.9+0.1
-  self.saw=par.saw
-  local pd=par.dec-1
+  self.fc=(100/sample_rate)*(2^(4*cut))/self.os
+  self.fr=res*4.4+0.1
+  self.env=env*env+0.1
+  self.acc=acc*1.9+0.1
+  self.saw=saw>0
+  local pd=dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
   self._med=0.999-0.01*pd*pd*pd*pd
   self._nt,self._nl=0,note_len
   self._lsl=self._sl
   self._gate=false
-  self.detune=semitone^(flr(24*(par.tun-0.5)+0.5))
+  self.detune=semitone^(flr(24*(tun-0.5)+0.5))
   self._ac=patstep==n_ac or patstep==n_ac_sl
   self._sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off) return
@@ -269,7 +271,7 @@ function synth_new(name)
   --ordered for numeric safety
   self.todp=(f/self.os)/(sample_rate>>8)
 
-  if (self._ac) self.env+=par.acc
+  if (self._ac) self.env+=acc
   if self._lsl then
    self.todpr=0.015
   else
@@ -343,7 +345,7 @@ function synth_new(name)
  return obj
 end
 
-function sweep_new(name,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
+function sweep_new(name,base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  local obj=parse[[{
   op=0,
   dp=6553.6,
@@ -354,14 +356,15 @@ function sweep_new(name,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   detune=1.0
  }]]
 
- obj.note=function(self,pat,seq,step,note_len)
-  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
+ obj.note=function(self,pat,patch,step,note_len)
+  local s=pat.steps[step]
+  local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
-   self.detune=2^(1.5*par.tun-0.75)
+   self.detune=2^(1.5*tun-0.75)
    self.op,self.dp=0,(_dp0<<16)*self.detune
-   self.ae=par.lev*par.lev*boost*trn(s==d_ac,1.5,0.6)
+   self.ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
    self.aemax=0.5*self.ae
-   self.ted=0.5*((te_base-te_scale*par.dec)^4)
+   self.ted=0.5*((te_base-te_scale*dec)^4)
    self.aed=1-ae_ratio*self.ted
   end
  end
@@ -395,19 +398,20 @@ function snare_new(name)
   aemax=0.4
  }]]
  
- obj.note=function(self,pat,seq,step,note_len)
-  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
+ obj.note=function(self,pat,patch,step,note_len)
+  local s=pat.steps[step]
+  local tun,dec,lev=unpack_patch(patch,43,45)
   if s!=d_off then
-   self.detune=2^(2*par.tun-1)
+   self.detune=2^(2*tun-1)
    self.op,self.dp=0,self.dp0*self.detune
    self.aes,self.aen=0.7,0.4
    if (s==d_ac) self.aes,self.aen=1.5,0.85
-   self.aes+=(par.tun-0.5)*-0.2
-   self.aen+=(par.tun-0.5)*0.2
-   self.aes*=par.lev*par.lev
-   self.aen*=par.lev*par.lev
+   self.aes+=(tun-0.5)*-0.2
+   self.aen+=(tun-0.5)*0.2
+   self.aes*=lev*lev
+   self.aen*=lev*lev
    self.aemax=self.aes*0.5
-   local pd4=(0.65-0.25*par.dec)^4
+   local pd4=(0.65-0.25*dec)^4
    self.aesd=1-0.1*pd4
    self.aend=1-0.04*pd4
   end
@@ -431,7 +435,7 @@ function snare_new(name)
  return obj
 end
 
-function hh_cy_new(name,_nlev,_tlev,dbase,dscale,tbase,tscale)
+function hh_cy_new(name,base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj=parse[[{
   ae=0.0,
   f1=0.0,
@@ -448,14 +452,15 @@ function hh_cy_new(name,_nlev,_tlev,dbase,dscale,tbase,tscale)
   detune=1
  }]]
  
- obj.note=function(self,pat,seq,step,note_len)
-  local s,par=pat.steps[step],pick_prefix(seq,name,drum_pars)
+ obj.note=function(self,pat,patch,step,note_len)
+  local s=pat.steps[step]
+  local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
    self.op,self.dp=0,self.dp0
-   self.ae=par.lev*par.lev*trn(s==d_ac,2.0,0.8)
+   self.ae=lev*lev*trn(s==d_ac,2.0,0.8)
 
-   self.detune=2^(tbase+tscale*par.tun)
-   local pd4=(dbase-dscale*par.dec)
+   self.detune=2^(tbase+tscale*tun)
+   local pd4=(dbase-dscale*dec)
    pd4*=pd4*pd4*pd4
 
    self.aed=1-0.04*pd4
@@ -621,23 +626,23 @@ drum_synths=split'bd,sd,hh,cy,pc'
 
 syn_base_idx=parse[[{
  b0=7,
- b1=19,
- drum=31,
- bd=36,
- sd=39,
- hh=42,
- cy=45,
- pc=48,
+ b1=21,
+ drum=35,
+ bd=40,
+ sd=43,
+ hh=46,
+ cy=49,
+ pc=52,
 }]]
 
 pat_param_idx=parse[[{
  b0=11,
- b1=23,
- bd=35,
- sd=35,
- hh=35,
- cy=35,
- pc=35
+ b1=25,
+ bd=39,
+ sd=39,
+ hh=39,
+ cy=39,
+ pc=39
 }]]
 
 -- float values: 0=>0,128=>1
@@ -663,26 +668,26 @@ default_seq=parse[[{
 17=64,
 18=64,
 19=64,
-20=0,
-21=0,
-22=128,
-23=128,
+20=64,
+21=64,
+22=0,
+23=0,
 24=128,
-25=64,
-26=64,
+25=128,
+26=128,
 27=64,
 28=64,
 29=64,
 30=64,
 31=64,
-32=0,
-33=0,
-34=128,
-35=1,
-36=64,
-37=64,
-38=64,
-39=64,
+32=64,
+33=64,
+34=64,
+35=64,
+36=0,
+37=0,
+38=128,
+39=1,
 40=64,
 41=64,
 42=64,
@@ -694,6 +699,10 @@ default_seq=parse[[{
 48=64,
 49=64,
 50=64,
+51=64,
+52=64,
+53=64,
+54=64,
 }]]
  -- 01 mix_tempo=0.5,
  -- 02 mix_shuf=0,
@@ -713,38 +722,42 @@ default_seq=parse[[{
  -- 16 b0_env=0.5,
  -- 17 b0_dec=0.5,
  -- 18 b0_acc=0.5,
- -- 19 b1_lev=0.5,
- -- 20 b1_od=0,
- -- 21 b1_fx=0,
- -- 22 b1_on=true,
- -- 23 b1_pat=1,
- -- 24 b1_saw=true,
- -- 25 b1_tun=0.5,
- -- 26 b1_cut=0.5,
- -- 27 b1_res=0.5,
- -- 28 b1_env=0.5,
- -- 29 b1_dec=0.5,
- -- 30 b1_acc=0.5,
- -- 31 drum_lev=0.5,
- -- 32 drum_od=0,
- -- 33 drum_fx=0,
- -- 34 drum_on=true,
- -- 35 drum_pat=1,
- -- 36 bd_tun=0.5,
- -- 37 bd_dec=0.5,
- -- 38 bd_lev=0.5,
- -- 39 sd_tun=0.5,
- -- 40 sd_dec=0.5,
- -- 41 sd_lev=0.5,
- -- 42 hh_tun=0.5,
- -- 43 hh_dec=0.5,
- -- 44 hh_lev=0.5,
- -- 45 cy_tun=0.5,
- -- 46 cy_dec=0.5,
- -- 47 cy_lev=0.5,
- -- 48 pc_tun=0.5,
- -- 49 pc_dec=0.5,
- -- 50 pc_lev=0.5,
+ -- 19 b0_??=0.5,
+ -- 20 b0_??=0.5,
+ -- 21 b1_lev=0.5,
+ -- 22 b1_od=0,
+ -- 23 b1_fx=0,
+ -- 24 b1_on=true,
+ -- 25 b1_pat=1,
+ -- 26 b1_saw=true,
+ -- 27 b1_tun=0.5,
+ -- 28 b1_cut=0.5,
+ -- 29 b1_res=0.5,
+ -- 30 b1_env=0.5,
+ -- 31 b1_dec=0.5,
+ -- 32 b1_acc=0.5,
+ -- 33 b1_??=0.5,
+ -- 34 b1_??=0.5,
+ -- 35 drum_lev=0.5,
+ -- 36 drum_od=0,
+ -- 37 drum_fx=0,
+ -- 38 drum_on=true,
+ -- 39 drum_pat=1,
+ -- 40 bd_tun=0.5,
+ -- 41 bd_dec=0.5,
+ -- 42 bd_lev=0.5,
+ -- 43 sd_tun=0.5,
+ -- 44 sd_dec=0.5,
+ -- 45 sd_lev=0.5,
+ -- 46 hh_tun=0.5,
+ -- 47 hh_dec=0.5,
+ -- 48 hh_lev=0.5,
+ -- 49 cy_tun=0.5,
+ -- 50 cy_dec=0.5,
+ -- 51 cy_lev=0.5,
+ -- 52 pc_tun=0.5,
+ -- 53 pc_dec=0.5,
+ -- 54 pc_lev=0.5,
 
 -- patterns:
 --  saved
@@ -823,8 +836,7 @@ function state_new(savedata)
   local patch=self.patch
   local nl=sample_rate*(15/(56+patch[1]))
   local shuf_diff=nl*patch[2]*(0.5-(self.tick&1))
-  self.note_len,self.base_note_len=
-   flr(0.5+nl+shuf_diff),nl
+  self.note_len,self.base_note_len=flr(0.5+nl+shuf_diff),nl
  end
 
  s.load_bar=function(self,i)
@@ -847,6 +859,7 @@ function state_new(savedata)
    self.bar,self.tick=tl.bar,tl.tick
   else
    self.tick+=1
+   if (self.tick>16) self.tick=1
   end
   self:_init_tick()
  end
@@ -857,7 +870,7 @@ function state_new(savedata)
    if (tl.recording) tl:toggle_recording()
   end
   self:load_bar()
-  t.playing=not t.playing
+  self.playing=not self.playing
  end
 
  s.toggle_recording=function(self)

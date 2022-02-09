@@ -17,14 +17,6 @@ function pick(t,keys)
  return r
 end
 
-function pick_prefix(t,prefix,suffixes)
- local r={}
- for s in all(suffixes) do
-  r[s]=t[prefix..'_'..s]
- end
- return r
-end
-
 function die(msg)
  assert(false,msg)
 end
@@ -206,3 +198,14 @@ function map_table(a,f)
  end
  return r
 end
+
+function unpack_patch(patch,first,last)
+ local r,idx={},1
+ for i=first,last do
+  -- shift back to 0-1 range
+  r[idx]=patch[i]>>7
+  idx+=1
+ end
+ return unpack(r)
+end
+
