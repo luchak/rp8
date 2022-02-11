@@ -856,11 +856,12 @@ function state_new(savedata)
   self:_sync_pats()
   self:_init_tick()
  end
+ local load_bar=function(i) s:load_bar(i) end
 
  s.next_tick=function(self)
   local tl=self.tl
   if self.song_mode then
-   tl:next_tick(self.patch)
+   tl:next_tick(self.patch, load_bar)
    self.bar,self.tick=tl.bar,tl.tick
   else
    self.tick+=1
@@ -873,6 +874,7 @@ function state_new(savedata)
   local tl=self.tl
   if self.playing then
    if (tl.recording) tl:toggle_recording()
+   tl.override_params={}
   end
   self:load_bar()
   self.playing=not self.playing
