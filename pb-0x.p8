@@ -649,7 +649,7 @@ pat_param_idx=parse[[{
 -- float values: 0=>0,128=>1
 -- bool values: 0=>false,128 (or any nonzero)=>true
 -- int values: identity map
-default_seq=parse[[{
+default_patch=parse[[{
 1=64,
 2=0,
 3=64,
@@ -812,13 +812,13 @@ function state_new(savedata)
   song_mode=false,
  }]]
 
- s.tl=timeline_new(default_seq)
- s.pat_patch=copy_table(default_seq)
+ s.tl=timeline_new(default_patch)
+ s.pat_patch=copy_table(default_patch)
  s.patch={}
  s.pat_seqs={}
  s.pat_status={}
  if savedata then
-  s.tl=timeline_new(savedata.tl)
+  s.tl=timeline_new(default_patch,savedata.tl)
   s.pat_patch=savedata.pat_patch
   s.song_mode=savedata.song_mode
   s.pat_storage=savedata.pat_storage

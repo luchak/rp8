@@ -12,11 +12,11 @@
 -- everything is passed in as a number array
 -- a new bar is just an array of n_params numbers
 -- an event is a (param, value) pair
-function timeline_new(default_start, savedata)
+function timeline_new(default_patch, savedata)
  local timeline={
   bars={},
   override_params={},
-  default_bar={start=enc_byte_array(default_start),events={}},
+  default_bar={start=enc_byte_array(default_patch),events={}},
   recording=false,
   has_override=false,
   loop_start=1,
@@ -53,9 +53,11 @@ function timeline_new(default_start, savedata)
   if tick>16 then
    if self.looping and self.bar==self.loop_start+self.loop_len-1 then
     self:load_bar(patch,self.loop_start)
+    if (self.recording) self.override_params={}
    else
     self:load_bar(patch,self.bar+1)
    end
+   return
   end
   for k,v in pairs(self.bar_events) do
    patch[k]=v[tick]
