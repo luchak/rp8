@@ -831,6 +831,7 @@ function state_new(savedata)
   self.patch[k]=v
   if self.song_mode then
    self.tl:record_event(k,v)
+   if (not self.playing) self:load_bar()
   else
    self.pat_patch[k]=v
    self.patch[k]=v
