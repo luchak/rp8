@@ -140,6 +140,9 @@ function _draw()
 
  --rectfill(0,0,30,6,0)
  --print(stat(0),0,0,7)
+ --rectfill(0,0,30,12,0)
+ --print(stat(1),0,0,7)
+ --print(stat(2),0,6,7)
  palt(0,false)
 end
 
@@ -153,7 +156,7 @@ end
 -- 96 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
-_schunk,_tgtchunks=96,1
+_schunk,_tgtchunks=100,1
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512
 
@@ -187,7 +190,7 @@ end
 function audio_update()
  local bufsize,inbuf,newchunks=stat(109),stat(108),0
 
- while inbuf<bufsize do
+ while inbuf<_schunk do
   log'behind'
   audio_dochunk()
   newchunks+=1
@@ -197,7 +200,7 @@ function audio_update()
  -- always generate at least 1
  -- chunk if there is space
  -- and time
- if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding then
+ if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.3 then
   audio_dochunk()
   inbuf+=_schunk
   newchunks+=1
