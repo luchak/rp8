@@ -135,7 +135,6 @@ function timeline_new(default_patch, savedata)
    local bar=i+self.loop_start-1
    c[i]=copy_table(bars[bar] or self.default_bar)
   end
-  log('copied',stringify(c))
   return c
  end
 
@@ -161,9 +160,7 @@ function timeline_new(default_patch, savedata)
    end
   end
   self.bars=nbs
-  log('nbs',stringify(self.bars))
   self:paste_seq(seq)
-  log('post paste',stringify(self.bars))
  end
 
  timeline.get_serializable=function(self)
