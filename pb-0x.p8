@@ -1576,10 +1576,10 @@ function header_ui_init(ui,yp)
  song_only(
   momentary_new(80,yp,192,
    function(state,b)
-    local s=state.song
-    local ns=s.loop_start+b
-    s.loop_start=mid(1,ns,999)
-    s.loop_len=mid(1,s.loop_len,1000-ns)
+    local tl=state.tl
+    local ns=tl.loop_start+b
+    tl.loop_start=mid(1,ns,999)
+    tl.loop_len=mid(1,tl.loop_len,1000-ns)
    end
   ),
   197
@@ -1590,8 +1590,8 @@ function header_ui_init(ui,yp)
  song_only(
   momentary_new(96,yp,192,
    function(state,b)
-    local s=state.song
-    s.loop_len=mid(1,s.loop_len+b,1000-s.loop_start)
+    local tl=state.tl
+    tl.loop_len=mid(1,tl.loop_len+b,1000-tl.loop_start)
    end
   ),
   197
