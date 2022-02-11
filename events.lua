@@ -114,10 +114,12 @@ function timeline_new(default_patch, savedata)
 
  timeline.cut_seq=function(self)
   assert(not self.recording)
-  local c=self:copy_seq(cut_start,cut_end)
+  local ls,ll=self.loop_start,self.loop_len
+  local cut_end=ls+ll
+  local c=self:copy_seq()
   local nbs={}
   for i,b in pairs(self.bars) do
-   if i>=cut_start then
+   if i>=ls then
     if i>=cut_end then
      nbs[i-ll]=b
     end
