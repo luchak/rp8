@@ -113,7 +113,6 @@ function timeline_new(default_patch, savedata)
  end
 
  timeline.cut_seq=function(self)
-  assert(not self.recording)
   local ls,ll=self.loop_start,self.loop_len
   local cut_end=ls+ll
   local c=self:copy_seq()

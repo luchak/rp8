@@ -942,6 +942,7 @@ function state_new(savedata)
  end
 
  s.cut_seq=function(self)
+  if (self.playing) self:toggle_playing()
   copy_buf_seq=self.tl:cut_seq()
   self:load_bar()
  end
