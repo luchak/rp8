@@ -6,6 +6,8 @@
  so that's 8*(64/n+2^ceil(log_2 kn)/n) -> (512+2^(3+ceil(log_2 k + log_2 n)))/n bytes per bar
 ]]
 
+no_event_params=parse[[{10=true,11=true,24=true,25=true,38=true,39=true}]]
+
 -- a bar is
 -- snapshot: string
 -- events: table<k=param_idx, v=event_string>
@@ -52,8 +54,8 @@ function timeline_new(default_patch, savedata)
   local op=self.override_params
   if tick>16 then
    if self.looping and self.bar==self.loop_start+self.loop_len-1 then
-    load_bar(self.loop_start)
     if (self.recording) self.override_params={}
+    load_bar(self.loop_start)
    else
     load_bar(self.bar+1)
    end
@@ -66,16 +68,18 @@ function timeline_new(default_patch, savedata)
   local bars,bar,bar_events=self.bars,self.bar,self.bar_events
   if self.recording then
    for k,v in pairs(op) do
-    local ek,bsk=bar_events[k],self.bar_start[k]
-    if v!=bsk then
-     if not ek then
-      ek={}
-      for i=1,16 do
-       ek[i]=bsk
+    if not no_event_params[k] then
+     local ek,bsk=bar_events[k],self.bar_start[k]
+     if v!=bsk then
+      if not ek then
+       ek={}
+       for i=1,16 do
+        ek[i]=bsk
+       end
+       bar_events[k]=ek
       end
-      bar_events[k]=ek
+      ek[tick]=v
      end
-     ek[tick]=v
     end
    end
    if tick==16 then
