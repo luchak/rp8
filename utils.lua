@@ -93,10 +93,13 @@ function stringify(v)
 end
 
 function make_reader(s)
- local p,n=0,#s
+ local p=0
  return function(inc)
   p+=inc or 1
-  if (p>n) return ''
+  if p>0x4000 then
+   s=sub(s,0x4001)
+   p-=0x4000
+  end
   return sub(s,p,p)
  end
 end
