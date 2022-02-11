@@ -46,16 +46,16 @@ function timeline_new(default_patch, savedata)
   self.tick=1
  end
 
- timeline.next_tick=function(self,patch)
+ timeline.next_tick=function(self,patch,load_bar)
   self.tick+=1
   local tick=self.tick
   local op=self.override_params
   if tick>16 then
    if self.looping and self.bar==self.loop_start+self.loop_len-1 then
-    self:load_bar(patch,self.loop_start)
+    load_bar(self.loop_start)
     if (self.recording) self.override_params={}
    else
-    self:load_bar(patch,self.bar+1)
+    load_bar(self.bar+1)
    end
    return
   end
