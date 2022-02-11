@@ -21,6 +21,7 @@ function paste_state()
  audio_set_root(nil)
  local pd=stat(4)
  if pd!='' then
+  log('paste',#pd)
   state=state_load(pd) or state
   seq_helper.state=state
  end
