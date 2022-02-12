@@ -18,12 +18,12 @@ function timeline_new(default_patch, savedata)
  local timeline={
   bars={},
   override_params={},
-  default_bar={start=enc_byte_array(default_patch),events={}},
+  def_bar={t0=enc_byte_array(default_patch),ev={}},
   recording=false,
   has_override=false,
   loop_start=1,
   loop_len=4,
-  looping=true,
+  loop=true,
   bar=1
  }
 
@@ -31,19 +31,19 @@ function timeline_new(default_patch, savedata)
 
  timeline.load_bar=function(self,patch,i)
   i=i or self.bar
-  local bar_data=self.bars[i] or copy_table(self.default_bar)
+  local bar_data=self.bars[i] or copy_table(self.def_bar)
   local op=self.override_params
-  self.bar_start=merge_tables(dec_byte_array(bar_data.start),op)
+  self.bar_start=merge_tables(dec_byte_array(bar_data.t0),op)
   merge_tables(patch,self.bar_start)
   if self.recording then
-   bar_data.start=enc_byte_array(self.bar_start)
+   bar_data.t0=enc_byte_array(self.bar_start)
    for k,_ in pairs(op) do
-    bar_data.events[k]=nil
+    bar_data.ev[k]=nil
    end
    self.bars[i]=bar_data
   end
 
-  self.bar_events=map_table(bar_data.events,dec_byte_array)
+  self.bar_events=map_table(bar_data.ev,dec_byte_array)
   self.bar=i
   self.tick=1
  end
@@ -53,7 +53,7 @@ function timeline_new(default_patch, savedata)
   local tick=self.tick
   local op=self.override_params
   if tick>16 then
-   if self.looping and self.bar==self.loop_start+self.loop_len-1 then
+   if self.loop and self.bar==self.loop_start+self.loop_len-1 then
     if (self.recording) self.override_params={}
     load_bar(self.loop_start)
    else
@@ -89,10 +89,10 @@ function timeline_new(default_patch, savedata)
  end
 
  timeline._finalize_bar=function(self)
-  if (not self.bars[self.bar]) self.bars[self.bar]=copy_table(self.default_bar)
+  if (not self.bars[self.bar]) self.bars[self.bar]=copy_table(self.def_bar)
   assert(self.bar_start)
   assert(self.bar_events)
-  self.bars[self.bar].events=map_table(self.bar_events,enc_byte_array)
+  self.bars[self.bar].ev=map_table(self.bar_events,enc_byte_array)
  end
 
  -- add to overrides
@@ -134,7 +134,7 @@ function timeline_new(default_patch, savedata)
   local c,bars={},self.bars
   for i=1,self.loop_len do
    local bar=i+self.loop_start-1
-   c[i]=copy_table(bars[bar] or self.default_bar)
+   c[i]=copy_table(bars[bar] or self.def_bar)
   end
   return c
  end
@@ -165,7 +165,7 @@ function timeline_new(default_patch, savedata)
  end
 
  timeline.get_serializable=function(self)
-  return pick(self, parse[[{1="bars",2="default_bar",3="loop_start",4="loop_len",5="looping"}]])
+  return pick(self, parse[[{1="bars",2="def_bar",3="loop_start",4="loop_len",5="loop"}]])
  end
 
  return timeline

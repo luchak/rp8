@@ -48,7 +48,7 @@ function _init()
  header_ui_init(ui,0)
  pbl_ui_init(ui,'b0',7,32)
  pbl_ui_init(ui,'b1',21,64)
- pirc_ui_init(ui,'drum',96)
+ pirc_ui_init(ui,'dr',96)
 
  pbl0,pbl1=synth_new('b0',7),synth_new('b1',21)
  kick,snare,hh,cy,perc=
@@ -64,7 +64,7 @@ function _init()
   {
    b0={obj=pbl0,lev=0.5,od=0.0,fx=0},
    b1={obj=pbl1,lev=0.5,od=0.5,fx=0},
-   drum={obj=drum_mixer,lev=0.5,od=0.5,fx=0},
+   dr={obj=drum_mixer,lev=0.5,od=0.5,fx=0},
   },
   delay,
   1.0
@@ -80,8 +80,8 @@ function _init()
    local now,nl=state.tick,state.note_len
    if (pstat.b0.on) pbl0:note(pseq.b0,patch,now,nl)
    if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
-   if pstat.drum.on then
-    local dseq=pseq.drum
+   if pstat.dr.on then
+    local dseq=pseq.dr
     kick:note(dseq.bd,patch,now,nl)
     snare:note(dseq.sd,patch,now,nl)
     hh:note(dseq.hh,patch,now,nl)
@@ -100,13 +100,13 @@ function _init()
    local ms=mixer.srcs
    ms.b0.lev=b0_lev
    ms.b1.lev=b1_lev
-   ms.drum.lev=drum_lev*2
+   ms.dr.lev=drum_lev*2
    ms.b0.od=b0_od
    ms.b1.od=b1_od
-   ms.drum.od=drum_od
+   ms.dr.od=drum_od
    ms.b0.fx=b0_fx^2*0.8
    ms.b1.fx=b1_fx^2*0.8
-   ms.drum.fx=drum_fx^2*0.8
+   ms.dr.fx=drum_fx^2*0.8
    comp.thresh=0.1+0.9*comp_thresh
 
    state:next_tick()
@@ -251,7 +251,7 @@ function synth_new(name,base)
 
  obj.note=function(self,pat,patch,step,note_len)
   assert(step<=16)
-  local patstep=pat.steps[step]
+  local patstep=pat.st[step]
   local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
   self.fc=(100/sample_rate)*(2^(4*cut))/self.os
@@ -271,7 +271,7 @@ function synth_new(name,base)
   if (patstep==n_off) return
 
   self._gate=true
-  local f=55*(semitone^(pat.notes[step]+3))
+  local f=55*(semitone^(pat.nt[step]+3))
   --ordered for numeric safety
   self.todp=(f/self.os)/(sample_rate>>8)
 
@@ -624,13 +624,13 @@ end
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
-pat_groups=split'b0,b1,drum'
+pat_groups=split'b0,b1,dr'
 drum_synths=split'bd,sd,hh,cy,pc'
 
 syn_base_idx=parse[[{
  b0=7,
  b1=21,
- drum=35,
+ dr=35,
  bd=40,
  sd=43,
  hh=46,
@@ -641,7 +641,7 @@ syn_base_idx=parse[[{
 pat_param_idx=parse[[{
  b0=11,
  b1=25,
- drum=39,
+ dr=39,
 }]]
 
 -- float values: 0=>0,128=>1
@@ -737,11 +737,11 @@ default_patch=parse[[{
  -- 32 b1_acc=0.5,
  -- 33 b1_??=0.5,
  -- 34 b1_??=0.5,
- -- 35 drum_lev=0.5,
- -- 36 drum_od=0,
- -- 37 drum_fx=0,
- -- 38 drum_on=true,
- -- 39 drum_pat=1,
+ -- 35 dr_lev=0.5,
+ -- 36 dr_od=0,
+ -- 37 dr_fx=0,
+ -- 38 dr_on=true,
+ -- 39 dr_pat=1,
  -- 40 bd_tun=0.5,
  -- 41 bd_dec=0.5,
  -- 42 bd_lev=0.5,
@@ -759,8 +759,8 @@ default_patch=parse[[{
  -- 54 pc_lev=0.5,
 
 pbl_pat_template=parse[[{
- notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
- steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
+ st={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
 }]]
 
 drum_pat_template=parse[[{
@@ -773,7 +773,7 @@ drum_pat_template=parse[[{
 
 function state_new(savedata)
  local s=parse[[{
-  pat_storage={},
+  pat_store={},
   tick=1,
   playing=false,
   base_note_len=750,
@@ -781,7 +781,7 @@ function state_new(savedata)
   drum_sel="bd",
   b0_bank=1,
   b1_bank=1,
-  drum_bank=1,
+  dr_bank=1,
   song_mode=false,
  }]]
 
@@ -794,7 +794,7 @@ function state_new(savedata)
   s.tl=timeline_new(default_patch,savedata.tl)
   s.pat_patch=dec_byte_array(savedata.pat_patch)
   s.song_mode=savedata.song_mode
-  s.pat_storage=map_table_deep(savedata.pat_storage,dec_byte_array,2)
+  s.pat_store=map_table_deep(savedata.pat_store,dec_byte_array,2)
  end
 
  s._apply_diff=function(self,k,v)
@@ -862,12 +862,12 @@ function state_new(savedata)
  end
 
  s._sync_pats=function(self)
-  local ps,patch=self.pat_storage,self.patch
+  local ps,patch=self.pat_store,self.patch
   for syn,param_idx in pairs(pat_param_idx) do
    local syn_pats=ps[syn]
    if not syn_pats then
     syn_pats={}
-    self.pat_storage[syn]=syn_pats
+    self.pat_store[syn]=syn_pats
    end
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
@@ -893,7 +893,7 @@ function state_new(savedata)
 
  s.get_pat_steps=function(self,syn)
   -- assume pats are aliased, always editing current
-  if (syn=='drum') return self.pat_seqs.drum[self.drum_sel] else return self.pat_seqs[syn].steps
+  if (syn=='dr') return self.pat_seqs.dr[self.drum_sel] else return self.pat_seqs[syn].st
  end
 
  s.set_bank=function(self,syn,bank)
@@ -905,7 +905,7 @@ function state_new(savedata)
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
    pat_patch=enc_byte_array(self.pat_patch),
-   pat_storage=map_table_deep(self.pat_storage,enc_byte_array,2)
+   pat_store=map_table_deep(self.pat_store,enc_byte_array,2)
   })
  end
 
@@ -956,7 +956,7 @@ end
 
 function transpose_pat(pat,d)
  for i=1,16 do
-  pat.notes[i]=mid(0,pat.notes[i]+d,35)
+  pat.nt[i]=mid(0,pat.nt[i]+d,35)
  end
 end
 
@@ -1154,10 +1154,10 @@ function pbl_note_btn_new(x,y,syn,step)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   return 64+state.pat_seqs[syn].notes[step]
+   return 64+state.pat_seqs[syn].nt[step]
   end,
   input=function(self,state,b)
-   local n=state.pat_seqs[syn].notes
+   local n=state.pat_seqs[syn].nt
    n[step]=mid(0,36,n[step]+b)
   end
  }
@@ -1381,12 +1381,12 @@ function pirc_ui_init(ui,key,yp)
 
   ui:add_widget(
    momentary_new(0,yp+16,11,function(state,b)
-    copy_buf_pirc=copy_table(state.pat_seqs['drum'])
+    copy_buf_pirc=copy_table(state.pat_seqs['dr'])
    end)
   )
   ui:add_widget(
    momentary_new(8,yp+16,10,function(state,b)
-    merge_tables(state.pat_seqs['drum'],copy_buf_pirc)
+    merge_tables(state.pat_seqs['dr'],copy_buf_pirc)
    end)
   )
 
@@ -1433,7 +1433,7 @@ function header_ui_init(ui,yp)
   momentary_new(
    16,yp,5,
    function()
-    state:go_to_bar(trn(state.tl.looping,state.tl.loop_start,1))
+    state:go_to_bar(trn(state.tl.loop,state.tl.loop_start,1))
    end
   ),
   5
@@ -1475,7 +1475,7 @@ function header_ui_init(ui,yp)
   hdial(unpack_split(s))
  end
 
- for pt,ypc in pairs(parse[[{b0=8,b1=16,drum=24}]]) do
+ for pt,ypc in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
   local base_idx=syn_base_idx[pt]
   ypc+=yp
   ui:add_widget(
@@ -1506,7 +1506,7 @@ function header_ui_init(ui,yp)
   197
  )
  song_only(
-  toggle_new(56,yp,193,194,state_make_get_set('tl','looping')),
+  toggle_new(56,yp,193,194,state_make_get_set('tl','loop')),
   195
  )
  ui:add_widget(
