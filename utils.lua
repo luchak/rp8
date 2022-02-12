@@ -72,9 +72,9 @@ function stringify(v)
  end
 end
 
-function make_reader(s)
+function parse(s)
  local p=0
- return function(inc)
+ local reader=function(inc)
   p+=inc or 1
   if p>0x6000 then
    s=sub(s,0x4001)
@@ -82,10 +82,7 @@ function make_reader(s)
   end
   return sub(s,p,p)
  end
-end
-
-function parse(s)
- return _parse(make_reader(s))
+ return _parse(reader)
 end
 
 function is_digit(c)
@@ -172,6 +169,11 @@ function dec_byte_array(s)
   a[i]=ord(s,i)
  end
  return a
+end
+
+function map_table_deep(a,f,d)
+ if (d==0) return map_table(a,f)
+ return map_table(a,function(v) return map_table_deep(v,f,d-1) end)
 end
 
 function map_table(a,f)

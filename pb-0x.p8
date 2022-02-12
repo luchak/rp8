@@ -792,10 +792,9 @@ function state_new(savedata)
  s.pat_status={}
  if savedata then
   s.tl=timeline_new(default_patch,savedata.tl)
-  s.pat_patch=savedata.pat_patch
-  s.song_mode=savedata.song_mode
-  s.pat_storage=savedata.pat_storage
   s.pat_patch=dec_byte_array(savedata.pat_patch)
+  s.song_mode=savedata.song_mode
+  s.pat_storage=map_table_deep(savedata.pat_storage,dec_byte_array,2)
  end
 
  s._apply_diff=function(self,k,v)
@@ -905,8 +904,8 @@ function state_new(savedata)
   return 'rp80'..stringify({
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
-   pat_patch=self.pat_patch,
-   pat_storage=self.pat_storage
+   pat_patch=enc_byte_array(self.pat_patch),
+   pat_storage=map_table_deep(self.pat_storage,enc_byte_array,2)
   })
  end
 
