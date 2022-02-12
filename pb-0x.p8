@@ -258,7 +258,7 @@ function synth_new(base)
   local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
   self.fc=(100/sample_rate)*(2^(4*cut))/self.os
-  self.fr=res*4.4+0.1
+  self.fr=res*4.9+0.1
   self.env=env*env+0.1
   self.acc=acc*1.9+0.1
   self.saw=saw>0
