@@ -159,7 +159,7 @@ end
 -- on machines i have tested on
 _schunk,_tgtchunks=100,1
 _bufpadding,_chunkbuf=4*_schunk,{}
-sample_rate=5512
+sample_rate=5512.5
 
 function audio_set_root(obj)
  _root_obj=obj
