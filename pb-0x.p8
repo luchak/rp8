@@ -840,7 +840,7 @@ function state_new(savedata)
 
  s._init_tick=function(self)
   local patch=self.patch
-  local nl=sample_rate*(15/(56+patch[1]))
+  local nl=sample_rate*(15/(60+patch[1]))
   local shuf_diff=nl*(patch[2]>>7)*(0.5-(self.tick&1))
   self.note_len,self.base_note_len=flr(0.5+nl+shuf_diff),nl
  end
