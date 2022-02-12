@@ -30,33 +30,32 @@ rec_menuitem=4
 audio_rec=false
 function start_rec()
  audio_rec=true
- menuitem(rec_menuitem, 'stop recording', stop_rec)
+ menuitem(rec_menuitem,'stop recording',stop_rec)
  extcmd'audio_rec'
 end
 
 function stop_rec()
  if (audio_rec) extcmd'audio_end'
- menuitem(rec_menuitem, 'start recording', start_rec)
+ menuitem(rec_menuitem,'start recording',start_rec)
 end
 
 function _init()
  cls()
- --extcmd('set_title', 'pb-0x')
 
  ui,state=ui_new(),state_new()
 
  header_ui_init(ui,0)
- pbl_ui_init(ui,'b0',7,32)
- pbl_ui_init(ui,'b1',21,64)
+ pbl_ui_init(ui,unpack_split'b0,7,32')
+ pbl_ui_init(ui,unpack_split'b1,21,64')
  pirc_ui_init(ui,'dr',96)
 
- pbl0,pbl1=synth_new('b0',7),synth_new('b1',21)
+ pbl0,pbl1=synth_new(7),synth_new(21)
  kick,snare,hh,cy,perc=
-  sweep_new(unpack_split'bd,40,0.092,0.0126,0.12,0.7,0.7,0.4'),
-  snare_new('sd'),
-  hh_cy_new(unpack_split'hh,46,1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'cy,49,1.3,0.5,0.5,0.18,0.3,0.8'),
-  sweep_new(unpack_split'pc,52,0.12,0.06,0.2,1,0.85,0.6')
+  sweep_new(unpack_split'40,0.092,0.0126,0.12,0.7,0.7,0.4'),
+  snare_new(),
+  hh_cy_new(unpack_split'46,1,0.8,0.75,0.35,-1,2'),
+  hh_cy_new(unpack_split'49,1.3,0.5,0.5,0.18,0.3,0.8'),
+  sweep_new(unpack_split'52,0.12,0.06,0.2,1,0.85,0.6')
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
  delay=delay_new(3000,0)
 
@@ -104,16 +103,20 @@ function _init()
    ms.b0.od=b0_od
    ms.b1.od=b1_od
    ms.dr.od=drum_od
-   ms.b0.fx=b0_fx^2*0.8
-   ms.b1.fx=b1_fx^2*0.8
-   ms.dr.fx=drum_fx^2*0.8
+   ms.b0.fx=b0_fx*b0_fx*0.8
+   ms.b1.fx=b1_fx*b1_fx*0.8
+   ms.dr.fx=drum_fx*drum_fx*0.8
    comp.thresh=0.1+0.9*comp_thresh
 
    state:next_tick()
   end
  )
 
- poke(0x5f36,(@0x5f36)|0x20)
+ function toggle_output_lpf()
+  poke(0x5f36,@0x5f36^^0x20)
+ end
+ toggle_output_lpf()
+
  menuitem(1, 'save to clip', copy_state)
  menuitem(2, 'load from clip', paste_state)
  menuitem(3, 'clear seq', function()
@@ -121,7 +124,7 @@ function _init()
   seq_helper.state=state
  end)
  menuitem(rec_menuitem, 'start recording', start_rec)
- menuitem(5, 'toggle output lpf', function() poke(0x5f36,(@0x5f36)^^0x20) end)
+ menuitem(5, 'toggle output lpf', toggle_output_lpf)
 
  log'init complete'
 end
@@ -154,7 +157,7 @@ end
 
 -- at 5512hz/60fps, we need to
 -- produce 92 samples a frame
--- 96 is just enough extra
+-- 96-104 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
 _schunk,_tgtchunks=100,1
@@ -212,7 +215,7 @@ end
 
 --fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
-function synth_new(name,base)
+function synth_new(base)
  -- simple saw wave synth
  -- filter:
  --  karlsen fast ladder iii
@@ -349,7 +352,7 @@ function synth_new(name,base)
  return obj
 end
 
-function sweep_new(name,base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
+function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  local obj=parse[[{
   op=0,
   dp=6553.6,
@@ -388,7 +391,7 @@ function sweep_new(name,base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  return obj
 end
 
-function snare_new(name)
+function snare_new()
  local obj=parse[[{
   dp0=0.08,
   dp1=0.042,
@@ -410,7 +413,7 @@ function snare_new(name)
    self.op,self.dp=0,self.dp0*self.detune
    self.aes,self.aen=0.7,0.4
    if (s==d_ac) self.aes,self.aen=1.5,0.85
-   self.aes+=(tun-0.5)*-0.2
+   self.aes-=(tun-0.5)*0.2
    self.aen+=(tun-0.5)*0.2
    self.aes*=lev*lev
    self.aen*=lev*lev
@@ -439,7 +442,7 @@ function snare_new(name)
  return obj
 end
 
-function hh_cy_new(name,base,_nlev,_tlev,dbase,dscale,tbase,tscale)
+function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj=parse[[{
   ae=0.0,
   f1=0.0,
@@ -512,6 +515,7 @@ function delay_new(l,fb)
   f1=0
  }
 
+ -- initialize maximum-length delay buffer
  for i=1,0x7fff do
   obj.dl[i]=0
  end
@@ -521,7 +525,7 @@ function delay_new(l,fb)
   local f1=self.f1
   for i=first,last do
    local x,y=b[i],dl[p]
-   if (abs(y) < 0.0001) y=0
+   if (abs(y)<0.0001) y=0
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
@@ -625,7 +629,6 @@ end
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'0,1,2,3,4,0,1,2'
 
 pat_groups=split'b0,b1,dr'
-drum_synths=split'bd,sd,hh,cy,pc'
 
 syn_base_idx=parse[[{
  b0=7,
@@ -1481,9 +1484,9 @@ function header_ui_init(ui,yp)
   ui:add_widget(
    toggle_new(64,ypc,22,38,state_make_get_set_param_bool(base_idx+3))
   )
-  hdial(104,ypc,base_idx)
-  hdial(112,ypc,base_idx+1)
-  hdial(120,ypc,base_idx+2)
+  for idx,xpc in pairs(parse[[{0=104,1=112,2=120}]]) do
+   hdial(xpc,ypc,base_idx+idx)
+  end
 
   ui:add_widget(
    spin_btn_new(72,ypc,split'208,209,210,211',state_make_get_set(pt..'_bank'))
