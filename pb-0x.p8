@@ -21,7 +21,6 @@ function paste_state()
  audio_set_root(nil)
  local pd=stat(4)
  if pd!='' then
-  log('paste',#pd)
   state=state_load(pd) or state
   seq_helper.state=state
  end
@@ -82,11 +81,12 @@ function _init()
    if (pstat.b0.on) pbl0:note(pseq.b0,patch,now,nl)
    if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
    if pstat.drum.on then
-    kick:note(pseq.bd,patch,now,nl)
-    snare:note(pseq.sd,patch,now,nl)
-    hh:note(pseq.hh,patch,now,nl)
-    cy:note(pseq.cy,patch,now,nl)
-    perc:note(pseq.pc,patch,now,nl)
+    local dseq=pseq.drum
+    kick:note(dseq.bd,patch,now,nl)
+    snare:note(dseq.sd,patch,now,nl)
+    hh:note(dseq.hh,patch,now,nl)
+    cy:note(dseq.cy,patch,now,nl)
+    perc:note(dseq.pc,patch,now,nl)
    end
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
@@ -361,7 +361,7 @@ function sweep_new(name,base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  }]]
 
  obj.note=function(self,pat,patch,step,note_len)
-  local s=pat.steps[step]
+  local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
    self.detune=2^(1.5*tun-0.75)
@@ -403,7 +403,7 @@ function snare_new(name)
  }]]
  
  obj.note=function(self,pat,patch,step,note_len)
-  local s=pat.steps[step]
+  local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,43,45)
   if s!=d_off then
    self.detune=2^(2*tun-1)
@@ -457,7 +457,7 @@ function hh_cy_new(name,base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  }]]
  
  obj.note=function(self,pat,patch,step,note_len)
-  local s=pat.steps[step]
+  local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
    self.op,self.dp=0,self.dp0
@@ -642,11 +642,6 @@ pat_param_idx=parse[[{
  b0=11,
  b1=25,
  drum=39,
- bd=39,
- sd=39,
- hh=39,
- cy=39,
- pc=39
 }]]
 
 -- float values: 0=>0,128=>1
@@ -921,10 +916,9 @@ function state_new(savedata)
   self:load_bar(mid(1,bar,999))
  end
 
- s.get_pat=function(self,syn)
+ s.get_pat_steps=function(self,syn)
   -- assume pats are aliased, always editing current
-  if (syn=='drum') syn=self.drum_sel
-  return self.pat_seqs[syn]
+  if (syn=='drum') return self.pat_seqs.drum[self.drum_sel] else return self.pat_seqs[syn].steps
  end
 
  s.set_bank=function(self,syn,bank)
@@ -1004,16 +998,15 @@ function transpose_pat(pat,d)
  end
 end
 
+drum_pat_template=parse[[{
+ bd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ sd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ hh={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ cy={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ pc={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+}]]
 function drum_pat_new()
- local pat={
-  steps={},
- }
-
- for i=1,16 do
-  pat.steps[i]=n_off
- end
-
- return pat
+ return copy_table(drum_pat_template)
 end
 
 function state_make_get_set_param(idx)
@@ -1040,7 +1033,7 @@ end
 
 state_is_song_mode=function(state) return state.song_mode end
 
--- passthrough audio generator
+-- passthrough audio processor
 -- that splits blocks to allow
 -- for sample-accurate note
 -- triggering
@@ -1121,6 +1114,10 @@ function ui_new()
    local w=self.widgets[id]
    local ww,sp=w.w,self.sprites[id]
    local tsp,wx,wy=type(sp),w.x,w.y
+   -- number => draw that sprite
+   --  (subject to width value)
+   -- string => unpack to text
+   --  params and draw those
    if tsp=='number' then
     if ww then
      local sp=self.sprites[id]
@@ -1206,11 +1203,11 @@ function pbl_note_btn_new(x,y,syn,step)
  return {
   x=x,y=y,
   get_sprite=function(self,state)
-   return 64+state:get_pat(syn).notes[step]
+   return 64+state.pat_seqs[syn].notes[step]
   end,
   input=function(self,state,b)
-   local n=state:get_pat(syn).notes
-   n[step]=mid(0,35,n[step]+b)
+   local n=state.pat_seqs[syn].notes
+   n[step]=mid(0,36,n[step]+b)
   end
  }
 end
@@ -1236,11 +1233,11 @@ function step_btn_new(x,y,syn,step,sprites)
   x=x,y=y,
   get_sprite=function(self,state)
    if (state.playing and state.tick==step) return sprites[n+1]
-   local v=state:get_pat(syn).steps[step]
+   local v=state:get_pat_steps(syn)[step]
    return sprites[v+1]
   end,
   input=function(self,state,b)
-   local st=state:get_pat(syn).steps
+   local st=state:get_pat_steps(syn)
    st[step]+=b
    st[step]=(st[step]+n)%n
   end
@@ -1367,13 +1364,13 @@ function pbl_ui_init(ui,key,base_idx,yp)
  )
  ui:add_widget(
   momentary_new(0,yp+8,28,function(state,b)
-   copy_buf_pbl=copy_table(state:get_pat(key))
+   copy_buf_pbl=copy_table(state.pat_seqs[key])
   end)
  )
  ui:add_widget(
   momentary_new(8,yp+8,27,function(state,b)
    local v=copy_buf_pbl
-   if (v) merge_tables(state:get_pat(key),v)
+   if (v) merge_tables(state.pat_seqs[key],v)
   end)
  )
 
@@ -1433,21 +1430,12 @@ function pirc_ui_init(ui,key,yp)
 
   ui:add_widget(
    momentary_new(0,yp+16,11,function(state,b)
-    local v={}
-    for syn in all(drum_synths) do
-     v[syn]=copy_table(state:get_pat(syn))
-    end
-    copy_buf_pirc=v
+    copy_buf_pirc=copy_table(state.pat_seqs['drum'])
    end)
   )
   ui:add_widget(
    momentary_new(8,yp+16,10,function(state,b)
-    local b=copy_buf_pirc
-    if b then
-     for k,v in pairs(b) do
-      merge_tables(state:get_pat(k),v)
-     end
-    end
+    merge_tables(state.pat_seqs['drum'],copy_buf_pirc)
    end)
   )
 
