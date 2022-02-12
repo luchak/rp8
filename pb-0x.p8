@@ -524,7 +524,7 @@ function delay_new(l,fb)
    if (abs(y) < 0.0001) y=0
    b[i]=y
    y=x+fb*y
-   f1+=0.08*(y-f1)
+   f1+=(y-f1)>>4
    dl[p]=y-(f1>>2)
    p+=1
    if (p>l) p=1
