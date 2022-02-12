@@ -795,6 +795,7 @@ function state_new(savedata)
   s.pat_patch=savedata.pat_patch
   s.song_mode=savedata.song_mode
   s.pat_storage=savedata.pat_storage
+  s.pat_patch=dec_byte_array(savedata.pat_patch)
  end
 
  s._apply_diff=function(self,k,v)
