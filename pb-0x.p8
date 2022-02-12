@@ -758,43 +758,18 @@ default_patch=parse[[{
  -- 53 pc_dec=0.5,
  -- 54 pc_lev=0.5,
 
--- patterns:
---  saved
---  changes applied instantly
---  not used directly
---  same in song/pat mode
--- transport:
---  not saved
--- seq:
---  saved
---  applies to pattern mode
--- [synth states]:
---  present directly on seq
---  not saved
---  applies to pattern mode
--- song:
---  saved
---  applies to song mode
---
--- move pat idx to mixer
--- and access indirectly?
--- how to store next pat? 
---
--- messages stored in a buffer
--- applied on note? or immediate?
--- 
--- knob changes should be
--- visible immediately
---
--- in song mode, accumulate
--- controls into "record buffer"
--- apply various parts of that
--- as necessary
---
--- bar/note functions both
--- update the current seq
--- from the song and update the
--- record buffer as necessary
+pbl_pat_template=parse[[{
+ notes={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
+ steps={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+}]]
+
+drum_pat_template=parse[[{
+ bd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ sd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ hh={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ cy={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+ pc={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
+}]]
 
 function state_new(savedata)
  local s=parse[[{
@@ -897,7 +872,7 @@ function state_new(savedata)
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
    if not pat then
-    if (syn=='b0' or syn=='b1') pat=pbl_pat_new() else pat=drum_pat_new()
+    if (syn=='b0' or syn=='b1') pat=copy_table(pbl_pat_template) else pat=copy_table(drum_pat_template)
     syn_pats[pat_idx]=pat
    end
    self.pat_seqs[syn]=pat
@@ -979,34 +954,10 @@ function state_load(str)
  return state_new(parse(sub(str,5)))
 end
 
-function pbl_pat_new()
- local pat={
-  notes={},
-  steps={},
- }
-
- for i=1,16 do
-  pat.notes[i],pat.steps[i]=19,n_off
- end
-
- return pat
-end
-
 function transpose_pat(pat,d)
  for i=1,16 do
   pat.notes[i]=mid(0,pat.notes[i]+d,35)
  end
-end
-
-drum_pat_template=parse[[{
- bd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
- sd={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
- hh={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
- cy={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
- pc={1=0,2=0,3=0,4=0,5=0,6=0,7=0,8=0,9=0,10=0,11=0,12=0,13=0,14=0,15=0,16=0},
-}]]
-function drum_pat_new()
- return copy_table(drum_pat_template)
 end
 
 function state_make_get_set_param(idx)
