@@ -560,14 +560,13 @@ function mixer_new(srcs,fx,lev)
   update=function(self,b,first,last)
    local fxbuf,tmp,lev=self.fxbuf,self.tmp,self.lev
    for i=first,last do
-    b[i]=0
-    fxbuf[i]=0
+    b[i],fxbuf[i]=0,0
    end
 
    for k,src in pairs(self.srcs) do
     local slev,od,fx=src.lev,src.od*src.od,src.fx
     src.obj:update(tmp,first,last)
-    local odf=0.3+23.7*od
+    local odf=0.3+31.7*od
     --local odfi=1/(4*(atan2(odf,1)-0.75))
     local odfi=(1+3*od)/odf
     for i=first,last do
