@@ -89,7 +89,7 @@ function _init()
     cy:note(dseq.cy,patch,now,nl)
     perc:note(dseq.pc,patch,now,nl)
    end
-   svf:note()
+   svf:note(patch)
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
@@ -147,10 +147,10 @@ cpumaxf=0
 function _draw()
  ui:draw(state)
 
- --cpumax[cpumaxf%100+1]=stat(1)
- --cpumaxf+=1
- --rectfill(0,0,30,6,0)
- --print(max(unpack(cpumax)),0,0,7)
+ cpumax[cpumaxf%100+1]=stat(1)
+ cpumaxf+=1
+ rectfill(0,0,30,6,0)
+ print(max(unpack(cpumax)),0,0,7)
 
  --rectfill(0,0,30,6,0)
  --print(stat(0),0,0,7)
@@ -309,6 +309,9 @@ function synth_new(base)
   local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
   local fosc,ffb=self._fosc,self._ffb
   for i=first,last do
+   -- I forgot why this is 0.37
+   -- I think it's more or less
+   -- arbitrary
    local fc=min(0.37/os,fcb+((me*env)>>4))
    -- very very janky dewarping
    -- arbitrary scaling constant
@@ -635,20 +638,17 @@ function svf_new()
  return {
   z1=0,
   z2=0,
-  rc=0.05,
+  rc=0.1,
   gc=0.2,
   wet=1,
   fe=0,
-  set_params=function(self,patch)
+  note=function(self,patch)
    --local q=1/(2*(1-res))
    --self.rc=1/(2*q)
-   self.rc=1-res
-   -- gc should be calculated as for synth filter
-   self.gc=f
-   self.wet=wet
-  end,
-  note=function(self)
-   self.fe=1
+   local r
+   self.gc,r,self.wet=unpack_patch(patch,61,63)
+   self.rc=1-(r*0.98)
+   --self.fe=1
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc,wet,fe=
@@ -659,7 +659,7 @@ function svf_new()
     self.wet,
     self.fe
    for i=first,last do
-    gc=(self.gc+fe*0.6)*0.5
+    gc=min((self.gc+0x0.02+fe*0.6),1)*0.5
     local rrpg=2*rc+gc
     local hpn=1+gc*rrpg
     local inp=b[i]
@@ -669,13 +669,18 @@ function svf_new()
     z1=gc*hp+bp
     z2=gc*bp+lp
 
+    -- why does this sound so
+    -- much better oversampled??
+    -- is it just that there's
+    -- no frequency warping, or
+    -- something else?
     hp=(inp-rrpg*z1-z2)/hpn
     bp=hp*gc+z1
     lp=bp*gc+z2
     z1=gc*hp+bp
     z2=gc*bp+lp
 
-    b[i]=inp+wet*(lp-inp)
+    b[i]=inp+wet*(bp-inp)
     fe*=0.99
    end
    self.z1,self.z2,self.fe=z1,z2,fe
@@ -1575,6 +1580,9 @@ function header_ui_init(ui,yp)
   4="16,16,2",
   5="16,24,4",
   6="32,24,5",
+  7="48,16,61",
+  8="48,24,62",
+  9="64,24,63",
  }]]) do
   hdial(unpack_split(s))
  end
