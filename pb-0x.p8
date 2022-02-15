@@ -652,6 +652,7 @@ function svf_new()
    self.rc=1-(r*0.98)
    --self.fe=0.6
    self.bp=(bp&0x0.02>0 and 1) or 0
+   self.gc+=0x0.02
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc,wet,fe,is_bp=
@@ -663,11 +664,11 @@ function svf_new()
     self.fe,
     self.bp
    for i=first,last do
-    gc=min((self.gc+0x0.02+fe),1)*0.5
+    gc=min(self.gc+fe,1)>>1
     local rrpg=2*rc+gc
-    local hpn=1+gc*rrpg
+    local hpn=1/gc+rrpg
     local inp=b[i]
-    local hpgc=gc*(inp-rrpg*z1-z2)/hpn
+    local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
     local lp=bp*gc+z2
     z1=hpgc+bp
@@ -678,7 +679,7 @@ function svf_new()
     -- is it just that there's
     -- no frequency warping, or
     -- something else?
-    hpgc=gc*(inp-rrpg*z1-z2)/hpn
+    hpgc=(inp-rrpg*z1-z2)/hpn
     bp=hpgc+z1
     lp=bp*gc+z2
     z1=hpgc+bp
