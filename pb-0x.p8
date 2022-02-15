@@ -642,45 +642,49 @@ function svf_new()
   gc=0.2,
   wet=1,
   fe=0,
+  bp=0,
   note=function(self,patch)
    --local q=1/(2*(1-res))
    --self.rc=1/(2*q)
-   local r
-   self.gc,r,self.wet=unpack_patch(patch,61,63)
+   -- configurable decay?
+   local r,bp
+   bp,self.gc,r,self.wet=unpack_patch(patch,60,63)
    self.rc=1-(r*0.98)
-   --self.fe=1
+   --self.fe=0.6
+   self.bp=(bp&0x0.02>0 and 1) or 0
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc,wet,fe=
+   local z1,z2,rc,gc,wet,fe,is_bp=
     self.z1,
     self.z2,
     self.rc,
     self.gc,
     self.wet,
-    self.fe
+    self.fe,
+    self.bp
    for i=first,last do
-    gc=min((self.gc+0x0.02+fe*0.6),1)*0.5
+    gc=min((self.gc+0x0.02+fe),1)*0.5
     local rrpg=2*rc+gc
     local hpn=1+gc*rrpg
     local inp=b[i]
-    local hp=(inp-rrpg*z1-z2)/hpn
-    local bp=hp*gc+z1
+    local hpgc=gc*(inp-rrpg*z1-z2)/hpn
+    local bp=hpgc+z1
     local lp=bp*gc+z2
-    z1=gc*hp+bp
-    z2=gc*bp+lp
+    z1=hpgc+bp
+    z2=bp*gc+lp
 
     -- why does this sound so
     -- much better oversampled??
     -- is it just that there's
     -- no frequency warping, or
     -- something else?
-    hp=(inp-rrpg*z1-z2)/hpn
-    bp=hp*gc+z1
+    hpgc=gc*(inp-rrpg*z1-z2)/hpn
+    bp=hpgc+z1
     lp=bp*gc+z2
-    z1=gc*hp+bp
-    z2=gc*bp+lp
+    z1=hpgc+bp
+    z2=bp*gc+lp
 
-    b[i]=inp+wet*(bp-inp)
+    b[i]=inp+wet*(lp+is_bp*(bp-lp)-inp)
     fe*=0.99
    end
    self.z1,self.z2,self.fe=z1,z2,fe
@@ -1056,10 +1060,11 @@ function state_make_get_set_param(idx)
   function(state,val) state:_apply_diff(idx,val) end
 end
 
-function state_make_get_set_param_bool(idx)
+function state_make_get_set_param_bool(idx,bit)
+ local mask=1<<(bit or 7)
  return
-  function(state) return state.patch[idx]>0 end,
-  function(state,val) state:_apply_diff(idx,trn(val,128,0)) end
+  function(state) return (state.patch[idx]&mask)>0 end,
+  function(state,val) local old=state.patch[idx] state:_apply_diff(idx,trn(val,old|mask,old&(~mask))) end
 end
 
 function state_make_get_set(a,b)
@@ -1586,6 +1591,10 @@ function header_ui_init(ui,yp)
  }]]) do
   hdial(unpack_split(s))
  end
+
+ ui:add_widget(
+  toggle_new(64,16,234,235,state_make_get_set_param_bool(60,0))
+ )
 
  for pt,ypc in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
   local base_idx=syn_base_idx[pt]
