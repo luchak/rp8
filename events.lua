@@ -65,11 +65,11 @@ function timeline_new(default_patch, savedata)
    patch[k]=v[tick]
   end
   merge_tables(patch,op)
-  local bars,bar,bar_events=self.bars,self.bar,self.bar_events
+  local bars,bar,bar_events,bar_start=self.bars,self.bar,self.bar_events,self.bar_start
   if self.recording then
    for k,v in pairs(op) do
     if not no_event_params[k] then
-     local ek,bsk=bar_events[k],self.bar_start[k]
+     local ek,bsk=bar_events[k],bar_start[k]
      if v!=bsk then
       if not ek then
        ek={}

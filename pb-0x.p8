@@ -58,6 +58,7 @@ function _init()
   sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6')
  drum_mixer=submixer_new({kick,snare,hh,cy,perc})
  delay=delay_new(3000,0)
+ svf=svf_new()
 
  mixer=mixer_new(
   {
@@ -66,6 +67,7 @@ function _init()
    dr={obj=drum_mixer,lev=0.5,od=0.5,fx=0},
   },
   delay,
+  svf,
   1.0
  )
  comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.008')
@@ -87,6 +89,7 @@ function _init()
     cy:note(dseq.cy,patch,now,nl)
     perc:note(dseq.pc,patch,now,nl)
    end
+   svf:note()
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
@@ -139,8 +142,15 @@ function _update60()
  end
 end
 
+cpumax={}
+cpumaxf=0
 function _draw()
  ui:draw(state)
+
+ --cpumax[cpumaxf%100+1]=stat(1)
+ --cpumaxf+=1
+ --rectfill(0,0,30,6,0)
+ --print(max(unpack(cpumax)),0,0,7)
 
  --rectfill(0,0,30,6,0)
  --print(stat(0),0,0,7)
@@ -204,7 +214,7 @@ function audio_update()
  -- always generate at least 1
  -- chunk if there is space
  -- and time
- if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.3 then
+ if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.2 then
   audio_dochunk()
   inbuf+=_schunk
   newchunks+=1
@@ -554,10 +564,9 @@ function submixer_new(srcs)
  }
 end
 
-function mixer_new(srcs,fx,lev)
+function mixer_new(srcs,fx,filt,lev)
  return {
   srcs=srcs,
-  fx=fx,
   lev=lev,
   tmp={},
   fxbuf={},
@@ -581,10 +590,11 @@ function mixer_new(srcs,fx,lev)
     end
    end
 
-   self.fx:update(fxbuf,first,last)
+   fx:update(fxbuf,first,last)
    for i=first,last do
     b[i]+=fxbuf[i]*lev
    end
+   filt:update(b,first,last)
   end
  }
 end
@@ -617,6 +627,51 @@ function comp_new(src,thresh,ratio,att,rel)
     b[i]*=g
    end
    self.env=env
+  end
+ }
+end
+
+function svf_new()
+ return {
+  z1=0,
+  z2=0,
+  rc=0.2,
+  gc=0.3,
+  wet=1,
+  fe=0,
+  set_params=function(self,patch)
+   --local q=1/(2*(1-res))
+   --self.rc=1/(2*q)
+   self.rc=1-res
+   -- gc should be calculated as for synth filter
+   self.gc=f
+   self.wet=wet
+  end,
+  note=function(self)
+   self.fe=1
+  end,
+  update=function(self,b,first,last)
+   local z1,z2,rc,gc,wet,fe=
+    self.z1,
+    self.z2,
+    self.rc,
+    self.gc,
+    self.wet,
+    self.fe
+   for i=first,last do
+    gc=self.gc+fe*0.5
+    local rrpg=2*rc+gc
+    local hpn=1+gc*rrpg
+    local inp=b[i]
+    local hp=(inp-rrpg*z1-z2)/hpn
+    local bp=hp*gc+z1
+    local lp=bp*gc+z2
+    z1=gc*hp+bp
+    z2=gc*bp+lp
+    b[i]=inp+wet*(lp-inp)
+    fe*=0.99
+   end
+   self.z1,self.z2,self.fe=z1,z2,fe
   end
  }
 end
@@ -714,6 +769,7 @@ default_patch=parse[[{
 61=64,
 62=64,
 63=128,
+64=0
 }]]
  -- 01 mix_tempo=0.5,
  -- 02 mix_shuf=0,
@@ -778,6 +834,7 @@ default_patch=parse[[{
  -- 61 fl_cut=0.5
  -- 62 fl_res=0.5
  -- 63 fl_wet=1
+ -- 64 fl_pat=0
 
 pbl_pat_template=parse[[{
  nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
@@ -839,6 +896,7 @@ function state_new(savedata)
  s.load_bar=function(self,i)
   local tl=self.tl
   if self.song_mode then
+   log('l',stringify(self.patch))
    self.tl:load_bar(self.patch,i)
    self.tick=tl.tick
   else
@@ -941,8 +999,8 @@ function state_new(savedata)
    copy_buf_seq=self.tl:copy_seq()
   else
    copy_buf_seq={{
-    start=enc_byte_array(self.pat_patch),
-    events={}
+    t0=enc_byte_array(self.pat_patch),
+    ev={}
    }}
   end
  end
