@@ -635,8 +635,8 @@ function svf_new()
  return {
   z1=0,
   z2=0,
-  rc=0.2,
-  gc=0.3,
+  rc=0.05,
+  gc=0.2,
   wet=1,
   fe=0,
   set_params=function(self,patch)
@@ -659,7 +659,7 @@ function svf_new()
     self.wet,
     self.fe
    for i=first,last do
-    gc=self.gc+fe*0.5
+    gc=(self.gc+fe*0.6)*0.5
     local rrpg=2*rc+gc
     local hpn=1+gc*rrpg
     local inp=b[i]
@@ -668,6 +668,13 @@ function svf_new()
     local lp=bp*gc+z2
     z1=gc*hp+bp
     z2=gc*bp+lp
+
+    hp=(inp-rrpg*z1-z2)/hpn
+    bp=hp*gc+z1
+    lp=bp*gc+z2
+    z1=gc*hp+bp
+    z2=gc*bp+lp
+
     b[i]=inp+wet*(lp-inp)
     fe*=0.99
    end
@@ -896,7 +903,6 @@ function state_new(savedata)
  s.load_bar=function(self,i)
   local tl=self.tl
   if self.song_mode then
-   log('l',stringify(self.patch))
    self.tl:load_bar(self.patch,i)
    self.tick=tl.tick
   else
