@@ -426,10 +426,11 @@ function snare_new()
    self.op,self.dp=0,self.dp0*self.detune
    self.aes,self.aen=0.7,0.4
    if (s==d_ac) self.aes,self.aen=1.5,0.85
-   self.aes-=(tun-0.5)*0.2
-   self.aen+=(tun-0.5)*0.2
-   self.aes*=lev*lev
-   self.aen*=lev*lev
+   local lev2,aeo=lev*lev,(tun-0.5)*0.2
+   self.aes-=aeo
+   self.aen+=aeo
+   self.aes*=lev2
+   self.aen*=lev2
    self.aemax=self.aes*0.5
    local pd4=(0.65-0.25*dec)^4
    self.aesd=1-0.1*pd4
@@ -480,17 +481,16 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    self.ae=lev*lev*trn(s==d_ac,2.0,0.8)
 
    self.detune=2^(tbase+tscale*tun)
-   local pd4=(dbase-dscale*dec)
-   pd4*=pd4*pd4*pd4
+   local pd=(dbase-dscale*dec)
 
-   self.aed=1-0.04*pd4
+   self.aed=1-0.04*pd*pd*pd*pd
   end
  end
 
  obj.subupdate=function(self,b,first,last)
   local ae,f1,f2=self.ae,self.f1,self.f2
-  local op1,op2,op3,op4=self.op1,self.op2,self.op3,self.op4
-  local odp1,odp2,odp3,odp4=self.odp1*self.detune,self.odp2*self.detune,self.odp3*self.detune,self.odp4*self.detune
+  local op1,op2,op3,op4,detune=self.op1,self.op2,self.op3,self.op4,self.detune
+  local odp1,odp2,odp3,odp4=self.odp1*detune,self.odp2*detune,self.odp3*detune,self.odp4*detune
   local aed,tlev,nlev=self.aed,_tlev,_nlev
 
   for i=first,last do
@@ -605,17 +605,15 @@ end
 -- absolutely ghastly but a
 -- very very fast log function
 -- is needed to make progress
-function comp_new(src,thresh,ratio,att,rel)
+function comp_new(src,thresh,ratio,_att,_rel)
  return {
   src=src,
   thresh=thresh,
   ratio=ratio,
-  att=att,
-  rel=rel,
   env=0,
   update=function(self,b,first,last)
    self.src:update(b,first,last)
-   local env,att,rel=self.env,self.att,self.rel
+   local env,att,rel=self.env,_att,_rel
    local thresh,ratio=self.thresh,1/self.ratio
    -- makeup targets 0.67
    local makeup=max(1,0.67/((0.67-thresh)*ratio+thresh))
@@ -655,7 +653,7 @@ function svf_new()
    self.gc+=0x0.02
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc,wet,fe,is_bp=
+   local z1,z2,rc,gc_base,wet,fe,is_bp=
     self.z1,
     self.z2,
     self.rc,
@@ -664,15 +662,14 @@ function svf_new()
     self.fe,
     self.bp
    for i=first,last do
-    gc=min(self.gc+fe,1)>>1
+    gc=min(gc_base+fe,1)>>1
     local rrpg=2*rc+gc
     local hpn=1/gc+rrpg
     local inp=b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
     local lp=bp*gc+z2
-    z1=hpgc+bp
-    z2=bp*gc+lp
+    z1,z2=hpgc+bp,bp*gc+lp
 
     -- why does this sound so
     -- much better oversampled??
@@ -682,8 +679,7 @@ function svf_new()
     hpgc=(inp-rrpg*z1-z2)/hpn
     bp=hpgc+z1
     lp=bp*gc+z2
-    z1=hpgc+bp
-    z2=bp*gc+lp
+    z1,z2=hpgc+bp,bp*gc+lp
 
     b[i]=inp+wet*(lp+is_bp*(bp-lp)-inp)
     fe*=0.99
@@ -1088,14 +1084,13 @@ function seq_helper_new(state,root,note_fn)
  return {
   state=state,
   root=root,
-  note_fn=note_fn,
   t=state.note_len,
   update=function(self,b,first,last)
    local p,nl=first,self.state.note_len
    while p<last do
     if self.t>=nl then
      self.t=0
-     self.note_fn()
+     note_fn()
     end
     local n=min(nl-self.t,last-p+1)
     self.root:update(b,p,p+n-1)
@@ -1509,7 +1504,7 @@ function pirc_ui_init(ui,key,yp)
  )
  for i=1,6 do
   ui:add_widget(
-   pat_btn_new(5+i*4,yp+16,key,6,i,2,14,8,5)
+   pat_btn_new(5+i*4,yp+16,key,6,i,unpack_split'2,14,8,5')
   )
  end
 
