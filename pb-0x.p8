@@ -142,8 +142,8 @@ function _update60()
  end
 end
 
-cpumax={}
-cpumaxf=0
+--cpumax={}
+--cpumaxf=0
 function _draw()
  ui:draw(state)
 
@@ -160,6 +160,8 @@ function _draw()
  palt(0,false)
 end
 
+--u60=_update60 _update60=nil function _update() u60() u60() end
+
 #include utils.lua
 
 -->8
@@ -170,7 +172,7 @@ end
 -- 96-104 is just enough extra
 -- to avoid jitter problems
 -- on machines i have tested on
-_schunk,_tgtchunks=100,1
+_schunk,_tgtchunks=100,4
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512.5
 
@@ -205,7 +207,7 @@ function audio_update()
  local bufsize,inbuf,newchunks=stat(109),stat(108),0
 
  while inbuf<_schunk do
-  log'behind'
+  log('behind')
   audio_dochunk()
   newchunks+=1
   inbuf+=_schunk
@@ -214,7 +216,7 @@ function audio_update()
  -- always generate at least 1
  -- chunk if there is space
  -- and time
- if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding and stat(1)<0.2 then
+ if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding then
   audio_dochunk()
   inbuf+=_schunk
   newchunks+=1
@@ -632,6 +634,8 @@ function comp_new(src,thresh,ratio,_att,_rel)
  }
 end
 
+-- heavily inspired by
+-- https://github.com/JordanTHarris/VAStateVariableFilter
 function svf_new()
  return {
   z1=0,
@@ -647,7 +651,7 @@ function svf_new()
    -- configurable decay?
    local r,bp
    bp,self.gc,r,self.wet=unpack_patch(patch,60,63)
-   self.rc=1-(r*0.98)
+   self.rc=1-(r*0.96)
    --self.fe=0.6
    self.bp=(bp&0x0.02>0 and 1) or 0
    self.gc+=0x0.02
@@ -662,7 +666,7 @@ function svf_new()
     self.fe,
     self.bp
    for i=first,last do
-    gc=min(gc_base+fe,1)>>1
+    gc=min(gc_base+fe,1)
     local rrpg=2*rc+gc
     local hpn=1/gc+rrpg
     local inp=b[i]
@@ -671,7 +675,7 @@ function svf_new()
     local lp=bp*gc+z2
     z1,z2=hpgc+bp,bp*gc+lp
 
-    -- why does this sound so
+    -- why does this sound o
     -- much better oversampled??
     -- is it just that there's
     -- no frequency warping, or
@@ -681,7 +685,9 @@ function svf_new()
     lp=bp*gc+z2
     z1,z2=hpgc+bp,bp*gc+lp
 
-    b[i]=inp+wet*(lp+is_bp*(bp-lp)-inp)
+    -- rc*bp is 1/2 of unity gain bp
+    -- bp is just bp
+    b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
     fe*=0.99
    end
    self.z1,self.z2,self.fe=z1,z2,fe
