@@ -114,9 +114,7 @@ function timeline_new(default_patch, savedata)
 
  timeline.cut_seq=function(self)
   local ls,ll=self.loop_start,self.loop_len
-  local cut_end=ls+ll
-  local c=self:copy_seq()
-  local nbs={}
+  local cut_end,c,nbs=ls+ll,self:copy_seq(),{}
   for i,b in pairs(self.bars) do
    if i>=ls then
     if i>=cut_end then
