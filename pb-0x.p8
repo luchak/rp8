@@ -1489,17 +1489,17 @@ function pirc_ui_init(ui,key,yp)
   ui:add_widget(
    radio_btn_new(d.x,cyp,k,d.s,d.s+1,state_make_get_set('drum_sel'))
   )
-  -- lev
+  -- lev,tun,dec
+  for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
+   ui:add_widget(
+    dial_new(d.x+x,cyp,112,16,state_make_get_set_param(d.b+o))
+   )
+  end
+ end
+
+ for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
   ui:add_widget(
-   dial_new(d.x+8,cyp,112,16,state_make_get_set_param(d.b+2))
-  )
-  -- tun
-  ui:add_widget(
-   dial_new(d.x+16,cyp,112,16,state_make_get_set_param(d.b+0))
-  )
-  -- dec
-  ui:add_widget(
-   dial_new(d.x+24,cyp,112,16,state_make_get_set_param(d.b+1))
+   toggle_new(x,yp,170,171,state_make_get_set_param_bool(41,b))
   )
  end
 
