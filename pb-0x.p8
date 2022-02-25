@@ -89,6 +89,7 @@ function _init()
     cy:note(dseq.cy,patch,now,nl)
     perc:note(dseq.pc,patch,now,nl)
    end
+   drum_mixer:note(patch)
    mixer:note(patch)
    svf:note(patch)
 
@@ -97,7 +98,7 @@ function _init()
    local b1_lev,b1_od,b1_fx=unpack_patch(patch,21,23)
    local drum_lev,drum_od,drum_fx=unpack_patch(patch,35,37)
    mixer.lev=mix_lev*3
-   delay.l=(0.9*dl_t+0.1)*sample_rate
+   delay.l=((dl_t<<4)+0.25)*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
 
    local ms=mixer.srcs
@@ -555,16 +556,21 @@ function delay_new(l,fb)
  return obj
 end
 
+
+dr_src_fx_masks=parse[[{1=1,2=1,3=2,4=2,5=3,6=3}]]
 function submixer_new(srcs)
  return {
   srcs=srcs,
-  update=function(self,b,first,last)
+  fx=127,
+  note=function(self,patch) self.fx=patch[41] end,
+  update=function(self,b,first,last,bypass)
    for i=first,last do
     b[i]=0
+    bypass[i]=0
    end
 
-   for src in all(self.srcs) do
-    src:subupdate(b,first,last)
+   for i,src in ipairs(self.srcs) do
+    if (self.fx & dr_src_fx_masks[i] > 0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
    end
   end
  }
@@ -576,20 +582,21 @@ function mixer_new(srcs,fx,filt,lev)
   srcs=srcs,
   lev=lev,
   tmp={},
+  bypass={},
   fxbuf={},
   filtsrc=1,
   note=function(self,state)
    self.filtsrc=flr(state[60]>>1)
   end,
   update=function(self,b,first,last)
-   local fxbuf,tmp,lev,filtsrc=self.fxbuf,self.tmp,self.lev,self.filtsrc
+   local fxbuf,tmp,bypass,lev,filtsrc=self.fxbuf,self.tmp,self.bypass,self.lev,self.filtsrc
    for i=first,last do
     b[i],fxbuf[i]=0,0
    end
 
    for k,src in pairs(self.srcs) do
     local slev,od,fx=src.lev,src.od*src.od,src.fx
-    src.obj:update(tmp,first,last)
+    src.obj:update(tmp,first,last,bypass)
     local odf=0.3+31.7*od
     --local odfi=1/(4*(atan2(odf,1)-0.75))
     local odfi=(1+3*od)/odf
@@ -606,8 +613,9 @@ function mixer_new(srcs,fx,filt,lev)
    end
 
    fx:update(fxbuf,first,last)
+   local drlev=self.srcs.dr.lev
    for i=first,last do
-    b[i]+=fxbuf[i]*lev
+    b[i]+=(fxbuf[i]+bypass[i]*drlev)*lev
    end
    if (filtsrc==2) filt:update(b,first,last)
   end
