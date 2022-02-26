@@ -1115,7 +1115,7 @@ function seq_helper_new(state,root,note_fn)
   t=state.note_len,
   update=function(self,b,first,last)
    local p,nl=first,self.state.note_len
-   while p<last do
+   while p<=last do
     if self.t>=nl then
      self.t=0
      note_fn()
