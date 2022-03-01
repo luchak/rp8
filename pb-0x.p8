@@ -45,6 +45,10 @@ function stop_rec()
  menuitem(rec_menuitem,'start recording',start_rec)
 end
 
+-- turn off output lpf for less
+-- muffled sound
+poke(0x5f36,@0x5f36^^0x20)
+
 function _init()
  cls()
 
@@ -125,11 +129,6 @@ function _init()
   end
  )
 
- function toggle_output_lpf()
-  poke(0x5f36,@0x5f36^^0x20)
- end
- toggle_output_lpf()
-
  menuitem(1, 'save to clip', copy_state)
  menuitem(2, 'load from clip', paste_state)
  menuitem(3, 'clear seq', function()
@@ -137,7 +136,6 @@ function _init()
   seq_helper.state=state
  end)
  menuitem(rec_menuitem, 'start recording', start_rec)
- menuitem(5, 'toggle output lpf', toggle_output_lpf)
 
  log'init complete'
 end
@@ -155,7 +153,6 @@ function _update60()
     nread+=1
    end
   end
-  log('read', nread)
  end
 
  audio_update()
@@ -286,7 +283,6 @@ function synth_new(base)
  }]]
 
  obj.note=function(self,pat,patch,step,note_len)
-  assert(step<=16)
   local patstep=pat.st[step]
   local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
@@ -555,7 +551,7 @@ function sample_new(base)
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   self.amp=lev*lev
   dec=1-dec
-  self.dec=0.9999-(0.01*dec*dec*dec*dec)
+  self.dec=0.9999-(0.01*dec^4)
   self.detune=2^(flr((tun-0.5)*48+0.5)/12)
   if s!=d_off then
    self.pos=1
@@ -745,8 +741,7 @@ function svf_new()
    for i=first,last do
     gc=min(gc_base+fe,1)
     local rrpg=2*rc+gc
-    local hpn=1/gc+rrpg
-    local inp=b[i]
+    local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
     local lp=bp*gc+z2
@@ -1065,7 +1060,6 @@ function state_new(savedata)
  end
 
  s.go_to_bar=function(self,bar)
-  assert(self.song_mode, 'navigation outside of song mode')
   self:load_bar(mid(1,bar,999))
  end
 
