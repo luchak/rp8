@@ -90,8 +90,6 @@ function timeline_new(default_patch, savedata)
 
  timeline._finalize_bar=function(self)
   if (not self.bars[self.bar]) self.bars[self.bar]=copy_table(self.def_bar)
-  assert(self.bar_start)
-  assert(self.bar_events)
   self.bars[self.bar].ev=map_table(self.bar_events,enc_byte_array)
  end
 

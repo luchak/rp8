@@ -25,8 +25,7 @@ function copy_table(t)
  return merge_tables({},t)
 end
 
-function merge_tables(base,new,do_copy)
- if (do_copy) base=copy_table(base)
+function merge_tables(base,new)
  if (not new) return base
  for k,v in pairs(new) do
   if type(v)=='table' then
