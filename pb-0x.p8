@@ -50,13 +50,14 @@ function _init()
  pirc_ui_init(ui,'dr',96)
 
  pbl0,pbl1=synth_new(7),synth_new(21)
- kick,snare,hh,cy,perc=
+ kick,snare,hh,cy,perc,sp=
   sweep_new(unpack_split'42,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
   hh_cy_new(unpack_split'48,1,0.8,0.75,0.35,-1,2'),
   hh_cy_new(unpack_split'51,1.3,0.5,0.5,0.18,0.3,0.8'),
-  sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6')
- drum_mixer=submixer_new({kick,snare,hh,cy,perc})
+  sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6'),
+  sweep_new(unpack_split'57,0.12,0.06,0.2,1,0.85,0.6')
+ drum_mixer=submixer_new({kick,snare,hh,cy,perc,sp})
  delay=delay_new(3000,0)
  svf=svf_new()
 
@@ -88,6 +89,7 @@ function _init()
     hh:note(dseq.hh,patch,now,nl)
     cy:note(dseq.cy,patch,now,nl)
     perc:note(dseq.pc,patch,now,nl)
+    sp:note(dseq.sp,patch,now,nl)
    end
    drum_mixer:note(patch)
    mixer:note(patch)
@@ -731,6 +733,7 @@ syn_base_idx=parse[[{
  hh=48,
  cy=51,
  pc=54,
+ sp=57,
 }]]
 
 pat_param_idx=parse[[{
@@ -864,9 +867,9 @@ default_patch=parse[[{
  -- 54 pc_tun=0.5,
  -- 55 pc_dec=0.5,
  -- 56 pc_lev=0.5,
- -- 57 p2_tun=0.5,
- -- 58 p2_dec=0.5,
- -- 59 p2_lev=0.5,
+ -- 57 sp_tun=0.5,
+ -- 58 sp_dec=0.5,
+ -- 59 sp_lev=0.5,
  -- 60 fl_src_type=2
  -- 61 fl_cut=0.5
  -- 62 fl_res=0.5
@@ -884,6 +887,7 @@ drum_pat_template=parse[[{
  hh={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
  cy={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
  pc={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
+ sp={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
 }]]
 
 function state_new(savedata)
@@ -1491,7 +1495,8 @@ function pirc_ui_init(ui,key,yp)
   sd={x=32,y=16,s=152,b=45},
   hh={x=64,y=8,s=154,b=48},
   cy={x=64,y=16,s=156,b=51},
-  pc={x=96,y=8,s=158,b=54}
+  pc={x=96,y=8,s=158,b=54},
+  sp={x=96,y=16,s=174,b=57}
  }]]) do
   local cyp=yp+d.y
   ui:add_widget(
