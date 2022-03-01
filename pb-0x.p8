@@ -6,19 +6,25 @@ __lua__
 
 semitone=2^(1/12)
 
+function audio_set_root(obj)
+ _root_obj=obj
+end
+
 -- give audio time to settle
 -- before starting synthesis
-pause_frames=6
+function audio_wait(frames)
+ pause_frames=frames
+ audio_set_root(nil)
+end
+audio_wait(6)
 
 function copy_state()
- pause_frames=2
- audio_set_root(nil)
+ audio_wait(2)
  printh(state:save(),'@clip')
 end
 
 function paste_state()
- pause_frames=2
- audio_set_root(nil)
+ audio_wait(2)
  local pd=stat(4)
  if pd!='' then
   state=state_load(pd) or state
@@ -56,7 +62,7 @@ function _init()
   hh_cy_new(unpack_split'48,1,0.8,0.75,0.35,-1,2'),
   hh_cy_new(unpack_split'51,1.3,0.5,0.5,0.18,0.3,0.8'),
   sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6'),
-  sweep_new(unpack_split'57,0.12,0.06,0.2,1,0.85,0.6')
+  sample_new(57)
  drum_mixer=submixer_new({kick,snare,hh,cy,perc,sp})
  delay=delay_new(3000,0)
  svf=svf_new()
@@ -137,6 +143,21 @@ function _init()
 end
 
 function _update60()
+ if stat(120) then
+  local s={}
+  state.samp=s
+  audio_wait(6)
+  local nread=0
+  while stat(120) do
+   local n=serial(0x800,0x5100,0x800)
+   for i=0x5100,0x50ff+n do
+    add(s,@i)
+    nread+=1
+   end
+  end
+  log('read', nread)
+ end
+
  audio_update()
  if pause_frames<=0 then
   ui:update(state)
@@ -151,10 +172,10 @@ end
 function _draw()
  ui:draw(state)
 
- --cpumax[cpumaxf%100+1]=stat(1)
- --cpumaxf+=1
- --rectfill(0,0,30,6,0)
- --print(max(unpack(cpumax)),0,0,7)
+--cpumax[cpumaxf%100+1]=stat(1)
+--cpumaxf+=1
+--rectfill(0,0,30,6,0)
+--print(max(unpack(cpumax)),0,0,7)
 
  --rectfill(0,0,30,6,0)
  --print(stat(0),0,0,7)
@@ -179,10 +200,6 @@ end
 _schunk,_tgtchunks=100,4
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512.5
-
-function audio_set_root(obj)
- _root_obj=obj
-end
 
 function audio_dochunk()
  local buf=_chunkbuf
@@ -522,6 +539,46 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 
  return obj
 end
+
+function sample_new(base)
+ local obj=parse[[{
+  pos=1,
+  fc=0,
+  f=0,
+  detune=1.0,
+  dec=0.99,
+  amp=0.5
+ }]]
+
+ obj.note=function(self,pat,patch,step,note_len)
+  local s=pat[step]
+  local tun,dec,lev=unpack_patch(patch,base,base+2)
+  self.amp=lev*lev
+  dec=1-dec
+  self.dec=0.9999-(0.01*dec*dec*dec*dec)
+  self.detune=2^(flr((tun-0.5)*48+0.5)/12)
+  if s!=d_off then
+   self.pos=1
+   self.fc=1
+  end
+ end
+
+ obj.subupdate=function(self,b,first,last)
+  local f,fc,pos,dec,samp=self.f,self.fc,self.pos,self.dec,state.samp
+  local amp,detune=self.amp,self.detune
+  local n=#samp
+  for i=first,last do
+   if (pos>=n+1) pos-=n
+   f+=fc*((samp[pos&0xffff.0000]>>7)-1-f)
+   fc*=dec
+   pos+=detune
+   b[i]+=amp*f
+  end
+  self.pos,self.fc,self.f=pos,fc,f
+ end
+
+ return obj
+end
 -->8
 -- audio fx
 
@@ -559,7 +616,7 @@ function delay_new(l,fb)
 end
 
 
-dr_src_fx_masks=parse[[{1=1,2=1,3=2,4=2,5=3,6=3}]]
+dr_src_fx_masks=parse[[{1=1,2=1,3=2,4=2,5=4,6=4}]]
 function submixer_new(srcs)
  return {
   srcs=srcs,
@@ -902,6 +959,7 @@ function state_new(savedata)
   b1_bank=1,
   dr_bank=1,
   song_mode=false,
+  samp={1=128,2=0,3=0,4=0,5=128,6=255,7=255,8=255}
  }]]
 
  s.tl=timeline_new(default_patch)
@@ -914,6 +972,7 @@ function state_new(savedata)
   s.pat_patch=dec_byte_array(savedata.pat_patch)
   s.song_mode=savedata.song_mode
   s.pat_store=map_table_deep(savedata.pat_store,dec_byte_array,2)
+  s.samp=dec_byte_array(savedata.samp)
  end
 
  s._apply_diff=function(self,k,v)
@@ -1024,7 +1083,8 @@ function state_new(savedata)
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
    pat_patch=enc_byte_array(self.pat_patch),
-   pat_store=map_table_deep(self.pat_store,enc_byte_array,2)
+   pat_store=map_table_deep(self.pat_store,enc_byte_array,2),
+   samp=enc_byte_array(self.samp)
   })
  end
 
