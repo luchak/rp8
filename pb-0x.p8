@@ -385,82 +385,65 @@ function synth_new(base)
 end
 
 function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
- local obj=parse[[{
-  op=0,
-  dp=6553.6,
-  ae=0.0,
-  aemax=0.6,
-  aed=0.995,
-  ted=0.05,
-  detune=1.0
- }]]
+ local obj,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
+  {},unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
 
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
-   self.detune=2^(1.5*tun-0.75)
-   self.op,self.dp=0,(_dp0<<16)*self.detune
-   self.ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
-   self.aemax=0.5*self.ae
-   self.ted=0.5*((te_base-te_scale*dec)^4)
-   self.aed=1-ae_ratio*self.ted
+   _detune=2^(1.5*tun-0.75)
+   _op,_dp=0,(_dp0<<16)*_detune
+   _ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
+   _aemax=0.5*_ae
+   _ted=0.5*((te_base-te_scale*dec)^4)
+   _aed=1-ae_ratio*_ted
   end
  end
 
  obj.subupdate=function(self,b,first,last)
-  local op,dp,dp1,ae,aed,ted=self.op,self.dp,(_dp1<<16)*self.detune,self.ae,self.aed,self.ted
-  local aemax=self.aemax
+  local op,dp,dp1,ae,aed,ted=_op,_dp,(_dp1<<16)*_detune,_ae,_aed,_ted
+  local aemax=_aemax
   for i=first,last do
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
    b[i]+=min(ae,aemax)*sin(0.5+(op>>16))
   end
-  self.op,self.dp,self.ae=op,dp,ae
+  _op,_dp,_ae=op,dp,ae
  end
 
  return obj
 end
 
 function snare_new()
- local obj=parse[[{
-  dp0=0.08,
-  dp1=0.042,
-  op=0,
-  dp=0.05,
-  aes=0.0,
-  aen=0.0,
-  detune=10,
-  aesd=0.99,
-  aend=0.996,
-  aemax=0.4
- }]]
- 
+ local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
+  {},unpack_split'0.08,0.042,0,0.05,0,0,10,0.99,0.996,0.4'
+
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,45,47)
   if s!=d_off then
-   self.detune=2^(2*tun-1)
-   self.op,self.dp=0,self.dp0*self.detune
-   self.aes,self.aen=0.7,0.4
-   if (s==d_ac) self.aes,self.aen=1.5,0.85
+   _detune=2^(2*tun-1)
+   _op,_dp=0,_dp0*_detune
+   _aes,_aen=0.7,0.4
+   if (s==d_ac) _aes,_aen=1.5,0.85
    local lev2,aeo=lev*lev,(tun-0.5)*0.2
-   self.aes-=aeo
-   self.aen+=aeo
-   self.aes*=lev2
-   self.aen*=lev2
-   self.aemax=self.aes*0.5
+   _aes-=aeo
+   _aen+=aeo
+   _aes*=lev2
+   _aen*=lev2
+   _aemax=_aes*0.5
    local pd4=(0.65-0.25*dec)^4
-   self.aesd=1-0.1*pd4
-   self.aend=1-0.04*pd4
+   _aesd=1-0.1*pd4
+   _aend=1-0.04*pd4
   end
  end
  
  obj.subupdate=function(self,b,first,last)
-  local op,dp,dp1=self.op,self.dp,self.dp1*self.detune
-  local aes,aen,aesd,aend=self.aes,self.aen,self.aesd,self.aend
-  local aemax=self.aemax
+  local op,dp,dp1=_op,_dp,_dp1*_detune
+  local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
+  local aemax=_aemax
   for i=first,last do
    op+=dp
    dp+=(dp1-dp)>>7
@@ -469,9 +452,9 @@ function snare_new()
    if (op>=1) op-=2
    b[i]+=(min(aemax,aes)*sin(op)+aen*(2*rnd()-1))*0.3
   end
-  self.dp,self.op,self.aes,self.aen=dp,op,aes,aen
+  _dp,_op,_aes,_aen=dp,op,aes,aen
  end
- 
+
  return obj
 end
 
