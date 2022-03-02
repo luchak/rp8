@@ -327,7 +327,7 @@ function synth_new(base)
    -- I forgot why this is 0.37
    -- I think it's more or less
    -- arbitrary
-   local fc=min(0.37/os,fcb+((me*env)>>4))
+   local fc=min(0.4/os,fcb+((me*env)>>4))
    -- very very janky dewarping
    -- arbitrary scaling constant
    -- is 0.75*2*pi because???
