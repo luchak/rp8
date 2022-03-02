@@ -476,41 +476,28 @@ function snare_new()
 end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
- local obj=parse[[{
-  ae=0.0,
-  f1=0.0,
-  f2=0.0,
-  op1=0.0,
-  odp1=14745.6,
-  op2=0.0,
-  odp2=17039.36,
-  op3=0.0,
-  odp3=15400.96,
-  op4=0.0,
-  odp4=15892.48,
-  aed=0.995,
-  detune=1
- }]]
- 
+ local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
+  {},unpack_split'0,0,0,0,14745.6,0,17039.36,0,15400.96,0,15892.48,0.995,1'
+
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
-   self.op,self.dp=0,self.dp0
-   self.ae=lev*lev*trn(s==d_ac,2.0,0.8)
+   _op,_dp=0,_dp0
+   _ae=lev*lev*trn(s==d_ac,2.0,0.8)
 
-   self.detune=2^(tbase+tscale*tun)
+   _detune=2^(tbase+tscale*tun)
    local pd=(dbase-dscale*dec)
 
-   self.aed=1-0.04*pd*pd*pd*pd
+   _aed=1-0.04*pd*pd*pd*pd
   end
  end
 
  obj.subupdate=function(self,b,first,last)
-  local ae,f1,f2=self.ae,self.f1,self.f2
-  local op1,op2,op3,op4,detune=self.op1,self.op2,self.op3,self.op4,self.detune
-  local odp1,odp2,odp3,odp4=self.odp1*detune,self.odp2*detune,self.odp3*detune,self.odp4*detune
-  local aed,tlev,nlev=self.aed,_tlev,_nlev
+  local ae,f1,f2=_ae,_f1,_f2
+  local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
+  local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
+  local aed,tlev,nlev=_aed,_tlev,_nlev
 
   for i=first,last do
    local osc=1.0
@@ -529,39 +516,32 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    op3+=odp3
    op4+=odp4
   end
-  self.ae,self.f1,self.f2=ae,f1,f2
-  self.op1,self.op2,self.op3,self.op4=op1,op2,op3,op4
+  _ae,_f1,_f2=ae,f1,f2
+  _op1,_op2,_op3,_op4=op1,op2,op3,op4
  end
 
  return obj
 end
 
 function sample_new(base)
- local obj=parse[[{
-  pos=1,
-  fc=0,
-  f=0,
-  detune=1.0,
-  dec=0.99,
-  amp=0.5
- }]]
+ local obj,_pos,_fc,_f,_detune,_dec,_amp={},unpack_split'1,0,0,1,0.99,0.5'
 
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  self.amp=lev*lev
-  dec=1-dec
-  self.dec=0.9999-(0.01*dec^4)
-  self.detune=2^(flr((tun-0.5)*48+0.5)/12)
+  _amp=lev*lev
+  _dec=0.9999-(0.01*(1-dec)^4)
+  _detune=2^(flr((tun-0.5)*48+0.5)/12)
   if s!=d_off then
-   self.pos=1
-   self.fc=1
+   _pos=1
+   _fc=1
   end
  end
 
  obj.subupdate=function(self,b,first,last)
-  local f,fc,pos,dec,samp=self.f,self.fc,self.pos,self.dec,state.samp
-  local amp,detune=self.amp,self.detune
+  -- TODO: samp should probably be passed in in note?
+  local f,fc,pos,dec,samp=_f,_fc,_pos,_dec,state.samp
+  local amp,detune=_amp,_detune
   local n=#samp
   for i=first,last do
    if (pos>=n+1) pos-=n
@@ -570,7 +550,7 @@ function sample_new(base)
    pos+=detune
    b[i]+=amp*f
   end
-  self.pos,self.fc,self.f=pos,fc,f
+  _pos,_fc,_f=pos,fc,f
  end
 
  return obj
@@ -1009,7 +989,7 @@ function state_new(savedata)
    self.bar,self.tick=tl.bar,tl.tick
   else
    self.tick+=1
-   if (self.tick>16) self:load_bar()
+   if (self.tick>16) load_bar()
   end
   self:_init_tick()
  end
@@ -1020,7 +1000,7 @@ function state_new(savedata)
    if (tl.recording) tl:toggle_recording()
    tl.override_params={}
   end
-  self:load_bar()
+  load_bar()
   self.playing=not self.playing
  end
 
@@ -1030,8 +1010,8 @@ function state_new(savedata)
 
  s.toggle_song_mode=function(self)
   self.song_mode=not self.song_mode
-  if (self.playing) self:toggle_playing()
-  self:load_bar()
+  self:stop_playing()
+  load_bar()
  end
 
  s._sync_pats=function(self)
@@ -1060,7 +1040,7 @@ function state_new(savedata)
  end
 
  s.go_to_bar=function(self,bar)
-  self:load_bar(mid(1,bar,999))
+  load_bar(mid(1,bar,999))
  end
 
  s.get_pat_steps=function(self,syn)
@@ -1082,8 +1062,12 @@ function state_new(savedata)
   })
  end
 
- s.cut_seq=function(self)
+ s.stop_playing=function(self)
   if (self.playing) self:toggle_playing()
+ end
+
+ s.cut_seq=function(self)
+  self:stop_playing()
   copy_buf_seq=self.tl:cut_seq()
   self:load_bar()
  end
@@ -1101,7 +1085,7 @@ function state_new(savedata)
 
  s.paste_seq=function(self)
   if (not copy_buf_seq) return
-  if (self.playing) self:toggle_playing()
+  self:stop_playing()
   local n=#copy_buf_seq
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
@@ -1113,7 +1097,7 @@ function state_new(savedata)
 
  s.insert_seq=function(self)
   if (not copy_buf_seq) return
-  if (self.playing) self:toggle_playing()
+  self:stop_playing()
   self.tl:insert_seq(copy_buf_seq)
   self:load_bar()
  end
