@@ -182,8 +182,6 @@ function _draw()
  palt(0,false)
 end
 
---u60=_update60 _update60=nil function _update() u60() u60() end
-
 #include utils.lua
 
 -->8
@@ -242,8 +240,6 @@ function audio_update()
 end
 -->8
 -- audio gen
-
---fir_coefs={0,0.0642,0.1362,0.1926,0.2139,0.1926,0.1362,0.0642}
 
 function synth_new(base)
  -- simple saw wave synth
@@ -392,6 +388,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
+   -- TODO: param updates should be reflected on every step?
    _detune=2^(1.5*tun-0.75)
    _op,_dp=0,(_dp0<<16)*_detune
    _ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
@@ -737,8 +734,6 @@ end
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'64,65,66,67,68,64,65,66'
 
-pat_groups=split'b0,b1,dr'
-
 syn_base_idx=parse[[{
  b0=7,
  b1=21,
@@ -1013,11 +1008,10 @@ function state_new(savedata)
    end
    self.pat_seqs[syn]=pat
   end
-  for group in all(pat_groups) do
-   local base=syn_base_idx[group]
+  for group,idx in pairs(pat_param_idx) do
    self.pat_status[group]={
-    on=patch[base+3]>0,
-    idx=patch[base+4],
+    on=patch[idx-1]>0,
+    idx=patch[idx],
    }
   end
  end
