@@ -509,8 +509,8 @@ function sample_new(base)
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  _dec=0.9999-(0.01*(1-dec)^4)
-  _detune=2^(flr((tun-0.5)*48+0.5)/12)
+  _dec=1-(0.01*(1-dec)^4)
+  _detune=2^(flr((tun-0.5)*24+0.5)/12)
   if s!=d_off then
    _pos=1
    _amp=lev*lev
@@ -523,8 +523,13 @@ function sample_new(base)
   local amp,detune=_amp,_detune
   local n=#samp
   for i=first,last do
-   if (pos>=n+1) pos-=n
-   b[i]+=amp*((samp[pos&0xffff.0000]>>7)-1)
+   if (pos>=n) break
+   local pi=pos&0xffff.0000
+   local po=pos-pi
+   local s0,s1=samp[pi],samp[pi+1]
+   local val=s0+po*(s1-s0)
+
+   b[i]+=amp*((val>>7)-1)
    amp*=dec
    pos+=detune
   end
