@@ -504,33 +504,31 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 end
 
 function sample_new(base)
- local obj,_pos,_fc,_f,_detune,_dec,_amp={},unpack_split'1,0,0,1,0.99,0.5'
+ local obj,_pos,_detune,_dec,_amp={},unpack_split'1,0,0,1,0.99,0.5'
 
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  _amp=lev*lev
   _dec=0.9999-(0.01*(1-dec)^4)
   _detune=2^(flr((tun-0.5)*48+0.5)/12)
   if s!=d_off then
    _pos=1
-   _fc=1
+   _amp=lev*lev
   end
  end
 
  obj.subupdate=function(self,b,first,last)
   -- TODO: samp should probably be passed in in note?
-  local f,fc,pos,dec,samp=_f,_fc,_pos,_dec,state.samp
+  local pos,dec,samp=_pos,_dec,state.samp
   local amp,detune=_amp,_detune
   local n=#samp
   for i=first,last do
    if (pos>=n+1) pos-=n
-   f+=fc*((samp[pos&0xffff.0000]>>7)-1-f)
-   fc*=dec
+   b[i]+=amp*((samp[pos&0xffff.0000]>>7)-1)
+   amp*=dec
    pos+=detune
-   b[i]+=amp*f
   end
-  _pos,_fc,_f=pos,fc,f
+  _pos,_amp=pos,amp
  end
 
  return obj
