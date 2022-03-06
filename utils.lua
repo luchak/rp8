@@ -170,6 +170,7 @@ function dec_byte_array(s)
  return a
 end
 
+-- todo: i think the base case can be inlined and this function can do both?
 function map_table_deep(a,f,d)
  if (d==0) return map_table(a,f)
  return map_table(a,function(v) return map_table_deep(v,f,d-1) end)

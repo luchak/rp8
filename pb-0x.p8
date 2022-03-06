@@ -6,15 +6,11 @@ __lua__
 
 semitone=2^(1/12)
 
-function audio_set_root(obj)
- _root_obj=obj
-end
-
 -- give audio time to settle
 -- before starting synthesis
 function audio_wait(frames)
  pause_frames=frames
- audio_set_root(nil)
+ audio_root_obj=nil
 end
 audio_wait(6)
 
@@ -32,17 +28,16 @@ function paste_state()
  end
 end
 
-rec_menuitem=4
 audio_rec=false
 function start_rec()
  audio_rec=true
- menuitem(rec_menuitem,'stop recording',stop_rec)
+ menuitem(4,'stop recording',stop_rec)
  extcmd'audio_rec'
 end
 
 function stop_rec()
  if (audio_rec) extcmd'audio_end'
- menuitem(rec_menuitem,'start recording',start_rec)
+ menuitem(4,'start recording',start_rec)
 end
 
 -- turn off output lpf for less
@@ -59,17 +54,20 @@ function _init()
  pbl_ui_init(ui,unpack_split'b1,21,64')
  pirc_ui_init(ui,'dr',96)
 
- pbl0,pbl1=synth_new(7),synth_new(21)
- kick,snare,hh,cy,perc,sp=
+ local pbl0,pbl1=synth_new(7),synth_new(21)
+ local drums={
   sweep_new(unpack_split'42,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
   hh_cy_new(unpack_split'48,1,0.8,0.75,0.35,-1,2'),
   hh_cy_new(unpack_split'51,1.3,0.5,0.5,0.18,0.3,0.8'),
   sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6'),
   sample_new(57)
- drum_mixer=submixer_new({kick,snare,hh,cy,perc,sp})
- delay=delay_new(3000,0)
- svf=svf_new()
+ }
+ local kick,snare,hh,cy,perc,sp=unpack(drums)
+ local drum_mixer=submixer_new(drums)
+ local delay=delay_new(3000,0)
+ local svf=svf_new()
+ local drum_keys=split'bd,sd,hh,cy,pc,sp'
 
  mixer=mixer_new(
   {
@@ -94,12 +92,9 @@ function _init()
    if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
    if pstat.dr.on then
     local dseq=pseq.dr
-    kick:note(dseq.bd,patch,now,nl)
-    snare:note(dseq.sd,patch,now,nl)
-    hh:note(dseq.hh,patch,now,nl)
-    cy:note(dseq.cy,patch,now,nl)
-    perc:note(dseq.pc,patch,now,nl)
-    sp:note(dseq.sp,patch,now,nl)
+    for idx,drum in ipairs(drums) do
+     drum:note(dseq[drum_keys[idx]],patch,now,nl)
+    end
    end
    drum_mixer:note(patch)
    mixer:note(patch)
@@ -144,21 +139,23 @@ function _update60()
  if stat(120) then
   local s={}
   state.samp=s
-  audio_wait(6)
   local nread=0
   while stat(120) do
    local n=serial(0x800,0x5100,0x800)
    for i=0x5100,0x50ff+n do
-    add(s,@i)
-    nread+=1
+    if nread<0x7fff then
+     add(s,@i)
+     nread+=1
+    end
    end
   end
+  audio_wait(10)
  end
 
  audio_update()
  if pause_frames<=0 then
   ui:update(state)
-  audio_set_root(seq_helper)
+  audio_root_obj=seq_helper
  else
   pause_frames-=1
  end
@@ -198,8 +195,8 @@ sample_rate=5512.5
 
 function audio_dochunk()
  local buf=_chunkbuf
- if _root_obj then
-  _root_obj:update(buf,1,_schunk)
+ if audio_root_obj then
+  audio_root_obj:update(buf,1,_schunk)
  else
   for i=1,_schunk do
    buf[i]=0
