@@ -1113,12 +1113,8 @@ end
 
 function state_make_get_set(a,b)
  return
-  state_make_get(a,b),
+  function(s) if b then return s[a][b] else return s[a] end end,
   function(s,v) if (b) s[a][b]=v else s[a]=v end
-end
-
-function state_make_get(a,b)
- return function(s) if (b) return s[a][b] else return s[a] end
 end
 
 state_is_song_mode=function(state) return state.song_mode end
@@ -1383,7 +1379,7 @@ function radio_btn_new(x,y,val,s_off,s_on,get,set)
 end
 
 function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
- local get_bank=state_make_get(syn..'_bank')
+ local get_bank=state_make_get_set(syn..'_bank')
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  local ret_prefix=pib..',4,'..c_bg..','
  return {
@@ -1405,7 +1401,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
 end
 
 function transport_number_new(x,y,w,obj,key)
- local get=state_make_get(obj,key)
+ local get=state_make_get_set(obj,key)
  return {
   x=x,y=y,w=w,noinput=true,
   get_sprite=function(self,state)
@@ -1448,6 +1444,7 @@ function pbl_ui_init(ui,key,base_idx,yp)
 
  ui:add_widget(
   momentary_new(24,yp,26,function(state,b)
+   -- just inline the function?
    transpose_pat(state.pat_seqs[key],b)
   end)
  )
@@ -1574,7 +1571,7 @@ function header_ui_init(ui,yp)
  ui:add_widget(
   toggle_new(
    0,yp,6,7,
-   state_make_get('playing'),
+   state_make_get_set('playing'),
    function(s) s:toggle_playing() end
   )
  )
@@ -1588,7 +1585,7 @@ function header_ui_init(ui,yp)
  song_only(
   toggle_new(
    8,yp,231,232,
-   state_make_get('tl','recording'),
+   state_make_get_set('tl','recording'),
    function(s) s:toggle_recording() end
   ),
   233
