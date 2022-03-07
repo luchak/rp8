@@ -130,7 +130,7 @@ function _init()
   state=state_new()
   seq_helper.state=state
  end)
- menuitem(rec_menuitem, 'start recording', start_rec)
+ menuitem(4, 'start recording', start_rec)
 
  log'init complete'
 end
