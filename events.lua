@@ -94,18 +94,22 @@ function timeline_new(default_patch, savedata)
  end
 
  -- add to overrides
- -- if recording, set in bar events
+ -- adding to events will be handled in tick/bar handlers if required
  timeline.record_event=function(self,k,v)
   self.override_params[k]=v
   self.has_override=true
  end
 
- timeline.toggle_recording=function(self)
+ timeline.clear_overrides=function(self)
+  self.override_params={}
+  self.has_override=false
+ end
+
+ toggle_recording=function(self)
   local sr=self.recording
   if sr then
    if (self.has_override) self:_finalize_bar()
-   self.override_params={}
-   self.has_override=false
+   self:clear_overrides()
   end
   self.recording=not sr
  end
