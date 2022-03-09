@@ -105,7 +105,7 @@ function timeline_new(default_patch, savedata)
   self.has_override=false
  end
 
- toggle_recording=function(self)
+ timeline.toggle_recording=function(self)
   local sr=self.recording
   if sr then
    if (self.has_override) self:_finalize_bar()
@@ -145,6 +145,20 @@ function timeline_new(default_patch, savedata)
    local bar=self.loop_start+i
    self.bars[bar]=copy_table(seq[i%n+1])
   end
+ end
+
+ timeline.copy_overrides_to_loop=function(self)
+  local op=self.override_params
+  for i=0,self.loop_len-1 do
+   local bar_idx=self.loop_start+i
+   local bar=self.bars[bar_idx] or copy_table(self.def_bar)
+   bar.t0=enc_byte_array(merge_tables(dec_byte_array(bar.t0),op))
+   for k,_ in pairs(op) do
+    bar.ev[k]=nil
+   end
+   self.bars[bar_idx]=bar
+  end
+  self:clear_overrides()
  end
 
  timeline.insert_seq=function(self,seq)
