@@ -51,17 +51,17 @@ function _init()
 
  header_ui_init(ui,0)
  pbl_ui_init(ui,unpack_split'b0,7,32')
- pbl_ui_init(ui,unpack_split'b1,21,64')
+ pbl_ui_init(ui,unpack_split'b1,19,64')
  pirc_ui_init(ui,'dr',96)
 
- local pbl0,pbl1=synth_new(7),synth_new(21)
+ local pbl0,pbl1=synth_new(7),synth_new(19)
  local drums={
-  sweep_new(unpack_split'42,0.092,0.0126,0.12,0.7,0.7,0.4'),
+  sweep_new(unpack_split'38,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
-  hh_cy_new(unpack_split'48,1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'51,1.3,0.5,0.5,0.18,0.3,0.8'),
-  sweep_new(unpack_split'54,0.12,0.06,0.2,1,0.85,0.6'),
-  sample_new(57)
+  hh_cy_new(unpack_split'44,1,0.8,0.75,0.35,-1,2'),
+  hh_cy_new(unpack_split'47,1.3,0.5,0.5,0.18,0.3,0.8'),
+  sweep_new(unpack_split'50,0.12,0.06,0.2,1,0.85,0.6'),
+  sample_new(53)
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
  local drum_mixer=submixer_new(drums)
@@ -102,8 +102,8 @@ function _init()
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
-   local b1_lev,b1_od,b1_fx=unpack_patch(patch,21,23)
-   local drum_lev,drum_od,drum_fx=unpack_patch(patch,35,37)
+   local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
+   local drum_lev,drum_od,drum_fx=unpack_patch(patch,31,33)
    mixer.lev=mix_lev*3
    delay.l=((dl_t<<4)+0.25)*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
@@ -416,7 +416,7 @@ function snare_new()
 
  obj.note=function(self,pat,patch,step,note_len)
   local s=pat[step]
-  local tun,dec,lev=unpack_patch(patch,45,47)
+  local tun,dec,lev=unpack_patch(patch,41,43)
   if s!=d_off then
    _detune=2^(2*tun-1)
    _op,_dp=0,_dp0*_detune
@@ -577,7 +577,7 @@ function submixer_new(srcs)
  return {
   srcs=srcs,
   fx=127,
-  note=function(self,patch) self.fx=patch[41] end,
+  note=function(self,patch) self.fx=patch[37] end,
   update=function(self,b,first,last,bypass)
    for i=first,last do
     b[i]=0
@@ -601,7 +601,7 @@ function mixer_new(srcs,fx,filt,lev)
   fxbuf={},
   filtsrc=1,
   note=function(self,state)
-   self.filtsrc=flr(state[60]>>1)
+   self.filtsrc=flr(state[56]>>1)
   end,
   update=function(self,b,first,last)
    local fxbuf,tmp,bypass,lev,filtsrc=self.fxbuf,self.tmp,self.bypass,self.lev,self.filtsrc
@@ -683,7 +683,7 @@ function svf_new()
    --self.rc=1/(2*q)
    -- configurable decay?
    local r,bp,gc
-   bp,gc,r,self.wet=unpack_patch(patch,60,63)
+   bp,gc,r,self.wet=unpack_patch(patch,56,59)
    self.rc=1-(r*0.96)
    --self.fe=0.6
    self.bp=(bp&0x0.02>0 and 1) or 0
@@ -752,6 +752,24 @@ pat_param_idx=parse[[{
  dr=39,
 }]]
 
+syn_base_idx=parse[[{
+ b0=7,
+ b1=19,
+ dr=31,
+ bd=38,
+ sd=41,
+ hh=44,
+ cy=47,
+ pc=50,
+ sp=53,
+}]]
+
+pat_param_idx=parse[[{
+ b0=11,
+ b1=23,
+ dr=35,
+}]]
+
 -- float values: 0=>0,128=>1
 -- bool values: 0=>false,128 (or any nonzero)=>true
 -- int values: identity map
@@ -775,28 +793,28 @@ default_patch=parse[[{
 17=64,
 18=64,
 19=64,
-20=64,
-21=64,
-22=0,
-23=0,
+20=0,
+21=0,
+22=128,
+23=1,
 24=128,
-25=1,
-26=128,
+25=64,
+26=64,
 27=64,
 28=64,
 29=64,
 30=64,
 31=64,
-32=64,
-33=64,
-34=64,
-35=64,
-36=0,
-37=0,
-38=128,
-39=1,
+32=0,
+33=0,
+34=128,
+35=1,
+36=64,
+37=127,
+38=64,
+39=64,
 40=64,
-41=127,
+41=64,
 42=64,
 43=64,
 44=64,
@@ -811,15 +829,11 @@ default_patch=parse[[{
 53=64,
 54=64,
 55=64,
-56=64,
+56=2,
 57=64,
 58=64,
-59=64,
-60=2,
-61=64,
-62=64,
-63=128,
-64=0
+59=128,
+60=0
 }]]
  -- 01 mix_tempo=0.5,
  -- 02 mix_shuf=0,
@@ -839,52 +853,48 @@ default_patch=parse[[{
  -- 16 b0_env=0.5,
  -- 17 b0_dec=0.5,
  -- 18 b0_acc=0.5,
- -- 19 b0_??=0.5,
- -- 20 b0_??=0.5,
- -- 21 b1_lev=0.5,
- -- 22 b1_od=0,
- -- 23 b1_fx=0,
- -- 24 b1_on=true,
- -- 25 b1_pat=1,
- -- 26 b1_saw=true,
- -- 27 b1_tun=0.5,
- -- 28 b1_cut=0.5,
- -- 29 b1_res=0.5,
- -- 30 b1_env=0.5,
- -- 31 b1_dec=0.5,
- -- 32 b1_acc=0.5,
- -- 33 b1_??=0.5,
- -- 34 b1_??=0.5,
- -- 35 dr_lev=0.5,
- -- 36 dr_od=0,
- -- 37 dr_fx=0,
- -- 38 dr_on=true,
- -- 39 dr_pat=1,
- -- 40 dr_acc=64,
- -- 41 dr_fx_en=127/128
- -- 42 bd_tun=0.5,
- -- 43 bd_dec=0.5,
- -- 44 bd_lev=0.5,
- -- 45 sd_tun=0.5,
- -- 46 sd_dec=0.5,
- -- 47 sd_lev=0.5,
- -- 48 hh_tun=0.5,
- -- 49 hh_dec=0.5,
- -- 50 hh_lev=0.5,
- -- 51 cy_tun=0.5,
- -- 52 cy_dec=0.5,
- -- 53 cy_lev=0.5,
- -- 54 pc_tun=0.5,
- -- 55 pc_dec=0.5,
- -- 56 pc_lev=0.5,
- -- 57 sp_tun=0.5,
- -- 58 sp_dec=0.5,
- -- 59 sp_lev=0.5,
- -- 60 fl_src_type=2
- -- 61 fl_cut=0.5
- -- 62 fl_res=0.5
- -- 63 fl_wet=1
- -- 64 fl_pat=0
+ -- 19 b1_lev=0.5,
+ -- 20 b1_od=0,
+ -- 21 b1_fx=0,
+ -- 22 b1_on=true,
+ -- 23 b1_pat=1,
+ -- 24 b1_saw=true,
+ -- 25 b1_tun=0.5,
+ -- 26 b1_cut=0.5,
+ -- 27 b1_res=0.5,
+ -- 28 b1_env=0.5,
+ -- 29 b1_dec=0.5,
+ -- 30 b1_acc=0.5,
+ -- 31 dr_lev=0.5,
+ -- 32 dr_od=0,
+ -- 33 dr_fx=0,
+ -- 34 dr_on=true,
+ -- 35 dr_pat=1,
+ -- 36 dr_acc=64,
+ -- 37 dr_fx_en=127/128
+ -- 38 bd_tun=0.5,
+ -- 39 bd_dec=0.5,
+ -- 40 bd_lev=0.5,
+ -- 41 sd_tun=0.5,
+ -- 42 sd_dec=0.5,
+ -- 43 sd_lev=0.5,
+ -- 44 hh_tun=0.5,
+ -- 45 hh_dec=0.5,
+ -- 46 hh_lev=0.5,
+ -- 47 cy_tun=0.5,
+ -- 48 cy_dec=0.5,
+ -- 49 cy_lev=0.5,
+ -- 50 pc_tun=0.5,
+ -- 51 pc_dec=0.5,
+ -- 52 pc_lev=0.5,
+ -- 53 sp_tun=0.5,
+ -- 54 sp_dec=0.5,
+ -- 55 sp_lev=0.5,
+ -- 56 fl_src_type=2
+ -- 57 fl_cut=0.5
+ -- 58 fl_res=0.5
+ -- 59 fl_wet=1
+ -- 60 fl_pat=0
 
 pbl_pat_template=parse[[{
  nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
@@ -1503,12 +1513,12 @@ function pirc_ui_init(ui,key,yp)
   )
  end
  for k,d in pairs(parse[[{
-  bd={x=32,y=8,s=150,b=42},
-  sd={x=32,y=16,s=152,b=45},
-  hh={x=64,y=8,s=154,b=48},
-  cy={x=64,y=16,s=156,b=51},
-  pc={x=96,y=8,s=158,b=54},
-  sp={x=96,y=16,s=174,b=57}
+  bd={x=32,y=8,s=150,b=38},
+  sd={x=32,y=16,s=152,b=41},
+  hh={x=64,y=8,s=154,b=44},
+  cy={x=64,y=16,s=156,b=47},
+  pc={x=96,y=8,s=158,b=50},
+  sp={x=96,y=16,s=174,b=53}
  }]]) do
   local cyp=yp+d.y
   ui:add_widget(
@@ -1524,7 +1534,7 @@ function pirc_ui_init(ui,key,yp)
 
  for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
   ui:add_widget(
-   toggle_new(x,yp,170,171,state_make_get_set_param_bool(41,b))
+   toggle_new(x,yp,170,171,state_make_get_set_param_bool(37,b))
   )
  end
 
@@ -1540,7 +1550,7 @@ function pirc_ui_init(ui,key,yp)
  )
 
  ui:add_widget(
-  toggle_new(0,yp+8,188,189,state_make_get_set_param_bool(38))
+  toggle_new(0,yp+8,188,189,state_make_get_set_param_bool(34))
  )
 
  ui:add_widget(
@@ -1648,18 +1658,18 @@ function header_ui_init(ui,yp)
   4="16,16,2",
   5="16,24,4",
   6="32,24,5",
-  7="48,16,61",
-  8="48,24,62",
-  9="64,24,63",
+  7="48,16,57",
+  8="48,24,58",
+  9="64,24,59",
  }]]) do
   hdial(unpack_split(s))
  end
 
  ui:add_widget(
-  toggle_new(64,yp+16,234,235,state_make_get_set_param_bool(60,0))
+  toggle_new(64,yp+16,234,235,state_make_get_set_param_bool(56,0))
  )
  ui:add_widget(
-  spin_btn_new(64,yp+8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(60,1))
+  spin_btn_new(64,yp+8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
  )
 
  for pt,ypc in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
