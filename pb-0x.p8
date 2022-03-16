@@ -104,7 +104,7 @@ function _init()
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
    local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
    local drum_lev,drum_od,drum_fx=unpack_patch(patch,31,33)
-   mixer.lev=mix_lev*3
+   mixer.lev=mix_lev*mix_lev*8
    delay.l=((dl_t<<4)+0.25)*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
 
