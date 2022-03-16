@@ -329,6 +329,7 @@ function synth_new(base)
    -- arbitrary scaling constant
    -- is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
+   local fc1=(0.6+fc)>>1
    if gate then
     ae+=(1-ae)>>2
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
@@ -356,7 +357,7 @@ function synth_new(base)
     local xc=mid(-1,x,1)
     x=xc+(x-xc)*0.9840
 
-    f1+=(x-f1)*fc
+    f1+=(x-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
