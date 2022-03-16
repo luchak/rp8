@@ -118,7 +118,7 @@ function _init()
    ms.b0.fx=b0_fx*b0_fx*0.8
    ms.b1.fx=b1_fx*b1_fx*0.8
    ms.dr.fx=drum_fx*drum_fx*0.8
-   comp.thresh=0.1+0.9*comp_thresh
+   comp.thresh=0.01+0.99*comp_thresh*comp_thresh*comp_thresh
 
    state:next_tick()
   end
@@ -349,7 +349,7 @@ function synth_new(base)
     if not saw then
      osc=0.5+((osc&0x8000)>>15)
     end
-    fosc+=(osc-fosc)*0.025
+    fosc+=(osc-fosc)>>5
     osc-=fosc
     ffb+=(f4-ffb)>>5
     local x=osc-fr*(f4-ffb-osc)
@@ -650,8 +650,8 @@ function comp_new(src,thresh,ratio,_att,_rel)
    self.src:update(b,first,last)
    local env,att,rel=self.env,_att,_rel
    local thresh,ratio=self.thresh,1/self.ratio
-   -- makeup targets 0.67
-   local makeup=max(1,0.67/((0.67-thresh)*ratio+thresh))
+   -- makeup targets 0.2
+   local makeup=max(1,0.2/((0.2-thresh)*ratio+thresh))
    for i=first,last do
     -- avoid divide-by-zero
     local x=abs(b[i])+0x0.0010
