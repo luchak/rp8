@@ -558,7 +558,7 @@ function delay_new(l,fb)
   local f1=self.f1
   for i=first,last do
    local x,y=b[i],dl[p]
-   if (abs(y)<0.0001) y=0
+   if (abs(y)<0x0.0040) y=0
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
