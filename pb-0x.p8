@@ -104,21 +104,21 @@ function _init()
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
    local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
    local drum_lev,drum_od,drum_fx=unpack_patch(patch,31,33)
-   mixer.lev=mix_lev*mix_lev*8
+   mixer.lev=pow4(mix_lev)*16
    delay.l=((dl_t<<4)+0.25)*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
 
    local ms=mixer.srcs
-   ms.b0.lev=b0_lev
-   ms.b1.lev=b1_lev
-   ms.dr.lev=drum_lev*2
-   ms.b0.od=b0_od
-   ms.b1.od=b1_od
-   ms.dr.od=drum_od
-   ms.b0.fx=b0_fx*b0_fx*0.8
-   ms.b1.fx=b1_fx*b1_fx*0.8
-   ms.dr.fx=drum_fx*drum_fx*0.8
-   comp.thresh=0.01+0.99*comp_thresh*comp_thresh*comp_thresh
+   ms.b0.lev=16*pow4(b0_lev)
+   ms.b1.lev=16*pow4(b1_lev)
+   ms.dr.lev=32*pow4(drum_lev)
+   ms.b0.od=b0_od*b0_od
+   ms.b1.od=b1_od*b1_od
+   ms.dr.od=drum_od*drum_od
+   ms.b0.fx=pow3(b0_fx)
+   ms.b1.fx=pow3(b1_fx)
+   ms.dr.fx=pow3(drum_fx)
+   comp.thresh=0.01+0.99*pow3(comp_thresh)
 
    state:next_tick()
   end
@@ -558,7 +558,7 @@ function delay_new(l,fb)
   local f1=self.f1
   for i=first,last do
    local x,y=b[i],dl[p]
-   if (abs(y)<0x0.0040) y=0
+   if (abs(y)<0x0.0100) y=0
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4

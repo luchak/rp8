@@ -194,3 +194,5 @@ function unpack_patch(patch,first,last)
  return unpack(r)
 end
 
+function pow3(x) return x*x*x end
+function pow4(x) return x*x*x*x end
