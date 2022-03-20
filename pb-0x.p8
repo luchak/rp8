@@ -1078,7 +1078,7 @@ function state_new(savedata)
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
   else
-   self.pat_patch=dec_byte_array(copy_buf_seq[1].start)
+   self.pat_patch=dec_byte_array(copy_buf_seq[1].t0)
   end
   self:load_bar()
  end
