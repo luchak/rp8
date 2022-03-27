@@ -192,8 +192,10 @@ end
 _schunk,_tgtchunks=100,4
 _bufpadding,_chunkbuf=4*_schunk,{}
 sample_rate=5512.5
+_audio_dcf=0
 
 function audio_dochunk()
+ local dcf=_audio_dcf
  local buf=_chunkbuf
  if audio_root_obj then
   audio_root_obj:update(buf,1,_schunk)
@@ -203,9 +205,12 @@ function audio_dochunk()
   end
  end
  for i=1,_schunk do
+  -- dc filter, plus
   -- soft saturation to make
   -- clipping less unpleasant
-  local x=mid(-1,buf[i],1)
+  local x=buf[i]
+  dcf+=(x-dcf)>>8
+  x=mid(-1,x-dcf,1)
   x-=0.148148*x*x*x
   -- add dither to keep delay
   -- tails somewhat nicer
@@ -214,6 +219,7 @@ function audio_dochunk()
   poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
  end
  serial(0x808,0x4300,_schunk)
+ _audio_dcf=dcf
 end
 
 function audio_update()
