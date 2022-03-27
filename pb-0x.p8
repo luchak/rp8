@@ -104,14 +104,14 @@ function _init()
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
    local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
    local drum_lev,drum_od,drum_fx=unpack_patch(patch,31,33)
-   mixer.lev=pow4(mix_lev)*16
+   mixer.lev=pow3(mix_lev)*8
    delay.l=((dl_t<<4)+0.25)*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
 
    local ms=mixer.srcs
-   ms.b0.lev=16*pow4(b0_lev)
-   ms.b1.lev=16*pow4(b1_lev)
-   ms.dr.lev=32*pow4(drum_lev)
+   ms.b0.lev=8*pow3(b0_lev)
+   ms.b1.lev=8*pow3(b1_lev)
+   ms.dr.lev=16*pow3(drum_lev)
    ms.b0.od=b0_od*b0_od
    ms.b1.od=b1_od*b1_od
    ms.dr.od=drum_od*drum_od
