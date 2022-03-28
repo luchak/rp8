@@ -51,11 +51,12 @@ function _init()
  poke(0x5f2d, 0x1)
 
  ui,state=ui_new(),state_new()
+ function add_to_ui(w) ui:add_widget(w) end
 
- header_ui_init(ui,0)
- pbl_ui_init(ui,unpack_split'b0,7,32')
- pbl_ui_init(ui,unpack_split'b1,19,64')
- pirc_ui_init(ui,'dr',96)
+ header_ui_init(add_to_ui,0)
+ pbl_ui_init(add_to_ui,unpack_split'b0,7,32')
+ pbl_ui_init(add_to_ui,unpack_split'b1,19,64')
+ pirc_ui_init(add_to_ui,'dr',96)
 
  local pbl0,pbl1=synth_new(7),synth_new(19)
  local drums={
@@ -1068,22 +1069,21 @@ function ui_new()
   w.id=#widgets
   w.tx,w.ty=w.x\4,w.y\4
   self.focus=self.focus or w
-  local tile=w.tx+(w.ty<<5)
+  local tile=w.tx+w.ty*32
   self.by_tile[tile]=w
   self.has_tiles_x[w.tx]=true
   self.has_tiles_y[w.ty]=true
   for dx=0,w.w-1 do
    for dy=0,w.h-1 do
-    self.mouse_tiles[tile+dx+(dy<<5)]=w
+    self.mouse_tiles[tile+dx+dy*32]=w
    end
   end
  end
 
  obj.draw=function(self,state)
   -- restore screen from mouse
-  local mx,my,ldmy=self.mx,self.my,self.ldmy
-  if ldmy then
-   local off=ldmy<<6
+  local mx,my,off=self.mx,self.my,self.mouse_restore_offset
+  if off then
    memcpy(0x6000+off,0x9000+off,384)
   end
 
@@ -1122,7 +1122,7 @@ function ui_new()
   -- store rows behind mouse and draw mouse
   memcpy(0x9000+my*64,0x6000+my*64,384)
   spr(15,mx,my)
-  self.ldmy=my
+  self.mouse_restore_offset=my<<6
  end
 
  obj.update=function(self,state)
@@ -1141,8 +1141,8 @@ function ui_new()
   if (btns[➡️]) search={true,1}
   if (btns[⬆️]) search={false,-1}
   if (btns[⬇️]) search={false,1}
-  if (btns[❎]) self.focus:input(state,1*self.focus.btn_amt)
-  if (btns[🅾️]) self.focus:input(state,-1*self.focus.btn_amt)
+  if (btns[❎]) self.focus:input(state,self.focus.btn_amt)
+  if (btns[🅾️]) self.focus:input(state,-self.focus.btn_amt)
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my=self.mx,self.my
@@ -1161,7 +1161,7 @@ function ui_new()
    else
     poke(0x5f2d, 0x5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
-    new_focus=self.mouse_tiles[mx\4 + ((my\4)<<5)]
+    new_focus=self.mouse_tiles[mx\4 + (my\4)*32]
     if (new_focus and not new_focus.active) new_focus=nil
     if (new_focus and new_focus.act_on_click) new_focus:input(state,trn(click==1,1,-1))
    end
@@ -1353,42 +1353,42 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-function pbl_ui_init(ui,key,base_idx,yp)
+function pbl_ui_init(add_to_ui,key,base_idx,yp)
  for i=1,16 do
   local xp=(i-1)*8
-  ui:add_widget(
+  add_to_ui(
    pbl_note_btn_new(xp,yp+24,key,i)
   )
-  ui:add_widget(
+  add_to_ui(
    step_btn_new(xp,yp+16,key,i,split'16,17,33,18,34,32')
   )
  end
 
- ui:add_widget(
+ add_to_ui(
   momentary_new(24,yp,26,function(state,b)
    -- just inline the function?
    transpose_pat(state.pat_seqs[key],b)
   end)
  )
- ui:add_widget(
+ add_to_ui(
   momentary_new(8,yp,28,function(state,b)
    copy_buf_pbl=copy_table(state.pat_seqs[key])
   end)
  )
- ui:add_widget(
+ add_to_ui(
   momentary_new(16,yp,27,function(state,b)
    local v=copy_buf_pbl
    if (v) merge_tables(state.pat_seqs[key],v)
   end)
  )
- ui:add_widget(
+ add_to_ui(
   toggle_new(0,yp,186,187,state_make_get_set_param_bool(base_idx+3))
  )
- ui:add_widget(
+ add_to_ui(
   spin_btn_new(0,yp+8,split'162,163,164,165',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
-  ui:add_widget(
+  add_to_ui(
    pat_btn_new(5+i*4,yp+8,key,6,i,2,14,8,6)
   )
  end
@@ -1401,7 +1401,7 @@ function pbl_ui_init(ui,key,base_idx,yp)
   10=104,
   11=120
  }]]) do
-  ui:add_widget(
+  add_to_ui(
    dial_new(
     x,yp,43,21,
     state_make_get_set_param(base_idx+k)
@@ -1409,7 +1409,7 @@ function pbl_ui_init(ui,key,base_idx,yp)
   )
  end
 
- ui:add_widget(
+ add_to_ui(
   toggle_new(32,yp,2,3,state_make_get_set_param_bool(base_idx+5))
  )
 
@@ -1417,10 +1417,10 @@ function pbl_ui_init(ui,key,base_idx,yp)
 end
 
 
-function pirc_ui_init(ui,key,yp)
+function pirc_ui_init(add_to_ui,key,yp)
  for i=1,16 do
   local xp=(i-1)*8
-  ui:add_widget(
+  add_to_ui(
    step_btn_new(xp,yp+24,key,i,split'19,21,20,35')
   )
  end
@@ -1433,43 +1433,43 @@ function pirc_ui_init(ui,key,yp)
   sp={x=96,y=16,s=174,b=53}
  }]]) do
   local cyp=yp+d.y
-  ui:add_widget(
+  add_to_ui(
    radio_btn_new(d.x,cyp,k,d.s,d.s+1,state_make_get_set('drum_sel'))
   )
   -- lev,tun,dec
   for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
-   ui:add_widget(
+   add_to_ui(
     dial_new(d.x+x,cyp,112,16,state_make_get_set_param(d.b+o))
    )
   end
  end
 
  for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
-  ui:add_widget(
+  add_to_ui(
    toggle_new(x,yp,170,171,state_make_get_set_param_bool(37,b))
   )
  end
 
- ui:add_widget(
+ add_to_ui(
   momentary_new(8,yp+8,11,function(state,b)
    copy_buf_pirc=copy_table(state.pat_seqs['dr'])
   end)
  )
- ui:add_widget(
+ add_to_ui(
   momentary_new(16,yp+8,10,function(state,b)
    merge_tables(state.pat_seqs['dr'],copy_buf_pirc)
   end)
  )
 
- ui:add_widget(
+ add_to_ui(
   toggle_new(0,yp+8,188,189,state_make_get_set_param_bool(34))
  )
 
- ui:add_widget(
+ add_to_ui(
   spin_btn_new(0,yp+16,split'166,167,168,169',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
-  ui:add_widget(
+  add_to_ui(
    pat_btn_new(5+i*4,yp+16,key,6,i,unpack_split'2,14,8,5')
   )
  end
@@ -1477,27 +1477,27 @@ function pirc_ui_init(ui,key,yp)
  map(0,8,0,yp,16,4)
 end
 
-function header_ui_init(ui,yp)
+function header_ui_init(add_to_ui,yp)
  local function hdial(x,y,idx)
- ui:add_widget(
+ add_to_ui(
   dial_new(x,yp+y,128,16,state_make_get_set_param(idx))
  )
  end
 
  local function song_only(w,s_not_song)
-  ui:add_widget(
+  add_to_ui(
    wrap_override(w,s_not_song,state_is_song_mode,false)
   )
  end
 
- ui:add_widget(
+ add_to_ui(
   toggle_new(
    0,yp,6,7,
    state_make_get_set('playing'),
    function(s) s:toggle_playing() end
   )
  )
- ui:add_widget(
+ add_to_ui(
   toggle_new(
    24,yp,172,173,
    state_is_song_mode,
@@ -1533,7 +1533,7 @@ function header_ui_init(ui,yp)
   5
  )
 
- ui:add_widget(momentary_new(
+ add_to_ui(momentary_new(
   0,yp+8,242,
   function(s)
    s:copy_seq()
@@ -1545,7 +1545,7 @@ function header_ui_init(ui,yp)
    s:cut_seq()
   end
  ),199)
- ui:add_widget(momentary_new(
+ add_to_ui(momentary_new(
   0,yp+16,247,
   function(s)
    s:paste_seq()
@@ -1578,10 +1578,10 @@ function header_ui_init(ui,yp)
   hdial(unpack_split(s))
  end
 
- ui:add_widget(
+ add_to_ui(
   toggle_new(64,yp+16,234,235,state_make_get_set_param_bool(56,0))
  )
- ui:add_widget(
+ add_to_ui(
   spin_btn_new(64,yp+8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
  )
 
@@ -1592,7 +1592,7 @@ function header_ui_init(ui,yp)
    hdial(xpc,ypc,base_idx+idx)
   end
  end
- ui:add_widget(
+ add_to_ui(
   transport_number_new(32,yp,unpack_split'16,tl,bar')
  )
  song_only(
@@ -1607,7 +1607,7 @@ function header_ui_init(ui,yp)
   toggle_new(56,yp,193,194,state_make_get_set('tl','loop')),
   195
  )
- ui:add_widget(
+ add_to_ui(
   transport_number_new(64,yp,unpack_split'16,tl,loop_start')
  )
  song_only(
@@ -1621,7 +1621,7 @@ function header_ui_init(ui,yp)
   ),
   197
  )
- ui:add_widget(
+ add_to_ui(
   transport_number_new(88,yp,unpack_split'8,tl,loop_len')
  )
  song_only(
