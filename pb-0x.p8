@@ -115,9 +115,9 @@ function _init()
    ms.b0.lev=8*pow3(b0_lev)
    ms.b1.lev=8*pow3(b1_lev)
    ms.dr.lev=16*pow3(drum_lev)
-   ms.b0.od=b0_od*b0_od
-   ms.b1.od=b1_od*b1_od
-   ms.dr.od=drum_od*drum_od
+   ms.b0.od=b0_od
+   ms.b1.od=b1_od
+   ms.dr.od=drum_od
    ms.b0.fx=pow3(b0_fx)
    ms.b1.fx=pow3(b1_fx)
    ms.dr.fx=pow3(drum_fx)
@@ -211,9 +211,9 @@ function audio_dochunk()
   -- dc filter, plus
   -- soft saturation to make
   -- clipping less unpleasant
-  local x=buf[i]
+  local x=buf[i]<<8
   dcf+=(x-dcf)>>8
-  x=mid(-1,x-dcf,1)
+  x=mid(-1,(x-dcf)>>8,1)
   x-=0.148148*x*x*x
   -- add dither to keep delay
   -- tails somewhat nicer
@@ -1220,9 +1220,10 @@ function ui_new()
 
  obj.draw=function(self,state)
   -- restore screen from mouse
-  local ldmy,mx,my=self.ldmy,self.mx,self.my
-  if ldmy then
-   memcpy(0x6000+ldmy*64,0x9000+ldmy*64,512)
+  local mx,my=self.mx,self.my
+  if self.ldmy then
+   local off=self.ldmy<<6
+   memcpy(0x6000+off,0x9000+off,512)
    self.ldmy=nil
   end
 
