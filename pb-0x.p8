@@ -1036,7 +1036,7 @@ ui_reps=parse[[{
  25=true,
  29=true
 }]]
---31=true
+
 widget_defaults=parse[[{
  w=2,
  h=2,
@@ -1055,7 +1055,9 @@ function ui_new()
   by_tile={},
   has_tiles_x={},
   has_tiles_y={},
-  mouse_tiles={}
+  mouse_tiles={},
+  mx=0,
+  my=0
  }]]
  -- obj.focus
 
@@ -1079,11 +1081,10 @@ function ui_new()
 
  obj.draw=function(self,state)
   -- restore screen from mouse
-  local mx,my=self.mx,self.my
-  if self.ldmy then
-   local off=self.ldmy<<6
+  local mx,my,ldmy=self.mx,self.my,self.ldmy
+  if ldmy then
+   local off=ldmy<<6
    memcpy(0x6000+off,0x9000+off,384)
-   self.ldmy=nil
   end
 
   -- draw changed widgets
@@ -1112,18 +1113,16 @@ function ui_new()
   end
   self.dirty={}
   local f=self.focus
-  -- skip nil check
+
   palt(0,true)
   -- draw focus indicator
   spr(1,f.x,f.y,1,1)
   sspr(32,0,4,4,f.x+f.w*4-4,f.y)
 
   -- store rows behind mouse and draw mouse
-  if mx and my then
-   memcpy(0x9000+my*64,0x6000+my*64,384)
-   spr(15,mx,my)
-   self.ldmy=my
-  end
+  memcpy(0x9000+my*64,0x6000+my*64,384)
+  spr(15,mx,my)
+  self.ldmy=my
  end
 
  obj.update=function(self,state)
