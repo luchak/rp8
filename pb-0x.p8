@@ -40,12 +40,15 @@ function stop_rec()
  menuitem(4,'start recording',start_rec)
 end
 
--- turn off output lpf for less
--- muffled sound
-poke(0x5f36,@0x5f36^^0x20)
-
 function _init()
  cls()
+
+ -- turn off output lpf for less
+ -- muffled sound
+ poke(0x5f36,@0x5f36^^0x20)
+
+ -- turn on mouse
+ poke(0x5f2d, 0x1)
 
  ui,state=ui_new(),state_new()
 
@@ -1165,6 +1168,8 @@ end
 -- ui
 
 ui_btns={⬅️,➡️,⬆️,⬇️,❎,🅾️}
+-- custom retrigger frame intervals
+-- for buttons
 ui_reps=parse[[{
  1=true,
  11=true,
@@ -1173,6 +1178,14 @@ ui_reps=parse[[{
  29=true
 }]]
 --31=true
+widget_defaults=parse[[{
+ w=2,
+ h=2,
+ active=true,
+ act_on_click=false,
+ drag_amt=0,
+ btn_amt=1
+}]]
 
 function ui_new()
  local obj=parse[[{
@@ -1182,28 +1195,38 @@ function ui_new()
   holds={},
   by_tile={},
   has_tiles_x={},
-  has_tiles_y={}
+  has_tiles_y={},
+  mouse_tiles={}
  }]]
  -- obj.focus
 
- local function get_tile(tx,ty)
-  return tx+(ty<<5)
- end
-
  obj.add_widget=function(self,w)
+  w=merge_tables(copy_table(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
   w.id=#widgets
   w.tx,w.ty=w.x\4,w.y\4
-  local tile=get_tile(w.tx,w.ty)
-  w.tile=tile
   self.focus=self.focus or w
+  local tile=w.tx+(w.ty<<5)
   self.by_tile[tile]=w
   self.has_tiles_x[w.tx]=true
   self.has_tiles_y[w.ty]=true
+  for dx=0,w.w-1 do
+   for dy=0,w.h-1 do
+    self.mouse_tiles[tile+dx+(dy<<5)]=w
+   end
+  end
  end
 
  obj.draw=function(self,state)
+  -- restore screen from mouse
+  local ldmy,mx,my=self.ldmy,self.mx,self.my
+  if ldmy then
+   memcpy(0x6000+ldmy*64,0x9000+ldmy*64,512)
+   self.ldmy=nil
+  end
+
+  -- draw changed widgets
   for id,w in pairs(self.widgets) do
    local ns=w:get_sprite(state)
    if ns!=self.sprites[id] then
@@ -1212,39 +1235,37 @@ function ui_new()
   end
   palt(0,false)
   for id,_ in pairs(self.dirty) do
-   local w=self.widgets[id]
-   local ww,sp=w.w,self.sprites[id]
-   local tsp,wx,wy=type(sp),w.x,w.y
+   local w,sp=self.widgets[id],self.sprites[id]
+   local wx,wy=w.x,w.y
    -- number => draw that sprite
    --  (subject to width value)
    -- string => unpack to text
    --  params and draw those
-   if tsp=='number' then
-    if ww then
-     local sp=self.sprites[id]
-     local sx,sy=(sp%16)*8,(sp\16)*8
-     sspr(sx,sy,ww,8,wx,wy)
-    else
-     spr(self.sprites[id],wx,wy,1,1)
-    end
+   if type(sp)=='number' then
+    spr(self.sprites[id],wx,wy,1,1)
    else
-    local ts,tw,bg,fg=unpack_split(sp)
-    ts=tostr(ts)
+    local tc,tw,bg,fg=unpack_split(sp)
+    tc=tostr(tc)
     rectfill(wx,wy,wx+tw-1,wy+7,bg)
-    print(ts,wx+tw-#ts*4,wy+1,fg)
+    print(tc,wx+tw-#tc*4,wy+1,fg)
    end
   end
   self.dirty={}
   local f=self.focus
   -- skip nil check
   palt(0,true)
-  if f.w then
-   sspr(8,88,f.w,8,f.x,f.y)
-  else
-   spr(1,f.x,f.y,1,1)
+  -- draw focus indicator
+  spr(1,f.x,f.y,1,1)
+  sspr(32,0,4,4,f.x+f.w*4-4,f.y)
+
+  -- store rows behind mouse and draw mouse
+  if mx and my then
+   memcpy(0x9000+my*64,0x6000+my*64,512)
+   spr(15,mx,my)
+   self.ldmy=my
   end
  end
- 
+
  obj.update=function(self,state)
   local holds,btns=self.holds,{}
   for b in all(ui_btns) do
@@ -1261,14 +1282,41 @@ function ui_new()
   if (btns[➡️]) search={true,1}
   if (btns[⬆️]) search={false,-1}
   if (btns[⬇️]) search={false,1}
-  if (btns[❎]) self.focus:input(state,1)
-  if (btns[🅾️]) self.focus:input(state,-1)
-  if search then
-   local new_focus=self:move_focus(unpack(search))
+  if (btns[❎]) self.focus:input(state,1*self.focus.btn_amt)
+  if (btns[🅾️]) self.focus:input(state,-1*self.focus.btn_amt)
+
+  self.mx,self.my,click=stat(32),stat(33),stat(34)
+  local mx,my=self.mx,self.my
+
+  local new_focus
+
+  if (search) new_focus=self:move_focus(unpack(search))
+  if click>0 then
+   if click==self.last_click then
+    self.drag_dist+=stat(39)
+    local diff=flr(self.focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
+    if diff!=0 then
+     self.focus:input(state,diff)
+     self.last_drag=self.drag_dist
+    end
+   else
+    poke(0x5f2d, 0x5)
+    self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
+    new_focus=self.mouse_tiles[mx\4 + ((my\4)<<5)]
+    if (new_focus and not new_focus.active) new_focus=nil
+    if (new_focus and new_focus.act_on_click) new_focus:input(state,trn(click==1,1,-1))
+   end
+  else
+   poke(0x5f2d, 0x1)
+  end
+
+  if new_focus then
    self.dirty[self.focus.id]=true
    self.dirty[new_focus.id]=true
    self.focus=new_focus
   end
+
+  self.last_click=click
  end
 
  local search_diffs=split'0,-1,1,-2,2'
@@ -1289,7 +1337,7 @@ function ui_new()
    if has_tiles[sb] then
     for sa=ta+dir,lim,dir do
      local r=self.by_tile[(sa<<sha)+(sb<<shb)]
-     if (r and not r.noinput) return r
+     if (r and r.active) return r
     end
    end
   end
@@ -1302,7 +1350,7 @@ end
 
 function pbl_note_btn_new(x,y,syn,step)
  return {
-  x=x,y=y,
+  x=x,y=y,drag_amt=0.1,
   get_sprite=function(self,state)
    return 64+state.pat_seqs[syn].nt[step]
   end,
@@ -1316,7 +1364,7 @@ end
 function spin_btn_new(x,y,sprites,get,set)
  local n=#sprites
  return {
-  x=x,y=y,
+  x=x,y=y,act_on_click=true,
   get_sprite=function(self,state)
    return sprites[get(state)]
   end,
@@ -1332,7 +1380,7 @@ function step_btn_new(x,y,syn,step,sprites)
  -- "this step is active" sprite
  local n=#sprites-1
  return {
-  x=x,y=y,
+  x=x,y=y,act_on_click=true,
   get_sprite=function(self,state)
    if (state.playing and state.tick==step) return sprites[n+1]
    local v=state:get_pat_steps(syn)[step]
@@ -1348,12 +1396,12 @@ end
 function dial_new(x,y,s0,bins,get,set)
  bins-=0x0.0001
  return {
-  x=x,y=y,
+  x=x,y=y,drag_amt=0.25,btn_amt=2,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
-   local x=mid(0,128,get(state)+(b<<1))
+   local x=mid(0,128,get(state)+b)
    set(state,x)
   end
  }
@@ -1361,7 +1409,7 @@ end
 
 function toggle_new(x,y,s_off,s_on,get,set)
  return {
-  x=x,y=y,
+  x=x,y=y,act_on_click=true,
   get_sprite=function(self,state)
    return trn(get(state),s_on,s_off)
   end,
@@ -1373,7 +1421,7 @@ end
 
 function momentary_new(x,y,s,cb)
  return {
-  x=x,y=y,
+  x=x,y=y,act_on_click=true,
   get_sprite=function()
    return s
   end,
@@ -1385,7 +1433,7 @@ end
 
 function radio_btn_new(x,y,val,s_off,s_on,get,set)
  return {
-  x=x,y=y,
+  x=x,y=y,act_on_click=true,
   get_sprite=function(self,state)
    return trn(get(state)==val,s_on,s_off)
   end,
@@ -1400,7 +1448,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  local ret_prefix=pib..',4,'..c_bg..','
  return {
-  x=x,y=y,w=4,
+  x=x,y=y,w=1,
   get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
@@ -1420,7 +1468,7 @@ end
 function transport_number_new(x,y,w,obj,key)
  local get=state_make_get_set(obj,key)
  return {
-  x=x,y=y,w=w,noinput=true,
+  x=x,y=y,w=w,active=false,
   get_sprite=function(self,state)
    if state.song_mode then
     return tostr(get(state))..','..w..',0,15'
@@ -1432,20 +1480,18 @@ function transport_number_new(x,y,w,obj,key)
  }
 end
 
-function wrap_override(w,s_override,get_not_override,override_noinput)
- local obj={
-  get_sprite=function(self,state)
-   if get_not_override(state) then
-    self.noinput=false
-    return w:get_sprite(state)
-   else
-    self.noinput=override_noinput
-    return s_override
-   end
-  end,
- }
- setmetatable(obj,{__index=w})
- return obj
+function wrap_override(w,s_override,get_not_override,override_active)
+ local get_sprite=w.get_sprite
+ w.get_sprite=function(self,state)
+  if get_not_override(state) then
+   self.active=true
+   return get_sprite(self,state)
+  else
+   self.active=override_active
+   return s_override
+  end
+ end
+ return w
 end
 
 function pbl_ui_init(ui,key,base_idx,yp)
@@ -1581,7 +1627,7 @@ function header_ui_init(ui,yp)
 
  local function song_only(w,s_not_song)
   ui:add_widget(
-   wrap_override(w,s_not_song,state_is_song_mode,true)
+   wrap_override(w,s_not_song,state_is_song_mode,false)
   )
  end
 
@@ -1607,7 +1653,8 @@ function header_ui_init(ui,yp)
     function(s) s:toggle_recording() end
    ),
    239,
-   function(s) return (not s.tl.has_override) or s.tl.recording end
+   function(s) return (not s.tl.has_override) or s.tl.recording end,
+   true
   ),
   233
  )
@@ -1733,12 +1780,12 @@ function header_ui_init(ui,yp)
 end
 
 __gfx__
-0000000000000ccc6666666666666666000000000000000000000000000000000000000000000000555555555555555500000005000000006666666600000000
-000000000000000c655566566555665600000000006000606000f0f0b00060600666066600000000555555555666655500000000000000006666666600000000
-007007000000000c656565566565655600000000006005505600f0f03b0060600666060600000000555665555655655500000005000000006666666600000000
-0007700000000000656555566565555600000000005055505560909033b0505006060666fff0fff0556666555656666500000000000000006666666600000000
-00077000000000006666666666666666000000000050555055509090333050500606060600000000556556555656556500000005000000006666666600000000
-00700700c00000006005555665550056000000000050055055009090330050500606060600000000556556555666556500000000000000006666666600000000
+000000000000000066666666666666660ccc00000000000000000000000000000000000000000000555555555555555500000005000000006666666601000000
+00000000000000006555665665556656000c0000006000606000f0f0b00060600666066600000000555555555666655500000000000000006666666617100000
+00700700000000006565655665656556000c0000006005505600f0f03b0060600666060600000000555665555655655500000005000000006666666617710000
+0007700000000000656555566565555600000000005055505560909033b0505006060666fff0fff0556666555656666500000000000000006666666617771000
+00077000000000006666666666666666000000000050555055509090333050500606060600000000556556555656556500000005000000006666666601710000
+00700700c00000006005555665550056000000000050055055009090330050500606060600000000556556555666556500000000000000006666666600100000
 00000000c00000006000555665550006000000000050005050009090300050500000000000000000556556555556556500000005000000006666666600000000
 00000000ccc000006666666666666666000000000000000000000000000000000000000000000000556666555556666500000000000000006666066600000000
 66000006660000066600000655000005550000055500000500000000000000000000000000000000666666666666666666666666666666666666666666666660
