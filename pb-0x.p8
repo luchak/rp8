@@ -1448,7 +1448,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  local ret_prefix=pib..',4,'..c_bg..','
  return {
-  x=x,y=y,w=1,
+  x=x,y=y,w=1,act_on_click=true,
   get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
