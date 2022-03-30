@@ -83,7 +83,7 @@ function _init()
   svf,
   1.0
  )
- comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.008')
+ comp=comp_new(mixer,unpack_split'0.5,4,0.08,0.003')
  seq_helper=seq_helper_new(
   state,comp,function()
    local patch,pseq,pstat=
@@ -122,7 +122,7 @@ function _init()
    ms.b0.fx=pow3(b0_fx)
    ms.b1.fx=pow3(b1_fx)
    ms.dr.fx=pow3(dr_fx)
-   comp.thresh=0.01+0.99*pow3(comp_thresh)
+   comp.thresh=0.02+0.98*pow3(comp_thresh)
 
    state:next_tick()
   end
@@ -637,8 +637,8 @@ function comp_new(src,thresh,ratio,_att,_rel)
    self.src:update(b,first,last)
    local env,att,rel=self.env,_att,_rel
    local thresh,ratio=self.thresh,1/self.ratio
-   -- makeup targets 0.2
-   local makeup=max(1,0.2/((0.2-thresh)*ratio+thresh))
+   -- makeup targets 0.3
+   local makeup=max(1,0.3/((0.3-thresh)*ratio+thresh))
    for i=first,last do
     -- avoid divide-by-zero
     local x=abs(b[i])+0x0.0010
