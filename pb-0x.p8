@@ -500,7 +500,7 @@ function sample_new(base)
   _detune=2^(flr((tun-0.5)*24+0.5)/12)
   if s!=d_off then
    _pos=1
-   _amp=lev*lev
+   _amp=lev*lev*trn(s==d_ac,1,0.5)
   end
  end
 
