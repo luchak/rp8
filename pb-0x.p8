@@ -102,7 +102,7 @@ function _init()
    end
    drum_mixer:note(patch)
    mixer:note(patch)
-   svf:note(patch)
+   svf:note(patch,now)
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
@@ -654,6 +654,17 @@ function comp_new(src,thresh,ratio,_att,_rel)
  }
 end
 
+svf_pats=parse[[{
+ 1="@///////////////",
+ 2="@///////@///////",
+ 3="@///@///@///@///",
+ 4="@/@/@/@/@/@/@/@/",
+ 5="@@@@@@@@@@@@@@@@",
+ 6="@//@//@//@//@//@",
+ 7="//@//@////@//@//",
+ 8="0123456789:;<=>@",
+}]]
+
 -- heavily inspired by
 -- https://github.com/JordanTHarris/VAStateVariableFilter
 function svf_new()
@@ -663,30 +674,34 @@ function svf_new()
   rc=0.1,
   gc=0.2,
   wet=1,
-  fe=0,
+  fe=1,
   bp=0,
-  note=function(self,patch)
+  dec=1,
+  note=function(self,patch,tick)
    --local q=1/(2*(1-res))
    --self.rc=1/(2*q)
    -- configurable decay?
-   local r,bp,gc
-   bp,gc,r,self.wet=unpack_patch(patch,56,59)
+   local r,bp,gc,dec
+   bp,gc,r,self.wet,_,dec=unpack_patch(patch,56,61)
    self.rc=1-r*0.96
-   --self.fe=0.6
+   local pat_val=ord(svf_pats[patch[60]],tick)-48
+   if (pat_val>=0) self.fe=pat_val>>4
+   self.dec=1-(pow3(1-dec)>>7)
    self.bp=(bp&0x0.02>0 and 1) or 0
    self.gc=gc*gc+0x0.02
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc_base,wet,fe,is_bp=
+   local z1,z2,rc,gc_base,wet,fe,is_bp,dec=
     self.z1,
     self.z2,
     self.rc,
     self.gc,
     self.wet,
     self.fe,
-    self.bp
+    self.bp,
+    self.dec
    for i=first,last do
-    gc=min(gc_base+fe,1)
+    gc=min(gc_base*fe,1)
     local rrpg=2*rc+gc
     local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
@@ -703,7 +718,7 @@ function svf_new()
     -- rc*bp is 1/2 of unity gain bp
     -- bp is just bp
     b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
-    fe*=0.99
+    fe*=dec
    end
    self.z1,self.z2,self.fe=z1,z2,fe
   end
@@ -753,10 +768,11 @@ pat_param_idx=parse[[{
  dr=35,
 }]]
 
--- float values: 0=>0,128=>1
+-- real values: 0=>0,128=>1
 -- bool values: 0=>false,128 (or any nonzero)=>true
 -- int values: identity map
-default_patch=split'64,0,64,64,64,128,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,0'
+-- also watch out for packed bitfield-ish things
+default_patch=split'64,0,64,64,64,128,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
  nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
@@ -1076,7 +1092,7 @@ function ui_new()
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.mouse_restore_offset
   if off then
-   memcpy(0x6000+off,0x9000+off,448)
+   memcpy(0x6000+off,0x9000+off,384)
   end
 
   -- draw changed widgets
@@ -1112,9 +1128,10 @@ function ui_new()
   sspr(32,0,4,4,f.x+f.w*4-4,f.y)
 
   -- store rows behind mouse and draw mouse
-  memcpy(0x9000+my*64,0x6000+my*64,448)
+  local next_off=mid(0,my,122)<<6
+  memcpy(0x9000+next_off,0x6000+next_off,384)
   spr(15,mx,my)
-  self.mouse_restore_offset=my<<6
+  self.mouse_restore_offset=next_off
  end
 
  obj.update=function(self,state)
@@ -1566,6 +1583,7 @@ function header_ui_init(add_to_ui,yp)
   7="48,16,57",
   8="48,24,58",
   9="64,24,59",
+  10="80,24,61",
  }]]) do
   hdial(unpack_split(s))
  end
@@ -1635,9 +1653,9 @@ __gfx__
 00000000000000006557000660005576000c0000006000606000f0f0b00060600666066600000000555555555666655500000000000000006666666617700000
 00700700000000006555000660005556000c0000006005505600f0f03b0060600666060600000000555665555655655500000005000000006666666617770000
 0007700000000000666666666666666600000000005055505560909033b0505006060666fff0fff0556666555656666500000000000000006666666617777000
-00077000000000006555665665556656000000000050555055509090333050500606060600000000556556555656556500000005000000006666666617777700
-00700700c00000006565655665656556000000000050055055009090330050500606060600000000556556555666556500000000000000006666666617711000
-00000000c00000006565555665655556000000000050005050009090300050500000000000000000556556555556556500000005000000006666666601100000
+00077000000000006555665665556656000000000050555055509090333050500606060600000000556556555656556500000005000000006666666617710000
+00700700c00000006565655665656556000000000050055055009090330050500606060600000000556556555666556500000000000000006666666601100000
+00000000c00000006565555665655556000000000050005050009090300050500000000000000000556556555556556500000005000000006666666600000000
 00000000ccc000006666666666666666000000000000000000000000000000000000000000000000556666555556666500000000000000006666066600000000
 66000006660000066600000655000005550000055500000500000000000000000000000000000000666666666666666666666666666666666666666666666660
 60666670606666706066667050555560505555605055556000056000000000000000000000000000666566666666666665555666666666666666666666666666
