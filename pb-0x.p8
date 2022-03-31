@@ -978,7 +978,7 @@ end
 
 function transpose_pat(pat,d)
  for i=1,16 do
-  pat.nt[i]=mid(0,pat.nt[i]+d,35)
+  pat.nt[i]=mid(0,pat.nt[i]+d,36)
  end
 end
 
