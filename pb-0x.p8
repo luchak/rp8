@@ -637,8 +637,8 @@ function comp_new(src,thresh,ratio,_att,_rel)
    self.src:update(b,first,last)
    local env,att,rel=self.env,_att,_rel
    local thresh,ratio=self.thresh,1/self.ratio
-   -- makeup targets 0.3
-   local makeup=max(1,0.3/((0.3-thresh)*ratio+thresh))
+   -- makeup targets 0.6
+   local makeup=max(1,0.6/((0.6-thresh)*ratio+thresh))
    for i=first,last do
     -- avoid divide-by-zero
     local x=abs(b[i])+0x0.0010
