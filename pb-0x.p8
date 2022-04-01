@@ -1002,7 +1002,7 @@ end
 function state_make_get_set(a,b)
  return
   function(s) if b then return s[a][b] else return s[a] end end,
-  function(s,v) if (b) s[a][b]=v else s[a]=v end
+  function(s,v) if b then s[a][b]=v else s[a]=v end end
 end
 
 state_is_song_mode=function(state) return state.song_mode end
@@ -1104,10 +1104,10 @@ function ui_new()
    if type(sp)=='number' then
     spr(self.sprites[id],wx,wy,1,1)
    else
-    local tc,tw,bg,fg=unpack_split(sp)
-    tc=tostr(tc)
+    local text,tw,bg,fg=unpack_split(sp)
+    text=tostr(text)
     rectfill(wx,wy,wx+tw-1,wy+7,bg)
-    print(tc,wx+tw-#tc*4,wy+1,fg)
+    print(text,wx+tw-#text*4,wy+1,fg)
    end
   end
   self.dirty={}
@@ -1278,14 +1278,14 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
   get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
-   local val=(bank-1)*bank_size+pib
+   local val=bank*bank_size-bank_size+pib
    local col=trn(pat==val,c_on,c_off)
    if (pending==val and pending!=pat) col=c_next
    return ret_prefix..col
   end,
   input=function(self,state)
    local bank=get_bank(state)
-   local val=(bank-1)*bank_size+pib
+   local val=bank*bank_size-bank_size+pib
    set_pat(state,val)
   end
  }
@@ -1322,7 +1322,7 @@ end
 
 function pbl_ui_init(add_to_ui,key,base_idx,yp)
  for i=1,16 do
-  local xp=(i-1)*8
+  local xp=i*8-8
   add_to_ui(
    pbl_note_btn_new(xp,yp+24,key,i)
   )
@@ -1333,7 +1333,6 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
 
  add_to_ui(
   momentary_new(24,yp,26,function(state,b)
-   -- just inline the function?
    transpose_pat(state.pat_seqs[key],b)
   end)
  )
@@ -1399,7 +1398,7 @@ function pirc_ui_init(add_to_ui,key)
   sp={x=96,y=112,s=174,b=53}
  }]]) do
   add_to_ui(
-   radio_btn_new(d.x,d.y,k,d.s,d.s+1,state_make_get_set('drum_sel'))
+   radio_btn_new(d.x,d.y,k,d.s,d.s+1,state_make_get_set'drum_sel')
   )
   -- lev,tun,dec
   for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
@@ -1458,7 +1457,7 @@ function header_ui_init(add_to_ui)
  add_to_ui(
   toggle_new(
    0,0,6,7,
-   state_make_get_set('playing'),
+   state_make_get_set'playing',
    function(s) s:toggle_playing() end
   )
  )
