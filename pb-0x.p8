@@ -267,7 +267,7 @@ function synth_new(base)
   _lsl=false
  }]]
 
- obj.note=function(self,pat,patch,step,note_len)
+ function obj:note(pat,patch,step,note_len)
   local patstep=pat.st[step]
   local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
@@ -303,7 +303,7 @@ function synth_new(base)
   self._nt=0
  end
 
- obj.update=function(self,b,first,last)
+ function obj:update(b,first,last)
   local odp,op,detune=self.odp,self.op,self.detune
   local todp,todpr=self.todp,self.todpr
   local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
@@ -371,7 +371,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  local obj,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
   {},unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
 
- obj.note=function(self,pat,patch,step,note_len)
+ function obj:note(pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
@@ -385,7 +385,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   end
  end
 
- obj.subupdate=function(self,b,first,last)
+ function obj:subupdate(b,first,last)
   local op,dp,dp1,ae,aed,ted=_op,_dp,(_dp1<<16)*_detune,_ae,_aed,_ted
   local aemax=_aemax
   for i=first,last do
@@ -404,7 +404,7 @@ function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
   {},unpack_split'0.08,0.042,0,0.05,0,0,10,0.99,0.996,0.4'
 
- obj.note=function(self,pat,patch,step,note_len)
+ function obj:note(pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,41,43)
   if s!=d_off then
@@ -424,7 +424,7 @@ function snare_new()
   end
  end
 
- obj.subupdate=function(self,b,first,last)
+ function obj:subupdate(b,first,last)
   local op,dp,dp1=_op,_dp,_dp1*_detune
   local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
   local aemax=_aemax
@@ -493,7 +493,7 @@ end
 function sample_new(base)
  local obj,_pos,_detune,_dec,_amp={},unpack_split'1,0,0,1,0.99,0.5'
 
- obj.note=function(self,pat,patch,step,note_len)
+ function obj:note(pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   _dec=1-(0.01*(1-dec)^4)
@@ -504,7 +504,7 @@ function sample_new(base)
   end
  end
 
- obj.subupdate=function(self,b,first,last)
+ function obj:subupdate(b,first,last)
   local pos,dec,samp=_pos,_dec,state.samp
   local amp,detune=_amp,_detune
   local n=#samp
@@ -540,7 +540,7 @@ function delay_new(l,fb)
   obj.dl[i]=0
  end
 
- obj.update=function(self,b,first,last)
+ function obj:update(b,first,last)
   local dl,l,fb,p=self.dl,self.l,self.fb,self.p
   local f1=self.f1
   for i=first,last do
@@ -816,7 +816,7 @@ function state_new(savedata)
   s.samp=dec_byte_array(savedata.samp)
  end
 
- s._apply_diff=function(self,k,v)
+ function s:_apply_diff(k,v)
   self.patch[k]=v
   if self.song_mode then
    self.tl:record_event(k,v)
@@ -827,14 +827,14 @@ function state_new(savedata)
   end
  end
 
- s._init_tick=function(self)
+ function s:_init_tick()
   local patch=self.patch
   local nl=sample_rate*(15/(60+patch[1]))
   local shuf_diff=nl*(patch[2]>>7)*(0.5-(self.tick&1))
   self.note_len,self.base_note_len=flr(0.5+nl+shuf_diff),nl
  end
 
- s.load_bar=function(self,i)
+ function s:load_bar(i)
   local tl=self.tl
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
@@ -848,7 +848,7 @@ function state_new(savedata)
  end
  local load_bar=function(i) s:load_bar(i) end
 
- s.next_tick=function(self)
+ function s:next_tick()
   local tl=self.tl
   if self.song_mode then
    tl:next_tick(self.patch, load_bar)
@@ -860,7 +860,7 @@ function state_new(savedata)
   self:_init_tick()
  end
 
- s.toggle_playing=function(self)
+ function s:toggle_playing()
   local tl=self.tl
   if self.playing then
    if (tl.recording) tl:toggle_recording()
@@ -870,17 +870,17 @@ function state_new(savedata)
   self.playing=not self.playing
  end
 
- s.toggle_recording=function(self)
+ function s:toggle_recording()
   self.tl:toggle_recording()
  end
 
- s.toggle_song_mode=function(self)
+ function s:toggle_song_mode()
   self.song_mode=not self.song_mode
   self:stop_playing()
   load_bar()
  end
 
- s._sync_pats=function(self)
+ function s:_sync_pats()
   local ps,patch=self.pat_store,self.patch
   for syn,param_idx in pairs(pat_param_idx) do
    local syn_pats=ps[syn]
@@ -904,20 +904,20 @@ function state_new(savedata)
   end
  end
 
- s.go_to_bar=function(self,bar)
+ function s:go_to_bar(bar)
   load_bar(mid(1,bar,999))
  end
 
- s.get_pat_steps=function(self,syn)
+ function s:get_pat_steps(syn)
   -- assume pats are aliased, always editing current
   if (syn=='dr') return self.pat_seqs.dr[self.drum_sel] else return self.pat_seqs[syn].st
  end
 
- s.set_bank=function(self,syn,bank)
+ function s:set_bank(syn,bank)
   self[syn..'_bank']=bank
  end
 
- s.save=function(self)
+ function s:save()
   return 'rp80'..stringify({
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
@@ -927,17 +927,17 @@ function state_new(savedata)
   })
  end
 
- s.stop_playing=function(self)
+ function s:stop_playing()
   if (self.playing) self:toggle_playing()
  end
 
- s.cut_seq=function(self)
+ function s:cut_seq()
   self:stop_playing()
   copy_buf_seq=self.tl:cut_seq()
   self:load_bar()
  end
 
- s.copy_seq=function(self)
+ function s:copy_seq()
   if self.song_mode then
    copy_buf_seq=self.tl:copy_seq()
   else
@@ -948,7 +948,7 @@ function state_new(savedata)
   end
  end
 
- s.paste_seq=function(self)
+ function s:paste_seq()
   if (not copy_buf_seq) return
   self:stop_playing()
   local n=#copy_buf_seq
@@ -960,7 +960,7 @@ function state_new(savedata)
   self:load_bar()
  end
 
- s.insert_seq=function(self)
+ function s:insert_seq()
   if (not copy_buf_seq) return
   self:stop_playing()
   self.tl:insert_seq(copy_buf_seq)
@@ -1068,7 +1068,7 @@ function ui_new()
  }]]
  -- obj.focus
 
- obj.add_widget=function(self,w)
+ function obj:add_widget(w)
   w=merge_tables(copy_table(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
@@ -1081,7 +1081,7 @@ function ui_new()
   end
  end
 
- obj.draw=function(self,state)
+ function obj:draw(state)
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.mouse_restore_offset
   memcpy(0x6000+off,0x9000+off,384)
@@ -1125,7 +1125,7 @@ function ui_new()
   self.mouse_restore_offset=next_off
  end
 
- obj.update=function(self,state)
+ function obj:update(state)
   local holds,btns=self.holds,{}
   for b in all(ui_btns) do
    if btn(b) then
