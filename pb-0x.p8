@@ -800,7 +800,7 @@ function state_new(savedata)
   b1_bank=1,
   dr_bank=1,
   song_mode=false,
-  samp={1=128,2=0,3=0,4=0,5=128,6=255,7=255,8=255}
+  samp={1=0}
  }]]
 
  s.tl=timeline_new(default_patch)
@@ -1063,8 +1063,7 @@ function ui_new()
   holds={},
   mouse_tiles={},
   mx=0,
-  my=0,
-  mouse_restore_offset=0
+  my=0
  }]]
  -- obj.focus
 
@@ -1084,7 +1083,7 @@ function ui_new()
  function obj:draw(state)
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.mouse_restore_offset
-  memcpy(0x6000+off,0x9000+off,384)
+  if (off) memcpy(0x6000+off,0x9000+off,384)
 
   -- draw changed widgets
   for id,w in pairs(self.widgets) do
@@ -1155,7 +1154,7 @@ function ui_new()
     poke(0x5f2d, 0x5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=self.mouse_tiles[mx\4 + (my\4)*32]
-    new_focus=trn(new_focus.active,new_focus,nil)
+    new_focus=trn(new_focus and new_focus.active,new_focus,nil)
     if (new_focus and new_focus.act_on_click) new_focus:input(state,trn(click==1,1,-1))
    end
   else
