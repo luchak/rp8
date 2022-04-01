@@ -1155,7 +1155,7 @@ function ui_new()
     poke(0x5f2d, 0x5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=self.mouse_tiles[mx\4 + (my\4)*32]
-    if (new_focus and not new_focus.active) new_focus=nil
+    new_focus=trn(new_focus.active,new_focus,nil)
     if (new_focus and new_focus.act_on_click) new_focus:input(state,trn(click==1,1,-1))
    end
   else
@@ -1384,70 +1384,68 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
 end
 
 
-function pirc_ui_init(add_to_ui,key,yp)
+function pirc_ui_init(add_to_ui,key)
  for i=1,16 do
-  local xp=(i-1)*8
   add_to_ui(
-   step_btn_new(xp,yp+24,key,i,split'19,21,20,35')
+   step_btn_new(i*8-8,120,key,i,split'19,21,20,35')
   )
  end
  for k,d in pairs(parse[[{
-  bd={x=32,y=8,s=150,b=38},
-  sd={x=32,y=16,s=152,b=41},
-  hh={x=64,y=8,s=154,b=44},
-  cy={x=64,y=16,s=156,b=47},
-  pc={x=96,y=8,s=158,b=50},
-  sp={x=96,y=16,s=174,b=53}
+  bd={x=32,y=104,s=150,b=38},
+  sd={x=32,y=112,s=152,b=41},
+  hh={x=64,y=104,s=154,b=44},
+  cy={x=64,y=112,s=156,b=47},
+  pc={x=96,y=104,s=158,b=50},
+  sp={x=96,y=112,s=174,b=53}
  }]]) do
-  local cyp=yp+d.y
   add_to_ui(
-   radio_btn_new(d.x,cyp,k,d.s,d.s+1,state_make_get_set('drum_sel'))
+   radio_btn_new(d.x,d.y,k,d.s,d.s+1,state_make_get_set('drum_sel'))
   )
   -- lev,tun,dec
   for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
    add_to_ui(
-    dial_new(d.x+x,cyp,112,16,state_make_get_set_param(d.b+o))
+    dial_new(d.x+x,d.y,112,16,state_make_get_set_param(d.b+o))
    )
   end
  end
 
  for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
   add_to_ui(
-   toggle_new(x,yp,170,171,state_make_get_set_param_bool(37,b))
+   toggle_new(x,96,170,171,state_make_get_set_param_bool(37,b))
   )
  end
 
  add_to_ui(
-  momentary_new(8,yp+8,11,function(state,b)
+  momentary_new(8,104,11,function(state,b)
    copy_buf_pirc=copy_table(state.pat_seqs['dr'])
   end)
  )
  add_to_ui(
-  momentary_new(16,yp+8,10,function(state,b)
+  momentary_new(16,104,10,function(state,b)
    merge_tables(state.pat_seqs['dr'],copy_buf_pirc)
   end)
  )
 
  add_to_ui(
-  toggle_new(0,yp+8,188,189,state_make_get_set_param_bool(34))
+  toggle_new(0,104,188,189,state_make_get_set_param_bool(34))
  )
 
  add_to_ui(
-  spin_btn_new(0,yp+16,split'166,167,168,169',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,112,split'166,167,168,169',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
   add_to_ui(
-   pat_btn_new(5+i*4,yp+16,key,6,i,unpack_split'2,14,8,5')
+   pat_btn_new(5+i*4,112,key,6,i,unpack_split'2,14,8,5')
   )
  end
 
- map(0,8,0,yp,16,4)
+ map(0,8,0,96,16,4)
 end
 
-function header_ui_init(add_to_ui,yp)
+function header_ui_init(add_to_ui)
  local function hdial(x,y,idx)
  add_to_ui(
-  dial_new(x,yp+y,128,16,state_make_get_set_param(idx))
+  dial_new(x,y,128,16,state_make_get_set_param(idx))
  )
  end
 
@@ -1459,14 +1457,14 @@ function header_ui_init(add_to_ui,yp)
 
  add_to_ui(
   toggle_new(
-   0,yp,6,7,
+   0,0,6,7,
    state_make_get_set('playing'),
    function(s) s:toggle_playing() end
   )
  )
  add_to_ui(
   toggle_new(
-   24,yp,172,173,
+   24,0,172,173,
    state_is_song_mode,
    function(s) s:toggle_song_mode() end
   )
@@ -1474,7 +1472,7 @@ function header_ui_init(add_to_ui,yp)
  song_only(
   wrap_override(
    toggle_new(
-    8,yp,231,232,
+    8,0,231,232,
     state_make_get_set('tl','recording'),
     function(s) s:toggle_recording() end
    ),
@@ -1486,7 +1484,7 @@ function header_ui_init(add_to_ui,yp)
  )
  song_only(
   momentary_new(
-   16,yp,5,
+   16,0,5,
    function()
     state:go_to_bar(
      trn(
@@ -1501,31 +1499,31 @@ function header_ui_init(add_to_ui,yp)
  )
 
  add_to_ui(momentary_new(
-  0,yp+8,242,
+  0,8,242,
   function(s)
    s:copy_seq()
   end
  ))
  song_only(momentary_new(
-  8,yp+8,241,
+  8,8,241,
   function(s)
    s:cut_seq()
   end
  ),199)
  add_to_ui(momentary_new(
-  0,yp+16,247,
+  0,16,247,
   function(s)
    s:paste_seq()
   end
  ))
  song_only(momentary_new(
-  8,yp+16,243,
+  8,16,243,
   function(s)
    s:insert_seq()
   end
  ),201)
  song_only(momentary_new(
-  8,yp+24,246,
+  8,24,246,
   function(s)
    s.tl:copy_overrides_to_loop()
   end
@@ -1547,24 +1545,23 @@ function header_ui_init(add_to_ui,yp)
  end
 
  add_to_ui(
-  toggle_new(64,yp+16,234,235,state_make_get_set_param_bool(56,0))
+  toggle_new(64,16,234,235,state_make_get_set_param_bool(56,0))
  )
  add_to_ui(
-  spin_btn_new(64,yp+8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
+  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
  )
 
- for pt,ypc in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
+ for pt,yp in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
   local base_idx=syn_base_idx[pt]
-  ypc+=yp
   for idx,xpc in pairs(parse[[{0=104,1=112,2=120}]]) do
-   hdial(xpc,ypc,base_idx+idx)
+   hdial(xpc,yp,base_idx+idx)
   end
  end
  add_to_ui(
-  transport_number_new(32,yp,unpack_split'16,tl,bar')
+  transport_number_new(32,0,unpack_split'16,tl,bar')
  )
  song_only(
-  momentary_new(48,yp,192,
+  momentary_new(48,0,192,
    function(state,b)
     state:go_to_bar(state.tl.bar+b)
    end
@@ -1572,14 +1569,14 @@ function header_ui_init(add_to_ui,yp)
   197
  )
  song_only(
-  toggle_new(56,yp,193,194,state_make_get_set('tl','loop')),
+  toggle_new(56,0,193,194,state_make_get_set('tl','loop')),
   195
  )
  add_to_ui(
-  transport_number_new(64,yp,unpack_split'16,tl,loop_start')
+  transport_number_new(64,0,unpack_split'16,tl,loop_start')
  )
  song_only(
-  momentary_new(80,yp,192,
+  momentary_new(80,0,192,
    function(state,b)
     local tl=state.tl
     local ns=tl.loop_start+b
@@ -1590,10 +1587,10 @@ function header_ui_init(add_to_ui,yp)
   197
  )
  add_to_ui(
-  transport_number_new(88,yp,unpack_split'8,tl,loop_len')
+  transport_number_new(88,0,unpack_split'8,tl,loop_len')
  )
  song_only(
-  momentary_new(96,yp,192,
+  momentary_new(96,0,192,
    function(state,b)
     local tl=state.tl
     tl.loop_len=mid(1,tl.loop_len+b,1000-tl.loop_start)
@@ -1602,7 +1599,6 @@ function header_ui_init(add_to_ui,yp)
   197
  )
 
- -- last 0 should be yp
  map(unpack_split'0,0,0,0,16,4')
 end
 
