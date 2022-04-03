@@ -1110,7 +1110,7 @@ function ui_new()
   local hover=self.hover
   if self.help_on and self.hover_frames>40 and hover and hover.tt and hover.active then
    local tt=hover.tt
-   local xp=trn(mx<56,mx+6,mx-2-4*#tt)
+   local xp=trn(mx<56,mx+7,mx-2-4*#tt)
    rectfill(xp,my,xp+4*#tt,my+6,1)
    print(tt,xp+1,my+1,7)
   end
@@ -1340,7 +1340,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
 
  local transpose_btn = momentary_new(24,yp,26,function(state,b)
   transpose_pat(state.pat_seqs[key],b)
- end,'transpose')
+ end,'transpose (drag)')
  transpose_btn.act_on_click=false
  transpose_btn.drag_amt=0.05
  add_to_ui(transpose_btn)
@@ -1409,16 +1409,16 @@ function pirc_ui_init(add_to_ui,key)
    radio_btn_new(d.x,d.y,k,d.s,d.s+1,state_make_get_set'drum_sel')
   )
   -- lev,tun,dec
-  for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
+  for dial in all(parse[[{1={x=8,o=2,tt="level"},2={x=16,o=0,tt="tune"},3={x=24,o=1,tt="decay"}}]]) do
    add_to_ui(
-    dial_new(d.x+x,d.y,112,16,d.b+o)
+    dial_new(d.x+dial.x,d.y,112,16,d.b+dial.o,k..' '..dial.tt)
    )
   end
  end
 
- for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
+ for fx in all(parse[[{1={x=32,b=0,tt="bd/sd "},2={x=64,b=1,tt="hh/cy "},3={x=96,b=2,tt="pc/sp "}}]]) do
   add_to_ui(
-   toggle_new(x,96,170,171,'fx on/off',state_make_get_set_param_bool(37,b))
+   toggle_new(fx.x,96,170,171,fx.tt..'fx on/off',state_make_get_set_param_bool(37,fx.b))
   )
  end
 
