@@ -31,13 +31,13 @@ end
 audio_rec=false
 function start_rec()
  audio_rec=true
- menuitem(4,'stop recording',stop_rec)
+ menuitem(4,'stop export',stop_rec)
  extcmd'audio_rec'
 end
 
 function stop_rec()
  if (audio_rec) extcmd'audio_end'
- menuitem(4,'start recording',start_rec)
+ menuitem(4,'start export',start_rec)
 end
 
 function _init()
@@ -134,7 +134,7 @@ function _init()
   state=state_new()
   seq_helper.state=state
  end)
- menuitem(4, 'start recording', start_rec)
+ menuitem(4, 'start export', start_rec)
 
  log'init complete'
 end
