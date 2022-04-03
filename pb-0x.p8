@@ -1186,10 +1186,10 @@ function pbl_note_btn_new(x,y,syn,step)
  }
 end
 
-function spin_btn_new(x,y,sprites,get,set)
+function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
-  x=x,y=y,act_on_click=true,
+  x=x,y=y,tt=tt,act_on_click=true,
   get_sprite=function(self,state)
    return sprites[get(state)]
   end,
@@ -1257,9 +1257,9 @@ function momentary_new(x,y,s,cb,tt)
  }
 end
 
-function radio_btn_new(x,y,val,s_off,s_on,get,set)
+function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
-  x=x,y=y,act_on_click=true,
+  x=x,y=y,tt=tt,act_on_click=true,
   get_sprite=function(self,state)
    return trn(get(state)==val,s_on,s_off)
   end,
@@ -1360,7 +1360,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
   toggle_new(0,yp,186,187,'active',state_make_get_set_param_bool(base_idx+3))
  )
  add_to_ui(
-  spin_btn_new(0,yp+8,split'162,163,164,165',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,yp+8,split'162,163,164,165','pattern bank',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
   add_to_ui(
@@ -1368,17 +1368,17 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
   )
  end
 
- for k,x in pairs(parse[[{
-  6=40,
-  7=56,
-  8=72,
-  9=88,
-  10=104,
-  11=120
+ for d in all(parse[[{
+  1={x=40,o=6,tt="tune"},
+  2={x=56,o=7,tt="cutoff"},
+  3={x=72,o=8,tt="resonance"},
+  4={x=88,o=9,tt="env amount"},
+  5={x=104,o=10,tt="env decay"},
+  6={x=120,o=11,tt="accent depth"},
  }]]) do
   add_to_ui(
    dial_new(
-    x,yp,43,21,base_idx+k
+    d.x,yp,43,21,base_idx+d.o,d.tt
    )
   )
  end
@@ -1398,15 +1398,15 @@ function pirc_ui_init(add_to_ui,key)
   )
  end
  for k,d in pairs(parse[[{
-  bd={x=32,y=104,s=150,b=38},
-  sd={x=32,y=112,s=152,b=41},
-  hh={x=64,y=104,s=154,b=44},
-  cy={x=64,y=112,s=156,b=47},
-  pc={x=96,y=104,s=158,b=50},
-  sp={x=96,y=112,s=174,b=53}
+  bd={x=32,y=104,s=150,b=38,tt="bass drum"},
+  sd={x=32,y=112,s=152,b=41,tt="snare drum"},
+  hh={x=64,y=104,s=154,b=44,tt="hihat"},
+  cy={x=64,y=112,s=156,b=47,tt="cymbal"},
+  pc={x=96,y=104,s=158,b=50,tt="percussion"},
+  sp={x=96,y=112,s=174,b=53,tt="sample"}
  }]]) do
   add_to_ui(
-   radio_btn_new(d.x,d.y,k,d.s,d.s+1,state_make_get_set'drum_sel')
+   radio_btn_new(d.x,d.y,k,d.s,d.s+1,d.tt,state_make_get_set'drum_sel')
   )
   -- lev,tun,dec
   for dial in all(parse[[{1={x=8,o=2,tt="level"},2={x=16,o=0,tt="tune"},3={x=24,o=1,tt="decay"}}]]) do
@@ -1438,7 +1438,7 @@ function pirc_ui_init(add_to_ui,key)
  )
 
  add_to_ui(
-  spin_btn_new(0,112,split'166,167,168,169',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,112,split'166,167,168,169','pattern_bank',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
   add_to_ui(
@@ -1503,7 +1503,8 @@ function header_ui_init(add_to_ui)
       1
      )
     )
-   end
+   end,
+   'rewind'
   ),
   5
  )
@@ -1563,13 +1564,13 @@ function header_ui_init(add_to_ui)
   toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  )
  add_to_ui(
-  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
+  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],'filter source',state_make_get_set_param(56,1))
  )
 
- for pt,yp in pairs(parse[[{b0=8,b1=16,dr=24}]]) do
-  local base_idx=syn_base_idx[pt]
-  for idx,xpc in pairs(parse[[{0=104,1=112,2=120}]]) do
-   hdial(xpc,yp,base_idx+idx)
+ for syn,syn_data in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
+  local base_idx=syn_base_idx[syn]
+  for idx,control_data in pairs(parse[[{0={x=104,tt="level"},1={x=112,tt="overdrive"},2={x=120,tt="delay send"}}]]) do
+   hdial(control_data.x,syn_data.y,base_idx+idx,syn_data.tt..control_data.tt)
   end
  end
  add_to_ui(
