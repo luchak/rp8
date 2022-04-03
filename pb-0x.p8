@@ -895,10 +895,6 @@ function state_new(savedata)
   if (syn=='dr') return self.pat_seqs.dr[self.drum_sel] else return self.pat_seqs[syn].st
  end
 
- function s:set_bank(syn,bank)
-  self[syn..'_bank']=bank
- end
-
  function s:save()
   return 'rp80'..stringify({
    tl=self.tl:get_serializable(),
@@ -1190,7 +1186,7 @@ end
 function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
-  x=x,y=y,tt=tt,drag_amt=0.05,
+  x=x,y=y,tt=tt,drag_amt=0.01,
   get_sprite=function(self,state)
    return sprites[get(state)]
   end,
@@ -1565,7 +1561,7 @@ function header_ui_init(add_to_ui)
   toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  )
  add_to_ui(
-  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],'filter source',state_make_get_set_param(56,1))
+  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="S1,8,0,15",4="S2,8,0,15",5="RC,8,0,15"}]],'filter source',state_make_get_set_param(56,1))
  )
 
  for syn,syn_data in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
