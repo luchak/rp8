@@ -175,13 +175,8 @@ end
 -->8
 -- audio driver
 
--- at 5512hz/60fps, we need to
--- produce 92 samples a frame
--- 96-104 is just enough extra
--- to avoid jitter problems
--- on machines i have tested on
-_schunk,_tgtchunks=100,4
-_bufpadding,_chunkbuf=2*_schunk,{}
+_schunk=100
+_bufpadding,_chunkbuf=16*_schunk,{}
 sample_rate=5512.5
 _audio_dcf=0
 
@@ -1238,9 +1233,9 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  }
 end
 
-function toggle_new(x,y,s_off,s_on,get,set)
+function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
-  x=x,y=y,act_on_click=true,
+  x=x,y=y,act_on_click=true,tt=tt,
   get_sprite=function(self,state)
    return trn(get(state),s_on,s_off)
   end,
@@ -1296,9 +1291,9 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  }
 end
 
-function number_new(x,y,w,get,input)
+function number_new(x,y,w,tt,get,input)
  return {
-  x=x,y=y,w=w,drag_amt=0.05,
+  x=x,y=y,w=w,drag_amt=0.05,tt=tt,
   get_sprite=function(self,state)
    if state.song_mode then
     return tostr(get(state))..','..4*w..',0,15'
@@ -1324,9 +1319,9 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-function transport_number_new(x,y,w,obj,key,input)
+function transport_number_new(x,y,w,obj,key,tt,input)
  return wrap_override(
-  number_new(x,y,w,state_make_get_set(obj,key),input),
+  number_new(x,y,w,tt,state_make_get_set(obj,key),input),
   '--,'..4*w..',0,15',
   state_is_song_mode
  )
@@ -1343,11 +1338,13 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
   )
  end
 
- add_to_ui(
-  momentary_new(24,yp,26,function(state,b)
-   transpose_pat(state.pat_seqs[key],b)
-  end,'transpose')
- )
+ local transpose_btn = momentary_new(24,yp,26,function(state,b)
+  transpose_pat(state.pat_seqs[key],b)
+ end,'transpose')
+ transpose_btn.act_on_click=false
+ transpose_btn.drag_amt=0.05
+ add_to_ui(transpose_btn)
+
  add_to_ui(
   momentary_new(8,yp,28,function(state,b)
    copy_buf_pbl=copy_table(state.pat_seqs[key])
@@ -1360,7 +1357,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
   end,'paste pattern')
  )
  add_to_ui(
-  toggle_new(0,yp,186,187,state_make_get_set_param_bool(base_idx+3))
+  toggle_new(0,yp,186,187,'active',state_make_get_set_param_bool(base_idx+3))
  )
  add_to_ui(
   spin_btn_new(0,yp+8,split'162,163,164,165',state_make_get_set(key..'_bank'))
@@ -1387,7 +1384,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  end
 
  add_to_ui(
-  toggle_new(32,yp,2,3,state_make_get_set_param_bool(base_idx+5))
+  toggle_new(32,yp,2,3,'waveform',state_make_get_set_param_bool(base_idx+5))
  )
 
  map(0,4,0,yp,16,2)
@@ -1421,23 +1418,23 @@ function pirc_ui_init(add_to_ui,key)
 
  for x,b in pairs(parse[[{32=0,64=1,96=2}]]) do
   add_to_ui(
-   toggle_new(x,96,170,171,state_make_get_set_param_bool(37,b))
+   toggle_new(x,96,170,171,'fx on/off',state_make_get_set_param_bool(37,b))
   )
  end
 
  add_to_ui(
   momentary_new(8,104,11,function(state,b)
    copy_buf_pirc=copy_table(state.pat_seqs['dr'])
-  end)
+  end, 'copy pattern')
  )
  add_to_ui(
   momentary_new(16,104,10,function(state,b)
    merge_tables(state.pat_seqs['dr'],copy_buf_pirc)
-  end)
+  end, 'paste pattern')
  )
 
  add_to_ui(
-  toggle_new(0,104,188,189,state_make_get_set_param_bool(34))
+  toggle_new(0,104,188,189,'active',state_make_get_set_param_bool(34))
  )
 
  add_to_ui(
@@ -1468,6 +1465,7 @@ function header_ui_init(add_to_ui)
  add_to_ui(
   toggle_new(
    0,0,6,7,
+   'play/pause',
    state_make_get_set'playing',
    function(s) s:toggle_playing() end
   )
@@ -1475,6 +1473,7 @@ function header_ui_init(add_to_ui)
  add_to_ui(
   toggle_new(
    24,0,172,173,
+   'pattern/song mode',
    state_is_song_mode,
    function(s) s:toggle_song_mode() end
   )
@@ -1483,6 +1482,7 @@ function header_ui_init(add_to_ui)
   wrap_override(
    toggle_new(
     8,0,231,232,
+    'record',
     state_make_get_set('tl','recording'),
     function(s) s:toggle_recording() end
    ),
@@ -1527,7 +1527,7 @@ function header_ui_init(add_to_ui)
   function(s)
    s:paste_seq()
   end,
-  'paste loop'
+  'fill loop'
  ))
  song_only(momentary_new(
   8,16,243,
@@ -1560,7 +1560,7 @@ function header_ui_init(add_to_ui)
  end
 
  add_to_ui(
-  toggle_new(64,16,234,235,state_make_get_set_param_bool(56,0))
+  toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  )
  add_to_ui(
   spin_btn_new(64,8,parse[[{1="--,8,0,15",2="AL,8,0,15",3="B1,8,0,15",4="B2,8,0,15",5="RC,8,0,15"}]],state_make_get_set_param(56,1))
@@ -1573,18 +1573,18 @@ function header_ui_init(add_to_ui)
   end
  end
  add_to_ui(
-  transport_number_new(32,0,4,'tl','bar',
+  transport_number_new(32,0,4,'tl','bar','song position',
    function(state,b)
     state:go_to_bar(state.tl.bar+b)
    end
   )
  )
  song_only(
-  toggle_new(56,0,193,194,state_make_get_set('tl','loop')),
+  toggle_new(56,0,193,194,'loop on/off',state_make_get_set('tl','loop')),
   195
  )
  add_to_ui(
-  transport_number_new(64,0,4,'tl','loop_start',
+  transport_number_new(64,0,4,'tl','loop_start','loop start',
    function(state,b)
     local tl=state.tl
     local ns=tl.loop_start+b
@@ -1594,7 +1594,7 @@ function header_ui_init(add_to_ui)
   )
  )
  add_to_ui(
-  transport_number_new(84,0,3,'tl','loop_len',
+  transport_number_new(84,0,3,'tl','loop_len','loop length',
    function(state,b)
     local tl=state.tl
     tl.loop_len=mid(1,tl.loop_len+b,1000-tl.loop_start)
