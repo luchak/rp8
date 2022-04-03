@@ -1048,9 +1048,12 @@ function ui_new()
   holds={},
   mouse_tiles={},
   mx=0,
-  my=0
+  my=0,
+  hover_frames=0,
+  help_on=false
  }]]
  -- obj.focus
+ -- obj.hover
 
  function obj:add_widget(w)
   w=merge_tables(copy_table(widget_defaults),w)
@@ -1068,7 +1071,7 @@ function ui_new()
  function obj:draw(state)
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.mouse_restore_offset
-  if (off) memcpy(0x6000+off,0x9000+off,384)
+  if (off) memcpy(0x6000+off,0x9000+off,448)
 
   -- draw changed widgets
   for id,w in pairs(self.widgets) do
@@ -1107,8 +1110,15 @@ function ui_new()
 
   -- store rows behind mouse and draw mouse
   local next_off=mid(0,my,122)<<6
-  memcpy(0x9000+next_off,0x6000+next_off,384)
+  memcpy(0x9000+next_off,0x6000+next_off,448)
   spr(15,mx,my)
+  local hover=self.hover
+  if self.help_on and self.hover_frames>40 and hover and hover.tt and hover.active then
+   local tt=hover.tt
+   local xp=trn(mx<56,mx+6,mx-2-4*#tt)
+   rectfill(xp,my,xp+4*#tt,my+6,1)
+   print(tt,xp+1,my+1,7)
+  end
   self.mouse_restore_offset=next_off
  end
 
@@ -1126,7 +1136,11 @@ function ui_new()
   if (btns[🅾️]) input-=1
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
-  local mx,my=self.mx,self.my
+  local mx,my,k=self.mx,self.my
+  local hover=self.mouse_tiles[mx\4 + (my\4)*32]
+
+  if (stat(30)) k=stat(31)
+  if (k=='h') self.help_on=not self.help_on
 
   local new_focus=self.focus
 
@@ -1141,8 +1155,7 @@ function ui_new()
    else
     poke(0x5f2d, 0x5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
-    new_focus=self.mouse_tiles[mx\4 + (my\4)*32]
-    new_focus=trn(new_focus and new_focus.active,new_focus,nil)
+    new_focus=trn(hover and hover.active,hover,nil)
     if (new_focus and new_focus.act_on_click) input=trn(click==1,1,-1)
    end
   else
@@ -1156,8 +1169,10 @@ function ui_new()
   end
 
   if (input!=0 and self.focus) self.focus:input(state,input)
+  if (self.hover==hover and click==0) self.hover_frames+=1 else self.hover_frames=0
 
   self.last_click=click
+  self.hover=hover
  end
 
  return obj
@@ -1208,10 +1223,11 @@ function step_btn_new(x,y,syn,step,sprites)
  }
 end
 
-function dial_new(x,y,s0,bins,get,set)
+function dial_new(x,y,s0,bins,param_idx,tt)
+ local get,set=state_make_get_set_param(param_idx)
  bins-=0x0.0001
  return {
-  x=x,y=y,drag_amt=0.33,
+  x=x,y=y,tt=tt,drag_amt=0.33,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
@@ -1234,9 +1250,9 @@ function toggle_new(x,y,s_off,s_on,get,set)
  }
 end
 
-function momentary_new(x,y,s,cb)
+function momentary_new(x,y,s,cb,tt)
  return {
-  x=x,y=y,act_on_click=true,
+  x=x,y=y,tt=tt,act_on_click=true,
   get_sprite=function()
    return s
   end,
@@ -1330,18 +1346,18 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  add_to_ui(
   momentary_new(24,yp,26,function(state,b)
    transpose_pat(state.pat_seqs[key],b)
-  end)
+  end,'transpose')
  )
  add_to_ui(
   momentary_new(8,yp,28,function(state,b)
    copy_buf_pbl=copy_table(state.pat_seqs[key])
-  end)
+  end,'copy pattern')
  )
  add_to_ui(
   momentary_new(16,yp,27,function(state,b)
    local v=copy_buf_pbl
    if (v) merge_tables(state.pat_seqs[key],v)
-  end)
+  end,'paste pattern')
  )
  add_to_ui(
   toggle_new(0,yp,186,187,state_make_get_set_param_bool(base_idx+3))
@@ -1365,8 +1381,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  }]]) do
   add_to_ui(
    dial_new(
-    x,yp,43,21,
-    state_make_get_set_param(base_idx+k)
+    x,yp,43,21,base_idx+k
    )
   )
  end
@@ -1399,7 +1414,7 @@ function pirc_ui_init(add_to_ui,key)
   -- lev,tun,dec
   for x,o in pairs(parse[[{8=2,16=0,24=1}]]) do
    add_to_ui(
-    dial_new(d.x+x,d.y,112,16,state_make_get_set_param(d.b+o))
+    dial_new(d.x+x,d.y,112,16,d.b+o)
    )
   end
  end
@@ -1438,10 +1453,10 @@ function pirc_ui_init(add_to_ui,key)
 end
 
 function header_ui_init(add_to_ui)
- local function hdial(x,y,idx)
- add_to_ui(
-  dial_new(x,y,128,16,state_make_get_set_param(idx))
- )
+ local function hdial(x,y,idx,tt)
+  add_to_ui(
+   dial_new(x,y,128,16,idx,tt)
+  )
  end
 
  local function song_only(w,s_not_song)
@@ -1497,44 +1512,49 @@ function header_ui_init(add_to_ui)
   0,8,242,
   function(s)
    s:copy_seq()
-  end
+  end,
+  'copy loop'
  ))
  song_only(momentary_new(
   8,8,241,
   function(s)
    s:cut_seq()
-  end
+  end,
+  'cut loop'
  ),199)
  add_to_ui(momentary_new(
   0,16,247,
   function(s)
    s:paste_seq()
-  end
+  end,
+  'paste loop'
  ))
  song_only(momentary_new(
   8,16,243,
   function(s)
    s:insert_seq()
-  end
+  end,
+  'insert loop'
  ),201)
  song_only(momentary_new(
   8,24,246,
   function(s)
    s.tl:copy_overrides_to_loop()
-  end
+  end,
+  'commit touched controls'
  ),204)
 
  for s in all(parse[[{
-  1="16,8,1",
-  2="32,8,3",
-  3="32,16,6",
-  4="16,16,2",
-  5="16,24,4",
-  6="32,24,5",
-  7="48,16,57",
-  8="48,24,58",
-  9="64,24,59",
-  10="80,24,61",
+  1="16,8,1,tempo",
+  2="32,8,3,level",
+  3="32,16,6,compressor threshold",
+  4="16,16,2,shuffle",
+  5="16,24,4,delay time",
+  6="32,24,5,delay feedback",
+  7="48,16,57,filter cutoff",
+  8="48,24,58,filter resonance",
+  9="64,24,59,filter wet/dry",
+  10="80,24,61,filter decay",
  }]]) do
   hdial(unpack_split(s))
  end
