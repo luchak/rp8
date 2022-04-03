@@ -1037,8 +1037,7 @@ widget_defaults=parse[[{
  h=2,
  active=true,
  act_on_click=false,
- drag_amt=0,
- btn_amt=1
+ drag_amt=0
 }]]
 
 function ui_new()
@@ -1120,8 +1119,8 @@ function ui_new()
     holds[b]=0
    end
   end
-  if (btns[❎]) self.focus:input(state,self.focus.btn_amt)
-  if (btns[🅾️]) self.focus:input(state,-self.focus.btn_amt)
+  if (btns[❎]) self.focus:input(state,1)
+  if (btns[🅾️]) self.focus:input(state,-1)
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my=self.mx,self.my
@@ -1207,7 +1206,7 @@ end
 function dial_new(x,y,s0,bins,get,set)
  bins-=0x0.0001
  return {
-  x=x,y=y,drag_amt=0.33,btn_amt=2,
+  x=x,y=y,drag_amt=0.33,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
@@ -1276,18 +1275,17 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  }
 end
 
-function transport_number_new(x,y,w,obj,key)
- local get=state_make_get_set(obj,key)
+function number_new(x,y,w,get,input)
  return {
-  x=x,y=y,w=w,active=false,
+  x=x,y=y,w=w,drag_amt=0.05,
   get_sprite=function(self,state)
    if state.song_mode then
-    return tostr(get(state))..','..w..',0,15'
+    return tostr(get(state))..','..4*w..',0,15'
    else
-    return '--,'..w..',0,15'
+    return '--,'..4*w..',0,15'
    end
   end,
-  update=function() end
+  input=function(self,state,b) input(state,b) end
  }
 end
 
@@ -1303,6 +1301,14 @@ function wrap_override(w,s_override,get_not_override,override_active)
   end
  end
  return w
+end
+
+function transport_number_new(x,y,w,obj,key,input)
+ return wrap_override(
+  number_new(x,y,w,state_make_get_set(obj,key),input),
+  '--,'..4*w..',0,15',
+  state_is_song_mode
+ )
 end
 
 function pbl_ui_init(add_to_ui,key,base_idx,yp)
@@ -1542,45 +1548,33 @@ function header_ui_init(add_to_ui)
   end
  end
  add_to_ui(
-  transport_number_new(32,0,unpack_split'16,tl,bar')
- )
- song_only(
-  momentary_new(48,0,192,
+  transport_number_new(32,0,4,'tl','bar',
    function(state,b)
     state:go_to_bar(state.tl.bar+b)
    end
-  ),
-  197
+  )
  )
  song_only(
   toggle_new(56,0,193,194,state_make_get_set('tl','loop')),
   195
  )
  add_to_ui(
-  transport_number_new(64,0,unpack_split'16,tl,loop_start')
- )
- song_only(
-  momentary_new(80,0,192,
+  transport_number_new(64,0,4,'tl','loop_start',
    function(state,b)
     local tl=state.tl
     local ns=tl.loop_start+b
     tl.loop_start=mid(1,ns,999)
     tl.loop_len=mid(1,tl.loop_len,1000-ns)
    end
-  ),
-  197
+  )
  )
  add_to_ui(
-  transport_number_new(88,0,unpack_split'8,tl,loop_len')
- )
- song_only(
-  momentary_new(96,0,192,
+  transport_number_new(84,0,3,'tl','loop_len',
    function(state,b)
     local tl=state.tl
     tl.loop_len=mid(1,tl.loop_len+b,1000-tl.loop_start)
    end
-  ),
-  197
+  )
  )
 
  map(unpack_split'0,0,0,0,16,4')
@@ -1846,7 +1840,7 @@ f000f00055505555006755000000000000557600000000050055550000660000c000000000000000
 00555550005555500055555000555550005555500055555000555550005555500055555000555550005555500055555000555550005555500055555000555550
 
 __map__
-07e905acefefc0c1efefc0efc0ec292a07e905ac0000c0c10000c000c0ec292a07e705ac00eec5c300eec5eec5ec292a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+07e905ac000000c10000000000ec292a07e905ac0000c0c10000c000c0ec292a07e705ac00eec5c300eec5eec5ec292a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 f2c785288527000009e0000c17858585c6cb842884270000000026b717848484f2c784288427001726d00000008484840000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 f7c985f885f986e1eae409e618858585c7c884f884f90000000026b418848484f7c984f884f9001826d00000008484840000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000c85fa85fb86e286e386e519858585cac984fa84fb0000000026b919848484000084fa84fb001926d00000008484840000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
