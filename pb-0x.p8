@@ -176,7 +176,7 @@ end
 -- audio driver
 
 _schunk=100
-_bufpadding,_chunkbuf=16*_schunk,{}
+_bufpadding,_chunkbuf=2*_schunk,{}
 sample_rate=5512.5
 _audio_dcf=0
 
@@ -487,10 +487,11 @@ function sample_new(base)
 
  function obj:subupdate(b,first,last)
   local pos,dec,samp=_pos,_dec,state.samp
+  if (pos<0) return
   local amp,detune=_amp,_detune
   local n=#samp
   for i=first,last do
-   if (pos>=n) break
+   if (pos>=n) pos=-1 break
    local pi=pos&0xffff.0000
    local po=pos-pi
    local s0,s1=samp[pi],samp[pi+1]
