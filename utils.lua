@@ -88,8 +88,18 @@ function is_digit(c)
  return (c>='0' and c<='9') or c=='.'
 end
 
-function is_whitespace(c)
- return c==' ' or c=='\n' or c=='\t'
+function is_whitespace_or_comma(c)
+ return c==' ' or c=='\n' or c=='\t' or c==','
+end
+
+function consume_while(r,test,s)
+ s=s or ''
+ repeat
+  local c=r()
+  if (not test(c)) return s
+  if (c=='\\') c=chr(ord(r())-35)
+  s..=c
+ until false
 end
 
 -- this is super fragile
@@ -101,41 +111,22 @@ function _parse(input)
  local c
  repeat
   c=input()
- until not is_whitespace(c)
+ until not is_whitespace_or_comma(c)
  if c=='"' then
-  local s=''
-  repeat
-   c=input()
-   if (c=='"') return s
-   if c=='\\' then
-    s..=chr(ord(input())-35)
-   else
-    s..=c
-   end
-  until false
+  return consume_while(input,function (c) return c!='"' end)
  elseif c=='-' or is_digit(c) then
-  local s=c
-  repeat
-   c=input()
-   local d=is_digit(c)
-   if (d) s..=c
-  until not d
+  local s=consume_while(input,is_digit,c)
   input(-1)
   return tonum(s)
  elseif c=='{' then
   local t={}
   repeat
    c=input()
-   while is_whitespace(c) or c==',' do
+   while is_whitespace_or_comma(c) do
     c=input()
    end
    if (c=='}') return t
-   local k=c
-   repeat
-    c=input()
-    if (c=='=') break
-    k..=c
-   until false
+   local k=consume_while(input,function (c) return c!='=' end,c)
    k=tonum(k) or k
    t[k]=_parse(input)
   until false
@@ -185,11 +176,10 @@ function map_table(a,f)
 end
 
 function unpack_patch(patch,first,last)
- local r,idx={},1
+ local r={}
  for i=first,last do
   -- shift back to 0-1 range
-  r[idx]=patch[i]>>7
-  idx+=1
+  add(r,patch[i]>>7)
  end
  return unpack(r)
 end

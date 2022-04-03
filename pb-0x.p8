@@ -181,7 +181,7 @@ end
 -- to avoid jitter problems
 -- on machines i have tested on
 _schunk,_tgtchunks=100,4
-_bufpadding,_chunkbuf=4*_schunk,{}
+_bufpadding,_chunkbuf=2*_schunk,{}
 sample_rate=5512.5
 _audio_dcf=0
 
@@ -212,22 +212,8 @@ function audio_dochunk()
 end
 
 function audio_update()
- local bufsize,inbuf,newchunks=stat(109),stat(108),0
-
- while inbuf<_schunk do
-  log('behind')
+ if stat(108)<stat(109)+_bufpadding then
   audio_dochunk()
-  newchunks+=1
-  inbuf+=_schunk
- end
-
- -- always generate at least 1
- -- chunk if there is space
- -- and time
- if newchunks<_tgtchunks and inbuf<bufsize+_bufpadding then
-  audio_dochunk()
-  inbuf+=_schunk
-  newchunks+=1
  end
 end
 -->8
