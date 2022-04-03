@@ -1190,7 +1190,7 @@ end
 function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
-  x=x,y=y,tt=tt,act_on_click=true,
+  x=x,y=y,tt=tt,drag_amt=0.05,
   get_sprite=function(self,state)
    return sprites[get(state)]
   end,
@@ -1361,7 +1361,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
   toggle_new(0,yp,186,187,'active',state_make_get_set_param_bool(base_idx+3))
  )
  add_to_ui(
-  spin_btn_new(0,yp+8,split'162,163,164,165','pattern bank',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,yp+8,split'162,163,164,165','bank select',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
   add_to_ui(
@@ -1371,10 +1371,10 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
 
  for d in all(parse[[{
   1={x=40,o=6,tt="tune"},
-  2={x=56,o=7,tt="cutoff"},
-  3={x=72,o=8,tt="resonance"},
-  4={x=88,o=9,tt="env amount"},
-  5={x=104,o=10,tt="env decay"},
+  2={x=56,o=7,tt="filter cutoff"},
+  3={x=72,o=8,tt="filter resonance"},
+  4={x=88,o=9,tt="filter env amount"},
+  5={x=104,o=10,tt="filter env decay"},
   6={x=120,o=11,tt="accent depth"},
  }]]) do
   add_to_ui(
@@ -1439,7 +1439,7 @@ function pirc_ui_init(add_to_ui,key)
  )
 
  add_to_ui(
-  spin_btn_new(0,112,split'166,167,168,169','pattern_bank',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,112,split'166,167,168,169','bank select',state_make_get_set(key..'_bank'))
  )
  for i=1,6 do
   add_to_ui(
