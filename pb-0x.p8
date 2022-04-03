@@ -1056,7 +1056,7 @@ function ui_new()
   w=merge_tables(copy_table(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
-  w.id,w.tx,w.ty,self.focus=#widgets,w.x\4,w.y\4,self.focus or w
+  w.id,w.tx,w.ty=#widgets,w.x\4,w.y\4
   local tile=w.tx+w.ty*32
   for dx=0,w.w-1 do
    for dy=0,w.h-1 do
@@ -1095,12 +1095,15 @@ function ui_new()
    end
   end
   self.dirty={}
-  local f=self.focus
 
+  local f=self.focus
   palt(0,true)
+
   -- draw focus indicator
-  spr(1,f.x,f.y,1,1)
-  sspr(32,0,4,8,f.x+f.w*4-4,f.y)
+  if f then
+   spr(1,f.x,f.y,1,1)
+   sspr(32,0,4,8,f.x+f.w*4-4,f.y)
+  end
 
   -- store rows behind mouse and draw mouse
   local next_off=mid(0,my,122)<<6
@@ -1110,7 +1113,7 @@ function ui_new()
  end
 
  function obj:update(state)
-  local holds,btns=self.holds,{}
+  local holds,btns,input=self.holds,{},0
   for b in all(ui_btns) do
    if btn(b) then
     local h=holds[b]+1
@@ -1119,20 +1122,20 @@ function ui_new()
     holds[b]=0
    end
   end
-  if (btns[❎]) self.focus:input(state,1)
-  if (btns[🅾️]) self.focus:input(state,-1)
+  if (btns[❎]) input+=1
+  if (btns[🅾️]) input-=1
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my=self.mx,self.my
 
-  local new_focus
+  local new_focus=self.focus
 
   if click>0 then
-   if click==self.last_click then
+   if self.focus and click==self.last_click then
     self.drag_dist+=stat(39)
     local diff=flr(self.focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
     if diff!=0 then
-     self.focus:input(state,diff)
+     input=diff
      self.last_drag=self.drag_dist
     end
    else
@@ -1140,17 +1143,19 @@ function ui_new()
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=self.mouse_tiles[mx\4 + (my\4)*32]
     new_focus=trn(new_focus and new_focus.active,new_focus,nil)
-    if (new_focus and new_focus.act_on_click) new_focus:input(state,trn(click==1,1,-1))
+    if (new_focus and new_focus.act_on_click) input=trn(click==1,1,-1)
    end
   else
    poke(0x5f2d, 0x1)
   end
 
-  if new_focus then
-   self.dirty[self.focus.id]=true
-   self.dirty[new_focus.id]=true
+  if new_focus!=self.focus then
+   if (self.focus) self.dirty[self.focus.id]=true
+   if (new_focus) self.dirty[new_focus.id]=true
    self.focus=new_focus
   end
+
+  if (input!=0 and self.focus) self.focus:input(state,input)
 
   self.last_click=click
  end
