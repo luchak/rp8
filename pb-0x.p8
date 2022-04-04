@@ -1194,6 +1194,7 @@ function ui_new()
    end
   else
    poke(0x5f2d, 0x1)
+   self.drag_dist,self.last_drag=0,0
   end
 
   if new_focus!=self.focus then
@@ -1517,7 +1518,7 @@ function header_ui_init(add_to_ui)
   wrap_override(
    toggle_new(
     8,0,231,232,
-    'record',
+    'record automation',
     state_make_get_set('tl','recording'),
     function(s) s:toggle_recording() end
    ),
