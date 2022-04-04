@@ -6,7 +6,7 @@
  so that's 8*(64/n+2^ceil(log_2 kn)/n) -> (512+2^(3+ceil(log_2 k + log_2 n)))/n bytes per bar
 ]]
 
-no_event_params=parse[[{10=true,11=true,24=true,25=true,38=true,39=true}]]
+no_event_params=parse[[{10=true,11=true,22=true,23=true,34=true,35=true}]]
 
 -- a bar is
 -- snapshot: string

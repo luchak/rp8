@@ -487,7 +487,7 @@ function sample_new(base)
  function obj:note(pat,patch,step,note_len)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  _dec=1-(0.01*(1-dec)^4)
+  _dec=1-(0.2*(1-dec)^2)
   _detune=2^(flr((tun-0.5)*24+0.5)/12)
   if s!=d_off then
    _pos=1
@@ -508,7 +508,7 @@ function sample_new(base)
    local val=s0+po*(s1-s0)
 
    b[i]+=amp*((val>>7)-1)
-   amp*=dec
+   if (pi&0xff==0) amp*=dec
    pos+=detune
   end
   _pos,_amp=pos,amp
@@ -1194,7 +1194,6 @@ function ui_new()
    end
   else
    poke(0x5f2d, 0x1)
-   self.drag_dist,self.last_drag=0,0
   end
 
   if new_focus!=self.focus then
