@@ -102,11 +102,8 @@ function consume_while(r,test,s)
  until false
 end
 
--- this is super fragile
--- can easily hang the program!
 -- make sure to always use
--- double quotes in serialized
--- data, single quotes will hang
+-- " (not ') when hand serializing
 function _parse(input)
  local c
  repeat
@@ -161,7 +158,7 @@ function dec_byte_array(s)
  return a
 end
 
--- todo: i think the base case can be inlined and this function can do both?
+-- todo: perhaps the base case can be inlined for one fewer fn?
 function map_table_deep(a,f,d)
  if (d==0) return map_table(a,f)
  return map_table(a,function(v) return map_table_deep(v,f,d-1) end)

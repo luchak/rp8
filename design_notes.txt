@@ -10,9 +10,19 @@
 
  002
 
--- a bar is
--- snapshot: string
--- events: table<k=param_idx, v=event_string>
--- everything is passed in as a number array
--- a new bar is just an array of n_params numbers
--- an event is a (param, value) pair
+a bar is
+snapshot: string
+events: table<k=param_idx, v=event_string>
+everything is passed in as a number array
+a new bar is just an array of n_params numbers
+an event is a (param, value) pair
+
+--
+
+003
+
+state contents:
+real values: 0=>0,128=>1
+bool values: 0=>false,128 (or any nonzero)=>true
+int values: identity map
+also watch out for packed bitfield-ish things

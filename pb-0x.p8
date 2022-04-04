@@ -616,9 +616,6 @@ function mixer_new(srcs,fx,filt,lev)
  }
 end
 
--- absolutely ghastly but a
--- very very fast log function
--- is needed to make progress
 function comp_new(src,thresh,ratio,_att,_rel)
  return {
   src=src,
@@ -672,20 +669,6 @@ svf_pats=parse[[{
  23=":///@/////:/@///",
 }]]
 
--- hack to generate random patterns
---[[
-vals="123456789:;<=>@"
-valtab={}
-for i=1,#vals do
- add(valtab,sub(vals,i,i))
-end
-np=''
-for i=1,49 do
- np=np..rnd(valtab)
-end
-log('np',np)
-]]
-
 -- heavily inspired by
 -- https://github.com/JordanTHarris/VAStateVariableFilter
 function svf_new()
@@ -699,9 +682,6 @@ function svf_new()
   bp=0,
   dec=1,
   note=function(self,patch,bar,tick)
-   --local q=1/(2*(1-res))
-   --self.rc=1/(2*q)
-   -- configurable decay?
    local r,bp,gc,dec
    bp,gc,r,self.wet,_,dec=unpack_patch(patch,56,61)
    self.rc=1-r*0.96
@@ -772,10 +752,7 @@ pat_param_idx=parse[[{
  dr=35,
 }]]
 
--- real values: 0=>0,128=>1
--- bool values: 0=>false,128 (or any nonzero)=>true
--- int values: identity map
--- also watch out for packed bitfield-ish things
+-- see note 003
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
@@ -1038,8 +1015,7 @@ end
 -- ui
 
 ui_btns={❎,🅾️}
--- custom retrigger frame intervals
--- for buttons
+-- custom retrigger intervals
 ui_reps=parse[[{
  1=true,
  11=true,
@@ -1100,10 +1076,7 @@ function ui_new()
   for id,_ in pairs(self.dirty) do
    local w,sp=self.widgets[id],self.sprites[id]
    local wx,wy=w.x,w.y
-   -- number => draw that sprite
-   --  (subject to width value)
-   -- string => unpack to text
-   --  params and draw those
+   -- see note 004
    if type(sp)=='number' then
     spr(self.sprites[id],wx,wy,1,1)
    else
@@ -1222,8 +1195,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
 end
 
 function step_btn_new(x,y,syn,step,sprites)
- -- last sprite in list is the
- -- "this step is active" sprite
+ -- last sprite is for the current step
  local n=#sprites-1
  return {
   x=x,y=y,act_on_click=true,
