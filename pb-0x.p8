@@ -89,7 +89,7 @@ function _init()
   svf,
   1.0
  )
- comp=comp_new(mixer,unpack_split'0.5,4,0.08,0.003')
+ comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
  seq_helper=seq_helper_new(
   state,comp,function()
    local patch,pseq,pstat=
@@ -135,7 +135,7 @@ function _init()
    ms.b0.fx=pow3(b0_fx)
    ms.b1.fx=pow3(b1_fx)
    ms.dr.fx=pow3(dr_fx)
-   comp.thresh=0.02+0.98*pow3(comp_thresh)
+   comp.thresh=0.05+0.95*pow3(comp_thresh)
 
    state:next_tick()
   end
@@ -753,24 +753,6 @@ end
 -- state
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'64,65,66,67,68,64,65,66'
-
-syn_base_idx=parse[[{
- b0=7,
- b1=21,
- dr=35,
- bd=42,
- sd=45,
- hh=48,
- cy=51,
- pc=54,
- sp=57,
-}]]
-
-pat_param_idx=parse[[{
- b0=11,
- b1=25,
- dr=39,
-}]]
 
 syn_base_idx=parse[[{
  b0=7,
