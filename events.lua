@@ -1,19 +1,7 @@
---[[
- each chunk contains (1) a rollup of the current state at its start, and (2) an _unsorted_ array of events (conflict: later wins)
- when a chunk is loaded, we scan its whole list of events and stick them in a table indexed by tick.
- duplicates can be discovered at this time and eliminated (rule: last event wins)
- with 64 event types and k events per bar, a chunk size of n bars gets us a size-64 array every n bars, plus a size 2^ceil(log_2 kn) events list
- so that's 8*(64/n+2^ceil(log_2 kn)/n) -> (512+2^(3+ceil(log_2 k + log_2 n)))/n bytes per bar
-]]
+-- see notes 001, 002
 
 no_event_params=parse[[{10=true,11=true,22=true,23=true,34=true,35=true}]]
 
--- a bar is
--- snapshot: string
--- events: table<k=param_idx, v=event_string>
--- everything is passed in as a number array
--- a new bar is just an array of n_params numbers
--- an event is a (param, value) pair
 function timeline_new(default_patch, savedata)
  local timeline={
   bars={},
