@@ -115,7 +115,14 @@ function _init()
    local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
    local dr_lev,dr_od,dr_fx=unpack_patch(patch,31,33)
    mixer.lev=pow3(mix_lev)*8
-   delay.l=((dl_t<<4)+0.25)*state.base_note_len
+
+   dl_t=(dl_t<<7)
+   if dl_t>32 then
+    dl_t=(dl_t-33)+0.5
+   elseif dl_t>16 then
+    dl_t=(dl_t-16)*0.66667
+   end
+   delay.l=dl_t*state.base_note_len
    delay.fb=sqrt(dl_fb)*0.95
 
    local ms=mixer.srcs
@@ -656,12 +663,13 @@ svf_pats=parse[[{
  14="@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8",
  15=";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/",
  16="@//",
- 17="@//:/",
- 18="////////@///////",
- 19="////@///",
- 20="//@/",
- 21="/@",
- 22=":///@/////:/@///",
+ 17="@////",
+ 18="@//:/",
+ 19="////////@///////",
+ 20="////@///",
+ 21="//@/",
+ 22="/@",
+ 23=":///@/////:/@///",
 }]]
 
 -- hack to generate random patterns
@@ -786,7 +794,7 @@ pat_param_idx=parse[[{
 -- bool values: 0=>false,128 (or any nonzero)=>true
 -- int values: identity map
 -- also watch out for packed bitfield-ish things
-default_patch=split'64,0,64,64,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
+default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
  nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
@@ -1029,13 +1037,13 @@ function seq_helper_new(state,root,note_fn)
   root=root,
   t=state.note_len,
   update=function(self,b,first,last)
-   local p,nl=first,self.state.note_len
+   local p=first
    while p<=last do
-    if self.t>=nl then
+    if self.t>=self.state.note_len then
      self.t=0
      note_fn()
     end
-    local n=min(nl-self.t,last-p+1)
+    local n=min(self.state.note_len-self.t,last-p+1)
     self.root:update(b,p,p+n-1)
     self.t+=n
     p+=n
@@ -1117,7 +1125,7 @@ function ui_new()
    if type(sp)=='number' then
     spr(self.sprites[id],wx,wy,1,1)
    else
-    local text,tw,bg,fg=unpack_split(sp)
+    local tw,text,bg,fg=w.w*4,unpack(split(sp,','))
     text=tostr(text)
     rectfill(wx,wy,wx+tw-1,wy+7,bg)
     print(text,wx+tw-#text*4,wy+1,fg)
@@ -1303,9 +1311,9 @@ end
 function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local get_bank=state_make_get_set(syn..'_bank')
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
- local ret_prefix=pib..',4,'..c_bg..','
+ local ret_prefix=pib..','..c_bg..','
  return {
-  x=x,y=y,w=1,act_on_click=true,
+  x=x,y=y,tt='pattern select',w=1,act_on_click=true,
   get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
@@ -1326,7 +1334,7 @@ function number_new(x,y,w,tt,get,input)
  return {
   x=x,y=y,w=w,drag_amt=0.05,tt=tt,
   get_sprite=function(self,state)
-   return tostr(get(state))..','..4*w..',0,15'
+   return tostr(get(state))..',0,15'
   end,
   input=function(self,state,b) input(state,b) end
  }
@@ -1349,7 +1357,7 @@ end
 function transport_number_new(x,y,w,obj,key,tt,input)
  return wrap_override(
   number_new(x,y,w,tt,state_make_get_set(obj,key),input),
-  '--,'..4*w..',0,15',
+  '--,0,15',
   state_is_song_mode
  )
 end
@@ -1577,12 +1585,11 @@ function header_ui_init(add_to_ui)
   2="32,8,3,level",
   3="32,16,6,compressor threshold",
   4="16,16,2,shuffle",
-  5="16,24,4,delay time",
-  6="32,24,5,delay feedback",
-  7="48,16,57,filter cutoff",
-  8="48,24,58,filter resonance",
-  9="64,24,59,filter wet/dry",
-  10="80,24,61,filter env decay",
+  5="32,24,5,delay feedback",
+  6="48,16,57,filter cutoff",
+  7="48,24,58,filter resonance",
+  8="64,24,59,filter wet/dry",
+  9="80,24,61,filter env decay",
  }]]) do
   hdial(unpack_split(s))
  end
@@ -1593,12 +1600,23 @@ function header_ui_init(add_to_ui)
  filt_pat_ctl.drag_amt=0.02
  add_to_ui(filt_pat_ctl)
 
+ local dts={}
+ for suffix in all(split(',t,d')) do
+  for dt in all(split('1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16')) do
+   if (suffix=='d') dt-=1
+   add(dts,dt..suffix..',0,15')
+  end
+ end
+ local dt_spin_btn=spin_btn_new(16,24,dts,'delay time',state_make_get_set_param(4))
+ dt_spin_btn.w=3
+ add_to_ui(dt_spin_btn)
+
  local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  filt_toggle.act_on_click=false
  filt_toggle.drag_amt=0.01
  add_to_ui(filt_toggle)
  add_to_ui(
-  spin_btn_new(64,8,parse[[{1="--,8,0,15",2="MA,8,0,15",3="S1,8,0,15",4="S2,8,0,15",5="DR,8,0,15"}]],'filter source',state_make_get_set_param(56,1))
+  spin_btn_new(64,8,parse[[{1="--,0,15",2="MA,0,15",3="S1,0,15",4="S2,0,15",5="DR,0,15"}]],'filter source',state_make_get_set_param(56,1))
  )
 
  for syn,syn_data in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do

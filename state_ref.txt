@@ -1,7 +1,7 @@
  -- 01 mix_tempo=0.5,
  -- 02 mix_shuf=0,
  -- 03 mix_lev=0.5,
- -- 04 mix_dl_t=0.5,
+ -- 04 mix_dl_t=3,
  -- 05 mix_dl_fb=0.5,
  -- 06 mix_comp_thresh=1.0,
  -- 07 b0_lev=0.5,
