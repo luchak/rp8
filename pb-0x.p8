@@ -1390,7 +1390,7 @@ end
 function pirc_ui_init(add_to_ui,key)
  for i=1,16 do
   add_to_ui(
-   step_btn_new(i*8-8,120,key,i,split'19,21,20,35')
+   step_btn_new(i*8-8,120,key,i,split'19,20,36,35')
   )
  end
  for k,d in pairs(parse[[{
@@ -1556,15 +1556,16 @@ function header_ui_init(add_to_ui)
   hdial(unpack_split(s))
  end
  local get_filt_pat,set_filt_pat=state_make_get_set_param(60)
- add_to_ui(
-  number_new(80,16,2,'filter pattern',get_filt_pat,function(state,b)
+ local filt_pat_ctl=number_new(80,16,2,'filter pattern',get_filt_pat,function(state,b)
    set_filt_pat(state,mid(1,get_filt_pat(state)+b,#svf_pats))
   end)
- )
+ filt_pat_ctl.drag_amt=0.02
+ add_to_ui(filt_pat_ctl)
 
- add_to_ui(
-  toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
- )
+ local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
+ filt_toggle.act_on_click=false
+ filt_toggle.drag_amt=0.01
+ add_to_ui(filt_toggle)
  add_to_ui(
   spin_btn_new(64,8,parse[[{1="--,8,0,15",2="MA,8,0,15",3="S1,8,0,15",4="S2,8,0,15",5="DR,8,0,15"}]],'filter source',state_make_get_set_param(56,1))
  )
