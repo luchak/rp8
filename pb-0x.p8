@@ -1551,7 +1551,7 @@ function header_ui_init(add_to_ui)
   7="48,16,57,filter cutoff",
   8="48,24,58,filter resonance",
   9="64,24,59,filter wet/dry",
-  10="80,24,61,filter decay",
+  10="80,24,61,filter env decay",
  }]]) do
   hdial(unpack_split(s))
  end
