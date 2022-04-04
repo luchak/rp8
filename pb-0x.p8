@@ -1125,7 +1125,7 @@ function ui_new()
    if type(sp)=='number' then
     spr(self.sprites[id],wx,wy,1,1)
    else
-    local tw,text,bg,fg=w.w*4,unpack(split(sp,','))
+    local tw,text,bg,fg=w.w*4,unpack_split(sp)
     text=tostr(text)
     rectfill(wx,wy,wx+tw-1,wy+7,bg)
     print(text,wx+tw-#text*4,wy+1,fg)
