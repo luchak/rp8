@@ -1414,7 +1414,7 @@ function pirc_ui_init(add_to_ui,key)
 
  for fx in all(parse[[{1={x=32,b=0,tt="bd/sd "},2={x=64,b=1,tt="hh/cy "},3={x=96,b=2,tt="pc/sp "}}]]) do
   add_to_ui(
-   toggle_new(fx.x,96,170,171,fx.tt..'fx on/off',state_make_get_set_param_bool(37,fx.b))
+   toggle_new(fx.x,96,170,171,fx.tt..'fx bypass',state_make_get_set_param_bool(37,fx.b))
   )
  end
 
