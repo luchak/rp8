@@ -97,7 +97,7 @@ function _init()
     state.pat_seqs,
     state.pat_status
    if (not state.playing) return
-   local now,nl=state.tick,state.note_len
+   local now,nl,bar=state.tick,state.note_len,state.bar
    if (pstat.b0.on) pbl0:note(pseq.b0,patch,now,nl)
    if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
    if pstat.dr.on then
@@ -108,7 +108,7 @@ function _init()
    end
    drum_mixer:note(patch)
    mixer:note(patch)
-   svf:note(patch,now)
+   svf:note(patch,bar,now)
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
    local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
@@ -641,14 +641,42 @@ end
 
 svf_pats=parse[[{
  1="@///////////////",
- 2="@///////@///////",
- 3="@///@///@///@///",
- 4="@/@/@/@/@/@/@/@/",
- 5="@@@@@@@@@@@@@@@@",
+ 2="@///////",
+ 3="@///",
+ 4="@/",
+ 5="@",
  6="@//@//@//@//@//@",
  7="//@//@////@//@//",
- 8="0123456789:;<=>@",
+ 8="/123456789:;<=>@",
+ 9="8899::;;<<==>>@@",
+ 10="8/9/:/;/</=/>/@/",
+ 11="@/>/=/</;/:/9/8/",
+ 12="==/3@@:/23@114:;92>:5<:27<@//;>8;3;43;64</;883=4:",
+ 13=">/3/7/</=/8/5/>/2/@/5/4/2/>/3/@/7/3/3/;/</6/2/;/7/",
+ 14="@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8",
+ 15=";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/",
+ 16="@//",
+ 17="@//:/",
+ 18="////////@///////",
+ 19="////@///",
+ 20="//@/",
+ 21="/@",
+ 22=":///@/////:/@///",
 }]]
+
+-- hack to generate random patterns
+--[[
+vals="123456789:;<=>@"
+valtab={}
+for i=1,#vals do
+ add(valtab,sub(vals,i,i))
+end
+np=''
+for i=1,49 do
+ np=np..rnd(valtab)
+end
+log('np',np)
+]]
 
 -- heavily inspired by
 -- https://github.com/JordanTHarris/VAStateVariableFilter
@@ -662,14 +690,15 @@ function svf_new()
   fe=1,
   bp=0,
   dec=1,
-  note=function(self,patch,tick)
+  note=function(self,patch,bar,tick)
    --local q=1/(2*(1-res))
    --self.rc=1/(2*q)
    -- configurable decay?
    local r,bp,gc,dec
    bp,gc,r,self.wet,_,dec=unpack_patch(patch,56,61)
    self.rc=1-r*0.96
-   local pat_val=ord(svf_pats[patch[60]],tick)-48
+   local svf_pat=svf_pats[patch[60]]
+   local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0) self.fe=pat_val>>4
    self.dec=1-(pow3(1-dec)>>7)
    self.bp=(bp&0x0.02>0 and 1) or 0
@@ -824,9 +853,11 @@ function state_new(savedata)
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
    self.tick=tl.tick
+   self.bar=tl.bar
   else
    self.patch=copy_table(self.pat_patch)
    self.tick=1
+   self.bar=1
   end
   self:_sync_pats()
   self:_init_tick()
