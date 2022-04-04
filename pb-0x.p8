@@ -1107,9 +1107,8 @@ function ui_new()
   local next_off=mid(0,my,122)<<6
   memcpy(0x9000+next_off,0x6000+next_off,448)
   local hover=self.hover
-  local hactive=hover and hover.active
-  spr(trn(hactive,15,13),mx,my)
-  if show_help and self.hover_frames>30 and hactive and hover.tt then
+  spr(15,mx,my)
+  if show_help and self.hover_frames>30 and hover and hover.active and hover.tt then
    local tt=hover.tt
    local xp=trn(mx<56,mx+7,mx-2-4*#tt)
    rectfill(xp,my,xp+4*#tt,my+6,1)
