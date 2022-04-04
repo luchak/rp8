@@ -28,6 +28,12 @@ function paste_state()
  end
 end
 
+show_help=true
+function toggle_help()
+ show_help=not show_help
+ menuitem(4,trn(show_help,'hide tooltips','show tooltips'),toggle_help)
+end
+
 audio_rec=false
 function start_rec()
  audio_rec=true
@@ -131,6 +137,7 @@ function _init()
  menuitem(1, 'save to clip', copy_state)
  menuitem(2, 'load from clip', paste_state)
  stop_rec()
+ toggle_help()
 
  log'init complete'
 end
@@ -750,7 +757,7 @@ pat_param_idx=parse[[{
 -- bool values: 0=>false,128 (or any nonzero)=>true
 -- int values: identity map
 -- also watch out for packed bitfield-ish things
-default_patch=split'64,0,64,64,64,128,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,128,64,64,64,64,64,64,64,0,0,128,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
+default_patch=split'64,0,64,64,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
  nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
@@ -967,7 +974,7 @@ function state_make_get_set_param(idx,shift)
 end
 
 function state_make_get_set_param_bool(idx,bit)
- local mask=1<<(bit or 7)
+ local mask=1<<(bit or 0)
  return
   function(state) return (state.patch[idx]&mask)>0 end,
   function(state,val) local old=state.patch[idx] state:_apply_diff(idx,trn(val,old|mask,old&(~mask))) end
@@ -1102,7 +1109,7 @@ function ui_new()
   local hover=self.hover
   local hactive=hover and hover.active
   spr(trn(hactive,15,13),mx,my)
-  if self.help_on and self.hover_frames>30 and hactive and hover.tt then
+  if show_help and self.hover_frames>30 and hactive and hover.tt then
    local tt=hover.tt
    local xp=trn(mx<56,mx+7,mx-2-4*#tt)
    rectfill(xp,my,xp+4*#tt,my+6,1)
@@ -1129,7 +1136,7 @@ function ui_new()
   local hover=self.mouse_tiles[mx\4 + (my\4)*32]
 
   if (stat(30)) k=stat(31)
-  if (k=='h') self.help_on=not self.help_on
+  if (k=='h') toggle_help()
 
   local new_focus=self.focus
 
@@ -1289,11 +1296,7 @@ function number_new(x,y,w,tt,get,input)
  return {
   x=x,y=y,w=w,drag_amt=0.05,tt=tt,
   get_sprite=function(self,state)
-   if state.song_mode then
-    return tostr(get(state))..','..4*w..',0,15'
-   else
-    return '--,'..4*w..',0,15'
-   end
+   return tostr(get(state))..','..4*w..',0,15'
   end,
   input=function(self,state,b) input(state,b) end
  }
@@ -1553,6 +1556,12 @@ function header_ui_init(add_to_ui)
  }]]) do
   hdial(unpack_split(s))
  end
+ local get_filt_pat,set_filt_pat=state_make_get_set_param(60)
+ add_to_ui(
+  number_new(80,16,2,'filter pattern',get_filt_pat,function(state,b)
+   set_filt_pat(state,mid(1,get_filt_pat(state)+b,#svf_pats))
+  end)
+ )
 
  add_to_ui(
   toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
