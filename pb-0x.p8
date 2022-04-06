@@ -54,7 +54,11 @@ function _init()
  poke(0x5f36,@0x5f36^^0x20)
 
  -- turn on mouse
- poke(0x5f2d, 0x1)
+ poke(0x5f2d,0x1)
+
+ -- faster repeat
+ poke(0x5f5c,5)
+ poke(0x5f5d,1)
 
  ui,state=ui_new(),state_new()
  function add_to_ui(w) ui:add_widget(w) end
@@ -189,36 +193,32 @@ _bufpadding,_chunkbuf=2*_schunk,{}
 sample_rate=5512.5
 _audio_dcf=0
 
-function audio_dochunk()
- local dcf=_audio_dcf
- local buf=_chunkbuf
- if audio_root_obj then
-  audio_root_obj:update(buf,1,_schunk)
- else
-  for i=1,_schunk do
-   buf[i]=0
-  end
- end
- for i=1,_schunk do
-  -- dc filter, plus
-  -- soft saturation to make
-  -- clipping less unpleasant
-  local x=buf[i]<<8
-  dcf+=(x-dcf)>>8
-  x-=dcf
-  x=mid(-1,x>>8,1)
-  x-=0.148148*x*x*x
-  -- add dither to keep delay
-  -- tails somewhat nicer
-  poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
- end
- serial(0x808,0x4300,_schunk)
- _audio_dcf=dcf
-end
-
 function audio_update()
  if stat(108)<stat(109)+_bufpadding then
-  audio_dochunk()
+  local dcf=_audio_dcf
+  local buf=_chunkbuf
+  if audio_root_obj then
+   audio_root_obj:update(buf,1,_schunk)
+  else
+   for i=1,_schunk do
+    buf[i]=0
+   end
+  end
+  for i=1,_schunk do
+   -- dc filter, plus
+   -- soft saturation to make
+   -- clipping less unpleasant
+   local x=buf[i]<<8
+   dcf+=(x-dcf)>>8
+   x-=dcf
+   x=mid(-1,x>>8,1)
+   x-=0.148148*x*x*x
+   -- add dither to keep delay
+   -- tails somewhat nicer
+   poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
+  end
+  serial(0x808,0x4300,_schunk)
+  _audio_dcf=dcf
  end
 end
 -->8
@@ -786,12 +786,10 @@ function state_new(savedata)
   local tl=self.tl
   if self.song_mode then
    self.tl:load_bar(self.patch,i)
-   self.tick=tl.tick
-   self.bar=tl.bar
+   self.tick,self.bar=tl.tick,tl.bar
   else
    self.patch=copy_table(self.pat_patch)
-   self.tick=1
-   self.bar=1
+   self.tick,self.bar=1,1
   end
   self:_sync_pats()
   self:_init_tick()
@@ -860,7 +858,7 @@ function state_new(savedata)
 
  function s:get_pat_steps(syn)
   -- assume pats are aliased, always editing current
-  if (syn=='dr') return self.pat_seqs.dr[self.drum_sel] else return self.pat_seqs[syn].st
+  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn].st)
  end
 
  function s:save()
@@ -981,16 +979,6 @@ end
 -->8
 -- ui
 
-ui_btns={❎,🅾️}
--- custom retrigger intervals
-ui_reps=parse[[{
- 1=true,
- 11=true,
- 19=true,
- 25=true,
- 29=true
-}]]
-
 widget_defaults=parse[[{
  w=2,
  h=2,
@@ -1004,7 +992,6 @@ function ui_new()
   widgets={},
   sprites={},
   dirty={},
-  holds={},
   mouse_tiles={},
   mx=0,
   my=0,
@@ -1079,17 +1066,9 @@ function ui_new()
  end
 
  function obj:update(state)
-  local holds,btns,input=self.holds,{},0
-  for b in all(ui_btns) do
-   if btn(b) then
-    local h=holds[b]+1
-    holds[b],btns[b]=h,ui_reps[h] or h>=31
-   else
-    holds[b]=0
-   end
-  end
-  if (btns[❎]) input+=1
-  if (btns[🅾️]) input-=1
+  local input=0
+  if (btnp(5)) input+=1
+  if (btnp(4)) input-=1
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my,k=self.mx,self.my
