@@ -63,10 +63,10 @@ function _init()
  ui,state=ui_new(),state_new()
  function add_to_ui(w) ui:add_widget(w) end
 
- header_ui_init(add_to_ui,0)
+ header_ui_init(add_to_ui)
  pbl_ui_init(add_to_ui,unpack_split'b0,7,32')
  pbl_ui_init(add_to_ui,unpack_split'b1,19,64')
- pirc_ui_init(add_to_ui,'dr',96)
+ pirc_ui_init(add_to_ui)
 
  local pbl0,pbl1=synth_new(7),synth_new(19)
  local drums={
@@ -189,14 +189,14 @@ end
 -- audio driver
 
 _schunk=100
-_bufpadding,_chunkbuf=2*_schunk,{}
+_bufpadding=2*_schunk
 sample_rate=5512.5
 _audio_dcf=0
 
 function audio_update()
  if stat(108)<stat(109)+_bufpadding then
   local dcf=_audio_dcf
-  local buf=_chunkbuf
+  local buf={}
   if audio_root_obj then
    audio_root_obj:update(buf,1,_schunk)
   else
@@ -205,16 +205,13 @@ function audio_update()
    end
   end
   for i=1,_schunk do
-   -- dc filter, plus
-   -- soft saturation to make
-   -- clipping less unpleasant
+   -- dc filter plus soft clipping
    local x=buf[i]<<8
    dcf+=(x-dcf)>>8
    x-=dcf
    x=mid(-1,x>>8,1)
    x-=0.148148*x*x*x
-   -- add dither to keep delay
-   -- tails somewhat nicer
+   -- add dither for nicer tails
    poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
   end
   serial(0x808,0x4300,_schunk)
@@ -234,8 +231,7 @@ function synth_new(base)
  }]]
 
  function obj:note(pat,patch,step,note_len)
-  local patstep=pat.st[step]
-  local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
+  local patstep,saw,tun,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+11)
 
   _fc=(100/sample_rate)*(2^(4*cut))/_os
   _fr=res*4.9+0.1
@@ -1302,10 +1298,10 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
 end
 
 
-function pirc_ui_init(add_to_ui,key)
+function pirc_ui_init(add_to_ui)
  for i=1,16 do
   add_to_ui(
-   step_btn_new(i*8-8,120,key,i,split'19,20,36,35')
+   step_btn_new(i*8-8,120,'dr',i,split'19,20,36,35')
   )
  end
  for k,d in pairs(parse[[{
@@ -1349,11 +1345,11 @@ function pirc_ui_init(add_to_ui,key)
  )
 
  add_to_ui(
-  spin_btn_new(0,112,split'166,167,168,169','bank select',state_make_get_set(key..'_bank'))
+  spin_btn_new(0,112,split'166,167,168,169','bank select',state_make_get_set('dr_bank'))
  )
  for i=1,6 do
   add_to_ui(
-   pat_btn_new(5+i*4,112,key,6,i,unpack_split'2,14,8,5')
+   pat_btn_new(5+i*4,112,'dr',6,i,unpack_split'2,14,8,5')
   )
  end
 

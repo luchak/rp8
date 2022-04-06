@@ -72,8 +72,8 @@ function parse(s)
  return _parse(reader)
 end
 
-function is_digit(c)
- return (c>='0' and c<='9') or c=='.'
+function is_num(c)
+ return (c>='0' and c<='9') or c=='.' or c=='-'
 end
 
 function is_sep(c)
@@ -92,33 +92,33 @@ end
 
 -- make sure to always use
 -- " (not ') when hand serializing
-function _parse(input)
+function _parse(read)
  local c
  repeat
-  c=input()
+  c=read()
  until not is_sep(c)
  if c=='"' then
-  return consume(input,function (c) return c!='"' end)
- elseif c=='-' or is_digit(c) then
-  local s=consume(input,is_digit,c)
-  input(-1)
+  return consume(read,function (c) return c!='"' end)
+ elseif is_num(c) then
+  local s=consume(read,is_num,c)
+  read(-1)
   return tonum(s)
  elseif c=='{' then
   local t={}
   repeat
    repeat
-    c=input()
+    c=read()
    until not is_sep(c)
    if (c=='}') return t
-   local k=consume(input,function (c) return c!='=' end,c)
+   local k=consume(read,function (c) return c!='=' end,c)
    k=tonum(k) or k
-   t[k]=_parse(input)
+   t[k]=_parse(read)
   until false
  elseif c=='t' then
-  input(3)
+  read(3)
   return true
  elseif c=='f' then
-  input(4)
+  read(4)
   return false
  else
   assert(nil,'cannot parse, c="'..c..'"')
