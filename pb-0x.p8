@@ -206,7 +206,8 @@ function audio_dochunk()
   -- clipping less unpleasant
   local x=buf[i]<<8
   dcf+=(x-dcf)>>8
-  x=mid(-1,(x-dcf)>>8,1)
+  x-=dcf
+  x=mid(-1,x>>8,1)
   x-=0.148148*x*x*x
   -- add dither to keep delay
   -- tails somewhat nicer
