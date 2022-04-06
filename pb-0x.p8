@@ -1220,28 +1220,28 @@ end
 function pbl_ui_init(add_to_ui,key,base_idx,yp)
 eval([[(
 (for 1 16
- (fn
+ (fn (i)
   (
-   (let xp (* (+ $1 -1) 8)),
-   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $1)),
-   ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $1 (' 16 17 33 18 34 32))),
+   (let xp (* (+ $i -1) 8)),
+   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
+   ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' 16 17 33 18 34 32))),
   )
  )
 )
+(let tb ($momentary_new 24 $yp 26
+ (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
+ "transpose (drag)"
+))
+(set@ $tb act_on_click false)
+(set@ $tb drag_amt 0.05)
+($add_to_ui $tb)
 ($add_to_ui
  ($momentary_new 8 $yp 28
-  (fn (set copy_buf_pbl ($copy (@ $1 pat_seqs $key))))
+  (fn (state) (set copy_buf_pbl ($copy (@ $state pat_seqs $key))))
   "copy pattern"
  )
 )
 )]],{yp=yp,key=key})
-
- local transpose_btn = momentary_new(24,yp,26,function(state,b)
-  transpose_pat(state.pat_seqs[key],b)
- end,'transpose (drag)')
- transpose_btn.click_act=false
- transpose_btn.drag_amt=0.05
- add_to_ui(transpose_btn)
 
  add_to_ui(
   momentary_new(16,yp,27,function(state,b)

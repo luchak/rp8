@@ -206,9 +206,12 @@ function _eval_scope(ast,locals)
   elseif cmd=='let' then
    locals[a1]=a2
   elseif cmd=='fn' then
-   local new_scope=copy(locals)
    return function(...)
-    return _eval_scope(a1,merge(new_scope,{...}))
+    local args,new_locals={...},copy(locals)
+    for i,v in ipairs(a1) do
+     new_locals[v]=args[i]
+    end
+    return _eval_scope(a2,new_locals)
    end
   end
  end
