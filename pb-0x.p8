@@ -1243,11 +1243,6 @@ eval([[(
  transpose_btn.drag_amt=0.05
  add_to_ui(transpose_btn)
 
- -- add_to_ui(
- --  momentary_new(8,yp,28,function(state,b)
- --   copy_buf_pbl=copy_table(state.pat_seqs[key])
- --  end,'copy pattern')
- -- )
  add_to_ui(
   momentary_new(16,yp,27,function(state,b)
    local v=copy_buf_pbl
