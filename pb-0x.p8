@@ -1033,7 +1033,9 @@ function ui_new()
 
   if click>0 then
    if focus and click==self.last_click then
-    self.drag_dist+=stat(39)
+    local drag=stat(39)
+    drag=trn(drag==0,(my-self.last_my)<<2,drag)
+    self.drag_dist+=drag
     local diff=flr(focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
     if diff!=0 then
      input=diff
@@ -1058,7 +1060,7 @@ function ui_new()
   if (input!=0 and self.focus) self.focus:input(state,input)
   if (self.hover==hover and click==0) self.hover_frames+=1 else self.hover_frames=0
 
-  self.last_click,self.hover=click,hover
+  self.last_click,self.hover,self.last_my=click,hover,my
  end
 
  return obj
