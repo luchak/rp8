@@ -710,10 +710,10 @@ function state_new(savedata)
  s.pat_status={}
  if savedata then
   s.tl=timeline_new(default_patch,savedata.tl)
-  s.pat_patch=dec_byte_array(savedata.pat_patch)
+  s.pat_patch=dec_bytes(savedata.pat_patch)
   s.song_mode=savedata.song_mode
-  s.pat_store=map_table(savedata.pat_store,dec_byte_array,2)
-  s.samp=dec_byte_array(savedata.samp)
+  s.pat_store=map_table(savedata.pat_store,dec_bytes,2)
+  s.samp=dec_bytes(savedata.samp)
  end
 
  function s:_init_tick()
@@ -816,9 +816,9 @@ function state_new(savedata)
   return 'rp80'..stringify({
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
-   pat_patch=enc_byte_array(self.pat_patch),
-   pat_store=map_table(self.pat_store,enc_byte_array,2),
-   samp=enc_byte_array(self.samp)
+   pat_patch=enc_bytes(self.pat_patch),
+   pat_store=map_table(self.pat_store,enc_bytes,2),
+   samp=enc_bytes(self.samp)
   })
  end
 
@@ -837,7 +837,7 @@ function state_new(savedata)
    copy_buf_seq=self.tl:copy_seq()
   else
    copy_buf_seq={{
-    t0=enc_byte_array(self.pat_patch),
+    t0=enc_bytes(self.pat_patch),
     ev={}
    }}
   end
@@ -850,7 +850,7 @@ function state_new(savedata)
   if self.song_mode then
    self.tl:paste_seq(copy_buf_seq)
   else
-   self.pat_patch=dec_byte_array(copy_buf_seq[1].t0)
+   self.pat_patch=dec_bytes(copy_buf_seq[1].t0)
   end
   load_bar()
  end
@@ -1095,7 +1095,7 @@ function step_btn_new(x,y,syn,step,sprites)
  -- last sprite is for the current step
  local n=#sprites-1
  return {
-  x=x,y=y,tt='step trigger',click_act=true,
+  x=x,y=y,tt='step edit',click_act=true,
   get_sprite=function(self,state)
    if (state.playing and state.tick==step) return sprites[n+1]
    local v=state:get_pat_steps(syn)[step]
