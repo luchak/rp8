@@ -1230,7 +1230,7 @@ eval([[(
 )
 ($add_to_ui
  ($momentary_new 8 $yp 28
-  (fn (set copy_buf_pbl ($copy (@ (@ $1 pat_seqs) $key))))
+  (fn (set copy_buf_pbl ($copy (@ $1 pat_seqs $key))))
   "copy pattern"
  )
 )
