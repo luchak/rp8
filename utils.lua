@@ -9,10 +9,6 @@ function log(...)
  printh(s,'log')
 end
 
-function die(msg)
- assert(false,msg)
-end
-
 function copy(t)
  return merge({},t)
 end
@@ -59,7 +55,7 @@ function stringify(v)
   end
   return s..'}'
  else
-  die'unsupported type in stringify'
+  return '[?]'
  end
 end
 
@@ -125,7 +121,7 @@ function _parse(input)
   input(4)
   return false
  else
-  die('cannot parse, c="'..c..'"')
+  assert(nil,'cannot parse, c="'..c..'"')
  end
 end
 
