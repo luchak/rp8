@@ -185,14 +185,18 @@ function _eval_scope(ast,locals)
 
   if type(cmd)=='function' then
    return cmd(unpack(node))
-  elseif cmd=='\'' then
+  elseif cmd=='\'' or cmd=='list' then
    return node
   elseif cmd=='+' then
    return a1+a2
   elseif cmd=='*' then
    return a1*a2
   elseif cmd=='@' then
-   return a1[a2]
+   local r=a1[a2]
+   if (a3) r=r[a3]
+   return r
+  elseif cmd=='set@' then
+   a1[a2]=a3
   elseif cmd=='for' then
    for i=a1,a2 do
     a3(i)
