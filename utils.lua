@@ -9,14 +9,6 @@ function log(...)
  printh(s,'log')
 end
 
-function pick(t,keys)
- local r={}
- for k in all(keys) do
-  r[k]=t[k]
- end
- return r
-end
-
 function die(msg)
  assert(false,msg)
 end
@@ -175,11 +167,11 @@ end
 function unpack_patch(patch,first,last)
  local r={}
  for i=first,last do
-  -- shift back to 0-1 range
+  -- shift to 0-1 range
   add(r,patch[i]>>7)
  end
  return unpack(r)
 end
 
 function pow3(x) return x*x*x end
-function pow4(x) return x*x*x*x end
+function pow4(x) return pow3(x)*x end
