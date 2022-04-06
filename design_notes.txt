@@ -26,3 +26,14 @@ real values: 0=>0,128=>1
 bool values: 0=>false,128 (or any nonzero)=>true
 int values: identity map
 also watch out for packed bitfield-ish things
+
+--
+
+004
+
+draw "sprite" interpretation
+
+number => draw that sprite
+ (subject to width value)
+string => unpack to text
+ params and draw those
