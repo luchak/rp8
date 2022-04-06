@@ -1017,7 +1017,7 @@ function ui_new()
  end
 
  function obj:update(state)
-  local input=0
+  local input=stat(36)
   if (btnp(5)) input+=1
   if (btnp(4)) input-=1
 
