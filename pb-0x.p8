@@ -1218,15 +1218,23 @@ function transport_number_new(x,y,w,obj,key,tt,input)
 end
 
 function pbl_ui_init(add_to_ui,key,base_idx,yp)
- for i=1,16 do
-  local xp=i*8-8
-  add_to_ui(
-   pbl_note_btn_new(xp,yp+24,key,i)
+eval([[(
+(for 1 16
+ (fn
+  (
+   (let xp (* (+ $1 -1) 8)),
+   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $1)),
+   ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $1 (' 16 17 33 18 34 32))),
   )
-  add_to_ui(
-   step_btn_new(xp,yp+16,key,i,split'16,17,33,18,34,32')
-  )
- end
+ )
+)
+($add_to_ui
+ ($momentary_new 8 $yp 28
+  (fn (set copy_buf_pbl ($copy (@ (@ $1 pat_seqs) $key))))
+  "copy pattern"
+ )
+)
+)]],{yp=yp,key=key})
 
  local transpose_btn = momentary_new(24,yp,26,function(state,b)
   transpose_pat(state.pat_seqs[key],b)
@@ -1235,11 +1243,11 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  transpose_btn.drag_amt=0.05
  add_to_ui(transpose_btn)
 
- add_to_ui(
-  momentary_new(8,yp,28,function(state,b)
-   copy_buf_pbl=copy(state.pat_seqs[key])
-  end,'copy pattern')
- )
+ -- add_to_ui(
+ --  momentary_new(8,yp,28,function(state,b)
+ --   copy_buf_pbl=copy_table(state.pat_seqs[key])
+ --  end,'copy pattern')
+ -- )
  add_to_ui(
   momentary_new(16,yp,27,function(state,b)
    local v=copy_buf_pbl
