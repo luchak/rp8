@@ -66,6 +66,10 @@ function is_num(c)
  return (c>='0' and c<='9') or c=='.' or c=='-'
 end
 
+function is_id(c)
+ return not (c==',' or c=='}' or c==')' or c==' ' or c=='' or c=='\n')
+end
+
 function is_sep(c)
  return c==' ' or c=='\n' or c=='\t' or c==','
 end
@@ -93,6 +97,16 @@ function _parse(read)
   local s=consume(read,is_num,c)
   read(-1)
   return tonum(s)
+ elseif c=='(' then
+  local t={}
+  repeat
+   repeat
+    c=read()
+   until not is_sep(c)
+   if (c==')') return t
+   read(-1)
+   add(t,_parse(read))
+  until false
  elseif c=='{' then
   local t={}
   repeat
@@ -104,14 +118,13 @@ function _parse(read)
    k=tonum(k) or k
    t[k]=_parse(read)
   until false
- elseif c=='t' then
-  read(3)
-  return true
- elseif c=='f' then
-  read(4)
-  return false
  else
-  assert(nil,'cannot parse, c="'..c..'"')
+  -- allow (most) bare strings
+  local s=consume(read,function (c) return is_id(c) end,c)
+  read(-1)
+  if (s=='true') return true
+  if (s=='false') return false
+  return s
  end
 end
 
@@ -153,3 +166,52 @@ end
 
 function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
+
+function _eval_scope(ast,locals)
+ local function _eval_node(node)
+  local typ=type(node)
+  if typ=='string' and sub(node,1,1)=='$' then
+   local tail=sub(node,2)
+   if (is_num(sub(tail,1,1))) tail=tonum(tail)
+   return locals[tail] or _ENV[tail]
+  end
+
+  if (typ!='table') return node;
+
+  if (node[1]!='fn' and node[1]!='\'') node=map_table(node,_eval_node) else node=copy(node)
+
+  local cmd=deli(node,1)
+  local a1,a2,a3=node[1],node[2],node[3]
+
+  if type(cmd)=='function' then
+   return cmd(unpack(node))
+  elseif cmd=='\'' then
+   return node
+  elseif cmd=='+' then
+   return a1+a2
+  elseif cmd=='*' then
+   return a1*a2
+  elseif cmd=='@' then
+   return a1[a2]
+  elseif cmd=='for' then
+   for i=a1,a2 do
+    a3(i)
+   end
+  elseif cmd=='set' then
+   _ENV[a1]=a2
+  elseif cmd=='let' then
+   locals[a1]=a2
+  elseif cmd=='fn' then
+   local new_scope=copy(locals)
+   return function(...)
+    return _eval_scope(a1,merge(new_scope,{...}))
+   end
+  end
+ end
+
+ return _eval_node(ast)
+end
+
+function eval(src,locals)
+ return _eval_scope(parse(src),locals or {})
+end
