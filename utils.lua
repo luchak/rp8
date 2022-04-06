@@ -123,25 +123,20 @@ function trn(c,t,f)
  return (c and t) or f
 end
 
-function enc_byte_array(a)
+function enc_bytes(a)
  return chr(unpack(a))
 end
 
-function dec_byte_array(s)
+function dec_bytes(s)
  local a={}
- for i=1,#s do
-  a[i]=ord(s,i)
- end
+ for i=1,#s do a[i]=ord(s,i) end
  return a
 end
 
 function map_table(a,f,d)
- d=d or 0
- if d==0 then
+ if (d or 0)==0 then
   local r={}
-  for k,v in pairs(a) do
-   r[k]=f(v)
-  end
+  for k,v in pairs(a) do r[k]=f(v) end
   return r
  end
  return map_table(a,function(v) return map_table(v,f,d-1) end)

@@ -6,7 +6,7 @@ function timeline_new(default_patch, savedata)
  local timeline={
   bars={},
   overrides={},
-  def_bar={t0=enc_byte_array(default_patch),ev={}},
+  def_bar={t0=enc_bytes(default_patch),ev={}},
   rec=false,
   has_override=false,
   loop_start=1,
@@ -21,17 +21,17 @@ function timeline_new(default_patch, savedata)
   i=i or self.bar
   local bar_data=self.bars[i] or copy(self.def_bar)
   local op=self.overrides
-  self.bar_start=merge(dec_byte_array(bar_data.t0),op)
+  self.bar_start=merge(dec_bytes(bar_data.t0),op)
   merge(patch,self.bar_start)
   if self.rec then
-   bar_data.t0=enc_byte_array(self.bar_start)
+   bar_data.t0=enc_bytes(self.bar_start)
    for k,_ in pairs(op) do
     bar_data.ev[k]=nil
    end
    self.bars[i]=bar_data
   end
 
-  self.bar_events=map_table(bar_data.ev,dec_byte_array)
+  self.bar_events=map_table(bar_data.ev,dec_bytes)
   self.bar=i
   self.tick=1
  end
@@ -78,7 +78,7 @@ function timeline_new(default_patch, savedata)
 
  timeline._finalize_bar=function(self)
   if (not self.bars[self.bar]) self.bars[self.bar]=copy(self.def_bar)
-  self.bars[self.bar].ev=map_table(self.bar_events,enc_byte_array)
+  self.bars[self.bar].ev=map_table(self.bar_events,enc_bytes)
  end
 
  -- add to overrides
@@ -140,7 +140,7 @@ function timeline_new(default_patch, savedata)
   for i=0,self.loop_len-1 do
    local bar_idx=self.loop_start+i
    local bar=self.bars[bar_idx] or copy(self.def_bar)
-   bar.t0=enc_byte_array(merge(dec_byte_array(bar.t0),op))
+   bar.t0=enc_bytes(merge(dec_bytes(bar.t0),op))
    for k,_ in pairs(op) do
     bar.ev[k]=nil
    end
