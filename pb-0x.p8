@@ -79,7 +79,7 @@ function _init()
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
  local drum_mixer=submixer_new(drums)
- local delay=delay_new(3000,0)
+ local delay=delay_new()
  local svf=svf_new()
  local drum_keys=split'bd,sd,hh,cy,pc,sp'
 
@@ -426,10 +426,9 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  end
 
  function obj:subupdate(b,first,last)
-  local ae,f1,f2=_ae,_f1,_f2
+  local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
-  local aed,tlev,nlev=_aed,_tlev,_nlev
 
   for i=first,last do
    local osc=1.0
@@ -470,15 +469,13 @@ function sample_new(base)
  end
 
  function obj:subupdate(b,first,last)
-  local pos,dec,samp=_pos,_dec,state.samp
+  local pos,samp=_pos,state.samp
   if (pos<0) return
-  local amp,detune=_amp,_detune
-  local n=#samp
+  local amp,dec,detune,n=_amp,_dec,_detune,#samp
   for i=first,last do
    if (pos>=n) pos=-1 break
    local pi=pos&0xffff.0000
-   local po=pos-pi
-   local s0,s1=samp[pi],samp[pi+1]
+   local po,s0,s1=pos-pi,samp[pi],samp[pi+1]
    local val=s0+po*(s1-s0)
 
    b[i]+=amp*((val>>7)-1)
@@ -493,22 +490,15 @@ end
 -->8
 -- audio fx
 
-function delay_new(l,fb)
- local obj={
-  dl={},
-  p=1,
-  l=l,
-  fb=fb,
-  f1=0
- }
+function delay_new()
+ local obj,_dl,_p,_f1={l=20,fb=0},{},1,0
 
  for i=1,0x7fff do
-  obj.dl[i]=0
+  _dl[i]=0
  end
 
  function obj:update(b,first,last)
-  local dl,l,fb,p=self.dl,self.l,self.fb,self.p
-  local f1=self.f1
+  local dl,l,fb,p,f1=_dl,self.l,self.fb,_p,_f1
   for i=first,last do
    local x,y=b[i],dl[p]
    if (abs(y)<0x0.0100) y=0
@@ -519,7 +509,7 @@ function delay_new(l,fb)
    p+=1
    if (p>l) p=1
   end
-  self.p,self.f1=p,f1
+  _p,_f1=p,f1
  end
 
  return obj
@@ -539,7 +529,7 @@ function submixer_new(srcs)
    end
 
    for i,src in ipairs(self.srcs) do
-    if (self.fx & dr_src_fx_masks[i] > 0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
+    if (self.fx&dr_src_fx_masks[i]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
    end
   end
  }
@@ -548,12 +538,7 @@ end
 filtmap=parse[[{b0=3,b1=4,dr=5}]]
 function mixer_new(srcs,fx,filt,lev)
  return {
-  srcs=srcs,
-  lev=lev,
-  tmp={},
-  bypass={},
-  fxbuf={},
-  filtsrc=1,
+  srcs=srcs,lev=lev,tmp={},bypass={},fxbuf={},filtsrc=1,
   note=function(self,state)
    self.filtsrc=flr(state[56]>>1)
   end,
@@ -660,15 +645,7 @@ function svf_new()
    _gc=gc*gc+0x0.02
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc_base,wet,fe,is_bp,dec=
-    _z1,
-    _z2,
-    _rc,
-    _gc,
-    _wet,
-    _fe,
-    _bp,
-    _dec
+   local z1,z2,rc,gc_base,wet,fe,is_bp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec
    for i=first,last do
     gc=min(gc_base*fe,1)
     local rrpg=2*rc+gc
@@ -685,7 +662,6 @@ function svf_new()
     z1,z2=hpgc+bp,bp*gc+lp
 
     -- rc*bp is 1/2 of unity gain bp
-    -- bp is just bp
     b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
     fe*=dec
    end
@@ -752,7 +728,7 @@ function state_new(savedata)
  }]]
 
  s.tl=timeline_new(default_patch)
- s.pat_patch=copy_table(default_patch)
+ s.pat_patch=copy(default_patch)
  s.patch={}
  s.pat_seqs={}
  s.pat_status={}
@@ -760,7 +736,7 @@ function state_new(savedata)
   s.tl=timeline_new(default_patch,savedata.tl)
   s.pat_patch=dec_byte_array(savedata.pat_patch)
   s.song_mode=savedata.song_mode
-  s.pat_store=map_table_deep(savedata.pat_store,dec_byte_array,2)
+  s.pat_store=map_table(savedata.pat_store,dec_byte_array,2)
   s.samp=dec_byte_array(savedata.samp)
  end
 
@@ -788,7 +764,7 @@ function state_new(savedata)
    self.tl:load_bar(self.patch,i)
    self.tick,self.bar=tl.tick,tl.bar
   else
-   self.patch=copy_table(self.pat_patch)
+   self.patch=copy(self.pat_patch)
    self.tick,self.bar=1,1
   end
   self:_sync_pats()
@@ -811,15 +787,15 @@ function state_new(savedata)
  function s:toggle_playing()
   local tl=self.tl
   if self.playing then
-   if (tl.recording) tl:toggle_recording()
+   if (tl.rec) tl:toggle_rec()
    tl:clear_overrides()
   end
   load_bar()
   self.playing=not self.playing
  end
 
- function s:toggle_recording()
-  self.tl:toggle_recording()
+ function s:toggle_rec()
+  self.tl:toggle_rec()
  end
 
  function s:toggle_song_mode()
@@ -839,7 +815,7 @@ function state_new(savedata)
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
    if not pat then
-    if (syn=='b0' or syn=='b1') pat=copy_table(pbl_pat_template) else pat=copy_table(drum_pat_template)
+    if (syn=='b0' or syn=='b1') pat=copy(pbl_pat_template) else pat=copy(drum_pat_template)
     syn_pats[pat_idx]=pat
    end
    self.pat_seqs[syn]=pat
@@ -866,7 +842,7 @@ function state_new(savedata)
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
    pat_patch=enc_byte_array(self.pat_patch),
-   pat_store=map_table_deep(self.pat_store,enc_byte_array,2),
+   pat_store=map_table(self.pat_store,enc_byte_array,2),
    samp=enc_byte_array(self.samp)
   })
  end
@@ -983,7 +959,7 @@ widget_defaults=parse[[{
  w=2,
  h=2,
  active=true,
- act_on_click=false,
+ click_act=false,
  drag_amt=0
 }]]
 
@@ -1002,7 +978,7 @@ function ui_new()
  -- obj.hover
 
  function obj:add_widget(w)
-  w=merge_tables(copy_table(widget_defaults),w)
+  w=merge(copy(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
   w.id,w.tx,w.ty=#widgets,w.x\4,w.y\4
@@ -1091,7 +1067,7 @@ function ui_new()
     poke(0x5f2d, 0x5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=trn(hover and hover.active,hover,nil)
-    if (new_focus and new_focus.act_on_click) input=trn(click==1,1,-1)
+    if (new_focus and new_focus.click_act) input=trn(click==1,1,-1)
    end
   else
    poke(0x5f2d, 0x1)
@@ -1115,7 +1091,7 @@ end
 
 function pbl_note_btn_new(x,y,syn,step)
  return {
-  x=x,y=y,drag_amt=0.05,
+  x=x,y=y,drag_amt=0.05,tt='note (drag)',
   get_sprite=function(self,state)
    return 64+state.pat_seqs[syn].nt[step]
   end,
@@ -1144,7 +1120,7 @@ function step_btn_new(x,y,syn,step,sprites)
  -- last sprite is for the current step
  local n=#sprites-1
  return {
-  x=x,y=y,act_on_click=true,
+  x=x,y=y,tt='step trigger',click_act=true,
   get_sprite=function(self,state)
    if (state.playing and state.tick==step) return sprites[n+1]
    local v=state:get_pat_steps(syn)[step]
@@ -1174,7 +1150,7 @@ end
 
 function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
-  x=x,y=y,act_on_click=true,tt=tt,
+  x=x,y=y,click_act=true,tt=tt,
   get_sprite=function(self,state)
    return trn(get(state),s_on,s_off)
   end,
@@ -1186,7 +1162,7 @@ end
 
 function momentary_new(x,y,s,cb,tt)
  return {
-  x=x,y=y,tt=tt,act_on_click=true,
+  x=x,y=y,tt=tt,click_act=true,
   get_sprite=function()
    return s
   end,
@@ -1198,7 +1174,7 @@ end
 
 function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
-  x=x,y=y,tt=tt,act_on_click=true,
+  x=x,y=y,tt=tt,click_act=true,
   get_sprite=function(self,state)
    return trn(get(state)==val,s_on,s_off)
   end,
@@ -1213,7 +1189,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local get_pat,set_pat=state_make_get_set_param(syn_base_idx[syn]+4)
  local ret_prefix=pib..','..c_bg..','
  return {
-  x=x,y=y,tt='pattern select',w=1,act_on_click=true,
+  x=x,y=y,tt='pattern select',w=1,click_act=true,
   get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
@@ -1276,19 +1252,19 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  local transpose_btn = momentary_new(24,yp,26,function(state,b)
   transpose_pat(state.pat_seqs[key],b)
  end,'transpose (drag)')
- transpose_btn.act_on_click=false
+ transpose_btn.click_act=false
  transpose_btn.drag_amt=0.05
  add_to_ui(transpose_btn)
 
  add_to_ui(
   momentary_new(8,yp,28,function(state,b)
-   copy_buf_pbl=copy_table(state.pat_seqs[key])
+   copy_buf_pbl=copy(state.pat_seqs[key])
   end,'copy pattern')
  )
  add_to_ui(
   momentary_new(16,yp,27,function(state,b)
    local v=copy_buf_pbl
-   if (v) merge_tables(state.pat_seqs[key],v)
+   if (v) merge(state.pat_seqs[key],v)
   end,'paste pattern')
  )
  add_to_ui(
@@ -1299,7 +1275,7 @@ function pbl_ui_init(add_to_ui,key,base_idx,yp)
  )
  for i=1,6 do
   add_to_ui(
-   pat_btn_new(5+i*4,yp+8,key,6,i,2,14,8,6)
+   pat_btn_new(5+i*4,yp+8,key,6,i,unpack_split'2,14,8,6')
   )
  end
 
@@ -1359,12 +1335,12 @@ function pirc_ui_init(add_to_ui,key)
 
  add_to_ui(
   momentary_new(8,104,11,function(state,b)
-   copy_buf_pirc=copy_table(state.pat_seqs['dr'])
+   copy_buf_pirc=copy(state.pat_seqs['dr'])
   end, 'copy pattern')
  )
  add_to_ui(
   momentary_new(16,104,10,function(state,b)
-   merge_tables(state.pat_seqs['dr'],copy_buf_pirc)
+   merge(state.pat_seqs['dr'],copy_buf_pirc)
   end, 'paste pattern')
  )
 
@@ -1381,7 +1357,7 @@ function pirc_ui_init(add_to_ui,key)
   )
  end
 
- map(0,8,0,96,16,4)
+ map(unpack_split'0,8,0,96,16,4')
 end
 
 function header_ui_init(add_to_ui)
@@ -1418,11 +1394,11 @@ function header_ui_init(add_to_ui)
    toggle_new(
     8,0,231,232,
     'record automation',
-    state_make_get_set('tl','recording'),
-    function(s) s:toggle_recording() end
+    state_make_get_set('tl','rec'),
+    function(s) s:toggle_rec() end
    ),
    239,
-   function(s) return (not s.tl.has_override) or s.tl.recording end,
+   function(s) return (not s.tl.has_override) or s.tl.rec end,
    true
   ),
   233
@@ -1512,17 +1488,17 @@ function header_ui_init(add_to_ui)
  add_to_ui(dt_spin_btn)
 
  local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
- filt_toggle.act_on_click=false
+ filt_toggle.click_act=false
  filt_toggle.drag_amt=0.01
  add_to_ui(filt_toggle)
  add_to_ui(
   spin_btn_new(64,8,parse[[{1="--,0,15",2="MA,0,15",3="S1,0,15",4="S2,0,15",5="DR,0,15"}]],'filter source',state_make_get_set_param(56,1))
  )
 
- for syn,syn_data in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
+ for syn,sd in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
   local base_idx=syn_base_idx[syn]
-  for idx,control_data in pairs(parse[[{0={x=104,tt="level"},1={x=112,tt="overdrive"},2={x=120,tt="delay send"}}]]) do
-   hdial(control_data.x,syn_data.y,base_idx+idx,syn_data.tt..control_data.tt)
+  for idx,cd in pairs(parse[[{0={x=104,tt="level"},1={x=112,tt="overdrive"},2={x=120,tt="delay send"}}]]) do
+   hdial(cd.x,sd.y,base_idx+idx,sd.tt..cd.tt)
   end
  end
  add_to_ui(
