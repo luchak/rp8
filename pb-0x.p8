@@ -1017,7 +1017,7 @@ function ui_new()
  end
 
  function obj:update(state)
-  local input=stat(36)
+  local input=0
   if (btnp(5)) input+=1
   if (btnp(4)) input-=1
 
@@ -1054,13 +1054,16 @@ function ui_new()
   if new_focus!=focus then
    if (focus) self.dirty[focus.id]=true
    if (new_focus) self.dirty[new_focus.id]=true
-   self.focus=new_focus
+   focus=new_focus
   end
 
-  if (input!=0 and self.focus) self.focus:input(state,input)
+  if focus then
+   input+=trn(focus.drag_amt>0,stat(36),0)
+   if (input!=0) focus:input(state,input)
+  end
   if (self.hover==hover and click==0) self.hover_frames+=1 else self.hover_frames=0
 
-  self.last_click,self.hover,self.last_my=click,hover,my
+  self.last_click,self.hover,self.last_my,self.focus=click,hover,my,focus
  end
 
  return obj
