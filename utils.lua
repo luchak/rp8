@@ -14,15 +14,10 @@ function copy(t)
 end
 
 function merge(base,new)
- if (not new) return base
  for k,v in pairs(new) do
   if type(v)=='table' then
    local bk=base[k]
-   if type(bk)=='table' then
-    merge(bk,v)
-   else
-    base[k]=copy(v)
-   end
+   if type(bk)=='table' then merge(bk,v) else base[k]=copy(v) end
   else
    base[k]=v
   end
@@ -32,19 +27,14 @@ end
 
 function stringify(v)
  local t=type(v)
- if t=='number' or t=='boolean' then
-  return tostr(v)
+ if t=='number' or t=='boolean' then return tostr(v)
  elseif t=='string' then
   local s='"'
   for i=1,#v do
    local c=sub(v,i,i)
    local o=ord(c)
    -- escape control chars, ", and \
-   if o<16 or o==34 or o==92 then
-    s..='\\'..chr(o+35)
-   else
-    s..=c
-   end
+   if o<16 or o==34 or o==92 then s..='\\'..chr(o+35) else s..=c end
   end
   s..='"'
   return s
