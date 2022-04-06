@@ -90,6 +90,12 @@ function _init()
   1.0
  )
  comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
+
+ local mixer_params=parse[[{
+  b0={s=7,e=9,lev=8},
+  b1={s=19,e=21,lev=8},
+  dr={s=31,e=33,lev=16},
+ }]]
  seq_helper=seq_helper_new(
   state,comp,function()
    local patch,pseq,pstat=
@@ -111,9 +117,6 @@ function _init()
    svf:note(patch,bar,now)
 
    local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
-   local b0_lev,b0_od,b0_fx=unpack_patch(patch,7,9)
-   local b1_lev,b1_od,b1_fx=unpack_patch(patch,19,21)
-   local dr_lev,dr_od,dr_fx=unpack_patch(patch,31,33)
    mixer.lev=pow3(mix_lev)*8
 
    dl_t=(dl_t<<7)
@@ -125,17 +128,13 @@ function _init()
    delay.l=dl_t*nl
    delay.fb=sqrt(dl_fb)*0.95
 
-   local ms=mixer.srcs
-   ms.b0.lev=8*pow3(b0_lev)
-   ms.b1.lev=8*pow3(b1_lev)
-   ms.dr.lev=16*pow3(dr_lev)
-   ms.b0.od=b0_od
-   ms.b1.od=b1_od
-   ms.dr.od=dr_od
-   ms.b0.fx=pow3(b0_fx)
-   ms.b1.fx=pow3(b1_fx)
-   ms.dr.fx=pow3(dr_fx)
    comp.thresh=0.05+0.95*pow3(comp_thresh)
+
+   for key,src in pairs(mixer_params) do
+    local msk=mixer.srcs[key]
+    local lev,od,fx=unpack_patch(patch,src.s,src.e)
+    msk.lev,msk.od,msk.fx=src.lev*pow3(lev),od,pow3(fx)
+   end
 
    state:next_tick()
   end
@@ -226,84 +225,59 @@ end
 -- audio gen
 
 function synth_new(base)
- local obj=parse[[{
-  op=0,
-  odp=0.001,
-  todp=0.001,
-  todpr=0.999,
-  fc=0.5,
-  fr=3.6,
-  os=4,
-  env=0.5,
-  acc=0.5,
-  detune=1,
-  saw=false,
-  _fc=0,
-  _f1=0,
-  _f2=0,
-  _f3=0,
-  _f4=0,
-  _fosc=0,
-  _ffb=0,
-  _me=0,
-  _med=0.99,
-  _ae=0,
-  _aed=0.997,
-  _mr=false,
-  _ar=false,
-  _gate=false,
-  _nt=0,
-  _nl=900,
-  _ac=false,
-  _sl=false,
-  _lsl=false
+ local obj,_op,_odp,_todp,_todpr,_fc,_fr,_os,_env,_acc,
+       _detune,_fc,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
+       _ae,_aed,_nt,_nl={},
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0,0.99,0,0.997,900'
+ local _mr,_ar,_gate,_saw,_ac,_sl,_lsl=parse[[{
+  1=false,2=false,3=false,4=false,5=false,6=false,7=false
  }]]
 
  function obj:note(pat,patch,step,note_len)
   local patstep=pat.st[step]
   local saw,tun,cut,res,env,dec,acc=unpack_patch(patch,base+5,base+11)
 
-  self.fc=(100/sample_rate)*(2^(4*cut))/self.os
-  self.fr=res*4.9+0.1
-  self.env=env*env+0.1
-  self.acc=acc*1.9+0.1
-  self.saw=saw>0
+  _fc=(100/sample_rate)*(2^(4*cut))/_os
+  _fr=res*4.9+0.1
+  _env=env*env+0.1
+  _acc=acc*1.9+0.1
+  _saw=saw>0
   local pd=dec-1
   if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
-  self._med=0.999-0.01*pd*pd*pd*pd
-  self._nt,self._nl=0,note_len
-  self._lsl=self._sl
-  self._gate=false
-  self.detune=semitone^(flr(24*(tun-0.5)+0.5))
-  self._ac=patstep==n_ac or patstep==n_ac_sl
-  self._sl=patstep==n_sl or patstep==n_ac_sl
+  _med=0.999-0.01*pow4(pd)
+  _nt,_nl=0,note_len
+  _lsl=_sl
+  _gate=false
+  _detune=semitone^(flr(24*(tun-0.5)+0.5))
+  _ac=patstep==n_ac or patstep==n_ac_sl
+  _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off) return
 
-  self._gate=true
+  _gate=true
   local f=55*(semitone^(pat.nt[step]+3))
   --ordered for numeric safety
-  self.todp=(f/self.os)/(sample_rate>>8)
+  _todp=(f/_os)/(sample_rate>>16)
 
-  if (self._ac) self.env+=acc
-  if self._lsl then
-   self.todpr=0.015
+  if (_ac) _env+=acc
+  if _lsl then
+   _todpr=0.015
   else
-   self.todpr=0.995
-   self._mr=true
+   _todpr=0.995
+   _mr=true
   end
 
-  self._nt=0
+  _nt=0
  end
 
  function obj:update(b,first,last)
-  local odp,op,detune=self.odp,self.op,self.detune
-  local todp,todpr=self.todp,self.todpr
-  local f1,f2,f3,f4=self._f1,self._f2,self._f3,self._f4
-  local fr,fcb,os=self.fr,self.fc,self.os
-  local ae,aed,me,med,mr=self._ae,self._aed,self._me,self._med,self._mr
-  local env,saw,lev,acc=self.env,self.saw,self.lev,self.acc
-  local gate,nt,nl,sl,ac=self._gate,self._nt,self._nl,self._sl,self._ac
-  local fosc,ffb=self._fosc,self._ffb
+  local odp,op,detune=_odp,_op,_detune
+  local todp,todpr=_todp,_todpr
+  local f1,f2,f3,f4=_f1,_f2,_f3,_f4
+  local fr,fcb,os=_fr,_fc,_os
+  local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
+  local env,saw,lev,acc=_env,_saw,_lev,_acc
+  local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
+  local fosc,ffb=_fosc,_ffb
   for i=first,last do
    local fc=min(0.4/os,fcb+((me*env)>>4))
    -- very very janky dewarping
@@ -325,9 +299,9 @@ function synth_new(base)
    end
    odp+=todpr*(todp-odp)
    local dodp=odp*detune
-   self._nt+=1
+   _nt+=1
    for j=1,os do
-    local osc=op>>7
+    local osc=op>>15
     if not saw then
      osc=0.5+((osc&0x8000)>>15)
     end
@@ -344,16 +318,15 @@ function synth_new(base)
     f4+=(f3-f4)*fc
 
     op+=dodp
-    if (op>128) op-=256
    end
    local out=(f4*ae)>>2
    if (ac) out+=acc*me*out
    b[i]=out
   end
-  self.op,self.odp,self._gate=op,odp,gate
-  self._f1,self._f2,self._f3,self._f4=f1,f2,f3,f4
-  self._me,self._ae,self._mr=me,ae,mr
-  self._fosc,self._ffb=fosc,ffb
+  _op,_odp,_gate=op,odp,gate
+  _f1,_f2,_f3,_f4=f1,f2,f3,f4
+  _me,_ae,_mr=me,ae,mr
+  _fosc,_ffb=fosc,ffb
  end
 
  return obj
@@ -372,7 +345,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
    _op,_dp=0,(_dp0<<16)*_detune
    _ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
    _aemax=0.5*_ae
-   _ted=0.5*((te_base-te_scale*dec)^4)
+   _ted=0.5*pow4(te_base-te_scale*dec)
    _aed=1-ae_ratio*_ted
   end
  end
@@ -410,7 +383,7 @@ function snare_new()
    _aes*=lev2
    _aen*=lev2
    _aemax=_aes*0.5
-   local pd4=(0.65-0.25*dec)^4
+   local pd4=pow4(0.65-0.25*dec)
    _aesd=1-0.1*pd4
    _aend=1-0.04*pd4
   end
@@ -448,7 +421,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    _detune=2^(tbase+tscale*tun)
    local pd=(dbase-dscale*dec)
 
-   _aed=1-0.04*pd*pd*pd*pd
+   _aed=1-0.04*pow4(pd)
   end
  end
 
@@ -630,8 +603,7 @@ function comp_new(src,thresh,ratio,_att,_rel)
    -- makeup targets 0.6
    local makeup=max(1,0.6/((0.6-thresh)*ratio+thresh))
    for i=first,last do
-    -- avoid divide-by-zero
-    local x=abs(b[i])+0x0.0010
+    local x=abs(b[i])
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
@@ -674,36 +646,29 @@ svf_pats=parse[[{
 -- heavily inspired by
 -- https://github.com/JordanTHarris/VAStateVariableFilter
 function svf_new()
+ local _z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec=unpack_split'0,0,0.1,0.2,1,1,0,1'
  return {
-  z1=0,
-  z2=0,
-  rc=0.1,
-  gc=0.2,
-  wet=1,
-  fe=1,
-  bp=0,
-  dec=1,
   note=function(self,patch,bar,tick)
    local r,bp,gc,dec
    bp,gc,r,self.wet,_,dec=unpack_patch(patch,56,61)
-   self.rc=1-r*0.96
+   _rc=1-r*0.96
    local svf_pat=svf_pats[patch[60]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
-   if (pat_val>=0) self.fe=pat_val>>4
-   self.dec=1-(pow3(1-dec)>>7)
-   self.bp=(bp&0x0.02>0 and 1) or 0
-   self.gc=gc*gc+0x0.02
+   if (pat_val>=0) _fe=pat_val>>4
+   _dec=1-(pow3(1-dec)>>7)
+   _bp=(bp&0x0.02>0 and 1) or 0
+   _gc=gc*gc+0x0.02
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc_base,wet,fe,is_bp,dec=
-    self.z1,
-    self.z2,
-    self.rc,
-    self.gc,
-    self.wet,
-    self.fe,
-    self.bp,
-    self.dec
+    _z1,
+    _z2,
+    _rc,
+    _gc,
+    _wet,
+    _fe,
+    _bp,
+    _dec
    for i=first,last do
     gc=min(gc_base*fe,1)
     local rrpg=2*rc+gc
@@ -724,7 +689,7 @@ function svf_new()
     b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
     fe*=dec
    end
-   self.z1,self.z2,self.fe=z1,z2,fe
+   _z1,_z2,_fe=z1,z2,fe
   end
  }
 end
