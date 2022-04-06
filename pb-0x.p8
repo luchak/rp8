@@ -49,13 +49,10 @@ end
 function _init()
  cls()
 
- -- turn off output lpf for less
- -- muffled sound
+ -- no output lpf
  poke(0x5f36,@0x5f36^^0x20)
-
- -- turn on mouse
+ -- yes mouse
  poke(0x5f2d,0x1)
-
  -- faster repeat
  poke(0x5f5c,5)
  poke(0x5f5d,1)
@@ -251,7 +248,7 @@ function synth_new(base)
 
   _gate=true
   local f=55*(semitone^(pat.nt[step]+3))
-  --ordered for numeric safety
+  --ordered for safety
   _todp=(f/_os)/(sample_rate>>16)
 
   if (_ac) _env+=acc
@@ -266,8 +263,7 @@ function synth_new(base)
  end
 
  function obj:update(b,first,last)
-  local odp,op,detune=_odp,_op,_detune
-  local todp,todpr=_todp,_todpr
+  local odp,op,detune,todp,todpr=_odp,_op,_detune,_todp,_todpr
   local f1,f2,f3,f4=_f1,_f2,_f3,_f4
   local fr,fcb,os=_fr,_fc,_os
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
@@ -276,9 +272,8 @@ function synth_new(base)
   local fosc,ffb=_fosc,_ffb
   for i=first,last do
    local fc=min(0.4/os,fcb+((me*env)>>4))
-   -- very very janky dewarping
-   -- arbitrary scaling constant
-   -- is 0.75*2*pi because???
+   -- janky dewarping
+   -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
    local fc1=(0.6+fc)>>1
    if gate then
@@ -320,9 +315,8 @@ function synth_new(base)
    b[i]=out
   end
   _op,_odp,_gate=op,odp,gate
-  _f1,_f2,_f3,_f4=f1,f2,f3,f4
+  _f1,_f2,_f3,_f4,_fosc,_ffb=f1,f2,f3,f4,fosc,ffb
   _me,_ae,_mr=me,ae,mr
-  _fosc,_ffb=fosc,ffb
  end
 
  return obj
@@ -673,23 +667,9 @@ end
 
 n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'64,65,66,67,68,64,65,66'
 
-syn_base_idx=parse[[{
- b0=7,
- b1=19,
- dr=31,
- bd=38,
- sd=41,
- hh=44,
- cy=47,
- pc=50,
- sp=53,
-}]]
+syn_base_idx=parse[[{b0=7,b1=19,dr=31,bd=38,sd=41,hh=44,cy=47,pc=50,sp=53}]]
 
-pat_param_idx=parse[[{
- b0=11,
- b1=23,
- dr=35,
-}]]
+pat_param_idx=parse[[{b0=11,b1=23,dr=35}]]
 
 -- see note 003
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
@@ -736,17 +716,6 @@ function state_new(savedata)
   s.samp=dec_byte_array(savedata.samp)
  end
 
- function s:_apply_diff(k,v)
-  self.patch[k]=v
-  if self.song_mode then
-   self.tl:record_event(k,v)
-   if (not self.playing) self:load_bar()
-  else
-   self.pat_patch[k]=v
-   self.patch[k]=v
-  end
- end
-
  function s:_init_tick()
   local patch=self.patch
   local nl=sample_rate*(15/(60+patch[1]))
@@ -768,10 +737,20 @@ function state_new(savedata)
  end
  local load_bar=function(i) s:load_bar(i) end
 
+ function s:_apply_diff(k,v)
+  self.patch[k]=v
+  if self.song_mode then
+   self.tl:record_event(k,v)
+  else
+   self.pat_patch[k]=v
+  end
+  if (not self.playing) load_bar()
+ end
+
  function s:next_tick()
   local tl=self.tl
   if self.song_mode then
-   tl:next_tick(self.patch, load_bar)
+   tl:next_tick(self.patch,load_bar)
    self.bar,self.tick=tl.bar,tl.tick
   else
    self.tick+=1
@@ -850,7 +829,7 @@ function state_new(savedata)
  function s:cut_seq()
   self:stop_playing()
   copy_buf_seq=self.tl:cut_seq()
-  self:load_bar()
+  load_bar()
  end
 
  function s:copy_seq()
@@ -873,17 +852,17 @@ function state_new(savedata)
   else
    self.pat_patch=dec_byte_array(copy_buf_seq[1].t0)
   end
-  self:load_bar()
+  load_bar()
  end
 
  function s:insert_seq()
   if (not copy_buf_seq) return
   self:stop_playing()
   self.tl:insert_seq(copy_buf_seq)
-  self:load_bar()
+  load_bar()
  end
 
- s:load_bar()
+ load_bar()
  return s
 end
 
@@ -1049,12 +1028,13 @@ function ui_new()
   if (stat(30)) k=stat(31)
   if (k=='h') toggle_help()
 
+  local focus=self.focus
   local new_focus=self.focus
 
   if click>0 then
-   if self.focus and click==self.last_click then
+   if focus and click==self.last_click then
     self.drag_dist+=stat(39)
-    local diff=flr(self.focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
+    local diff=flr(focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
     if diff!=0 then
      input=diff
      self.last_drag=self.drag_dist
@@ -1069,8 +1049,8 @@ function ui_new()
    poke(0x5f2d, 0x1)
   end
 
-  if new_focus!=self.focus then
-   if (self.focus) self.dirty[self.focus.id]=true
+  if new_focus!=focus then
+   if (focus) self.dirty[focus.id]=true
    if (new_focus) self.dirty[new_focus.id]=true
    self.focus=new_focus
   end
@@ -1078,8 +1058,7 @@ function ui_new()
   if (input!=0 and self.focus) self.focus:input(state,input)
   if (self.hover==hover and click==0) self.hover_frames+=1 else self.hover_frames=0
 
-  self.last_click=click
-  self.hover=hover
+  self.last_click,self.hover=click,hover
  end
 
  return obj
