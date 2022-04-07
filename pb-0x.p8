@@ -47,23 +47,24 @@ function stop_rec()
 end
 
 function _init()
- cls()
+ eval[[(
+($cls)
+(set ui ($ui_new))
+(set state ($state_new))
+(set add_to_ui (fn (w) ((@ $ui add_widget) $ui $w)))
+($header_ui_init $add_to_ui)
+($pbl_ui_init $add_to_ui b0 7 32)
+($pbl_ui_init $add_to_ui b1 19 64)
+($pirc_ui_init $add_to_ui)
+)]]
 
  -- no output lpf
  poke(0x5f36,@0x5f36^^0x20)
  -- yes mouse
- poke(0x5f2d,0x1)
+ poke(0x5f2d,1)
  -- faster repeat
  poke(0x5f5c,5)
  poke(0x5f5d,1)
-
- ui,state=ui_new(),state_new()
- function add_to_ui(w) ui:add_widget(w) end
-
- header_ui_init(add_to_ui)
- pbl_ui_init(add_to_ui,unpack_split'b0,7,32')
- pbl_ui_init(add_to_ui,unpack_split'b1,19,64')
- pirc_ui_init(add_to_ui)
 
  local pbl0,pbl1=synth_new(7),synth_new(19)
  local drums={
@@ -220,9 +221,7 @@ function synth_new(base)
        _detune,_fc,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
        _ae,_aed,_nt,_nl={},
        unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0,0.99,0,0.997,900'
- local _mr,_ar,_gate,_saw,_ac,_sl,_lsl=parse[[{
-  1=false,2=false,3=false,4=false,5=false,6=false,7=false
- }]]
+ local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
   local patstep,saw,tun,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+11)
@@ -501,7 +500,7 @@ function delay_new()
 end
 
 
-dr_src_fx_masks=parse[[{1=1,2=1,3=2,4=2,5=4,6=4}]]
+dr_src_fx_masks=split'1,1,2,2,4,4'
 function submixer_new(srcs)
  return {
   srcs=srcs,
@@ -586,32 +585,32 @@ function comp_new(src,thresh,ratio,_att,_rel)
  }
 end
 
-svf_pats=parse[[{
- 1="@///////////////",
- 2="@///////",
- 3="@///",
- 4="@/",
- 5="@",
- 6="@//@//@//@//@//@",
- 7="//@//@////@//@//",
- 8="/123456789:;<=>@",
- 9="8899::;;<<==>>@@",
- 10="8/9/:/;/</=/>/@/",
- 11="@/>/=/</;/:/9/8/",
- 12="==/3@@:/23@114:;92>:5<:27<@//;>8;3;43;64</;883=4:",
- 13=">/3/7/</=/8/5/>/2/@/5/4/2/>/3/@/7/3/3/;/</6/2/;/7/",
- 14="@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8",
- 15=";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/",
- 16="@//",
- 17="@////",
- 18="@//////",
- 19="@//:/",
- 20="////////@///////",
- 21="////@///",
- 22="//@/",
- 23="/@",
- 24=":///@/////:/@///",
-}]]
+svf_pats=parse[[(
+"@///////////////",
+"@///////",
+"@///",
+"@/",
+"@",
+"@//@//@//@//@//@",
+"//@//@////@//@//",
+"/123456789:;<=>@",
+"8899::;;<<==>>@@",
+"8/9/:/;/</=/>/@/",
+"@/>/=/</;/:/9/8/",
+"==/3@@:/23@114:;92>:5<:27<@//;>8;3;43;64</;883=4:",
+">/3/7/</=/8/5/>/2/@/5/4/2/>/3/@/7/3/3/;/</6/2/;/7/",
+"@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8",
+";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/",
+"@//",
+"@////",
+"@//////",
+"@//:/",
+"////////@///////",
+"////@///",
+"//@/",
+"/@",
+":///@/////:/@///",
+)]]
 
 -- heavily inspired by
 -- https://github.com/JordanTHarris/VAStateVariableFilter
@@ -670,17 +669,17 @@ pat_param_idx=parse[[{b0=11,b1=23,dr=35}]]
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
- nt={1=19,2=19,3=19,4=19,5=19,6=19,7=19,8=19,9=19,10=19,11=19,12=19,13=19,14=19,15=19,16=19},
- st={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
+ nt=(19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19),
+ st=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64)
 }]]
 
 drum_pat_template=parse[[{
- bd={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
- sd={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
- hh={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
- cy={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
- pc={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
- sp={1=64,2=64,3=64,4=64,5=64,6=64,7=64,8=64,9=64,10=64,11=64,12=64,13=64,14=64,15=64,16=64},
+ bd=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
+ sd=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
+ hh=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
+ cy=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
+ pc=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
+ sp=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64)
 }]]
 
 function state_new(savedata)
@@ -1041,13 +1040,13 @@ function ui_new()
      self.last_drag=self.drag_dist
     end
    else
-    poke(0x5f2d, 0x5)
+    poke(0x5f2d,5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=trn(hover and hover.active,hover,nil)
     if (new_focus and new_focus.click_act) input=trn(click==1,1,-1)
    end
   else
-   poke(0x5f2d, 0x1)
+   poke(0x5f2d,1)
   end
 
   if new_focus!=focus then
@@ -1295,14 +1294,14 @@ function pirc_ui_init(add_to_ui)
    radio_btn_new(d.x,d.y,k,d.s,d.s+1,d.tt,state_make_get_set'drum_sel')
   )
   -- lev,tun,dec
-  for dial in all(parse[[{1={x=8,o=2,tt="level"},2={x=16,o=0,tt="tune"},3={x=24,o=1,tt="decay"}}]]) do
+  for dial in all(parse[[({x=8,o=2,tt="level"},{x=16,o=0,tt="tune"},{x=24,o=1,tt="decay"})]]) do
    add_to_ui(
     dial_new(d.x+dial.x,d.y,112,16,d.b+dial.o,k..' '..dial.tt)
    )
   end
  end
 
- for fx in all(parse[[{1={x=32,b=0,tt="bd/sd "},2={x=64,b=1,tt="hh/cy "},3={x=96,b=2,tt="pc/sp "}}]]) do
+ for fx in all(parse[[({x=32,b=0,tt="bd/sd "},{x=64,b=1,tt="hh/cy "},{x=96,b=2,tt="pc/sp "})]]) do
   add_to_ui(
    toggle_new(fx.x,96,170,171,fx.tt..'fx bypass',state_make_get_set_param_bool(37,fx.b))
   )
@@ -1431,17 +1430,17 @@ function header_ui_init(add_to_ui)
   'commit touched controls'
  ),204)
 
- for s in all(parse[[{
-  1="16,8,1,tempo",
-  2="32,8,3,level",
-  3="32,16,6,compressor threshold",
-  4="16,16,2,shuffle",
-  5="32,24,5,delay feedback",
-  6="48,16,57,filter cutoff",
-  7="48,24,58,filter resonance",
-  8="64,24,59,filter wet/dry",
-  9="80,24,61,filter env decay",
- }]]) do
+ for s in all(parse[[(
+  "16,8,1,tempo",
+  "32,8,3,level",
+  "32,16,6,compressor threshold",
+  "16,16,2,shuffle",
+  "32,24,5,delay feedback",
+  "48,16,57,filter cutoff",
+  "48,24,58,filter resonance",
+  "64,24,59,filter wet/dry",
+  "80,24,61,filter env decay",
+ )]]) do
   hdial(unpack_split(s))
  end
  local get_filt_pat,set_filt_pat=state_make_get_set_param(60)
@@ -1467,7 +1466,7 @@ function header_ui_init(add_to_ui)
  filt_toggle.drag_amt=0.01
  add_to_ui(filt_toggle)
  add_to_ui(
-  spin_btn_new(64,8,parse[[{1="--,0,15",2="MA,0,15",3="S1,0,15",4="S2,0,15",5="DR,0,15"}]],'filter source',state_make_get_set_param(56,1))
+  spin_btn_new(64,8,parse[[("--,0,15","MA,0,15","S1,0,15","S2,0,15","DR,0,15")]],'filter source',state_make_get_set_param(56,1))
  )
 
  for syn,sd in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
