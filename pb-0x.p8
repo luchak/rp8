@@ -1217,17 +1217,14 @@ function transport_number_new(x,y,w,obj,key,tt,input)
  )
 end
 
-function pbl_ui_init(add_to_ui,key,base_idx,yp)
-eval([[(
-(for 1 16
- (fn (i)
-  (
-   (let xp (* (+ $i -1) 8)),
-   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
-   ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' 16 17 33 18 34 32))),
-  )
+pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
+(for 1 16 (fn (i)
+ (
+  (let xp (* (+ $i -1) 8)),
+  ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
+  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' 16 17 33 18 34 32))),
  )
-)
+))
 (let tb ($momentary_new 24 $yp 26
  (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
  "transpose (drag)"
@@ -1247,42 +1244,38 @@ eval([[(
   "paste pattern"
  )
 )
-)]],{yp=yp,key=key})
-
- add_to_ui(
-  toggle_new(0,yp,186,187,'active',state_make_get_set_param_bool(base_idx+3))
+($add_to_ui
+ ($toggle_new 0 $yp 186 187 active
+  ($state_make_get_set_param_bool (+ $base_idx 3))
  )
- add_to_ui(
-  spin_btn_new(0,yp+8,split'162,163,164,165','bank select',state_make_get_set(key..'_bank'))
+)
+($add_to_ui
+ ($spin_btn_new 0 (+ $yp 8) (' 162 163 164 165) "bank select"
+  ($state_make_get_set (cat $key _bank))
  )
- for i=1,6 do
-  add_to_ui(
-   pat_btn_new(5+i*4,yp+8,key,6,i,unpack_split'2,14,8,6')
-  )
- end
-
- for d in all(parse[[{
-  1={x=40,o=6,tt="tune"},
-  2={x=56,o=7,tt="filter cutoff"},
-  3={x=72,o=8,tt="filter resonance"},
-  4={x=88,o=9,tt="filter env amount"},
-  5={x=104,o=10,tt="filter env decay"},
-  6={x=120,o=11,tt="accent depth"},
- }]]) do
-  add_to_ui(
-   dial_new(
-    d.x,yp,43,21,base_idx+d.o,d.tt
-   )
-  )
- end
-
- add_to_ui(
-  toggle_new(32,yp,2,3,'waveform',state_make_get_set_param_bool(base_idx+5))
+)
+(for 1 6 (fn (i)
+ ($add_to_ui
+  ($pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
  )
-
- map(0,4,0,yp,16,2)
-end
-
+))
+($foreach ('
+ {x=40,o=6,tt="tune"}
+ {x=56,o=7,tt="filter cutoff"}
+ {x=72,o=8,tt="filter resonance"}
+ {x=88,o=9,tt="filter env amount"}
+ {x=104,o=10,tt="filter env decay"}
+ {x=120,o=11,tt="accent depth"}
+ )
+ (fn (d) ($add_to_ui
+  ($dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
+ ))
+)
+($add_to_ui
+ ($toggle_new 32 $yp 2 3 waveform ($state_make_get_set_param_bool (+ $base_idx 5)))
+)
+($map 0 4 0 $yp 16 2)
+))]]
 
 function pirc_ui_init(add_to_ui)
  for i=1,16 do

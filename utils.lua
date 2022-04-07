@@ -156,6 +156,17 @@ function map_table(a,f,d)
  return map_table(a,function(v) return map_table(v,f,d-1) end)
 end
 
+function map_table_multi(a,f)
+ local r={}
+ for v in all(a) do
+  local ret={f(v)}
+  for rv in all(ret) do
+   add(r,rv)
+  end
+ end
+ return r
+end
+
 function unpack_patch(patch,first,last)
  local r={}
  for i=first,last do
@@ -179,7 +190,7 @@ function _eval_scope(ast,locals)
 
   if (typ!='table') return node;
 
-  if (not defer_eval[node[1]]) node=map_table(node,_eval_node) else node=copy(node)
+  if (not defer_eval[node[1]]) node=map_table_multi(node,_eval_node) else node=copy(node)
 
   local cmd=deli(node,1)
   local a1,a2,a3=unpack(node)
@@ -192,6 +203,8 @@ function _eval_scope(ast,locals)
    return a1+a2
   elseif cmd=='*' then
    return a1*a2
+  elseif cmd=='cat' then
+   return a1..a2
   elseif cmd=='@' then
    local r=a1[a2]
    if (a3) r=r[a3]
