@@ -31,7 +31,7 @@ print(myvar4)
 eval('($print (+ 4 5))')
 
 
-eval('(for 71 73 (fn (x) ($print (* 0.5 $x))))')
+eval('(for 71 72 (fn (x) ($print (* 0.5 $x))))')
 end
 
 __gfx__

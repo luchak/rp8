@@ -1232,8 +1232,8 @@ eval([[(
  (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
  "transpose (drag)"
 ))
-(set@ $tb act_on_click false)
-(set@ $tb drag_amt 0.05)
+(@= $tb click_act false)
+(@= $tb drag_amt 0.05)
 ($add_to_ui $tb)
 ($add_to_ui
  ($momentary_new 8 $yp 28
@@ -1241,14 +1241,14 @@ eval([[(
   "copy pattern"
  )
 )
+($add_to_ui
+ ($momentary_new 16 $yp 27
+  (fn (state) (if $copy_buf_pbl ($merge (@ $state pat_seqs $key) $copy_buf_pbl) nil))
+  "paste pattern"
+ )
+)
 )]],{yp=yp,key=key})
 
- add_to_ui(
-  momentary_new(16,yp,27,function(state,b)
-   local v=copy_buf_pbl
-   if (v) merge(state.pat_seqs[key],v)
-  end,'paste pattern')
- )
  add_to_ui(
   toggle_new(0,yp,186,187,'active',state_make_get_set_param_bool(base_idx+3))
  )

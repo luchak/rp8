@@ -124,6 +124,7 @@ function _parse(read)
   read(-1)
   if (s=='true') return true
   if (s=='false') return false
+  if (s=='nil') return nil
   return s
  end
 end
@@ -167,21 +168,21 @@ end
 function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
+defer_eval=parse[[{fn=true,if=true,'=true}]]
 function _eval_scope(ast,locals)
  local function _eval_node(node)
   local typ=type(node)
   if typ=='string' and sub(node,1,1)=='$' then
    local tail=sub(node,2)
-   if (is_num(sub(tail,1,1))) tail=tonum(tail)
    return locals[tail] or _ENV[tail]
   end
 
   if (typ!='table') return node;
 
-  if (node[1]!='fn' and node[1]!='\'') node=map_table(node,_eval_node) else node=copy(node)
+  if (not defer_eval[node[1]]) node=map_table(node,_eval_node) else node=copy(node)
 
   local cmd=deli(node,1)
-  local a1,a2,a3=node[1],node[2],node[3]
+  local a1,a2,a3=unpack(node)
 
   if type(cmd)=='function' then
    return cmd(unpack(node))
@@ -195,12 +196,14 @@ function _eval_scope(ast,locals)
    local r=a1[a2]
    if (a3) r=r[a3]
    return r
-  elseif cmd=='set@' then
+  elseif cmd=='@=' then
    a1[a2]=a3
   elseif cmd=='for' then
    for i=a1,a2 do
     a3(i)
    end
+  elseif cmd=='if' then
+   if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
   elseif cmd=='set' then
    _ENV[a1]=a2
   elseif cmd=='let' then
