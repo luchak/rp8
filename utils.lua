@@ -229,6 +229,8 @@ function _eval_scope(ast,locals)
     end
     return _eval_scope(a2,new_locals)
    end
+  elseif type(cmd)=='table' then
+   return deli(node)
   end
  end
 
