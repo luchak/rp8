@@ -168,7 +168,7 @@ function timeline_new(default_patch, savedata)
 
  timeline.get_serializable=function(self)
   local r={}
-  for k in all(parse[[{1="bars",2="def_bar",3="loop_start",4="loop_len",5="loop"}]]) do
+  for k in all(split'bars,def_bar,loop_start,loop_len,loop') do
    r[k]=self[k]
   end
   return r
