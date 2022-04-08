@@ -185,10 +185,9 @@ function _eval_scope(ast,locals)
    return a1
   elseif cmd=='if' then
    if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
-  --elseif cmd=='defun' then
-  -- return _eval_node({'set',_eval_node(a1),{'fn',a2,a3}})
   elseif cmd=='fn' then
    return function(...)
+    log('exec script fn')
     local args,new_locals={...},copy(locals)
     for i,v in ipairs(a1) do
      new_locals[v]=args[i]
@@ -241,5 +240,6 @@ function _eval_scope(ast,locals)
 end
 
 function eval(src,locals)
+ log('exec script')
  return _eval_scope(parse(src),locals or {})
 end
