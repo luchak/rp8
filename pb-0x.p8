@@ -915,14 +915,12 @@ function seq_helper_new(state,root,note_fn)
      note_fn()
     end
     local n=min(self.state.note_len-self.t,last-p+1)
-    log('STEP',p,p+n-1,n)
     self.root:update(b,p,p+n-1)
     self.t+=n
     p+=n
     np+=n
    end
    if (not self.state.playing) self.t=0
-   log('DONE',first,last,last-first+1,np)
    assert(np==last-first+1)
   end
  }
