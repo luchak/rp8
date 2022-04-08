@@ -1221,7 +1221,7 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
  (
   (let xp (* (+ $i -1) 8)),
   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
-  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (vals 16 17 33 18 34 32))),
+  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
  )
 ))
 (let tb ($momentary_new 24 $yp 26
@@ -1249,7 +1249,7 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
  )
 )
 ($add_to_ui
- ($spin_btn_new 0 (+ $yp 8) (vals 162 163 164 165) "bank select"
+ ($spin_btn_new 0 (+ $yp 8) (' (162 163 164 165)) "bank select"
   ($state_make_get_set (cat $key _bank))
  )
 )
@@ -1258,14 +1258,14 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
   ($pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
  )
 ))
-($foreach (vals
+($foreach (' (
  {x=40,o=6,tt="tune"}
  {x=56,o=7,tt="filter cutoff"}
  {x=72,o=8,tt="filter resonance"}
  {x=88,o=9,tt="filter env amount"}
  {x=104,o=10,tt="filter env decay"}
  {x=120,o=11,tt="accent depth"}
- )
+ ))
  (fn (d) ($add_to_ui
   ($dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
@@ -1276,58 +1276,52 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
 ($map 0 4 0 $yp 16 2)
 ))]]
 
-function pirc_ui_init(add_to_ui)
- for k,d in pairs(parse[[{
-  bd={x=32,y=104,s=150,b=38,tt="bass drum"},
-  sd={x=32,y=112,s=152,b=41,tt="snare drum"},
-  hh={x=64,y=104,s=154,b=44,tt="hihat"},
-  cy={x=64,y=112,s=156,b=47,tt="cymbal"},
-  pc={x=96,y=104,s=158,b=50,tt="percussion"},
-  sp={x=96,y=112,s=174,b=53,tt="sample"}
- }]]) do
-  add_to_ui(
-   radio_btn_new(d.x,d.y,k,d.s,d.s+1,d.tt,state_make_get_set'drum_sel')
+pirc_ui_init=eval[[(fn (add_to_ui) (
+(for 1 16 (fn (i) ($add_to_ui
+ ($step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
+)))
+($foreach
+ (' (
+  {k=bd,x=32,y=104,s=150,b=38,tt="bass drum"}
+  {k=sd,x=32,y=112,s=152,b=41,tt="snare drum"}
+  {k=hh,x=64,y=104,s=154,b=44,tt=hihat}
+  {k=cy,x=64,y=112,s=156,b=47,tt=cymbal}
+  {k=pc,x=96,y=104,s=158,b=50,tt=percussion}
+  {k=sp,x=96,y=112,s=174,b=53,tt=sample}
+ ))
+ (fn (d) (
+  ($add_to_ui ($radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) ($state_make_get_set drum_sel)))
+  ($foreach
+   (' ({x=8,o=2,tt=level} {x=16,o=0,tt=tune} {x=24,o=1,tt=decay}))
+   (fn (c) ($add_to_ui
+    ($dial_new (+ (@ $d x) (@ $c x)) (@ $d y) 112 16 (+ (@ $d b) (@ $c o)) (cat (cat (@ $d k) " ") (@ $c tt)))
+   ))
   )
-  -- lev,tun,dec
-  for dial in all(parse[[({x=8,o=2,tt="level"},{x=16,o=0,tt="tune"},{x=24,o=1,tt="decay"})]]) do
-   add_to_ui(
-    dial_new(d.x+dial.x,d.y,112,16,d.b+dial.o,k..' '..dial.tt)
-   )
-  end
- end
-
- for fx in all(parse[[({x=32,b=0,tt="bd/sd "},{x=64,b=1,tt="hh/cy "},{x=96,b=2,tt="pc/sp "})]]) do
-  add_to_ui(
-   toggle_new(fx.x,96,170,171,fx.tt..'fx bypass',state_make_get_set_param_bool(37,fx.b))
-  )
- end
-
- add_to_ui(
-  momentary_new(8,104,11,function(state,b)
-   copy_buf_pirc=copy(state.pat_seqs['dr'])
-  end, 'copy pattern')
- )
- add_to_ui(
-  momentary_new(16,104,10,function(state,b)
-   merge(state.pat_seqs['dr'],copy_buf_pirc)
-  end, 'paste pattern')
- )
-
- add_to_ui(
-  toggle_new(0,104,188,189,'active',state_make_get_set_param_bool(34))
- )
-
- add_to_ui(
-  spin_btn_new(0,112,split'166,167,168,169','bank select',state_make_get_set('dr_bank'))
- )
- for i=1,6 do
-  add_to_ui(
-   pat_btn_new(5+i*4,112,'dr',6,i,unpack_split'2,14,8,5')
-  )
- end
-
- map(unpack_split'0,8,0,96,16,4')
-end
+ ))
+)
+($foreach
+ (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
+ (fn (c) ($add_to_ui ($toggle_new
+  (@ $c x) 96 170 171 (cat (@ $c tt) "fx bypass") ($state_make_get_set_param_bool 37 (@ $c b))
+ )))
+)
+($add_to_ui ($momentary_new
+ 8 104 11 (fn (state b) (set copy_buf_pirc ($copy (@ $state pat_seqs dr)))) "copy pattern"
+))
+($add_to_ui ($momentary_new
+ 16 104 10 (fn (state b) ($merge (@ $state pat_seqs dr) $copy_buf_pirc)) "paste pattern"
+))
+($add_to_ui ($toggle_new
+ 0 104 188 189 active ($state_make_get_set_param_bool 34)
+))
+($add_to_ui ($spin_btn_new
+ 0 112 (' (166 167 168 169)) "bank select" ($state_make_get_set dr_bank)
+))
+(for 1 6 (fn (i) ($add_to_ui
+ ($pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
+)))
+($map 0 8 0 96 16 4)
+))]]
 
 function header_ui_init(add_to_ui)
  local function hdial(x,y,idx,tt)
