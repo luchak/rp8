@@ -55,15 +55,11 @@ function _init()
 ($pbl_ui_init $add_to_ui b0 7 32)
 ($pbl_ui_init $add_to_ui b1 19 64)
 ($pirc_ui_init $add_to_ui)
+($menuitem 1 "save to clip" $copy_state)
+($menuitem 2 "load from clip" $paste_state)
+($stop_rec)
+($toggle_help)
 )]]
-
- -- no output lpf
- poke(0x5f36,@0x5f36^^0x20)
- -- yes mouse
- poke(0x5f2d,1)
- -- faster repeat
- poke(0x5f5c,5)
- poke(0x5f5d,1)
 
  local pbl0,pbl1=synth_new(7),synth_new(19)
  local drums={
@@ -141,10 +137,13 @@ function _init()
   end
  )
 
- menuitem(1, 'save to clip', copy_state)
- menuitem(2, 'load from clip', paste_state)
- stop_rec()
- toggle_help()
+ -- no output lpf
+ poke(0x5f36,@0x5f36^^0x20)
+ -- yes mouse
+ poke(0x5f2d,1)
+ -- faster repeat
+ poke(0x5f5c,5)
+ poke(0x5f5d,1)
 
  log'init complete'
 end
@@ -152,7 +151,6 @@ end
 function _update60()
  if stat(120) then
   local s={}
-  state.samp=s
   local nread=0
   while stat(120) do
    local n=serial(0x800,0x5100,0x800)
@@ -163,6 +161,7 @@ function _update60()
     end
    end
   end
+  state.samp=s
   audio_wait(10)
  end
 
