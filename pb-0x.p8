@@ -4,6 +4,8 @@ __lua__
 -- rp-8
 -- by luchak
 
+#include utils.lua
+
 semitone=2^(1/12)
 
 -- give audio time to settle
@@ -28,11 +30,13 @@ function paste_state()
  end
 end
 
-show_help=true
-function toggle_help()
- show_help=not show_help
- menuitem(4,trn(show_help,'hide tooltips','show tooltips'),toggle_help)
-end
+eval[[(
+(set show_help true)
+(set toggle_help (fn () (
+ (set show_help (not $show_help))
+ ($menuitem 4 ($trn $show_help "hide tooltips" "show tooltips") $toggle_help)
+)))
+)]]
 
 audio_rec=false
 function start_rec()
@@ -181,7 +185,6 @@ function _draw()
  palt(0,false)
 end
 
-#include utils.lua
 
 -->8
 -- audio driver
