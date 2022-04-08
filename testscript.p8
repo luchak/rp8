@@ -17,7 +17,7 @@ print(type(dbl))
 print('q'..dbl(dbl(3)))
 print('r'..eval('($dbl,3)'))
 px=eval('(fn,(str),($print,$str))')
-eval[[($foreach (' q r x) $print)]]
+eval[[($foreach (' (q r x)) $print)]]
 --foreach(parse('(q,r,x)'), print)
 tbl={a=5,b=7}
 hm=eval('(@,$tbl,b)')

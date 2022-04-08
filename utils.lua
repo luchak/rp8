@@ -181,11 +181,7 @@ function _eval_scope(ast,locals)
   local cmd,a1,a2,a3=unpack(node)
   cmd=_eval_node(cmd)
 
-  if cmd=='vals' then
-   node=copy(node)
-   deli(node,1)
-   return node
-  elseif cmd=='\'' then
+  if cmd=='\'' then
    return a1
   elseif cmd=='if' then
    if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
@@ -211,8 +207,6 @@ function _eval_scope(ast,locals)
 
   if type(cmd)=='function' then
    return cmd(unpack(ev_node))
-  elseif cmd=='tab' then
-   return ev_node
   end
 
   a1,a2,a3=unpack(ev_node)
@@ -225,13 +219,11 @@ function _eval_scope(ast,locals)
   elseif cmd=='eq' then
    return a1==a2
   elseif cmd=='not' then
-   log('not',a1)
    return not a1
   elseif cmd=='cat' then
    return a1..a2
   elseif cmd=='@' then
-   local r=a1[a2]
-   if (a3) return r[a3] else return r
+   if (a3) return a1[a2][a3] else return a1[a2]
   elseif cmd=='@=' then
    a1[a2]=a3
   elseif cmd=='for' then
