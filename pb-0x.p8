@@ -186,11 +186,11 @@ end
 -- audio driver
 
 sample_rate=5512.5
-_audio_dcf=0
+_dcf=0
 
 function audio_update()
  if stat(108)<512 then
-  local todo,buf,dcf=100,{},_audio_dcf
+  local todo,buf,dcf=100,{},_dcf
   if audio_root_obj then
    audio_root_obj:update(buf,1,todo)
   else
@@ -209,7 +209,7 @@ function audio_update()
    poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
   end
   serial(0x808,0x4300,todo)
-  _audio_dcf=dcf
+  _dcf=dcf
  end
 end
 -->8
@@ -907,6 +907,7 @@ function seq_helper_new(state,root,note_fn)
   root=root,
   t=state.note_len,
   update=function(self,b,first,last)
+   local np=0
    local p=first
    while p<=last do
     if self.t>=self.state.note_len then
@@ -914,11 +915,15 @@ function seq_helper_new(state,root,note_fn)
      note_fn()
     end
     local n=min(self.state.note_len-self.t,last-p+1)
+    log('STEP',p,p+n-1,n)
     self.root:update(b,p,p+n-1)
     self.t+=n
     p+=n
+    np+=n
    end
    if (not self.state.playing) self.t=0
+   log('DONE',first,last,last-first+1,np)
+   assert(np==last-first+1)
   end
  }
 end
