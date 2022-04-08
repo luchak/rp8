@@ -88,10 +88,9 @@ function timeline_new(default_patch, savedata)
   self.has_override=true
  end
 
- timeline.clear_overrides=function(self)
-  self.overrides={}
-  self.has_override=false
- end
+ timeline.clear_overrides=eval[[
+ (fn (self) ((@= $self overrides (') (@= $self has_override false))))
+ ]]
 
  timeline.toggle_rec=function(self)
   local sr=self.rec
