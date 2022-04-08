@@ -70,7 +70,7 @@ function _init()
   sweep_new(unpack_split'38,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
   hh_cy_new(unpack_split'44,1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'47,1.3,0.5,0.5,0.18,0.3,0.8'),
+  hh_cy_new(unpack_split'47,1.3,0.5,0.65,0.35,0,1.1'),
   sweep_new(unpack_split'50,0.12,0.06,0.2,1,0.85,0.6'),
   sample_new(53)
  }
@@ -185,23 +185,20 @@ end
 -->8
 -- audio driver
 
-_schunk=100
-_bufpadding=2*_schunk
 sample_rate=5512.5
 _audio_dcf=0
 
 function audio_update()
- if stat(108)<stat(109)+_bufpadding then
-  local dcf=_audio_dcf
-  local buf={}
+ if stat(108)<512 then
+  local todo,buf,dcf=100,{},_audio_dcf
   if audio_root_obj then
-   audio_root_obj:update(buf,1,_schunk)
+   audio_root_obj:update(buf,1,todo)
   else
-   for i=1,_schunk do
+   for i=1,todo do
     buf[i]=0
    end
   end
-  for i=1,_schunk do
+  for i=1,todo do
    -- dc filter plus soft clipping
    local x=buf[i]<<8
    dcf+=(x-dcf)>>8
@@ -211,7 +208,7 @@ function audio_update()
    -- add dither for nicer tails
    poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
   end
-  serial(0x808,0x4300,_schunk)
+  serial(0x808,0x4300,todo)
   _audio_dcf=dcf
  end
 end
@@ -231,7 +228,7 @@ function synth_new(base)
   local patstep,saw,tun,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+11)
 
   _fc=(100/sample_rate)*(2^(4*cut))/_os
-  _fr=res*4.9+0.1
+  _fr=sqrt(res)*7
   _env=env*env+0.1
   _acc=acc*1.9+0.1
   _saw=saw>0
@@ -405,13 +402,11 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=d_off then
-   _op,_dp=0,_dp0
-   _ae=lev*lev*trn(s==d_ac,2.0,0.8)
+   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==d_ac,2.0,0.8)
 
    _detune=2^(tbase+tscale*tun)
-   local pd=(dbase-dscale*dec)
 
-   _aed=1-0.04*pow4(pd)
+   _aed=1-0.04*pow4(dbase-dscale*dec)
   end
  end
 
@@ -541,8 +536,8 @@ function mixer_new(srcs,fx,filt,lev)
    for k,src in pairs(self.srcs) do
     local slev,od,fx=src.lev,src.od*src.od,src.fx
     src.obj:update(tmp,first,last,bypass)
-    local odf=0.3+31.7*od
-    local odfi=(1+3*od)/odf
+    local odf=0.3+47.7*od*od
+    local odfi=(1+3*od*od)/odf
     for i=first,last do
      local x=mid(-1,tmp[i]*odf,1)
      tmp[i]=slev*odfi*(x-0.148148*x*x*x)
@@ -582,7 +577,7 @@ function comp_new(src,thresh,ratio,_att,_rel)
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
-    local g,te=makeup,thresh/env
+    local g,te=makeup,thresh/(env+0x0.0010)
     if (env>thresh) g*=te+ratio*(1-te)
     b[i]*=g
    end
@@ -625,7 +620,7 @@ function svf_new()
  return {
   note=function(self,patch,bar,tick)
    local r,bp,gc,dec
-   bp,gc,r,self.wet,_,dec=unpack_patch(patch,56,61)
+   bp,gc,r,_wet,_,dec=unpack_patch(patch,56,61)
    _rc=1-r*0.96
    local svf_pat=svf_pats[patch[60]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
