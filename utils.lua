@@ -156,17 +156,6 @@ function map_table(a,f,d)
  return map_table(a,function(v) return map_table(v,f,d-1) end)
 end
 
-function map_table_multi(a,f)
- local r={}
- for v in all(a) do
-  local ret={f(v)}
-  for rv in all(ret) do
-   add(r,rv)
-  end
- end
- return r
-end
-
 function unpack_patch(patch,first,last)
  local r={}
  for i=first,last do
@@ -179,7 +168,6 @@ end
 function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
-defer_eval=parse[[{fn=true,if=true,'=true}]]
 function _eval_scope(ast,locals)
  local function _eval_node(node)
   local typ=type(node)
@@ -190,37 +178,15 @@ function _eval_scope(ast,locals)
 
   if (typ!='table') return node;
 
-  if (not defer_eval[node[1]]) node=map_table_multi(node,_eval_node) else node=copy(node)
+  local cmd,a1,a2,a3=unpack(node)
+  cmd=_eval_node(cmd)
 
-  local cmd=deli(node,1)
-  local a1,a2,a3=unpack(node)
-
-  if type(cmd)=='function' then
-   return cmd(unpack(node))
-  elseif cmd=='\'' or cmd=='list' then
+  if cmd=='\'' then
+   node=copy(node)
+   deli(node,1)
    return node
-  elseif cmd=='+' then
-   return a1+a2
-  elseif cmd=='*' then
-   return a1*a2
-  elseif cmd=='cat' then
-   return a1..a2
-  elseif cmd=='@' then
-   local r=a1[a2]
-   if (a3) r=r[a3]
-   return r
-  elseif cmd=='@=' then
-   a1[a2]=a3
-  elseif cmd=='for' then
-   for i=a1,a2 do
-    a3(i)
-   end
   elseif cmd=='if' then
    if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
-  elseif cmd=='set' then
-   _ENV[a1]=a2
-  elseif cmd=='let' then
-   locals[a1]=a2
   elseif cmd=='fn' then
    return function(...)
     local args,new_locals={...},copy(locals)
@@ -229,8 +195,42 @@ function _eval_scope(ast,locals)
     end
     return _eval_scope(a2,new_locals)
    end
-  elseif type(cmd)=='table' then
-   return deli(node)
+  end
+
+  local ev_node={}
+  for i=2,#node do
+   local ret={_eval_node(node[i])}
+   for rv in all(ret) do
+    add(ev_node,rv)
+   end
+  end
+
+  if type(cmd)=='function' then
+   return cmd(unpack(ev_node))
+  elseif cmd=='tab' then
+   return ev_node
+  end
+
+  a1,a2,a3=unpack(ev_node)
+  if cmd=='+' then
+   return a1+a2
+  elseif cmd=='*' then
+   return a1*a2
+  elseif cmd=='cat' then
+   return a1..a2
+  elseif cmd=='@' then
+   local r=a1[a2]
+   if (a3) return r[a3] else return r
+  elseif cmd=='@=' then
+   a1[a2]=a3
+  elseif cmd=='for' then
+   for i=a1,a2 do
+    a3(i)
+   end
+  elseif cmd=='set' then
+   _ENV[a1]=a2
+  elseif cmd=='let' then
+   locals[a1]=a2
   end
  end
 
