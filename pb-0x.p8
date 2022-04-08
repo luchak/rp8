@@ -10,45 +10,40 @@ semitone=2^(1/12)
 
 -- give audio time to settle
 -- before starting synthesis
-function audio_wait(frames)
- pause_frames=frames
- audio_root_obj=nil
-end
-audio_wait(6)
-
-function copy_state()
- audio_wait(2)
- printh(state:save(),'@clip')
-end
-
-function paste_state()
- audio_wait(2)
- local pd=stat(4)
- if pd!='' then
-  state=state_load(pd) or state
-  seq_helper.state=state
- end
-end
 
 eval[[(
+(set audio_wait (fn (frames) (
+ (set pause_frames $frames)
+ (set audio_root_obj nil)
+)))
+($audio_wait 6)
+(set copy_state (fn () (
+ ($audio_wait 2)
+ ($printh ((@ $state save) $state) @clip)
+)))
+(set paste_state (fn () (
+ ($audio_wait 2)
+ (let pd ($stat 4))
+ (if (not (eq $pd "")) (
+  (set state (or ($state_load $pd) $state))
+  (@= $seq_helper state $state)
+ ) ())
+)))
 (set show_help true)
 (set toggle_help (fn () (
  (set show_help (not $show_help))
  ($menuitem 4 ($trn $show_help "hide tooltips" "show tooltips") $toggle_help)
 )))
+(set audio_rec false)
+(set start_rec (fn () (
+ (set audio_rec true)
+ ($menuitem 3 "stop export" $stop_rec)
+)))
+(set stop_rec (fn () (
+ (if $audio_rec ($extcmd audio_end))
+ ($menuitem 3 "start export" $start_rec)
+)))
 )]]
-
-audio_rec=false
-function start_rec()
- audio_rec=true
- menuitem(3,'stop export',stop_rec)
- extcmd'audio_rec'
-end
-
-function stop_rec()
- if (audio_rec) extcmd'audio_end'
- menuitem(3,'start export',start_rec)
-end
 
 function _init()
  eval[[(
@@ -182,6 +177,8 @@ end
 
 function _draw()
  ui:draw(state)
+ rectfill(0,0,30,7,0)
+ print(stat(0),0,0,7)
  palt(0,false)
 end
 
@@ -1224,7 +1221,7 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
  (
   (let xp (* (+ $i -1) 8)),
   ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
-  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' 16 17 33 18 34 32))),
+  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (vals 16 17 33 18 34 32))),
  )
 ))
 (let tb ($momentary_new 24 $yp 26
@@ -1252,7 +1249,7 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
  )
 )
 ($add_to_ui
- ($spin_btn_new 0 (+ $yp 8) (' 162 163 164 165) "bank select"
+ ($spin_btn_new 0 (+ $yp 8) (vals 162 163 164 165) "bank select"
   ($state_make_get_set (cat $key _bank))
  )
 )
@@ -1261,7 +1258,7 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
   ($pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
  )
 ))
-($foreach ('
+($foreach (vals
  {x=40,o=6,tt="tune"}
  {x=56,o=7,tt="filter cutoff"}
  {x=72,o=8,tt="filter resonance"}
@@ -1280,11 +1277,6 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
 ))]]
 
 function pirc_ui_init(add_to_ui)
- for i=1,16 do
-  add_to_ui(
-   step_btn_new(i*8-8,120,'dr',i,split'19,20,36,35')
-  )
- end
  for k,d in pairs(parse[[{
   bd={x=32,y=104,s=150,b=38,tt="bass drum"},
   sd={x=32,y=112,s=152,b=41,tt="snare drum"},
