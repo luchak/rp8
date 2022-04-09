@@ -82,7 +82,7 @@ function timeline_new(default_patch, savedata)
  end
 
  -- add to overrides
- -- adding to events will be handled in tick/bar handlers if required
+ -- events will be collected in tick/bar handlers
  function timeline:record_event(k,v)
   self.overrides[k]=v
   self.has_override=true
