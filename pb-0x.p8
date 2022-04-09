@@ -8,7 +8,7 @@ __lua__
 
 semitone=2^(1/12)
 
--- give audio time to settle
+-- settle audio
 -- before starting synthesis
 
 eval[[(
@@ -186,7 +186,7 @@ function audio_update()
    end
   end
   for i=1,todo do
-   -- dc filter plus soft clipping
+   -- dc filter and soft clipping
    local x=buf[i]<<8
    dcf+=(x-dcf)>>8
    x-=dcf
@@ -312,7 +312,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off then
-   -- TODO: param updates should be reflected on every step?
+   -- TODO: update params every step?
    _detune=2^(1.5*tun-0.75)
    _op,_dp=0,(_dp0<<16)*_detune
    _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
@@ -800,7 +800,7 @@ function state_new(savedata)
  end
 
  function s:get_pat_steps(syn)
-  -- assume pats are aliased, always editing current
+  -- pats are aliased, always editing current
   return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn].st)
  end
 
@@ -898,10 +898,7 @@ end
 
 state_is_song_mode=function(state) return state.song_mode end
 
--- passthrough audio processor
--- that splits blocks to allow
--- for sample-accurate note
--- triggering
+-- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
  return {
   state=state,
@@ -948,8 +945,8 @@ function ui_new()
   hover_frames=0,
   help_on=false
  }]]
- -- obj.focus
- -- obj.hover
+ -- focus
+ -- hover
 
  function obj:add_widget(w)
   w=merge(copy(widget_defaults),w)
@@ -995,7 +992,7 @@ function ui_new()
   local f=self.focus
   palt(0,true)
 
-  -- draw focus indicator
+  -- draw focus box
   if f then
    spr(1,f.x,f.y,1,1)
    sspr(32,0,4,8,f.x+f.w*4-4,f.y)
@@ -1097,7 +1094,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
 end
 
 function step_btn_new(x,y,syn,step,sprites)
- -- last sprite is for the current step
+ -- last sprite is for current step
  local n=#sprites-1
  return {
   x=x,y=y,tt='step edit',click_act=true,
