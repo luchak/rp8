@@ -52,16 +52,16 @@ function _init()
 (set state ($state_new))
 (set add_ui (fn (w) ((@ $ui add_widget) $ui $w)))
 ($header_ui_init $add_ui)
-($pbl_ui_init $add_ui b0 7 32)
-($pbl_ui_init $add_ui b1 19 64)
-($pirc_ui_init $add_ui)
+($syn_ui_init $add_ui b0 7 32)
+($syn_ui_init $add_ui b1 19 64)
+($drum_ui_init $add_ui)
 ($menuitem 1 "save to clip" $copy_state)
 ($menuitem 2 "load from clip" $paste_state)
 ($stop_rec)
 ($toggle_help)
 )]]
 
- local pbl0,pbl1=synth_new(7),synth_new(19)
+ local syn0,syn1=synth_new(7),synth_new(19)
  local drums={
   sweep_new(unpack_split'38,0.092,0.0126,0.12,0.7,0.7,0.4'),
   snare_new(),
@@ -76,8 +76,8 @@ function _init()
 
  mixer=mixer_new(
   {
-   b0={obj=pbl0,lev=0.5,od=0.0,fx=0},
-   b1={obj=pbl1,lev=0.5,od=0.5,fx=0},
+   b0={obj=syn0,lev=0.5,od=0.0,fx=0},
+   b1={obj=syn1,lev=0.5,od=0.5,fx=0},
    dr={obj=drum_mixer,lev=0.5,od=0.5,fx=0},
   },
   delay,
@@ -94,8 +94,8 @@ function _init()
     state.pat_status
    if (not state.playing) return
    local now,nl,bar=state.tick,state.base_note_len,state.bar
-   if (pstat.b0.on) pbl0:note(pseq.b0,patch,now,nl)
-   if (pstat.b1.on) pbl1:note(pseq.b1,patch,now,nl)
+   if (pstat.b0.on) syn0:note(pseq.b0,patch,now,nl)
+   if (pstat.b1.on) syn1:note(pseq.b1,patch,now,nl)
    if pstat.dr.on then
     local dseq=pseq.dr
     for idx,drum in ipairs(drums) do
@@ -106,7 +106,7 @@ function _init()
    mixer:note(patch)
    svf:note(patch,bar,now)
 
-   local mix_lev,dl_t,dl_fb,comp_thresh=unpack_patch(patch,3,6)
+   local mix_lev,dl_t,dl_fb,comp_th=unpack_patch(patch,3,6)
    mixer.lev=pow3(mix_lev)*8
 
    dl_t=(dl_t<<7)
@@ -118,7 +118,7 @@ function _init()
    delay.l=dl_t*nl
    delay.fb=sqrt(dl_fb)*0.95
 
-   comp.thresh=0.05+0.95*pow3(comp_thresh)
+   comp.th=0.05+0.95*pow3(comp_th)
 
    state:next_tick()
   end
@@ -556,28 +556,27 @@ function mixer_new(_srcs,_fx,_filt,_lev)
  }
 end
 
-function comp_new(src,thresh,ratio,_att,_rel)
+function comp_new(src,th,_ratio,_att,_rel)
+ local _env=0
  return {
   src=src,
-  thresh=thresh,
-  ratio=ratio,
-  env=0,
+  th=th,
   update=function(self,b,first,last)
    self.src:update(b,first,last)
-   local env,att,rel=self.env,_att,_rel
-   local thresh,ratio=self.thresh,1/self.ratio
+   local env,att,rel=_env,_att,_rel
+   local th,ratio=self.th,1/_ratio
    -- makeup targets 0.6
-   local makeup=max(1,0.6/((0.6-thresh)*ratio+thresh))
+   local makeup=max(1,0.6/((0.6-th)*ratio+th))
    for i=first,last do
     local x=abs(b[i])
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
-    local g,te=makeup,thresh/(env+0x0.0010)
-    if (env>thresh) g*=te+ratio*(1-te)
+    local g,te=makeup,th/(env+0x0.0010)
+    if (env>th) g*=te+ratio*(1-te)
     b[i]*=g
    end
-   self.env=env
+   _env=env
   end
  }
 end
@@ -664,7 +663,7 @@ pat_param_idx=parse[[{b0=11,b1=23,dr=35}]]
 -- see note 003
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
-pbl_pat_template=parse[[{
+syn_pat_template=parse[[{
  nt=`($rep 16 19)
  st=`($rep 16 64)
 }]]
@@ -782,7 +781,7 @@ function state_new(savedata)
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
    if not pat then
-    if (syn=='b0' or syn=='b1') pat=copy(pbl_pat_template) else pat=copy(drum_pat_template)
+    if (syn=='b0' or syn=='b1') pat=copy(syn_pat_template) else pat=copy(drum_pat_template)
     syn_pats[pat_idx]=pat
    end
    self.pat_seqs[syn]=pat
@@ -942,7 +941,7 @@ function ui_new()
   mouse_tiles={},
   mx=0,
   my=0,
-  hover_frames=0,
+  hover_t=0,
   help_on=false
  }]]
  -- focus
@@ -1003,7 +1002,7 @@ function ui_new()
   memcpy(0x9000+next_off,0x6000+next_off,448)
   local hover=self.hover
   spr(15,mx,my)
-  if show_help and self.hover_frames>30 and hover and hover.active and hover.tt then
+  if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
    local tt=hover.tt
    local xp=trn(mx<56,mx+7,mx-2-4*#tt)
    rectfill(xp,my,xp+4*#tt,my+6,1)
@@ -1058,7 +1057,7 @@ function ui_new()
    input+=trn(focus.drag_amt>0,stat(36),0)
    if (input!=0) focus:input(state,input)
   end
-  if (self.hover==hover and click==0) self.hover_frames+=1 else self.hover_frames=0
+  if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
 
   self.last_click,self.hover,self.last_my,self.focus=click,hover,my,focus
  end
@@ -1066,7 +1065,7 @@ function ui_new()
  return obj
 end
 
-function pbl_note_btn_new(x,y,syn,step)
+function syn_note_btn_new(x,y,syn,step)
  return {
   x=x,y=y,drag_amt=0.05,tt='note (drag)',
   get_sprite=function(self,state)
@@ -1213,11 +1212,11 @@ transport_number_new=eval[[(fn (x y w obj key tt input) ($wrap_override
  $state_is_song_mode
 ))]]
 
-pbl_ui_init=eval[[(fn (add_ui key base_idx yp) (
+syn_ui_init=eval[[(fn (add_ui key base_idx yp) (
 (for 1 16 (fn (i)
  (
   (let xp (* (+ $i -1) 8)),
-  ($add_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
+  ($add_ui ($syn_note_btn_new $xp (+ $yp 24) $key $i)),
   ($add_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
  )
 ))
@@ -1227,13 +1226,13 @@ pbl_ui_init=eval[[(fn (add_ui key base_idx yp) (
 ) (' {click_act=false drag_amt=0.05})))
 ($add_ui
  ($push_new 8 $yp 28
-  (fn (state) (set copy_buf_pbl ($copy (@ $state pat_seqs $key))))
+  (fn (state) (set copy_buf_syn ($copy (@ $state pat_seqs $key))))
   "copy pattern"
  )
 )
 ($add_ui
  ($push_new 16 $yp 27
-  (fn (state) (if $copy_buf_pbl ($merge (@ $state pat_seqs $key) $copy_buf_pbl) nil))
+  (fn (state) (if $copy_buf_syn ($merge (@ $state pat_seqs $key) $copy_buf_syn) nil))
   "paste pattern"
  )
 )
@@ -1270,7 +1269,7 @@ pbl_ui_init=eval[[(fn (add_ui key base_idx yp) (
 ($map 0 4 0 $yp 16 2)
 ))]]
 
-pirc_ui_init=eval[[(fn (add_ui) (
+drum_ui_init=eval[[(fn (add_ui) (
 (for 1 16 (fn (i) ($add_ui
  ($step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
 )))
@@ -1300,10 +1299,10 @@ pirc_ui_init=eval[[(fn (add_ui) (
  )))
 )
 ($add_ui ($push_new
- 8 104 11 (fn (state) (set copy_buf_pirc ($copy (@ $state pat_seqs dr)))) "copy pattern"
+ 8 104 11 (fn (state) (set copy_buf_drum ($copy (@ $state pat_seqs dr)))) "copy pattern"
 ))
 ($add_ui ($push_new
- 16 104 10 (fn (state) ($merge (@ $state pat_seqs dr) $copy_buf_pirc)) "paste pattern"
+ 16 104 10 (fn (state) ($merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
 ))
 ($add_ui ($toggle_new
  0 104 188 189 active ($state_make_get_set_param_bool 34)
@@ -1410,9 +1409,9 @@ function header_ui_init(add_ui)
    add(dts,dt..suffix..',0,15')
   end
  end
- local dt_spin_btn=spin_btn_new(16,24,dts,'delay time',state_make_get_set_param(4))
- dt_spin_btn.w=3
- add_ui(dt_spin_btn)
+ local dt_btn=spin_btn_new(16,24,dts,'delay time',state_make_get_set_param(4))
+ dt_btn.w=3
+ add_ui(dt_btn)
 
  local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  filt_toggle.click_act=false
