@@ -86,11 +86,6 @@ function _init()
  )
  comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
 
- local mixer_params=parse[[{
-  b0={s=7,e=9,lev=8},
-  b1={s=19,e=21,lev=8},
-  dr={s=31,e=33,lev=16},
- }]]
  seq_helper=seq_helper_new(
   state,comp,function()
    local patch,pseq,pstat=
@@ -124,12 +119,6 @@ function _init()
    delay.fb=sqrt(dl_fb)*0.95
 
    comp.thresh=0.05+0.95*pow3(comp_thresh)
-
-   for key,src in pairs(mixer_params) do
-    local msk=mixer.srcs[key]
-    local lev,od,fx=unpack_patch(patch,src.s,src.e)
-    msk.lev,msk.od,msk.fx=src.lev*pow3(lev),od,pow3(fx)
-   end
 
    state:next_tick()
   end
@@ -517,19 +506,30 @@ function drum_mixer_new(srcs)
 end
 
 filtmap=parse[[{b0=3,b1=4,dr=5}]]
-function mixer_new(srcs,fx,filt,lev)
+mixer_params=parse[[{
+ b0={s=7,e=9,lev=8},
+ b1={s=19,e=21,lev=8},
+ dr={s=31,e=33,lev=16},
+}]]
+function mixer_new(_srcs,_fx,_filt,_lev)
+ local _tmp,_bypass,_fxbuf,_filtsrc={},{},{},1
  return {
-  srcs=srcs,lev=lev,tmp={},bypass={},fxbuf={},filtsrc=1,
-  note=function(self,state)
-   self.filtsrc=flr(state[56]>>1)
+  note=function(self,patch)
+   _lev=pow3(patch[3]>>7)*8
+   _filtsrc=flr(patch[56]>>1)
+   for key,src in pairs(mixer_params) do
+    local sk=_srcs[key]
+    local lev,od,fx=unpack_patch(patch,src.s,src.e)
+    sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od,pow3(fx)
+   end
   end,
   update=function(self,b,first,last)
-   local fxbuf,tmp,bypass,lev,filtsrc=self.fxbuf,self.tmp,self.bypass,self.lev,self.filtsrc
+   local fxbuf,tmp,bypass,lev,filtsrc=_fxbuf,_tmp,_bypass,_lev,_filtsrc
    for i=first,last do
     b[i],fxbuf[i]=0,0
    end
 
-   for k,src in pairs(self.srcs) do
+   for k,src in pairs(_srcs) do
     local slev,od,fx=src.lev,src.od*src.od,src.fx
     src.obj:update(tmp,first,last,bypass)
     local odf=0.3+47.7*od*od
@@ -538,7 +538,7 @@ function mixer_new(srcs,fx,filt,lev)
      local x=mid(-1,tmp[i]*odf,1)
      tmp[i]=slev*odfi*(x-0.148148*x*x*x)
     end
-    if (filtmap[k]==filtsrc) filt:update(tmp,first,last)
+    if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
     for i=first,last do
      local x=tmp[i]
      b[i]+=x*lev
@@ -546,8 +546,8 @@ function mixer_new(srcs,fx,filt,lev)
     end
    end
 
-   fx:update(fxbuf,first,last)
-   local drlev=self.srcs.dr.lev
+   _fx:update(fxbuf,first,last)
+   local drlev=_srcs.dr.lev
    for i=first,last do
     b[i]+=(fxbuf[i]+bypass[i]*drlev)*lev
    end
