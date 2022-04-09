@@ -233,6 +233,8 @@ function _eval_scope(ast,locals)
    _ENV[a1]=a2
   elseif cmd=='let' then
    locals[a1]=a2
+  elseif cmd=='tab' then
+   return ev_node
   -- else
   --  return ev_node[#ev_node]
   end
@@ -241,11 +243,13 @@ function _eval_scope(ast,locals)
  return _eval_node(ast)
 end
 
-function eval(src,locals)
+function eval(src)
  log('exec script')
- return _eval_scope(parse(src),locals or {})
+ return _eval_scope(parse(src),{})
 end
 
 function take(i,...)
  return pack(...)[i]
 end
+
+make_obj_cb=eval[[(fn (n) (fn (o) ((@ $o $n) $o)))]]

@@ -8,6 +8,8 @@ __lua__
 
 semitone=2^(1/12)
 
+function newtab() return {} end
+
 -- give audio time to settle
 -- before starting synthesis
 
@@ -176,8 +178,8 @@ end
 
 function _draw()
  ui:draw(state)
- rectfill(0,0,30,7,0)
- print(stat(0),0,0,7)
+ --rectfill(0,0,30,7,0)
+ --print(stat(0),0,0,7)
  palt(0,false)
 end
 
@@ -855,6 +857,10 @@ function state_new(savedata)
   load_bar()
  end
 
+ function s:copy_overrides_to_loop()
+  self.tl:copy_overrides_to_loop()
+ end
+
  load_bar()
  return s
 end
@@ -1338,7 +1344,7 @@ function header_ui_init(add_to_ui)
    0,0,6,7,
    'play/pause',
    state_make_get_set'playing',
-   function(s) s:toggle_playing() end
+   make_obj_cb('toggle_playing')
   )
  )
  add_to_ui(
@@ -1346,7 +1352,7 @@ function header_ui_init(add_to_ui)
    24,0,172,173,
    'pattern/song mode',
    state_is_song_mode,
-   function(s) s:toggle_song_mode() end
+   make_obj_cb('toggle_song_mode')
   )
  )
  song_only(
@@ -1355,7 +1361,7 @@ function header_ui_init(add_to_ui)
     8,0,231,232,
     'record automation',
     state_make_get_set('tl','rec'),
-    function(s) s:toggle_rec() end
+    make_obj_cb('toggle_rec')
    ),
    239,
    function(s) return (not s.tl.has_override) or s.tl.rec end,
@@ -1380,41 +1386,15 @@ function header_ui_init(add_to_ui)
   5
  )
 
- add_to_ui(momentary_new(
-  0,8,242,
-  function(s)
-   s:copy_seq()
-  end,
-  'copy loop'
- ))
- song_only(momentary_new(
-  8,8,241,
-  function(s)
-   s:cut_seq()
-  end,
-  'cut loop'
- ),199)
- add_to_ui(momentary_new(
-  0,16,247,
-  function(s)
-   s:paste_seq()
-  end,
-  'fill loop'
- ))
- song_only(momentary_new(
-  8,16,243,
-  function(s)
-   s:insert_seq()
-  end,
-  'insert loop'
- ),201)
- song_only(momentary_new(
-  8,24,246,
-  function(s)
-   s.tl:copy_overrides_to_loop()
-  end,
-  'commit touched controls'
- ),204)
+ eval[[(fn (add_to_ui song_only) (
+ ($add_to_ui ($momentary_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
+ ($song_only ($momentary_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
+ ($add_to_ui ($momentary_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
+ ($song_only ($momentary_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
+ ($song_only
+  ($momentary_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
+ 204)
+ ))]](add_to_ui,song_only)
 
  for s in all(parse[[(
   "16,8,1,tempo",
