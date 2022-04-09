@@ -84,8 +84,7 @@ function consume(r,test,s)
  until false
 end
 
--- make sure to always use
--- " (not ') when hand serializing
+-- strings must use " (not ')
 function _parse(read)
  local c
  repeat
