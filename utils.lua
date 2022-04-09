@@ -45,7 +45,7 @@ function stringify(v)
   end
   return s..'}'
  else
-  return '[?]'
+  return t..' [?]'
  end
 end
 
@@ -118,6 +118,8 @@ function _parse(read)
    k=tonum(k) or k
    t[k]=_parse(read)
   until false
+ elseif c=='`' then
+  return _eval_scope(_parse(read),{})
  else
   -- allow (most) bare strings
   local s=consume(read,function (c) return is_id(c) end,c)
@@ -170,13 +172,12 @@ function pow4(x) return pow3(x)*x end
 
 function _eval_scope(ast,locals)
  local function _eval_node(node)
-  local typ=type(node)
-  if typ=='string' and sub(node,1,1)=='$' then
-   local tail=sub(node,2)
-   return locals[tail] or _ENV[tail]
+  if type(node)=='string' and sub(node,1,1)=='$' then
+   local s=sub(node,2)
+   return locals[s] or _ENV[s]
   end
 
-  if (typ!='table') return node;
+  if (type(node)!='table') return node;
 
   local cmd,a1,a2,a3=unpack(node)
   cmd=_eval_node(cmd)
@@ -187,28 +188,30 @@ function _eval_scope(ast,locals)
    if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
   elseif cmd=='fn' then
    return function(...)
-    log('exec script fn')
-    local args,new_locals={...},copy(locals)
-    for i,v in ipairs(a1) do
-     new_locals[v]=args[i]
+    local args,new_locals={...},{}
+    for k,v in pairs(locals) do
+     new_locals[k]=v
+    end
+    for k,v in ipairs(a1) do
+     new_locals[v]=args[k]
     end
     return _eval_scope(a2,new_locals)
    end
   end
 
-  local ev_node={}
+  local vals={}
   for i=2,#node do
    local ret={_eval_node(node[i])}
    for rv in all(ret) do
-    add(ev_node,rv)
+    add(vals,rv)
    end
   end
 
   if type(cmd)=='function' then
-   return cmd(unpack(ev_node))
+   return cmd(unpack(vals))
   end
 
-  a1,a2,a3=unpack(ev_node)
+  a1,a2,a3=unpack(vals)
   if cmd=='+' then
    return a1+a2
   elseif cmd=='*' then
@@ -234,9 +237,9 @@ function _eval_scope(ast,locals)
   elseif cmd=='let' then
    locals[a1]=a2
   elseif cmd=='tab' then
-   return ev_node
-  -- else
-  --  return ev_node[#ev_node]
+   return vals
+  else
+   return vals[#vals]
   end
  end
 
@@ -244,7 +247,6 @@ function _eval_scope(ast,locals)
 end
 
 function eval(src)
- log('exec script')
  return _eval_scope(parse(src),{})
 end
 
@@ -252,4 +254,11 @@ function take(i,...)
  return pack(...)[i]
 end
 
-make_obj_cb=eval[[(fn (n) (fn (o) ((@ $o $n) $o)))]]
+eval[[(
+(set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
+(set rep (fn (n x) (
+ (let a (tab))
+ (for 1 $n (fn () ($add $a $x)))
+ $a
+)))
+)]]
