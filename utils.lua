@@ -233,6 +233,8 @@ function _eval_scope(ast,locals)
    _ENV[a1]=a2
   elseif cmd=='let' then
    locals[a1]=a2
+  else
+   return ev_node[#ev_node]
   end
  end
 
@@ -242,4 +244,8 @@ end
 function eval(src,locals)
  log('exec script')
  return _eval_scope(parse(src),locals or {})
+end
+
+function take(i,...)
+ return pack(...)[i]
 end
