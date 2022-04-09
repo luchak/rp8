@@ -233,8 +233,8 @@ function _eval_scope(ast,locals)
    _ENV[a1]=a2
   elseif cmd=='let' then
    locals[a1]=a2
-  else
-   return ev_node[#ev_node]
+  -- else
+  --  return ev_node[#ev_node]
   end
  end
 
