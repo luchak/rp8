@@ -219,6 +219,8 @@ function _eval_scope(ast,locals)
    return (a1 or a2)
   elseif cmd=='eq' then
    return a1==a2
+  elseif cmd=='gt' then
+   return a1>a2
   elseif cmd=='not' then
    return not a1
   elseif cmd=='cat' then

@@ -48,7 +48,7 @@ loop_start
 make_obj_cb
 map_table
 merge
-mouse_tiles
+mtiles
 mx
 my
 note_len
