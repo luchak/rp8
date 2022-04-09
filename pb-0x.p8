@@ -52,11 +52,11 @@ function _init()
 ($cls)
 (set ui ($ui_new))
 (set state ($state_new))
-(set add_to_ui (fn (w) ((@ $ui add_widget) $ui $w)))
-($header_ui_init $add_to_ui)
-($pbl_ui_init $add_to_ui b0 7 32)
-($pbl_ui_init $add_to_ui b1 19 64)
-($pirc_ui_init $add_to_ui)
+(set add_ui (fn (w) ((@ $ui add_widget) $ui $w)))
+($header_ui_init $add_ui)
+($pbl_ui_init $add_ui b0 7 32)
+($pbl_ui_init $add_ui b1 19 64)
+($pirc_ui_init $add_ui)
 ($menuitem 1 "save to clip" $copy_state)
 ($menuitem 2 "load from clip" $paste_state)
 ($stop_rec)
@@ -695,21 +695,23 @@ function state_new(savedata)
   b1_bank=1,
   dr_bank=1,
   song_mode=false,
-  samp={1=0}
+  samp=(0),
+  patch={},
+  pat_seqs={},
+  pat_status={}
  }]]
 
- s.tl=timeline_new(default_patch)
- s.pat_patch=copy(default_patch)
- s.patch={}
- s.pat_seqs={}
- s.pat_status={}
- if savedata then
-  s.tl=timeline_new(default_patch,savedata.tl)
-  s.pat_patch=dec_bytes(savedata.pat_patch)
-  s.song_mode=savedata.song_mode
-  s.pat_store=map_table(savedata.pat_store,dec_bytes,2)
-  s.samp=dec_bytes(savedata.samp)
- end
+ eval[[(fn (s dat) (
+ (@= $s tl ($timeline_new $default_patch))
+ (@= $s pat_patch ($copy $default_patch))
+ (if $dat (
+  (@= $s tl ($timeline_new $default_patch (@ $dat tl)))
+  (@= $s pat_patch ($dec_bytes (@ $dat pat_patch)))
+  (@= $s song_mode (@ $dat song_mode))
+  (@= $s pat_store ($map_table (@ $dat pat_store) $dec_bytes 2))
+  (@= $s samp ($dec_bytes (@ $dat samp)))
+ ))
+ ))]](s,savedata)
 
  function s:_init_tick()
   local patch=self.patch
@@ -1143,7 +1145,7 @@ function toggle_new(x,y,s_off,s_on,tt,get,set)
  }
 end
 
-function momentary_new(x,y,s,cb,tt)
+function push_new(x,y,s,cb,tt)
  return {
   x=x,y=y,tt=tt,click_act=true,
   get_sprite=function()
@@ -1199,14 +1201,14 @@ function number_new(x,y,w,tt,get,input)
  }
 end
 
-function wrap_override(w,s_override,get_not_override,override_active)
+function wrap_override(w,s_override,get_not_override,active)
  local get_sprite=w.get_sprite
  w.get_sprite=function(self,state)
   if get_not_override(state) then
    self.active=true
    return get_sprite(self,state)
   else
-   self.active=override_active
+   self.active=active
    return s_override
   end
  end
@@ -1219,45 +1221,45 @@ transport_number_new=eval[[(fn (x y w obj key tt input) ($wrap_override
  $state_is_song_mode
 ))]]
 
-pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
+pbl_ui_init=eval[[(fn (add_ui key base_idx yp) (
 (for 1 16 (fn (i)
  (
   (let xp (* (+ $i -1) 8)),
-  ($add_to_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
-  ($add_to_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
+  ($add_ui ($pbl_note_btn_new $xp (+ $yp 24) $key $i)),
+  ($add_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
  )
 ))
-(let tb ($momentary_new 24 $yp 26
+(let tb ($push_new 24 $yp 26
  (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
  "transpose (drag)"
 ))
 (@= $tb click_act false)
 (@= $tb drag_amt 0.05)
-($add_to_ui $tb)
-($add_to_ui
- ($momentary_new 8 $yp 28
+($add_ui $tb)
+($add_ui
+ ($push_new 8 $yp 28
   (fn (state) (set copy_buf_pbl ($copy (@ $state pat_seqs $key))))
   "copy pattern"
  )
 )
-($add_to_ui
- ($momentary_new 16 $yp 27
+($add_ui
+ ($push_new 16 $yp 27
   (fn (state) (if $copy_buf_pbl ($merge (@ $state pat_seqs $key) $copy_buf_pbl) nil))
   "paste pattern"
  )
 )
-($add_to_ui
+($add_ui
  ($toggle_new 0 $yp 186 187 active
   ($state_make_get_set_param_bool (+ $base_idx 3))
  )
 )
-($add_to_ui
+($add_ui
  ($spin_btn_new 0 (+ $yp 8) (' (162 163 164 165)) "bank select"
   ($state_make_get_set (cat $key _bank))
  )
 )
 (for 1 6 (fn (i)
- ($add_to_ui
+ ($add_ui
   ($pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
  )
 ))
@@ -1269,18 +1271,18 @@ pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
  {x=104,o=10,tt="filter env decay"}
  {x=120,o=11,tt="accent depth"}
  ))
- (fn (d) ($add_to_ui
+ (fn (d) ($add_ui
   ($dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
 )
-($add_to_ui
+($add_ui
  ($toggle_new 32 $yp 2 3 waveform ($state_make_get_set_param_bool (+ $base_idx 5)))
 )
 ($map 0 4 0 $yp 16 2)
 ))]]
 
-pirc_ui_init=eval[[(fn (add_to_ui) (
-(for 1 16 (fn (i) ($add_to_ui
+pirc_ui_init=eval[[(fn (add_ui) (
+(for 1 16 (fn (i) ($add_ui
  ($step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
 )))
 ($foreach
@@ -1293,10 +1295,10 @@ pirc_ui_init=eval[[(fn (add_to_ui) (
   {k=sp,x=96,y=112,s=174,b=53,tt=sample}
  ))
  (fn (d) (
-  ($add_to_ui ($radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) ($state_make_get_set drum_sel)))
+  ($add_ui ($radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) ($state_make_get_set drum_sel)))
   ($foreach
    (' ({x=8,o=2,tt=level} {x=16,o=0,tt=tune} {x=24,o=1,tt=decay}))
-   (fn (c) ($add_to_ui
+   (fn (c) ($add_ui
     ($dial_new (+ (@ $d x) (@ $c x)) (@ $d y) 112 16 (+ (@ $d b) (@ $c o)) (cat (cat (@ $d k) " ") (@ $c tt)))
    ))
   )
@@ -1304,42 +1306,42 @@ pirc_ui_init=eval[[(fn (add_to_ui) (
 )
 ($foreach
  (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
- (fn (c) ($add_to_ui ($toggle_new
+ (fn (c) ($add_ui ($toggle_new
   (@ $c x) 96 170 171 (cat (@ $c tt) "fx bypass") ($state_make_get_set_param_bool 37 (@ $c b))
  )))
 )
-($add_to_ui ($momentary_new
- 8 104 11 (fn (state b) (set copy_buf_pirc ($copy (@ $state pat_seqs dr)))) "copy pattern"
+($add_ui ($push_new
+ 8 104 11 (fn (state) (set copy_buf_pirc ($copy (@ $state pat_seqs dr)))) "copy pattern"
 ))
-($add_to_ui ($momentary_new
- 16 104 10 (fn (state b) ($merge (@ $state pat_seqs dr) $copy_buf_pirc)) "paste pattern"
+($add_ui ($push_new
+ 16 104 10 (fn (state) ($merge (@ $state pat_seqs dr) $copy_buf_pirc)) "paste pattern"
 ))
-($add_to_ui ($toggle_new
+($add_ui ($toggle_new
  0 104 188 189 active ($state_make_get_set_param_bool 34)
 ))
-($add_to_ui ($spin_btn_new
+($add_ui ($spin_btn_new
  0 112 (' (166 167 168 169)) "bank select" ($state_make_get_set dr_bank)
 ))
-(for 1 6 (fn (i) ($add_to_ui
+(for 1 6 (fn (i) ($add_ui
  ($pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
 )))
 ($map 0 8 0 96 16 4)
 ))]]
 
-function header_ui_init(add_to_ui)
+function header_ui_init(add_ui)
  local function hdial(x,y,idx,tt)
-  add_to_ui(
+  add_ui(
    dial_new(x,y,128,16,idx,tt)
   )
  end
 
  local function song_only(w,s_not_song)
-  add_to_ui(
+  add_ui(
    wrap_override(w,s_not_song,state_is_song_mode,false)
   )
  end
 
- add_to_ui(
+ add_ui(
   toggle_new(
    0,0,6,7,
    'play/pause',
@@ -1347,7 +1349,7 @@ function header_ui_init(add_to_ui)
    make_obj_cb('toggle_playing')
   )
  )
- add_to_ui(
+ add_ui(
   toggle_new(
    24,0,172,173,
    'pattern/song mode',
@@ -1370,7 +1372,7 @@ function header_ui_init(add_to_ui)
   233
  )
  song_only(
-  momentary_new(
+  push_new(
    16,0,5,
    function()
     state:go_to_bar(
@@ -1386,15 +1388,15 @@ function header_ui_init(add_to_ui)
   5
  )
 
- eval[[(fn (add_to_ui song_only) (
- ($add_to_ui ($momentary_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
- ($song_only ($momentary_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
- ($add_to_ui ($momentary_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
- ($song_only ($momentary_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
+ eval[[(fn (add_ui song_only) (
+ ($add_ui ($push_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
+ ($song_only ($push_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
+ ($add_ui ($push_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
+ ($song_only ($push_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
  ($song_only
-  ($momentary_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
+  ($push_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
  204)
- ))]](add_to_ui,song_only)
+ ))]](add_ui,song_only)
 
  for s in all(parse[[(
   "16,8,1,tempo",
@@ -1414,7 +1416,7 @@ function header_ui_init(add_to_ui)
    set_filt_pat(state,mid(1,get_filt_pat(state)+b,#svf_pats))
   end)
  filt_pat_ctl.drag_amt=0.02
- add_to_ui(filt_pat_ctl)
+ add_ui(filt_pat_ctl)
 
  local dts={}
  for suffix in all(split(',t,d')) do
@@ -1425,13 +1427,13 @@ function header_ui_init(add_to_ui)
  end
  local dt_spin_btn=spin_btn_new(16,24,dts,'delay time',state_make_get_set_param(4))
  dt_spin_btn.w=3
- add_to_ui(dt_spin_btn)
+ add_ui(dt_spin_btn)
 
  local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
  filt_toggle.click_act=false
  filt_toggle.drag_amt=0.01
- add_to_ui(filt_toggle)
- add_to_ui(
+ add_ui(filt_toggle)
+ add_ui(
   spin_btn_new(64,8,parse[[("--,0,15","MA,0,15","S1,0,15","S2,0,15","DR,0,15")]],'filter source',state_make_get_set_param(56,1))
  )
 
@@ -1441,7 +1443,7 @@ function header_ui_init(add_to_ui)
    hdial(cd.x,sd.y,base_idx+idx,sd.tt..cd.tt)
   end
  end
- add_to_ui(
+ add_ui(
   transport_number_new(32,0,4,'tl','bar','song position',
    function(state,b)
     state:go_to_bar(state.tl.bar+b)
@@ -1452,7 +1454,7 @@ function header_ui_init(add_to_ui)
   toggle_new(56,0,193,194,'loop on/off',state_make_get_set('tl','loop')),
   195
  )
- add_to_ui(
+ add_ui(
   transport_number_new(64,0,4,'tl','loop_start','loop start',
    function(state,b)
     local tl=state.tl
@@ -1462,7 +1464,7 @@ function header_ui_init(add_to_ui)
    end
   )
  )
- add_to_ui(
+ add_ui(
   transport_number_new(84,0,3,'tl','loop_len','loop length',
    function(state,b)
     local tl=state.tl
