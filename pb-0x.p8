@@ -8,9 +8,7 @@ __lua__
 
 semitone=2^(1/12)
 
--- settle audio
--- before starting synthesis
-
+-- settle audio before starting synthesis
 eval[[(
 (set audio_wait (fn (frames) (
  (set pause_t $frames)
@@ -938,7 +936,7 @@ function ui_new()
   widgets={},
   sprites={},
   dirty={},
-  mouse_tiles={},
+  mtiles={},
   mx=0,
   my=0,
   hover_t=0,
@@ -955,7 +953,7 @@ function ui_new()
   local tile=w.tx+w.ty*32
   for dx=0,w.w-1 do
    for dy=0,w.h-1 do
-    self.mouse_tiles[tile+dx+dy*32]=w
+    self.mtiles[tile+dx+dy*32]=w
    end
   end
  end
@@ -1018,7 +1016,7 @@ function ui_new()
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my,k=self.mx,self.my
-  local hover=self.mouse_tiles[mx\4 + (my\4)*32]
+  local hover=self.mtiles[mx\4 + (my\4)*32]
 
   if (stat(30)) k=stat(31)
   if (k=='h') toggle_help()
@@ -1316,6 +1314,8 @@ drum_ui_init=eval[[(fn (add_ui) (
 ($map 0 8 0 96 16 4)
 ))]]
 
+function rec_not_yellow(s) return (not s.tl.has_override) or s.tl.rec end
+
 function header_ui_init(add_ui)
  local hdial=eval[[(fn (add_ui)
  (fn (x y idx tt) ($add_ui ($dial_new $x $y 128 16 $idx $tt)))
@@ -1325,62 +1325,30 @@ function header_ui_init(add_ui)
  (fn (w s_not_song) ($add_ui ($wrap_override $w $s_not_song $state_is_song_mode false)))
  )]](add_ui)
 
- add_ui(
-  toggle_new(
-   0,0,6,7,
-   'play/pause',
-   state_make_get_set'playing',
-   make_obj_cb('toggle_playing')
-  )
- )
- add_ui(
-  toggle_new(
-   24,0,172,173,
-   'pattern/song mode',
-   state_is_song_mode,
-   make_obj_cb('toggle_song_mode')
-  )
- )
- song_only(
-  wrap_override(
-   toggle_new(
-    8,0,231,232,
-    'record automation',
-    state_make_get_set('tl','rec'),
-    make_obj_cb('toggle_rec')
-   ),
-   239,
-   function(s) return (not s.tl.has_override) or s.tl.rec end,
-   true
-  ),
-  233
- )
- song_only(
-  push_new(
-   16,0,5,
-   function()
-    state:go_to_bar(
-     trn(
-      state.tl.bar>state.tl.loop_start,
-      state.tl.loop_start,
-      1
-     )
-    )
-   end,
-   'rewind'
-  ),
-  5
- )
-
  eval[[(fn (add_ui song_only) (
- ($add_ui ($push_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
- ($song_only ($push_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
- ($add_ui ($push_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
- ($song_only ($push_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
- ($song_only
-  ($push_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
- 204)
- ))]](add_ui,song_only)
+($add_ui ($toggle_new
+ 0 0 6 7 "play/pause" ($take 1 ($state_make_get_set playing)) ($make_obj_cb toggle_playing)
+))
+($add_ui ($toggle_new
+ 24 0 172 173 "pattern/song mode" $state_is_song_mode ($make_obj_cb toggle_song_mode)
+))
+($song_only ($wrap_override ($toggle_new
+ 8 0 231 232 "record automation" ($take 1 ($state_make_get_set tl rec))
+ ($make_obj_cb toggle_rec)
+) 239 $rec_not_yellow true) 233)
+($song_only ($push_new 16 0 5 (fn (s)
+ ((@ $s go_to_bar) $s
+  ($trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
+ )
+) rewind) 5)
+($add_ui ($push_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
+($song_only ($push_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
+($add_ui ($push_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
+($song_only ($push_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
+($song_only
+ ($push_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
+204)
+))]](add_ui,song_only)
 
  for s in all(parse[[(
   "16,8,1,tempo",
