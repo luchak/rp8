@@ -17,7 +17,7 @@ function timeline_new(default_patch, savedata)
 
  if (savedata) merge(timeline, savedata)
 
- timeline.load_bar=function(self,patch,i)
+ function timeline:load_bar(patch,i)
   i=i or self.bar
   local bar_data=self.bars[i] or copy(self.def_bar)
   local op=self.overrides
@@ -36,7 +36,7 @@ function timeline_new(default_patch, savedata)
   self.tick=1
  end
 
- timeline.next_tick=function(self,patch,load_bar)
+ function timeline:next_tick(patch,load_bar)
   self.tick+=1
   local tick=self.tick
   local op=self.overrides
@@ -76,23 +76,23 @@ function timeline_new(default_patch, savedata)
   end
  end
 
- timeline._finalize_bar=function(self)
+ function timeline:_finalize_bar()
   if (not self.bars[self.bar]) self.bars[self.bar]=copy(self.def_bar)
   self.bars[self.bar].ev=map_table(self.bar_events,enc_bytes)
  end
 
  -- add to overrides
  -- adding to events will be handled in tick/bar handlers if required
- timeline.record_event=function(self,k,v)
+ function timeline:record_event(k,v)
   self.overrides[k]=v
   self.has_override=true
  end
 
- timeline.clear_overrides=eval[[
+ eval[[(fn (timeline) (@= $timeline clear_overrides
  (fn (self) ((@= $self overrides (tab)) (@= $self has_override false)))
- ]]
+ ))]](timeline)
 
- timeline.toggle_rec=function(self)
+ function timeline:toggle_rec()
   local sr=self.rec
   if sr then
    if (self.has_override) self:_finalize_bar()
@@ -101,7 +101,7 @@ function timeline_new(default_patch, savedata)
   self.rec=not sr
  end
 
- timeline.cut_seq=function(self)
+ function timeline:cut_seq()
   local ls,ll=self.loop_start,self.loop_len
   local cut_end,c,nbs=ls+ll,self:copy_seq(),{}
   for i,b in pairs(self.bars) do
@@ -117,7 +117,7 @@ function timeline_new(default_patch, savedata)
   return c
  end
 
- timeline.copy_seq=function(self)
+ function timeline:copy_seq()
   local c,bars={},self.bars
   for i=1,self.loop_len do
    local bar=i+self.loop_start-1
@@ -126,7 +126,7 @@ function timeline_new(default_patch, savedata)
   return c
  end
 
- timeline.paste_seq=function(self,seq)
+ function timeline:paste_seq(seq)
   local n=#seq
   for i=0,self.loop_len-1 do
    local bar=self.loop_start+i
@@ -134,7 +134,7 @@ function timeline_new(default_patch, savedata)
   end
  end
 
- timeline.copy_overrides_to_loop=function(self)
+ function timeline:copy_overrides_to_loop()
   local op=self.overrides
   for i=0,self.loop_len-1 do
    local bar_idx=self.loop_start+i
@@ -148,7 +148,7 @@ function timeline_new(default_patch, savedata)
   self:clear_overrides()
  end
 
- timeline.insert_seq=function(self,seq)
+ function timeline:insert_seq(seq)
   local bs,ls,ll,nbs=
    self.bars,
    self.loop_start,
@@ -165,7 +165,7 @@ function timeline_new(default_patch, savedata)
   self:paste_seq(seq)
  end
 
- timeline.get_serializable=function(self)
+ function timeline:get_serializable()
   local r={}
   for k in all(split'bars,def_bar,loop_start,loop_len,loop') do
    r[k]=self[k]
