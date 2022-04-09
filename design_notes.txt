@@ -37,3 +37,11 @@ number => draw that sprite
  (subject to width value)
 string => unpack to text
  params and draw those
+
+--
+
+005
+
+heavily inspired by
+https://github.com/JordanTHarris/VAStateVariableFilter
+
