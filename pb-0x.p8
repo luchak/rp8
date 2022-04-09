@@ -1207,13 +1207,11 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-function transport_number_new(x,y,w,obj,key,tt,input)
- return wrap_override(
-  number_new(x,y,w,tt,state_make_get_set(obj,key),input),
-  '--,0,15',
-  state_is_song_mode
- )
-end
+transport_number_new=eval[[(fn (x y w obj key tt input) ($wrap_override
+ ($number_new $x $y $w $tt ($take 1 ($state_make_get_set $obj $key)) $input)
+ "--,0,15"
+ $state_is_song_mode
+))]]
 
 pbl_ui_init=eval[[(fn (add_to_ui key base_idx yp) (
 (for 1 16 (fn (i)
