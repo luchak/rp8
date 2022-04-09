@@ -8,15 +8,13 @@ __lua__
 
 semitone=2^(1/12)
 
-function newtab() return {} end
-
 -- give audio time to settle
 -- before starting synthesis
 
 eval[[(
 (set audio_wait (fn (frames) (
  (set pause_frames $frames)
- (set audio_root_obj nil)
+ (set audio_root_obj)
 )))
 ($audio_wait 6)
 (set copy_state (fn () (
@@ -73,9 +71,7 @@ function _init()
   sample_new(53)
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
- local drum_mixer=submixer_new(drums)
- local delay=delay_new()
- local svf=svf_new()
+ local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()
  local drum_keys=split'bd,sd,hh,cy,pc,sp'
 
  mixer=mixer_new(
@@ -207,7 +203,7 @@ function audio_update()
    x-=dcf
    x=mid(-1,x>>8,1)
    x-=0.148148*x*x*x
-   -- add dither for nicer tails
+   -- dither for nicer tails
    poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
   end
   serial(0x808,0x4300,todo)
@@ -326,11 +322,11 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  if s!=d_off then
+  if s!=n_off then
    -- TODO: param updates should be reflected on every step?
    _detune=2^(1.5*tun-0.75)
    _op,_dp=0,(_dp0<<16)*_detune
-   _ae=lev*lev*boost*trn(s==d_ac,1.5,0.6)
+   _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
    _ted=0.5*pow4(te_base-te_scale*dec)
    _aed=1-ae_ratio*_ted
@@ -359,11 +355,11 @@ function snare_new()
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,41,43)
-  if s!=d_off then
+  if s!=n_off then
    _detune=2^(2*tun-1)
    _op,_dp=0,_dp0*_detune
    _aes,_aen=0.7,0.4
-   if (s==d_ac) _aes,_aen=1.5,0.85
+   if (s==n_ac) _aes,_aen=1.5,0.85
    local lev2,aeo=lev*lev,(tun-0.5)*0.2
    _aes-=aeo
    _aen+=aeo
@@ -401,8 +397,8 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  if s!=d_off then
-   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==d_ac,2.0,0.8)
+  if s!=n_off then
+   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,2.0,0.8)
 
    _detune=2^(tbase+tscale*tun)
 
@@ -447,9 +443,9 @@ function sample_new(base)
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   _dec=1-(0.2*(1-dec)^2)
   _detune=2^(flr((tun-0.5)*24+0.5)/12)
-  if s!=d_off then
+  if s!=n_off then
    _pos=1
-   _amp=lev*lev*trn(s==d_ac,1,0.5)
+   _amp=lev*lev*trn(s==n_ac,1,0.5)
   end
  end
 
@@ -501,8 +497,8 @@ function delay_new()
 end
 
 
-dr_src_fx_masks=split'1,1,2,2,4,4'
-function submixer_new(srcs)
+dr_fx_masks=split'1,1,2,2,4,4'
+function drum_mixer_new(srcs)
  return {
   srcs=srcs,
   fx=127,
@@ -514,7 +510,7 @@ function submixer_new(srcs)
    end
 
    for i,src in ipairs(self.srcs) do
-    if (self.fx&dr_src_fx_masks[i]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
+    if (self.fx&dr_fx_masks[i]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
    end
   end
  }
@@ -587,34 +583,33 @@ function comp_new(src,thresh,ratio,_att,_rel)
 end
 
 svf_pats=parse[[(
-"@///////////////",
-"@///////",
-"@///",
-"@/",
-"@",
-"@//@//@//@//@//@",
-"//@//@////@//@//",
-"/123456789:;<=>@",
-"8899::;;<<==>>@@",
-"8/9/:/;/</=/>/@/",
-"@/>/=/</;/:/9/8/",
-"==/3@@:/23@114:;92>:5<:27<@//;>8;3;43;64</;883=4:",
-">/3/7/</=/8/5/>/2/@/5/4/2/>/3/@/7/3/3/;/</6/2/;/7/",
-"@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8",
-";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/",
-"@//",
-"@////",
-"@//////",
-"@//:/",
-"////////@///////",
-"////@///",
-"//@/",
-"/@",
-":///@/////:/@///",
+"@///////////////"
+"@///////"
+"@///"
+"@/"
+"@"
+"@//@//@//@//@//@"
+"//@//@////@//@//"
+"/123456789:;<=>@"
+"8899::;;<<==>>@@"
+"8/9/:/;/</=/>/@/"
+"@/>/=/</;/:/9/8/"
+"==/3@@:/23@114:;92>:5<:27<@//;>8;3;43;64</;883=4:"
+">/3/7/</=/8/5/>/2/@/5/4/2/>/3/@/7/3/3/;/</6/2/;/7/"
+"@;:=<@:=;8@;<>>@8@<999;8=<==:99:=<8:=:=<;8<<@8=<8"
+";/=/>/@/;/:/9/;/@/;/=/</@/@/</</>/</;/:/@/</;/</@/"
+"@//"
+"@////"
+"@//////"
+"@//:/"
+"////////@///////"
+"////@///"
+"//@/"
+"/@"
+":///@/////:/@///"
 )]]
 
--- heavily inspired by
--- https://github.com/JordanTHarris/VAStateVariableFilter
+-- see note 005
 function svf_new()
  local _z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec=unpack_split'0,0,0.1,0.2,1,1,0,1'
  return {
@@ -660,7 +655,7 @@ end
 -->8
 -- state
 
-n_off,n_on,n_ac,n_sl,n_ac_sl,d_off,d_on,d_ac=unpack_split'64,65,66,67,68,64,65,66'
+n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
 syn_base_idx=parse[[{b0=7,b1=19,dr=31,bd=38,sd=41,hh=44,cy=47,pc=50,sp=53}]]
 
@@ -670,17 +665,17 @@ pat_param_idx=parse[[{b0=11,b1=23,dr=35}]]
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 pbl_pat_template=parse[[{
- nt=(19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19),
- st=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64)
+ nt=`($rep 16 19)
+ st=`($rep 16 64)
 }]]
 
 drum_pat_template=parse[[{
- bd=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
- sd=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
- hh=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
- cy=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
- pc=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64),
- sp=(64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64)
+ bd=`($rep 16 64)
+ sd=`($rep 16 64)
+ hh=`($rep 16 64)
+ cy=`($rep 16 64)
+ pc=`($rep 16 64)
+ sp=`($rep 16 64)
 }]]
 
 function state_new(savedata)
@@ -690,7 +685,7 @@ function state_new(savedata)
   playing=false,
   base_note_len=750,
   note_len=750,
-  drum_sel="bd",
+  drum_sel=bd,
   b0_bank=1,
   b1_bank=1,
   dr_bank=1,
@@ -698,12 +693,12 @@ function state_new(savedata)
   samp=(0),
   patch={},
   pat_seqs={},
-  pat_status={}
+  pat_status={},
+  tl=`($timeline_new $default_patch),
+  pat_patch=`($copy $default_patch),
  }]]
 
  eval[[(fn (s dat) (
- (@= $s tl ($timeline_new $default_patch))
- (@= $s pat_patch ($copy $default_patch))
  (if $dat (
   (@= $s tl ($timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch ($dec_bytes (@ $dat pat_patch)))
@@ -1229,13 +1224,10 @@ pbl_ui_init=eval[[(fn (add_ui key base_idx yp) (
   ($add_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
  )
 ))
-(let tb ($push_new 24 $yp 26
+($add_ui ($merge ($push_new 24 $yp 26
  (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
  "transpose (drag)"
-))
-(@= $tb click_act false)
-(@= $tb drag_amt 0.05)
-($add_ui $tb)
+) (' {click_act=false drag_amt=0.05})))
 ($add_ui
  ($push_new 8 $yp 28
   (fn (state) (set copy_buf_pbl ($copy (@ $state pat_seqs $key))))
@@ -1329,17 +1321,13 @@ pirc_ui_init=eval[[(fn (add_ui) (
 ))]]
 
 function header_ui_init(add_ui)
- local function hdial(x,y,idx,tt)
-  add_ui(
-   dial_new(x,y,128,16,idx,tt)
-  )
- end
+ local hdial=eval[[(fn (add_ui)
+ (fn (x y idx tt) ($add_ui ($dial_new $x $y 128 16 $idx $tt)))
+ )]](add_ui)
 
- local function song_only(w,s_not_song)
-  add_ui(
-   wrap_override(w,s_not_song,state_is_song_mode,false)
-  )
- end
+ local song_only=eval[[(fn (add_ui)
+ (fn (w s_not_song) ($add_ui ($wrap_override $w $s_not_song $state_is_song_mode false)))
+ )]](add_ui)
 
  add_ui(
   toggle_new(
