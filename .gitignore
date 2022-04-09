@@ -1,3 +1,4 @@
 log.p8l
 *.p8.png
 .DS_Store
+*_fmt.p8
