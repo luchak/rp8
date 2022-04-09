@@ -13,7 +13,7 @@ semitone=2^(1/12)
 
 eval[[(
 (set audio_wait (fn (frames) (
- (set pause_frames $frames)
+ (set pause_t $frames)
  (set audio_root_obj)
 )))
 ($audio_wait 6)
@@ -153,11 +153,11 @@ function _update60()
  end
 
  audio_update()
- if pause_frames<=0 then
+ if pause_t<=0 then
   ui:update(state)
   audio_root_obj=seq_helper
  else
-  pause_frames-=1
+  pause_t-=1
  end
 end
 
@@ -507,9 +507,9 @@ end
 
 filtmap=parse[[{b0=3,b1=4,dr=5}]]
 mixer_params=parse[[{
- b0={s=7,e=9,lev=8},
- b1={s=19,e=21,lev=8},
- dr={s=31,e=33,lev=16},
+ b0={p0=7,p1=9,lev=8},
+ b1={p0=19,p1=21,lev=8},
+ dr={p0=31,p1=33,lev=16},
 }]]
 function mixer_new(_srcs,_fx,_filt,_lev)
  local _tmp,_bypass,_fxbuf,_filtsrc={},{},{},1
@@ -519,7 +519,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    _filtsrc=flr(patch[56]>>1)
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
-    local lev,od,fx=unpack_patch(patch,src.s,src.e)
+    local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
     sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od,pow3(fx)
    end
   end,
@@ -862,7 +862,7 @@ function state_new(savedata)
 end
 
 function state_load(str)
- if (sub(str,1,4)!='rp80') return nil
+ if (sub(str,1,4)!='rp80') return
  return state_new(parse(sub(str,5)))
 end
 
@@ -899,25 +899,25 @@ state_is_song_mode=function(state) return state.song_mode end
 
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
+ _t=1000
  return {
   state=state,
   root=root,
-  t=state.note_len,
   update=function(self,b,first,last)
    local np=0
    local p=first
    while p<=last do
-    if self.t>=self.state.note_len then
-     self.t=0
+    if _t>=self.state.note_len then
+     _t=0
      note_fn()
     end
-    local n=min(self.state.note_len-self.t,last-p+1)
+    local n=min(self.state.note_len-_t,last-p+1)
     self.root:update(b,p,p+n-1)
-    self.t+=n
+    _t+=n
     p+=n
     np+=n
    end
-   if (not self.state.playing) self.t=0
+   if (not self.state.playing) _t=0
    assert(np==last-first+1)
   end
  }
