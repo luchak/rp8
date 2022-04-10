@@ -35,6 +35,7 @@ eval[[(
 (set audio_rec false)
 (set start_rec (fn () (
  (set audio_rec true)
+ ($extcmd audio_rec)
  ($menuitem 3 "stop export" $stop_rec)
 )))
 (set stop_rec (fn () (
@@ -188,10 +189,11 @@ function audio_update()
    local x=buf[i]<<8
    dcf+=(x-dcf)>>8
    x-=dcf
-   x=mid(-1,x>>8,1)
-   x-=0.148148*x*x*x
+   x=mid(-1.5,x>>8,1.5)
+   x-=0x0.25ee*x*x*x
+   x*=0x0.fec1
    -- dither for nicer tails
-   poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2))+128)
+   poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2)+128))
   end
   serial(0x808,0x4300,todo)
   _dcf=dcf
@@ -528,13 +530,14 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
 
    for k,src in pairs(_srcs) do
-    local slev,od,fx=src.lev,src.od*src.od,src.fx
+    local od,fx=src.od*src.od,src.fx
     src.obj:update(tmp,first,last,bypass)
-    local odf=0.3+47.7*od*od
-    local odfi=(1+3*od*od)/odf
+    local odg=0.2+95.8*od
+    local odgi=src.lev*(1+6*od)/odg
     for i=first,last do
-     local x=mid(-1,tmp[i]*odf,1)
-     tmp[i]=slev*odfi*(x-0.148148*x*x*x)
+     local x=tmp[i]*odg
+     x=mid(-1.5,x,1.5)
+     tmp[i]=odgi*(x-0.148148*x*x*x)
     end
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
     for i=first,last do
