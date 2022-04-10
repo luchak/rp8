@@ -512,7 +512,7 @@ mixer_params=parse[[{
  dr={p0=31,p1=33,lev=16},
 }]]
 function mixer_new(_srcs,_fx,_filt,_lev)
- local _tmp,_bypass,_fxbuf,_filtsrc={},{},{},1
+ local _tmp,_bypass,_fxbuf,_filtsrc,_xp1={},{},{},1,parse[[{b0=0,b1=0,dr=0}]]
  return {
   note=function(self,patch)
    _lev=pow3(patch[3]>>7)*8
@@ -530,15 +530,21 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
 
    for k,src in pairs(_srcs) do
-    local od,fx=src.od*src.od,src.fx
+    local od,fx,xp1=src.od*src.od,src.fx,_xp1[k]
     src.obj:update(tmp,first,last,bypass)
     local odg=0.2+95.8*od
-    local odgi=src.lev*(1+6*od)/odg
+    local odgi=(1+6*od)/odg
     for i=first,last do
-     local x=tmp[i]*odg
-     x=mid(-1.5,x,1.5)
-     tmp[i]=odgi*(x-0.148148*x*x*x)
+     local x1,x0=tmp[i]
+     x0,xp1=(xp1+x1)>>1,x1
+     local pre=x1+x0
+     x0,x1=mid(-1.5,x0*odg,1.5),mid(-1.5,x1*odg,1.5)
+     x0-=0.148148*x0*x0*x0
+     x1-=0.148148*x1*x1*x1
+     tmp[i]+=(odgi*(x0+x1)-pre)>>1
+     tmp[i]*=src.lev
     end
+    _xp1[k]=xp1
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
     for i=first,last do
      local x=tmp[i]
