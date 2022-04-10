@@ -1325,7 +1325,7 @@ function header_ui_init(add_ui)
  (fn (w s_not_song) ($add_ui ($wrap_override $w $s_not_song $state_is_song_mode false)))
  )]](add_ui)
 
- eval[[(fn (add_ui song_only) (
+ eval[[(fn (add_ui song_only hdial) (
 ($add_ui ($toggle_new
  0 0 6 7 "play/pause" ($take 1 ($state_make_get_set playing)) ($make_obj_cb toggle_playing)
 ))
@@ -1341,6 +1341,7 @@ function header_ui_init(add_ui)
   ($trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
  )
 ) rewind) 5)
+
 ($add_ui ($push_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
 ($song_only ($push_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
 ($add_ui ($push_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
@@ -1348,9 +1349,8 @@ function header_ui_init(add_ui)
 ($song_only
  ($push_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
 204)
-))]](add_ui,song_only)
 
- for s in all(parse[[(
+($foreach (' (
   "16,8,1,tempo",
   "32,8,3,level",
   "32,16,6,compressor threshold",
@@ -1360,9 +1360,12 @@ function header_ui_init(add_ui)
   "48,24,58,filter resonance",
   "64,24,59,filter wet/dry",
   "80,24,61,filter env decay",
- )]]) do
-  hdial(unpack_split(s))
- end
+ )) (fn (s) (
+  ($hdial ($unpack_split $s))
+ ))
+)
+))]](add_ui,song_only,hdial)
+
  local get_filt_pat,set_filt_pat=state_make_get_set_param(60)
  local filt_pat_ctl=number_new(80,16,2,'filter pattern',get_filt_pat,function(state,b)
    set_filt_pat(state,mid(1,get_filt_pat(state)+b,#svf_pats))
