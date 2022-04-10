@@ -188,12 +188,10 @@ function audio_update()
    -- dc filter and soft clipping
    local x=buf[i]<<8
    dcf+=(x-dcf)>>8
-   x-=dcf
-   x=mid(-1.5,x>>8,1.5)
+   x=mid(-1.5,(x-dcf)>>8,1.5)
    x-=0x0.25ee*x*x*x
-   x*=0x0.fec1
    -- dither for nicer tails
-   poke(0x42ff+i,flr((x<<7)+0.375+(rnd()>>2)+128))
+   poke(0x42ff+i,flr(x*0x7f.5f80+0.375+(rnd()>>2)+128))
   end
   serial(0x808,0x4300,todo)
   _dcf=dcf
@@ -532,7 +530,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for k,src in pairs(_srcs) do
     local od,fx,xp1=src.od*src.od,src.fx,_xp1[k]
     src.obj:update(tmp,first,last,bypass)
-    local odg=0.2+95.8*od
+    local odg=0.2+63.8*od
     local odgi=(1+6*od)/odg
     for i=first,last do
      local x1,x0=tmp[i]
@@ -558,7 +556,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for i=first,last do
     b[i]+=(fxbuf[i]+bypass[i]*drlev)*lev
    end
-   if (filtsrc==2) filt:update(b,first,last)
+   if (filtsrc==2) _filt:update(b,first,last)
   end
  }
 end
