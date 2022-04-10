@@ -169,6 +169,74 @@ end
 function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
+function _es2(ast)
+ local function lookup(var)
+  return function(locals)
+   return locals[var] or _ENV[var]
+  end
+ end
+
+ local function _en(node)
+  if type(node)=='nil' then return nil end
+  if type(node)=='string' and sub(node,1,1)=='$' then
+   local s=sub(node,2)
+   return lookup(s)
+  end
+
+  if type(node)!='table' then
+   return function() return node end
+  end
+
+  local cmd=node[1]
+
+  if (type(cmd)=='table') then
+   local code={}
+   for i=1,#node do
+    local ret={_en(node[i])}
+    for rv in all(ret) do
+     add(code,rv)
+    end
+   end
+   return function(locals)
+    local retval
+    for c in all(code) do retval=c(locals) end
+    return retval
+   end
+  end
+
+  if cmd=='\'' then
+   return function() return node[2] end
+  end
+
+  if cmd=='fn' then
+   local body=_en(node[3])
+   return function(locals)
+    return function(...)
+     local args,new_locals={...},{}
+     for k,v in pairs(locals) do
+      new_locals[k]=v
+     end
+     for k,v in ipairs(node[2]) do
+      new_locals[v]=args[k]
+     end
+     return body(new_locals)
+    end
+   end
+  end
+
+  local a1,a2=_en(node[2]),_en(node[3])
+  if cmd=='set' then
+   return function(locals) _ENV[a1(locals)]=a2(locals) end
+  elseif cmd=='+' then
+   return function(locals) return a1(locals)+a2(locals) end
+  elseif cmd=='*' then
+   return function(locals) return a1(locals)*a2(locals) end
+  end
+ end
+
+ return _en(ast)
+end
+
 function _eval_scope(ast,locals)
  local function _eval_node(node)
   if type(node)=='string' and sub(node,1,1)=='$' then
