@@ -15,7 +15,7 @@ pdf:    clean $(PDFS)
 html:   clean $(HTML)
 
 %.html: %.md
-	pandoc --standalone --toc --template=easy_template -o $@ $<
+	./build_html.sh $< $@
 
 %.tex:  %.md
 	pandoc --standalone --toc --template=eisvogel -o $@ $<
