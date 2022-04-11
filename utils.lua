@@ -170,22 +170,22 @@ function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
 function _eval_scope(ast,locals)
- local function _lookup(s)
+ local function lookup(s)
   return locals[s] or _ENV[s]
  end
- local function _eval_node(node)
+ local function eval_node(node)
   if type(node)=='string' and sub(node,1,1)=='$' then
-   return _lookup(sub(node,2))
+   return lookup(sub(node,2))
   end
 
-  if (type(node)!='table') return node;
+  if (type(node)!='table') return node
 
   local cmd,a1,a2,a3=unpack(node)
 
   if cmd=='\'' then
    return a1
   elseif cmd=='if' then
-   if (_eval_node(a1)) return _eval_node(a2) else return _eval_node(a3)
+   if (eval_node(a1)) return eval_node(a2) else return eval_node(a3)
   elseif cmd=='fn' then
    return function(...)
     local args,new_locals={...},{}
@@ -199,18 +199,20 @@ function _eval_scope(ast,locals)
    end
   end
 
-  cmd=_eval_node(cmd)
+  cmd=eval_node(cmd)
   local vals={}
   for i=2,#node do
-   local ret={_eval_node(node[i])}
+   local ret={eval_node(node[i])}
    for rv in all(ret) do
     add(vals,rv)
    end
   end
 
   if type(cmd)=='string' then
-   cmd=_lookup(cmd) or cmd
-  elseif type(cmd)=='function' then
+   cmd=lookup(cmd) or cmd
+  end
+
+  if type(cmd)=='function' then
    return cmd(unpack(vals))
   end
 
@@ -246,7 +248,7 @@ function _eval_scope(ast,locals)
   end
  end
 
- return _eval_node(ast)
+ return eval_node(ast)
 end
 
 function eval(src)
@@ -261,7 +263,7 @@ eval[[(
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
 (set rep (fn (n x) (
  (let a (tab))
- (for 1 $n (fn () ($add $a $x)))
+ (for 1 $n (fn () (add $a $x)))
  $a
 )))
 )]]

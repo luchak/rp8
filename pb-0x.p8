@@ -14,50 +14,50 @@ eval[[(
  (set pause_t $frames)
  (set audio_root_obj)
 )))
-($audio_wait 6)
+(audio_wait 6)
 (set copy_state (fn () (
- ($audio_wait 2)
- ($printh ((@ $state save) $state) @clip)
+ (audio_wait 2)
+ (printh ((@ $state save) $state) @clip)
 )))
 (set paste_state (fn () (
- ($audio_wait 2)
- (let pd ($stat 4))
+ (audio_wait 2)
+ (let pd (stat 4))
  (if (not (eq $pd "")) (
-  (set state (or ($state_load $pd) $state))
+  (set state (or (state_load $pd) $state))
   (@= $seq_helper state $state)
  ) ())
 )))
 (set show_help true)
 (set toggle_help (fn () (
  (set show_help (not $show_help))
- ($menuitem 4 ($trn $show_help "hide tooltips" "show tooltips") $toggle_help)
+ (menuitem 4 (trn $show_help "hide tooltips" "show tooltips") $toggle_help)
 )))
 (set audio_rec false)
 (set start_rec (fn () (
  (set audio_rec true)
- ($extcmd audio_rec)
- ($menuitem 3 "stop export" $stop_rec)
+ (extcmd audio_rec)
+ (menuitem 3 "stop export" $stop_rec)
 )))
 (set stop_rec (fn () (
- (if $audio_rec ($extcmd audio_end))
- ($menuitem 3 "start export" $start_rec)
+ (if $audio_rec (extcmd audio_end))
+ (menuitem 3 "start export" $start_rec)
 )))
 )]]
 
 function _init()
  eval[[(
-($cls)
-(set ui ($ui_new))
-(set state ($state_new))
+(cls)
+(set ui (ui_new))
+(set state (state_new))
 (set add_ui (fn (w) ((@ $ui add_widget) $ui $w)))
-($header_ui_init $add_ui)
-($syn_ui_init $add_ui b0 7 32)
-($syn_ui_init $add_ui b1 19 64)
-($drum_ui_init $add_ui)
-($menuitem 1 "save to clip" $copy_state)
-($menuitem 2 "load from clip" $paste_state)
-($stop_rec)
-($toggle_help)
+(header_ui_init $add_ui)
+(syn_ui_init $add_ui b0 7 32)
+(syn_ui_init $add_ui b1 19 64)
+(drum_ui_init $add_ui)
+(menuitem 1 "save to clip" $copy_state)
+(menuitem 2 "load from clip" $paste_state)
+(stop_rec)
+(toggle_help)
 )]]
 
  local syn0,syn1=synth_new(7),synth_new(19)
@@ -668,17 +668,17 @@ pat_param_idx=parse[[{b0=11,b1=23,dr=35}]]
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,2,64,64,128,1,128'
 
 syn_pat_template=parse[[{
- nt=`($rep 16 19)
- st=`($rep 16 64)
+ nt=`(rep 16 19)
+ st=`(rep 16 64)
 }]]
 
 drum_pat_template=parse[[{
- bd=`($rep 16 64)
- sd=`($rep 16 64)
- hh=`($rep 16 64)
- cy=`($rep 16 64)
- pc=`($rep 16 64)
- sp=`($rep 16 64)
+ bd=`(rep 16 64)
+ sd=`(rep 16 64)
+ hh=`(rep 16 64)
+ cy=`(rep 16 64)
+ pc=`(rep 16 64)
+ sp=`(rep 16 64)
 }]]
 
 function state_new(savedata)
@@ -697,17 +697,17 @@ function state_new(savedata)
   patch={},
   pat_seqs={},
   pat_status={},
-  tl=`($timeline_new $default_patch),
-  pat_patch=`($copy $default_patch),
+  tl=`(timeline_new $default_patch),
+  pat_patch=`(copy $default_patch),
  }]]
 
  eval[[(fn (s dat) (
  (if $dat (
-  (@= $s tl ($timeline_new $default_patch (@ $dat tl)))
-  (@= $s pat_patch ($dec_bytes (@ $dat pat_patch)))
+  (@= $s tl (timeline_new $default_patch (@ $dat tl)))
+  (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
   (@= $s song_mode (@ $dat song_mode))
-  (@= $s pat_store ($map_table (@ $dat pat_store) $dec_bytes 2))
-  (@= $s samp ($dec_bytes (@ $dat samp)))
+  (@= $s pat_store (map_table (@ $dat pat_store) $dec_bytes 2))
+  (@= $s samp (dec_bytes (@ $dat samp)))
  ))
  ))]](s,savedata)
 
@@ -1210,8 +1210,8 @@ function wrap_override(w,s_override,get_not_override,active)
  return w
 end
 
-transport_number_new=eval[[(fn (x y w obj key tt input) ($wrap_override
- ($number_new $x $y $w $tt ($take 1 ($state_make_get_set $obj $key)) $input)
+transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
+ (number_new $x $y $w $tt (take 1 (state_make_get_set $obj $key)) $input)
  "--,0,15"
  $state_is_song_mode
 ))]]
@@ -1220,42 +1220,42 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp) (
 (for 1 16 (fn (i)
  (
   (let xp (* (+ $i -1) 8)),
-  ($add_ui ($syn_note_btn_new $xp (+ $yp 24) $key $i)),
-  ($add_ui ($step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
+  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key $i)),
+  (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
  )
 ))
-($add_ui ($merge ($push_new 24 $yp 26
- (fn (state b) ($transpose_pat (@ $state pat_seqs $key) $b))
+(add_ui (merge (push_new 24 $yp 26
+ (fn (state b) (transpose_pat (@ $state pat_seqs $key) $b))
  "transpose (drag)"
 ) (' {click_act=false drag_amt=0.05})))
-($add_ui
- ($push_new 8 $yp 28
-  (fn (state) (set copy_buf_syn ($copy (@ $state pat_seqs $key))))
+(add_ui
+ (push_new 8 $yp 28
+  (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))))
   "copy pattern"
  )
 )
-($add_ui
- ($push_new 16 $yp 27
-  (fn (state) (if $copy_buf_syn ($merge (@ $state pat_seqs $key) $copy_buf_syn) nil))
+(add_ui
+ (push_new 16 $yp 27
+  (fn (state) (if $copy_buf_syn (merge (@ $state pat_seqs $key) $copy_buf_syn) nil))
   "paste pattern"
  )
 )
-($add_ui
- ($toggle_new 0 $yp 186 187 active
-  ($state_make_get_set_param_bool (+ $base_idx 3))
+(add_ui
+ (toggle_new 0 $yp 186 187 active
+  (state_make_get_set_param_bool (+ $base_idx 3))
  )
 )
-($add_ui
- ($spin_btn_new 0 (+ $yp 8) (' (162 163 164 165)) "bank select"
-  ($state_make_get_set (cat $key _bank))
+(add_ui
+ (spin_btn_new 0 (+ $yp 8) (' (162 163 164 165)) "bank select"
+  (state_make_get_set (cat $key _bank))
  )
 )
 (for 1 6 (fn (i)
- ($add_ui
-  ($pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
+ (add_ui
+  (pat_btn_new (+ (* $i 4) 5) (+ $yp 8) $key 6 $i 2 14 8 6)
  )
 ))
-($foreach (' (
+(foreach (' (
  {x=40,o=6,tt="tune"}
  {x=56,o=7,tt="filter cutoff"}
  {x=72,o=8,tt="filter resonance"}
@@ -1263,21 +1263,21 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp) (
  {x=104,o=10,tt="filter env decay"}
  {x=120,o=11,tt="accent depth"}
  ))
- (fn (d) ($add_ui
-  ($dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
+ (fn (d) (add_ui
+  (dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
 )
-($add_ui
- ($toggle_new 32 $yp 2 3 waveform ($state_make_get_set_param_bool (+ $base_idx 5)))
+(add_ui
+ (toggle_new 32 $yp 2 3 waveform (state_make_get_set_param_bool (+ $base_idx 5)))
 )
-($map 0 4 0 $yp 16 2)
+(map 0 4 0 $yp 16 2)
 ))]]
 
 drum_ui_init=eval[[(fn (add_ui) (
-(for 1 16 (fn (i) ($add_ui
- ($step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
+(for 1 16 (fn (i) (add_ui
+ (step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
 )))
-($foreach
+(foreach
  (' (
   {k=bd,x=32,y=104,s=150,b=38,tt="bass drum"}
   {k=sd,x=32,y=112,s=152,b=41,tt="snare drum"}
@@ -1287,76 +1287,76 @@ drum_ui_init=eval[[(fn (add_ui) (
   {k=sp,x=96,y=112,s=174,b=53,tt=sample}
  ))
  (fn (d) (
-  ($add_ui ($radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) ($state_make_get_set drum_sel)))
-  ($foreach
+  (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
+  (foreach
    (' ({x=8,o=2,tt=level} {x=16,o=0,tt=tune} {x=24,o=1,tt=decay}))
-   (fn (c) ($add_ui
-    ($dial_new (+ (@ $d x) (@ $c x)) (@ $d y) 112 16 (+ (@ $d b) (@ $c o)) (cat (cat (@ $d k) " ") (@ $c tt)))
+   (fn (c) (add_ui
+    (dial_new (+ (@ $d x) (@ $c x)) (@ $d y) 112 16 (+ (@ $d b) (@ $c o)) (cat (cat (@ $d k) " ") (@ $c tt)))
    ))
   )
  ))
 )
-($foreach
+(foreach
  (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
- (fn (c) ($add_ui ($toggle_new
-  (@ $c x) 96 170 171 (cat (@ $c tt) "fx bypass") ($state_make_get_set_param_bool 37 (@ $c b))
+ (fn (c) (add_ui (toggle_new
+  (@ $c x) 96 170 171 (cat (@ $c tt) "fx bypass") (state_make_get_set_param_bool 37 (@ $c b))
  )))
 )
-($add_ui ($push_new
- 8 104 11 (fn (state) (set copy_buf_drum ($copy (@ $state pat_seqs dr)))) "copy pattern"
+(add_ui (push_new
+ 8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr)))) "copy pattern"
 ))
-($add_ui ($push_new
- 16 104 10 (fn (state) ($merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
+(add_ui (push_new
+ 16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
 ))
-($add_ui ($toggle_new
- 0 104 188 189 active ($state_make_get_set_param_bool 34)
+(add_ui (toggle_new
+ 0 104 188 189 active (state_make_get_set_param_bool 34)
 ))
-($add_ui ($spin_btn_new
- 0 112 (' (166 167 168 169)) "bank select" ($state_make_get_set dr_bank)
+(add_ui (spin_btn_new
+ 0 112 (' (166 167 168 169)) "bank select" (state_make_get_set dr_bank)
 ))
-(for 1 6 (fn (i) ($add_ui
- ($pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
+(for 1 6 (fn (i) (add_ui
+ (pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
 )))
-($map 0 8 0 96 16 4)
+(map 0 8 0 96 16 4)
 ))]]
 
 function rec_not_yellow(s) return (not s.tl.has_override) or s.tl.rec end
 
 function header_ui_init(add_ui)
  local hdial=eval[[(fn (add_ui)
- (fn (x y idx tt) ($add_ui ($dial_new $x $y 128 16 $idx $tt)))
+ (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt)))
  )]](add_ui)
 
  local song_only=eval[[(fn (add_ui)
- (fn (w s_not_song) ($add_ui ($wrap_override $w $s_not_song $state_is_song_mode false)))
+ (fn (w s_not_song) (add_ui (wrap_override $w $s_not_song $state_is_song_mode false)))
  )]](add_ui)
 
  eval[[(fn (add_ui song_only hdial) (
-($add_ui ($toggle_new
- 0 0 6 7 "play/pause" ($take 1 ($state_make_get_set playing)) ($make_obj_cb toggle_playing)
+(add_ui (toggle_new
+ 0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
-($add_ui ($toggle_new
- 24 0 172 173 "pattern/song mode" $state_is_song_mode ($make_obj_cb toggle_song_mode)
+(add_ui (toggle_new
+ 24 0 172 173 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
 ))
-($song_only ($wrap_override ($toggle_new
- 8 0 231 232 "record automation" ($take 1 ($state_make_get_set tl rec))
- ($make_obj_cb toggle_rec)
+(song_only (wrap_override (toggle_new
+ 8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
+ (make_obj_cb toggle_rec)
 ) 239 $rec_not_yellow true) 233)
-($song_only ($push_new 16 0 5 (fn (s)
+(song_only (push_new 16 0 5 (fn (s)
  ((@ $s go_to_bar) $s
-  ($trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
+  (trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
  )
 ) rewind) 5)
 
-($add_ui ($push_new 0 8 242 ($make_obj_cb copy_seq) "copy loop"))
-($song_only ($push_new 8 8 241 ($make_obj_cb cut_seq) "cut loop") 199)
-($add_ui ($push_new 0 16 247 ($make_obj_cb paste_seq) "fill loop"))
-($song_only ($push_new 8 16 243 ($make_obj_cb insert_seq) "insert loop") 201)
-($song_only
- ($push_new 8 24 246 ($make_obj_cb copy_overrides_to_loop) "commit touched controls")
+(add_ui (push_new 0 8 242 (make_obj_cb copy_seq) "copy loop"))
+(song_only (push_new 8 8 241 (make_obj_cb cut_seq) "cut loop") 199)
+(add_ui (push_new 0 16 247 (make_obj_cb paste_seq) "fill loop"))
+(song_only (push_new 8 16 243 (make_obj_cb insert_seq) "insert loop") 201)
+(song_only
+ (push_new 8 24 246 (make_obj_cb copy_overrides_to_loop) "commit touched controls")
 204)
 
-($foreach (' (
+(foreach (' (
   "16,8,1,tempo",
   "32,8,3,level",
   "32,16,6,compressor threshold",
@@ -1367,7 +1367,7 @@ function header_ui_init(add_ui)
   "64,24,59,filter wet/dry",
   "80,24,61,filter env decay",
  )) (fn (s) (
-  ($hdial ($unpack_split $s))
+  (hdial (unpack_split $s))
  ))
 )
 ))]](add_ui,song_only,hdial)
