@@ -28,6 +28,8 @@ thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS.
 
 RP-8 is controlled primarily using the mouse. Each control on the screen responds either to clicks or to (vertical) drags.
 
+### Hotkeys
+
 # Usage
 
 ## Running RP-8
