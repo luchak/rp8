@@ -179,7 +179,6 @@ function _eval_scope(ast,locals)
   if (type(node)!='table') return node;
 
   local cmd,a1,a2,a3=unpack(node)
-  cmd=_eval_node(cmd)
 
   if cmd=='\'' then
    return a1
@@ -198,6 +197,7 @@ function _eval_scope(ast,locals)
    end
   end
 
+  cmd=_eval_node(cmd)
   local vals={}
   for i=2,#node do
    local ret={_eval_node(node[i])}
