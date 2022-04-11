@@ -10,6 +10,11 @@ commercially successful software synthesizers. Like the original, it provides tw
 sequencing, effects to enrich the sound, a pattern mode for immediate hands-on control, and a song mode for recording
 music.
 
+Unlike the original, the audio output is 8 bit 5.5kHz mono sound, and the user interface is rendered in glorious
+128x128 4-bit color.
+
+![A screenshot of the RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=50%}
+
 This guide will introduce you to the instrument, its major features and underlying concepts, and how to go about
 designing sounds and composing songs.
 
@@ -23,5 +28,24 @@ thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS.
 
 RP-8 is controlled primarily using the mouse. Each control on the screen responds either to clicks or to (vertical) drags.
 
-![RP-8 Screenshot](img/rp8.png "screenshot"){width=50%}
+# Usage
 
+## Running RP-8
+
+## Making Patterns
+
+## Song Mode
+
+## Recording Automation
+
+## Saving and Loading
+
+# Reference
+
+## Audio Routing
+
+## Synth Controls
+
+## Drum Controls
+
+## Web Compatibility
