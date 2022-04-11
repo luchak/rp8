@@ -378,8 +378,8 @@ function snare_new()
 end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
- local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
-  {},unpack_split'0,0,0,0,14745.6,0,17039.36,0,15400.96,0,15892.48,0.995,1'
+ local obj,_ae,_f1,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
+  {},unpack_split'0,0,0,14745.6,0,17039.36,0,15400.96,0,15892.48,0.995,1'
 
  function obj:note(pat,patch,step)
   local s=pat[step]
@@ -394,7 +394,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  end
 
  function obj:subupdate(b,first,last)
-  local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
+  local ae,f1,aed,tlev,nlev=_ae,_f1,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
 
@@ -407,15 +407,14 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 
    local r=nlev*(rnd()-0.5)+tlev*osc
    f1+=0.8*(r-f1)
-   f2+=0.8*(f1-f2)
    ae*=aed
-   b[i]+=ae*((r-f2)>>1)
+   b[i]+=ae*(r-f1)
    op1+=odp1
    op2+=odp2
    op3+=odp3
    op4+=odp4
   end
-  _ae,_f1,_f2=ae,f1,f2
+  _ae,_f1=ae,f1
   _op1,_op2,_op3,_op4=op1,op2,op3,op4
  end
 
