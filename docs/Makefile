@@ -8,26 +8,20 @@ SRC = $(wildcard *.$(MEXT))
 ## x.pdf depends on x.md, x.html depends on x.md, etc
 PDFS=$(SRC:.md=.pdf)
 HTML=$(SRC:.md=.html)
-TEX=$(SRC:.md=.tex)
 
 ## Rules -- make all, make pdf, make html. The `clean` rule is below.
-all:    $(PDFS) $(HTML) $(TEX)
+all:    $(PDFS) $(HTML)
 pdf:    clean $(PDFS)
 html:   clean $(HTML)
-tex:    clean $(TEX)
 
-## The commands associated with each rule. The first one is run with 
-## make html.
 %.html: %.md
-	pandoc -s -o $@ $<
+	pandoc --standalone --toc --template=easy_template -o $@ $<
 
-## Same goes for the other file types. 
-## Watch out for the TAB before 'pandoc'
 %.tex:  %.md
-	pandoc -o $@ $<
+	pandoc --standalone --toc --template=eisvogel -o $@ $<
 
 %.pdf:  %.md
-	pandoc -o $@ $<
+	pandoc --standalone --toc --template=eisvogel -o $@ $<
 
 clean:
 	rm -f *.html *.pdf *.tex *.aux *.log
