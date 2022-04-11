@@ -26,4 +26,7 @@ html:   clean $(HTML)
 clean:
 	rm -f *.html *.pdf *.tex *.aux *.log
 
-.PHONY: clean
+watch:
+	echo "$(SRC)" | entr make
+
+.PHONY: clean watch
