@@ -13,14 +13,14 @@ music.
 Unlike the original, the audio output is 8 bit 5.5kHz mono sound, and the user interface is rendered in glorious
 128x128 4-bit color.
 
-![A screenshot of the RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=60%}
+![The RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=60%}
 
 This guide will introduce you to the instrument, its major features and underlying concepts, and how to go about
 designing sounds and composing songs.
 
 Thank you for trying RP-8, and please don't hesitate to let me know what might make RP-8 more pleasant or interesting to
-use. You can contact me at [luchak@gmail.com](mailto:luchak@gmail.com) or via the [RP-8
-thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS.
+use.^[You can contact me at [luchak@gmail.com](mailto:luchak@gmail.com) or via the [RP-8
+thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS.]
 
 # Overview
 

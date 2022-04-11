@@ -6,12 +6,12 @@ MEXT = md
 SRC = $(wildcard *.$(MEXT))
 
 ## x.pdf depends on x.md, x.html depends on x.md, etc
-PDFS=$(SRC:.md=.pdf)
+PDF=$(SRC:.md=.pdf)
 HTML=$(SRC:.md=.html)
 
 ## Rules -- make all, make pdf, make html. The `clean` rule is below.
-all:    $(PDFS) $(HTML)
-pdf:    clean $(PDFS)
+all:    $(HTML) $(PDF)
+pdf:    clean $(PDF)
 html:   clean $(HTML)
 
 %.html: %.md
