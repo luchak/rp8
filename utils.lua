@@ -51,7 +51,7 @@ end
 
 function parse(s)
  local p=0
- local reader=function(d)
+ local read=function(d)
   p+=d or 1
   if p>0x6000 then
    s=sub(s,0x4001)
@@ -59,7 +59,7 @@ function parse(s)
   end
   return sub(s,p,p)
  end
- return _parse(reader)
+ return _parse(read)
 end
 
 function is_num(c)
@@ -170,10 +170,12 @@ function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
 function _eval_scope(ast,locals)
+ local function _lookup(s)
+  return locals[s] or _ENV[s]
+ end
  local function _eval_node(node)
   if type(node)=='string' and sub(node,1,1)=='$' then
-   local s=sub(node,2)
-   return locals[s] or _ENV[s]
+   return _lookup(sub(node,2))
   end
 
   if (type(node)!='table') return node;
@@ -206,7 +208,9 @@ function _eval_scope(ast,locals)
    end
   end
 
-  if type(cmd)=='function' then
+  if type(cmd)=='string' then
+   cmd=_lookup(cmd) or cmd
+  elseif type(cmd)=='function' then
    return cmd(unpack(vals))
   end
 
@@ -230,9 +234,7 @@ function _eval_scope(ast,locals)
   elseif cmd=='@=' then
    a1[a2]=a3
   elseif cmd=='for' then
-   for i=a1,a2 do
-    a3(i)
-   end
+   for i=a1,a2 do a3(i) end
   elseif cmd=='set' then
    _ENV[a1]=a2
   elseif cmd=='let' then
