@@ -40,7 +40,7 @@ fi
 
 # ----- main -----
 
-for file in "css/theme.css" "css/skylighting-solarized-theme.css"; do
+for file in "templates/css/theme.css" "templates/css/skylighting-solarized-theme.css"; do
   if ! [ -f "$file" ]; then
     2>&1 echo "$0: warning: CSS theme file is missing: $file (will 404 when serving)"
   fi
@@ -49,7 +49,7 @@ done
 dest_dir="$(dirname "$dest")"
 mkdir -p "$dest_dir"
 
-css_rel_path="$("$realpath" "css/" --relative-to "$dest_dir")"
+css_rel_path="$("$realpath" "templates/css/" --relative-to "$dest_dir")"
 
 pandoc \
   --katex \
