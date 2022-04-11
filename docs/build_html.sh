@@ -5,6 +5,9 @@
 #
 # A simple script to build an HTML file using Pandoc
 #
+# From https://github.com/jez/pandoc-markdown-css-theme
+# License: https://blueoakcouncil.org/license/1.0.0
+#
 
 set -euo pipefail
 
