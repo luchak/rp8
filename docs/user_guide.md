@@ -13,7 +13,7 @@ music.
 Unlike the original, the audio output is 8 bit 5.5kHz mono sound, and the user interface is rendered in glorious
 128x128 4-bit color.
 
-![A screenshot of the RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=80% align=center}
+![A screenshot of the RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=60%}
 
 This guide will introduce you to the instrument, its major features and underlying concepts, and how to go about
 designing sounds and composing songs.
