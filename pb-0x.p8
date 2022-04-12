@@ -1356,46 +1356,51 @@ function header_ui_init(add_ui)
 204)
 
 (foreach (' (
-  "16,8,1,tempo",
-  "32,8,3,level",
-  "32,16,6,compressor threshold",
-  "16,16,2,shuffle",
-  "32,24,5,delay feedback",
-  "48,16,57,filter cutoff",
-  "48,24,58,filter resonance",
-  "64,24,59,filter wet/dry",
-  "80,24,61,filter env decay",
+  (16 8 1 tempo)
+  (32 8 3 level)
+  (32 16 6 "compressor threshold")
+  (16 16 2 shuffle)
+  (32 24 5 "delay feedback")
+  (48 16 57 "filter cutoff")
+  (48 24 58 "filter resonance")
+  (64 24 59 "filter wet/dry")
+  (80 24 61 "filter env decay")
  )) (fn (s) (
-  (hdial (unpack_split $s))
+  (hdial (unpack $s))
  ))
 )
-))]](add_ui,song_only,hdial)
-
- local get_filt_pat,set_filt_pat=state_make_get_set_param(60)
- local filt_pat_ctl=number_new(80,16,2,'filter pattern',get_filt_pat,function(state,b)
-   set_filt_pat(state,mid(1,get_filt_pat(state)+b,#svf_pats))
-  end)
- filt_pat_ctl.drag_amt=0.02
- add_ui(filt_pat_ctl)
-
- local dts={}
- for suffix in all(split(',t,d')) do
-  for dt in all(split('1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16')) do
-   if (suffix=='d') dt-=1
-   add(dts,dt..suffix..',0,15')
-  end
- end
- local dt_btn=spin_btn_new(16,24,dts,'delay time',state_make_get_set_param(4))
- dt_btn.w=3
- add_ui(dt_btn)
-
- local filt_toggle=toggle_new(64,16,234,235,'filter lp/bp',state_make_get_set_param_bool(56,0))
- filt_toggle.click_act=false
- filt_toggle.drag_amt=0.01
- add_ui(filt_toggle)
- add_ui(
-  spin_btn_new(64,8,parse[[("--,0,15","MA,0,15","S1,0,15","S2,0,15","DR,0,15")]],'filter source',state_make_get_set_param(56,1))
+(let get_set_filt_pat (pack (state_make_get_set_param 60)))
+(add_ui (merge
+ (number_new 80 16 2 "filter pattern" (@ $get_set_filt_pat 1)
+  (fn (s b)
+   ((@ $get_set_filt_pat 2) $s (mid 1 (+ ((@ $get_set_filt_pat 1) $s) $b) (len $svf_pats)))
+  )
  )
+ (' {drag_amt=0.02})
+))
+(let dts (pack))
+(foreach (' ("" t d)) (fn (suffix) (
+ (for 1 16 (fn (dt) (
+  (if (eq $suffix d) (let dt (+ $dt -1)))
+  (add $dts (cat (cat $dt $suffix) ",0,15"))
+ )))
+)))
+(add_ui (merge
+ (spin_btn_new 16 24 $dts "delay time" (state_make_get_set_param 4))
+ (' {w=3})
+))
+(add_ui (merge
+ (toggle_new 64 16 234 235 "filter lp/bp" (state_make_get_set_param_bool 56 0))
+ (' {click_act=false,drag_amt=0.01})
+))
+(add_ui (spin_btn_new
+ 64 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
+ (state_make_get_set_param 56 1)
+))
+
+
+(map 0 0 0 0 16 4)
+))]](add_ui,song_only,hdial)
 
  for syn,sd in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
   local base_idx=syn_base_idx[syn]
@@ -1432,8 +1437,6 @@ function header_ui_init(add_ui)
    end
   )
  )
-
- map(unpack_split'0,0,0,0,16,4')
 end
 
 __gfx__

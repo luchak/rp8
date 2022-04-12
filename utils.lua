@@ -87,38 +87,39 @@ function stringify(v)
  end
 end
 
-function is_num(c)
- return (c>='0' and c<='9') or c=='.' or c=='-'
+function mkmatch(s,inv)
+ return function(c)
+  for i=1,#s do
+   if (c==sub(s,i,i)) return not inv
+  end
+  return inv
+ end
 end
 
-function is_id(c)
- return not (is_sep(c) or c=='}' or c==')' or  c=='')
-end
-
-function is_sep(c)
- return c==' ' or c=='\n' or c=='\t' or c==','
-end
-
-function consume(r,test,c)
- local s=''
- c=c or ''
- repeat
-  if (c=='\\') c=chr(ord(r())-35)
-  s..=c
-  c=r()
- until not test(c)
- return s
-end
+is_num=mkmatch'0123456789.-'
+is_id=mkmatch(' \r\n\t,)}',true)
+is_sep=mkmatch' \r\n\t,'
 
 function parse(s)
  local p=0
- local read=function(d)
+
+ local function read(d)
   p+=d or 1
   if p>0x6000 then
    s=sub(s,0x4001)
    p-=0x4000
   end
   return sub(s,p,p)
+ end
+
+ local function consume(test)
+  local s,c='',''
+  repeat
+   if (c=='\\') c=chr(ord(read())-35)
+   s..=c
+   c=read()
+  until not test(c)
+  return s
  end
 
  local function _parse()
@@ -128,9 +129,9 @@ function parse(s)
   end
   skip()
   if c=='"' then
-   return consume(read,function (c) return c!='"' end)
+   return consume(mkmatch('"',true))
   elseif is_num(c) then
-   local s=consume(read,is_num,c)
+   local s=c..consume(is_num)
    read(-1)
    return tonum(s)
   elseif c=='(' then
@@ -146,15 +147,14 @@ function parse(s)
    repeat
     skip()
     if (c=='}') return t
-    local k=consume(read,function (c) return c!='=' end,c)
-    k=tonum(k) or k
-    t[k]=_parse()
+    local k=c..consume(mkmatch('=',true))
+    t[tonum(k) or k]=_parse()
    until false
   elseif c=='`' then
    return _eval_scope(_parse(),{})
   else
    -- allow (most) bare strings
-   local s=consume(read,is_id,c)
+   local s=c..consume(is_id)
    read(-1)
    if (s=='true') return true
    if (s=='false') return false
@@ -169,6 +169,7 @@ end
 function eq(a1,a2) return a1==a2 end
 function gt(a1,a2) return a1>a2 end
 function cat(a1,a2) return a1..a2 end
+function len(a1) return #a1 end
 
 function _eval_scope(ast,locals)
  local builtins={
@@ -213,16 +214,16 @@ function _eval_scope(ast,locals)
   end
 
   cmd=eval_node(cmd)
+  if type(cmd)=='string' then
+   cmd=lookup(cmd)
+  end
+
   local vals={}
   for i=2,#node do
    local ret={eval_node(node[i])}
    for rv in all(ret) do
     add(vals,rv)
    end
-  end
-
-  if type(cmd)=='string' then
-   cmd=lookup(cmd)
   end
 
   if type(cmd)=='function' then
