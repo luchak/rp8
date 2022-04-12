@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo 'pb-0x.p8' | entr ./build.sh
+echo 'rp8.p8' | entr ./build.sh
