@@ -468,7 +468,6 @@ function delay_new()
   local dl,l,fb,p,f1=_dl,self.l,self.fb,_p,_f1
   for i=first,last do
    local x,y=b[i],dl[p]
-   if (abs(y)<0x0.0100) y=0
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
