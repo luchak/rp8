@@ -89,7 +89,7 @@ function timeline_new(default_patch, savedata)
  end
 
  eval[[(fn (timeline) (@= $timeline clear_overrides
- (fn (self) ((@= $self overrides (tab)) (@= $self has_override false)))
+ (fn (self) ((@= $self overrides (pack)) (@= $self has_override false)))
  ))]](timeline)
 
  function timeline:toggle_rec()

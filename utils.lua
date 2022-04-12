@@ -9,6 +9,10 @@ function log(...)
  printh(s,'log')
 end
 
+function trn(c,t,f)
+ if (c) return t else return f
+end
+
 function copy(t)
  return merge({},t)
 end
@@ -25,6 +29,41 @@ function merge(base,new)
  return base
 end
 
+function unpack_split(s)
+ return unpack(split(s))
+end
+
+function enc_bytes(a)
+ return chr(unpack(a))
+end
+
+function dec_bytes(s)
+ local a={}
+ for i=1,#s do a[i]=ord(s,i) end
+ return a
+end
+
+function map_table(a,f,d)
+ if (d or 0)==0 then
+  local r={}
+  for k,v in pairs(a) do r[k]=f(v) end
+  return r
+ end
+ return map_table(a,function(v) return map_table(v,f,d-1) end)
+end
+
+function unpack_patch(patch,first,last)
+ local r={}
+ for i=first,last do
+  -- shift to 0-1 range
+  add(r,patch[i]>>7)
+ end
+ return unpack(r)
+end
+
+function pow3(x) return x*x*x end
+function pow4(x) return pow3(x)*x end
+
 function stringify(v)
  local t=type(v)
  if t=='number' or t=='boolean' then return tostr(v)
@@ -36,8 +75,7 @@ function stringify(v)
    -- escape control chars, ", and \
    if o<16 or o==34 or o==92 then s..='\\'..chr(o+35) else s..=c end
   end
-  s..='"'
-  return s
+  return s..'"'
  elseif t=='table' then
   local s='{'
   for k,v in pairs(v) do
@@ -47,6 +85,29 @@ function stringify(v)
  else
   return t..'[?]'
  end
+end
+
+function is_num(c)
+ return (c>='0' and c<='9') or c=='.' or c=='-'
+end
+
+function is_id(c)
+ return not (is_sep(c) or c=='}' or c==')' or  c=='')
+end
+
+function is_sep(c)
+ return c==' ' or c=='\n' or c=='\t' or c==','
+end
+
+function consume(r,test,c)
+ local s=''
+ c=c or ''
+ repeat
+  if (c=='\\') c=chr(ord(r())-35)
+  s..=c
+  c=r()
+ until not test(c)
+ return s
 end
 
 function parse(s)
@@ -95,7 +156,6 @@ function parse(s)
    -- allow (most) bare strings
    local s=consume(read,is_id,c)
    read(-1)
- 
    if (s=='true') return true
    if (s=='false') return false
    if (s=='nil') return nil
@@ -106,70 +166,24 @@ function parse(s)
  return _parse()
 end
 
-function is_num(c)
- return (c>='0' and c<='9') or c=='.' or c=='-'
-end
-
-function is_id(c)
- return not (is_sep(c) or c=='}' or c==')' or  c=='')
-end
-
-function is_sep(c)
- return c==' ' or c=='\n' or c=='\t' or c==','
-end
-
-function consume(r,test,s)
- s=s or ''
- repeat
-  local c=r()
-  if (not test(c)) return s
-  if (c=='\\') c=chr(ord(r())-35)
-  s..=c
- until false
-end
-
-function unpack_split(s)
- return unpack(split(s))
-end
-
-function trn(c,t,f)
- return (c and t) or f
-end
-
-function enc_bytes(a)
- return chr(unpack(a))
-end
-
-function dec_bytes(s)
- local a={}
- for i=1,#s do a[i]=ord(s,i) end
- return a
-end
-
-function map_table(a,f,d)
- if (d or 0)==0 then
-  local r={}
-  for k,v in pairs(a) do r[k]=f(v) end
-  return r
- end
- return map_table(a,function(v) return map_table(v,f,d-1) end)
-end
-
-function unpack_patch(patch,first,last)
- local r={}
- for i=first,last do
-  -- shift to 0-1 range
-  add(r,patch[i]>>7)
- end
- return unpack(r)
-end
-
-function pow3(x) return x*x*x end
-function pow4(x) return pow3(x)*x end
-
 function _eval_scope(ast,locals)
+ local builtins={
+  ['+']=function(a1,a2) return a1+a2 end,
+  ['*']=function(a1,a2) return a1*a2 end,
+  eq=function(a1,a2) return a1==a2 end,
+  ['not']=function(a1) return not a1 end,
+  gt=function(a1,a2) return a1>a2 end,
+  ['or']=function(a1,z2) return a1 or a2 end,
+  cat=function(a1,a2) return a1..a2 end,
+  ['@']=function(a1,a2,a3) if a3 then return a1[a2][a3] else return a1[a2] end end,
+  ['@=']=function(a1,a2,a3) a1[a2]=a3 end,
+  ['for']=function(a1,a2,a3) for i=a1,a2 do a3(i) end end,
+  set=function(a1,a2) _ENV[a1]=a2 end,
+  let=function(a1,a2) locals[a1]=a2 end,
+ }
+
  local function lookup(s)
-  return locals[s] or _ENV[s]
+  return locals[s] or _ENV[s] or builtins[s]
  end
  local function eval_node(node)
   if type(node)=='string' and sub(node,1,1)=='$' then
@@ -207,40 +221,11 @@ function _eval_scope(ast,locals)
   end
 
   if type(cmd)=='string' then
-   cmd=lookup(cmd) or cmd
+   cmd=lookup(cmd)
   end
 
   if type(cmd)=='function' then
    return cmd(unpack(vals))
-  end
-
-  a1,a2,a3=unpack(vals)
-  if cmd=='+' then
-   return a1+a2
-  elseif cmd=='*' then
-   return a1*a2
-  elseif cmd=='or' then
-   return (a1 or a2)
-  elseif cmd=='eq' then
-   return a1==a2
-  elseif cmd=='gt' then
-   return a1>a2
-  elseif cmd=='not' then
-   return not a1
-  elseif cmd=='cat' then
-   return a1..a2
-  elseif cmd=='@' then
-   if (a3) return a1[a2][a3] else return a1[a2]
-  elseif cmd=='@=' then
-   a1[a2]=a3
-  elseif cmd=='for' then
-   for i=a1,a2 do a3(i) end
-  elseif cmd=='set' then
-   _ENV[a1]=a2
-  elseif cmd=='let' then
-   locals[a1]=a2
-  elseif cmd=='tab' then
-   return vals
   else
    return vals[#vals]
   end
@@ -260,8 +245,9 @@ end
 eval[[(
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
 (set rep (fn (n x) (
- (let a (tab))
+ (let a (pack))
  (for 1 $n (fn () (add $a $x)))
  $a
 )))
 )]]
+
