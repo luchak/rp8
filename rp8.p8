@@ -244,12 +244,11 @@ function synth_new(base)
 
  function obj:update(b,first,last)
   local odp,op,detune,todp,todpr=_odp,_op,_detune,_todp,_todpr
-  local f1,f2,f3,f4=_f1,_f2,_f3,_f4
+  local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
   local fr,fcb,os=_fr,_fc,_os
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
   local env,saw,lev,acc=_env,_saw,_lev,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
-  local fosc,ffb=_fosc,_ffb
   for i=first,last do
    local fc=min(0.4/os,fcb+((me*env)>>4))
    -- janky dewarping
