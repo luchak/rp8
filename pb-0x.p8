@@ -73,7 +73,7 @@ function _init()
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()
  local drum_keys=split'bd,sd,hh,cy,pc,sp'
 
- mixer=mixer_new(
+ local mixer=mixer_new(
   {
    b0={obj=syn0,lev=0.5,od=0.0,fx=0},
    b1={obj=syn1,lev=0.5,od=0.5,fx=0},
@@ -83,7 +83,7 @@ function _init()
   svf,
   1.0
  )
- comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
+ local comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
 
  seq_helper=seq_helper_new(
   state,comp,function()
@@ -922,7 +922,6 @@ function seq_helper_new(state,root,note_fn)
     np+=n
    end
    if (not self.state.playing) _t=0
-   assert(np==last-first+1)
   end
  }
 end
