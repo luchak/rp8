@@ -166,15 +166,16 @@ function parse(s)
  return _parse()
 end
 
+function eq(a1,a2) return a1==a2 end
+function gt(a1,a2) return a1>a2 end
+function cat(a1,a2) return a1..a2 end
+
 function _eval_scope(ast,locals)
  local builtins={
   ['+']=function(a1,a2) return a1+a2 end,
   ['*']=function(a1,a2) return a1*a2 end,
-  eq=function(a1,a2) return a1==a2 end,
   ['not']=function(a1) return not a1 end,
-  gt=function(a1,a2) return a1>a2 end,
-  ['or']=function(a1,z2) return a1 or a2 end,
-  cat=function(a1,a2) return a1..a2 end,
+  ['or']=function(a1,a2) return a1 or a2 end,
   ['@']=function(a1,a2,a3) if a3 then return a1[a2][a3] else return a1[a2] end end,
   ['@=']=function(a1,a2,a3) a1[a2]=a3 end,
   ['for']=function(a1,a2,a3) for i=a1,a2 do a3(i) end end,
@@ -186,7 +187,7 @@ function _eval_scope(ast,locals)
   return locals[s] or _ENV[s] or builtins[s]
  end
  local function eval_node(node)
-  if type(node)=='string' and sub(node,1,1)=='$' then
+  if sub(node,1,1)=='$' then
    return lookup(sub(node,2))
   end
 
