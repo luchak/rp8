@@ -45,7 +45,7 @@ function stringify(v)
   end
   return s..'}'
  else
-  return t..' [?]'
+  return t..'[?]'
  end
 end
 
@@ -59,7 +59,51 @@ function parse(s)
   end
   return sub(s,p,p)
  end
- return _parse(read)
+
+ local function _parse()
+  local c
+  local function skip()
+   repeat c=read() until not is_sep(c)
+  end
+  skip()
+  if c=='"' then
+   return consume(read,function (c) return c!='"' end)
+  elseif is_num(c) then
+   local s=consume(read,is_num,c)
+   read(-1)
+   return tonum(s)
+  elseif c=='(' then
+   local t={}
+   repeat
+    skip()
+    if (c==')') return t
+    read(-1)
+    add(t,_parse())
+   until false
+  elseif c=='{' then
+   local t={}
+   repeat
+    skip()
+    if (c=='}') return t
+    local k=consume(read,function (c) return c!='=' end,c)
+    k=tonum(k) or k
+    t[k]=_parse()
+   until false
+  elseif c=='`' then
+   return _eval_scope(_parse(),{})
+  else
+   -- allow (most) bare strings
+   local s=consume(read,is_id,c)
+   read(-1)
+ 
+   if (s=='true') return true
+   if (s=='false') return false
+   if (s=='nil') return nil
+   return s
+  end
+ end
+
+ return _parse()
 end
 
 function is_num(c)
@@ -82,49 +126,6 @@ function consume(r,test,s)
   if (c=='\\') c=chr(ord(r())-35)
   s..=c
  until false
-end
-
--- strings must use " (not ')
-function _parse(read)
- local c
- local function skip()
-  repeat c=read() until not is_sep(c)
- end
- skip()
- if c=='"' then
-  return consume(read,function (c) return c!='"' end)
- elseif is_num(c) then
-  local s=consume(read,is_num,c)
-  read(-1)
-  return tonum(s)
- elseif c=='(' then
-  local t={}
-  repeat
-   skip()
-   if (c==')') return t
-   read(-1)
-   add(t,_parse(read))
-  until false
- elseif c=='{' then
-  local t={}
-  repeat
-   skip()
-   if (c=='}') return t
-   local k=consume(read,function (c) return c!='=' end,c)
-   k=tonum(k) or k
-   t[k]=_parse(read)
-  until false
- elseif c=='`' then
-  return _eval_scope(_parse(read),{})
- else
-  -- allow (most) bare strings
-  local s=consume(read,is_id,c)
-  read(-1)
-  if (s=='true') return true
-  if (s=='false') return false
-  if (s=='nil') return nil
-  return s
- end
 end
 
 function unpack_split(s)
