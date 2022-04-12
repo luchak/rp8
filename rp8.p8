@@ -1346,7 +1346,7 @@ function header_ui_init(add_ui)
 (add_ui (push_new 0 16 247 (make_obj_cb paste_seq) "fill loop"))
 (song_only (push_new 8 16 243 (make_obj_cb insert_seq) "insert loop") 201)
 (song_only
- (push_new 8 24 246 (make_obj_cb copy_overrides_to_loop) "commit touched controls")
+ (push_new 8 24 246 (make_obj_cb copy_overrides_to_loop) "commit changes")
 204)
 
 (foreach (' (
