@@ -517,7 +517,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
     local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
-    sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od,pow3(fx)
+    sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od*od,pow3(fx)
    end
   end,
   update=function(self,b,first,last)
@@ -527,7 +527,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
 
    for k,src in pairs(_srcs) do
-    local od,fx,xp1=src.od*src.od,src.fx,_xp1[k]
+    local od,fx,xp1=src.od,src.fx,_xp1[k]
     src.obj:update(tmp,first,last,bypass)
     local odg=0.2+63.8*od
     local odgi=(1+6*od)/odg
@@ -536,9 +536,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
      x0,xp1=(xp1+x1)>>1,x1
      local pre=x1+x0
      x0,x1=mid(-1.5,x0*odg,1.5),mid(-1.5,x1*odg,1.5)
-     x0-=0.148148*x0*x0*x0
-     x1-=0.148148*x1*x1*x1
-     tmp[i]+=(odgi*(x0+x1)-pre)>>1
+     tmp[i]+=(odgi*(x0+x1-0.148148*(x0*x0*x0+x1*x1*x1))-pre)>>1
      tmp[i]*=src.lev
     end
     _xp1[k]=xp1
@@ -908,7 +906,6 @@ function seq_helper_new(state,root,note_fn)
   state=state,
   root=root,
   update=function(self,b,first,last)
-   local np=0
    local p=first
    while p<=last do
     if _t>=self.state.note_len then
@@ -919,7 +916,6 @@ function seq_helper_new(state,root,note_fn)
     self.root:update(b,p,p+n-1)
     _t+=n
     p+=n
-    np+=n
    end
    if (not self.state.playing) _t=0
   end
