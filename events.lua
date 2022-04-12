@@ -3,17 +3,17 @@
 no_event_params=parse[[{10=true,11=true,22=true,23=true,34=true,35=true}]]
 
 function timeline_new(default_patch, savedata)
- local timeline={
+ local timeline=parse[[{
   bars={},
   overrides={},
-  def_bar={t0=enc_bytes(default_patch),ev={}},
+  def_bar={t0=`(enc_bytes $default_patch),ev={}},
   rec=false,
   has_override=false,
   loop_start=1,
   loop_len=4,
   loop=true,
   bar=1
- }
+ }]]
 
  if (savedata) merge(timeline, savedata)
 
