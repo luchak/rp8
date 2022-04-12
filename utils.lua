@@ -67,7 +67,7 @@ function is_num(c)
 end
 
 function is_id(c)
- return not (c==',' or c=='}' or c==')' or c==' ' or c=='' or c=='\n')
+ return not (is_sep(c) or c=='}' or c==')' or  c=='')
 end
 
 function is_sep(c)
@@ -87,9 +87,10 @@ end
 -- strings must use " (not ')
 function _parse(read)
  local c
- repeat
-  c=read()
- until not is_sep(c)
+ local function skip()
+  repeat c=read() until not is_sep(c)
+ end
+ skip()
  if c=='"' then
   return consume(read,function (c) return c!='"' end)
  elseif is_num(c) then
@@ -99,9 +100,7 @@ function _parse(read)
  elseif c=='(' then
   local t={}
   repeat
-   repeat
-    c=read()
-   until not is_sep(c)
+   skip()
    if (c==')') return t
    read(-1)
    add(t,_parse(read))
@@ -109,9 +108,7 @@ function _parse(read)
  elseif c=='{' then
   local t={}
   repeat
-   repeat
-    c=read()
-   until not is_sep(c)
+   skip()
    if (c=='}') return t
    local k=consume(read,function (c) return c!='=' end,c)
    k=tonum(k) or k
@@ -121,7 +118,7 @@ function _parse(read)
   return _eval_scope(_parse(read),{})
  else
   -- allow (most) bare strings
-  local s=consume(read,function (c) return is_id(c) end,c)
+  local s=consume(read,is_id,c)
   read(-1)
   if (s=='true') return true
   if (s=='false') return false
