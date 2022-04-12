@@ -12,7 +12,7 @@ semitone=2^(1/12)
 eval[[(
 (set audio_wait (fn (frames) (
  (set pause_t $frames)
- (set audio_root_obj)
+ (set audio_root)
 )))
 (audio_wait 6)
 (set copy_state (fn () (
@@ -154,7 +154,7 @@ function _update60()
  audio_update()
  if pause_t<=0 then
   ui:update(state)
-  audio_root_obj=seq_helper
+  audio_root=seq_helper
  else
   pause_t-=1
  end
@@ -177,8 +177,8 @@ _dcf=0
 function audio_update()
  if stat(108)<512 then
   local todo,buf,dcf=100,{},_dcf
-  if audio_root_obj then
-   audio_root_obj:update(buf,1,todo)
+  if audio_root then
+   audio_root:update(buf,1,todo)
   else
    for i=1,todo do
     buf[i]=0
@@ -707,11 +707,11 @@ function state_new(savedata)
  ))
  ))]](s,savedata)
 
- function s:_init_tick()
-  local patch=self.patch
+ function _init_tick()
+  local patch=s.patch
   local nl=sample_rate*(15/(60+patch[1]))
-  local shuf_diff=nl*(patch[2]>>7)*(0.5-(self.tick&1))
-  self.note_len,self.base_note_len=flr(0.5+nl+shuf_diff),nl
+  local shuf_diff=nl*(patch[2]>>7)*(0.5-(s.tick&1))
+  s.note_len,s.base_note_len=flr(0.5+nl+shuf_diff),nl
  end
 
  function s:load_bar(i)
@@ -723,19 +723,19 @@ function state_new(savedata)
    self.patch=copy(self.pat_patch)
    self.tick,self.bar=1,1
   end
-  self:_sync_pats()
-  self:_init_tick()
+  _sync_pats()
+  _init_tick()
  end
  local load_bar=function(i) s:load_bar(i) end
 
- function s:_apply_diff(k,v)
-  self.patch[k]=v
-  if self.song_mode then
-   self.tl:record_event(k,v)
+ s._apply_diff=function(k,v)
+  s.patch[k]=v
+  if s.song_mode then
+   s.tl:record_event(k,v)
   else
-   self.pat_patch[k]=v
+   s.pat_patch[k]=v
   end
-  if (not self.playing) load_bar()
+  if (not s.playing) load_bar()
  end
 
  function s:next_tick()
@@ -747,7 +747,7 @@ function state_new(savedata)
    self.tick+=1
    if (self.tick>16) load_bar()
   end
-  self:_init_tick()
+  _init_tick()
  end
 
  function s:toggle_playing()
@@ -770,13 +770,13 @@ function state_new(savedata)
   load_bar()
  end
 
- function s:_sync_pats()
-  local ps,patch=self.pat_store,self.patch
+ function _sync_pats()
+  local ps,patch=s.pat_store,s.patch
   for syn,param_idx in pairs(pat_param_idx) do
    local syn_pats=ps[syn]
    if not syn_pats then
     syn_pats={}
-    self.pat_store[syn]=syn_pats
+    s.pat_store[syn]=syn_pats
    end
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
@@ -784,10 +784,10 @@ function state_new(savedata)
     if (syn=='b0' or syn=='b1') pat=copy(syn_pat_template) else pat=copy(drum_pat_template)
     syn_pats[pat_idx]=pat
    end
-   self.pat_seqs[syn]=pat
+   s.pat_seqs[syn]=pat
   end
   for group,idx in pairs(pat_param_idx) do
-   self.pat_status[group]={
+   s.pat_status[group]={
     on=patch[idx-1]>0,
     idx=patch[idx],
    }
@@ -878,7 +878,7 @@ function state_make_get_set_param(idx,shift)
  return
   function(state) return (state.patch[idx]>>shift)&0xffff.0000 end,
   function(state,val)
-   state:_apply_diff(idx,val<<shift | (state.patch[idx]&mask))
+   state._apply_diff(idx,val<<shift | (state.patch[idx]&mask))
   end
 end
 
@@ -886,7 +886,7 @@ function state_make_get_set_param_bool(idx,bit)
  local mask=1<<(bit or 0)
  return
   function(state) return (state.patch[idx]&mask)>0 end,
-  function(state,val) local old=state.patch[idx] state:_apply_diff(idx,trn(val,old|mask,old&(~mask))) end
+  function(state,val) local old=state.patch[idx] state._apply_diff(idx,trn(val,old|mask,old&(~mask))) end
 end
 
 function state_make_get_set(a,b)
