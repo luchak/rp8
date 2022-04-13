@@ -30,8 +30,12 @@ RP-8 is controlled primarily using the mouse. Each control on the screen respond
 
 ### Hotkeys
 
-* **h** toggles tooltips
-* **space** toggles play/pause
+key       | action
+----------|-------
+**h**     | toggle tooltips
+**space** | toggle play/pause
+**up** | increase selected control one step
+**down** | decrease selected control one step
 
 # Usage
 
