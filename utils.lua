@@ -168,7 +168,6 @@ end
 
 
 function _eval_scope(ast,locals,start)
-
  local function eval_node(node)
   if sub(node,1,1)=='$' then
    local name=sub(node,2)
@@ -210,6 +209,7 @@ function _eval_scope(ast,locals,start)
   if cmd=='seq' then return vals[#vals]
   elseif cmd=='+' then return a1+a2
   elseif cmd=='*' then return a1*a2
+  elseif cmd=='~' then return a1-a2
   elseif cmd=='not' then return not a1
   elseif cmd=='or' then return a1 or a2
   elseif cmd=='@' then if a3 then return a1[a2][a3] else return a1[a2] end

@@ -49,7 +49,6 @@ function _init()
 (cls)
 (set ui (ui_new))
 (set state (state_new))
-(assert state aaa)
 (set add_ui (fn (w) ((@ $ui add_widget) $ui $w)))
 (header_ui_init $add_ui)
 (syn_ui_init $add_ui b0 7 32)
@@ -862,10 +861,9 @@ function state_new(savedata)
  return s
 end
 
-function state_load(str)
- if (sub(str,1,4)!='rp80') return
- return state_new(parse(sub(str,5)))
-end
+state_load=eval[[(fn (s)
+ (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
+)]]
 
 function transpose_pat(pat,d)
  for i=1,16 do
@@ -1314,16 +1312,12 @@ drum_ui_init=eval[[(fn (add_ui)
 
 function rec_not_yellow(s) return (not s.tl.has_override) or s.tl.rec end
 
-function header_ui_init(add_ui)
- local hdial=eval[[(fn (add_ui)
- (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt)))
- )]](add_ui)
-
- local song_only=eval[[(fn (add_ui)
+header_ui_init=eval[[(fn (add_ui)
+(let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
+(let song_only
  (fn (w s_not_song) (add_ui (wrap_override $w $s_not_song $state_is_song_mode false)))
- )]](add_ui)
+)
 
- eval[[(fn (add_ui song_only hdial)
 (add_ui (toggle_new
  0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
@@ -1391,45 +1385,33 @@ function header_ui_init(add_ui)
  (state_make_get_set_param 56 1)
 ))
 
-(map 0 0 0 0 16 4)
-)]](add_ui,song_only,hdial)
+(foreach (' ({s=b0 y=8 tt="synth 1 "} {s=b1 y=16 tt="synth 2 "} {s=dr y=24 tt="drums "})) (fn (syn)
+ (let base_idx (@ $syn_base_idx (@ $syn s)))
+ (foreach (' ({i=0 x=104 tt=level} {i=1 x=112 tt=overdrive} {i=2 x=120 tt="delay send"})) (fn (par)
+  (hdial (@ $par x) (@ $syn y) (+ $base_idx (@ $par i)) (cat (@ $syn tt) (@ $par tt)))
+ ))
+))
 
- for syn,sd in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
-  local base_idx=syn_base_idx[syn]
-  for idx,cd in pairs(parse[[{0={x=104,tt="level"},1={x=112,tt="overdrive"},2={x=120,tt="delay send"}}]]) do
-   hdial(cd.x,sd.y,base_idx+idx,sd.tt..cd.tt)
-  end
- end
- add_ui(
-  transport_number_new(32,0,4,'tl','bar','song position',
-   function(state,b)
-    state:go_to_bar(state.tl.bar+b)
-   end
-  )
- )
- song_only(
-  toggle_new(56,0,193,194,'loop on/off',state_make_get_set('tl','loop')),
-  195
- )
- add_ui(
-  transport_number_new(64,0,4,'tl','loop_start','loop start',
-   function(state,b)
-    local tl=state.tl
-    local ns=tl.loop_start+b
-    tl.loop_start=mid(1,ns,999)
-    tl.loop_len=mid(1,tl.loop_len,1000-ns)
-   end
-  )
- )
- add_ui(
-  transport_number_new(84,0,3,'tl','loop_len','loop length',
-   function(state,b)
-    local tl=state.tl
-    tl.loop_len=mid(1,tl.loop_len+b,1000-tl.loop_start)
-   end
-  )
- )
-end
+(add_ui (transport_number_new 32 0 4 tl bar "song position" (fn (s b)
+ ((@ $s go_to_bar) $s (+ (@ $state tl bar) $b))
+)))
+
+(song_only (toggle_new 56 0 193 194 "loop on/off" (state_make_get_set tl loop)) 195)
+
+(add_ui (transport_number_new 64 0 4 tl loop_start "loop start" (fn (s b)
+ (let tl (@ $s tl))
+ (let ns (+ (@ $tl loop_start) $b))
+ (@= $tl loop_start (mid 1 $ns 999))
+ (@= $tl loop_len (mid 1 (@ $tl loop_len) (~ 1000 $ns)))
+)))
+
+(add_ui (transport_number_new 84 0 3 tl loop_len "loop length" (fn (s b)
+ (let tl (@ $s tl))
+ (@= $tl loop_len (mid 1 (+ (@ $tl loop_len) $b) (~ 1000 (@ $tl loop_start))))
+)))
+
+(map 0 0 0 0 16 4)
+)]]
 
 __gfx__
 0000000000000000666666666666666600cc000000000000000000000000000000000000000000005555555555555555000000050d0000006666666607000000
