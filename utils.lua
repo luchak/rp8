@@ -151,7 +151,7 @@ function parse(s)
     t[tonum(k) or k]=_parse()
    until false
   elseif c=='`' then
-   return _eval_scope(_parse(),{})
+   return _eval_scope({_parse()},{},1)
   else
    -- allow (most) bare strings
    local s=c..consume(is_id)
@@ -171,7 +171,8 @@ function gt(a1,a2) return a1>a2 end
 function cat(a1,a2) return a1..a2 end
 function len(a1) return #a1 end
 
-function _eval_scope(ast,locals)
+function _eval_scope(ast,locals,start)
+ --log('ES',stringify(ast),start)
  local builtins={
   ['+']=function(a1,a2) return a1+a2 end,
   ['*']=function(a1,a2) return a1*a2 end,
@@ -187,11 +188,31 @@ function _eval_scope(ast,locals)
  local function lookup(s)
   return locals[s] or _ENV[s] or builtins[s]
  end
- local function eval_node(node)
+
+ local eval_node
+
+ local function eval_all(node,start)
+  --log('EA',stringify(node),start)
+  local vals={}
+  for i=start,#node do
+   local v={eval_node(node[i])}
+   --log('EAV',i,stringify(v))
+   add(vals,v)
+  end
+  return vals
+ end
+
+ local function eval_seq(node,start)
+  --log('ESEQ',stringify(node))
+  local vals=eval_all(node,start)
+  return unpack(vals[#vals])
+ end
+
+ eval_node=function(node)
+  --log('EN',stringify(node))
   if sub(node,1,1)=='$' then
    return lookup(sub(node,2))
   end
-
   if (type(node)!='table') return node
 
   local cmd,a1,a2,a3=unpack(node)
@@ -209,7 +230,7 @@ function _eval_scope(ast,locals)
     for k,v in ipairs(a1) do
      new_locals[v]=args[k]
     end
-    return _eval_scope(a2,new_locals)
+    return _eval_scope(node,new_locals,3)
    end
   end
 
@@ -219,37 +240,33 @@ function _eval_scope(ast,locals)
   end
 
   local vals={}
-  for i=2,#node do
-   local ret={eval_node(node[i])}
+  for ret in all(eval_all(node,2)) do
    for rv in all(ret) do
     add(vals,rv)
    end
   end
 
-  if type(cmd)=='function' then
-   return cmd(unpack(vals))
-  else
-   return vals[#vals]
-  end
+  return cmd(unpack(vals))
  end
 
- return eval_node(ast)
+ return eval_seq(ast,start)
 end
 
 function eval(src)
- return _eval_scope(parse(src),{})
+ local parsed=parse('('..src..')')
+ return _eval_scope(parsed,{},1)
 end
 
 function take(i,...)
  return pack(...)[i]
 end
 
-eval[[(
+eval[[
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
-(set rep (fn (n x) (
+(set rep (fn (n x)
  (let a (pack))
  (for 1 $n (fn () (add $a $x)))
  $a
-)))
-)]]
+))
+]]
 
