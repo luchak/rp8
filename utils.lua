@@ -166,23 +166,8 @@ function parse(s)
  return _parse()
 end
 
-function eq(a1,a2) return a1==a2 end
-function gt(a1,a2) return a1>a2 end
-function cat(a1,a2) return a1..a2 end
-function len(a1) return #a1 end
 
 function _eval_scope(ast,locals,start)
- local builtins={
-  ['+']=function(a1,a2) return a1+a2 end,
-  ['*']=function(a1,a2) return a1*a2 end,
-  ['not']=function(a1) return not a1 end,
-  ['or']=function(a1,a2) return a1 or a2 end,
-  ['@']=function(a1,a2,a3) if a3 then return a1[a2][a3] else return a1[a2] end end,
-  ['@=']=function(a1,a2,a3) a1[a2]=a3 end,
-  ['for']=function(a1,a2,a3) for i=a1,a2 do a3(i) end end,
-  set=function(a1,a2) _ENV[a1]=a2 end,
-  let=function(a1,a2) locals[a1]=a2 end,
- }
 
  local function eval_node(node)
   if sub(node,1,1)=='$' then
@@ -220,13 +205,29 @@ function _eval_scope(ast,locals,start)
    end
   end
 
-  if (cmd=='seq') return vals[#vals]
+  local a1,a2,a3=unpack(vals)
 
-  if type(cmd)=='string' then
-   cmd=locals[cmd] or _ENV[cmd] or builtins[cmd]
+  if cmd=='seq' then return vals[#vals]
+  elseif cmd=='+' then return a1+a2
+  elseif cmd=='*' then return a1*a2
+  elseif cmd=='not' then return not a1
+  elseif cmd=='or' then return a1 or a2
+  elseif cmd=='@' then if a3 then return a1[a2][a3] else return a1[a2] end
+  elseif cmd=='@=' then a1[a2]=a3
+  elseif cmd=='for' then for i=a1,a2 do a3(i) end
+  elseif cmd=='set' then _ENV[a1]=a2
+  elseif cmd=='let' then locals[a1]=a2
+  elseif cmd=='eq' then return a1==a2
+  elseif cmd=='gt' then return a1>a2
+  elseif cmd=='cat' then return a1..a2
+  elseif cmd=='len' then return #a1
+  else
+   if type(cmd)=='string' then
+    cmd=locals[cmd] or _ENV[cmd]
+   end
+
+   return cmd(unpack(vals))
   end
-
-  return cmd(unpack(vals))
  end
 
  for i=start or 1,#ast-1 do eval_node(ast[i]) end
