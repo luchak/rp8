@@ -22,10 +22,10 @@ eval[[
 (set paste_state (fn ()
  (audio_wait 2)
  (let pd (stat 4))
- (if (not (eq $pd "")) (
+ (if (not (eq $pd "")) (seq
   (set state (or (state_load $pd) $state))
   (@= $seq_helper state $state)
- ) ())
+ ))
 ))
 (set show_help true)
 (set toggle_help (fn ()

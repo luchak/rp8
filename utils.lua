@@ -211,9 +211,6 @@ function _eval_scope(ast,locals,start)
   end
 
   cmd=eval_node(cmd)
-  if type(cmd)=='string' then
-   cmd=locals[cmd] or _ENV[cmd] or builtins[cmd]
-  end
 
   local vals={}
   for i=2,#node do
@@ -221,6 +218,12 @@ function _eval_scope(ast,locals,start)
    for rv in all(ret) do
     add(vals,rv)
    end
+  end
+
+  if (cmd=='seq') return vals[#vals]
+
+  if type(cmd)=='string' then
+   cmd=locals[cmd] or _ENV[cmd] or builtins[cmd]
   end
 
   return cmd(unpack(vals))
