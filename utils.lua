@@ -172,7 +172,6 @@ function cat(a1,a2) return a1..a2 end
 function len(a1) return #a1 end
 
 function _eval_scope(ast,locals,start)
- --log('ES',stringify(ast),start)
  local builtins={
   ['+']=function(a1,a2) return a1+a2 end,
   ['*']=function(a1,a2) return a1*a2 end,
@@ -192,7 +191,6 @@ function _eval_scope(ast,locals,start)
  local eval_node
 
  local function eval_all(node,start)
-  --log('EA',stringify(node),start)
   local vals={}
   for i=start or 1,#node do
    add(vals,{eval_node(node[i])})
@@ -201,7 +199,6 @@ function _eval_scope(ast,locals,start)
  end
 
  eval_node=function(node)
-  --log('EN',stringify(node))
   if sub(node,1,1)=='$' then
    return lookup(sub(node,2))
   end
