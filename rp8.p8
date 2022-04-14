@@ -176,9 +176,9 @@ _dcf=0
 
 function audio_update()
  if stat(108)<512 then
-  local todo,buf,dcf=100,{},_dcf
+  local todo,buf,dcf=93,{},_dcf
   if audio_root then
-   audio_root:update(buf,1,todo)
+   todo=audio_root:run(buf,todo)
   else
    for i=1,todo do
     buf[i]=0
@@ -899,22 +899,27 @@ state_is_song_mode=function(state) return state.song_mode end
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
  _t=1000
+ _cost=3
  return {
   state=state,
   root=root,
-  update=function(self,b,first,last)
-   local p=first
-   while p<=last do
+  run=function(self,b,todo)
+   local p=1
+   while todo>0 do
     if _t>=self.state.note_len then
+     if (todo<_cost) break
      _t=0
      note_fn()
+     todo-=_cost
     end
-    local n=min(self.state.note_len-_t,last-p+1)
+    local n=min(self.state.note_len-_t,todo)
     self.root:update(b,p,p+n-1)
     _t+=n
     p+=n
+    todo-=n
    end
    if (not self.state.playing) _t=0
+   return p-1
   end
  }
 end
