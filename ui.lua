@@ -290,7 +290,7 @@ transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
 
 syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
- (let xp (* (+ $i -1) 8)),
+ (let xp (* (~ $i 1) 8)),
  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key $i)),
  (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
 ))
@@ -345,7 +345,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 
 drum_ui_init=eval[[(fn (add_ui)
 (for 1 16 (fn (i) (add_ui
- (step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
+ (step_btn_new (* (~ $i 1) 8) 120 dr $i (' (19 20 36 35)))
 )))
 (foreach
  (' (
@@ -448,7 +448,7 @@ header_ui_init=eval[[(fn (add_ui)
 (let dts (pack))
 (foreach (' ("" t d)) (fn (suffix)
  (for 1 16 (fn (dt)
-  (if (eq $suffix d) (let dt (+ $dt -1)))
+  (if (eq $suffix d) (let dt (~ $dt 1)))
   (add $dts (cat (cat $dt $suffix) ",0,15"))
  ))
 ))
