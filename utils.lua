@@ -151,7 +151,7 @@ function parse(s)
     t[tonum(k) or k]=_parse()
    until false
   elseif c=='`' then
-   return _eval_scope({_parse()},{},1)
+   return _eval_scope({_parse()},{})
   else
    -- allow (most) bare strings
    local s=c..consume(is_id)
@@ -194,18 +194,10 @@ function _eval_scope(ast,locals,start)
  local function eval_all(node,start)
   --log('EA',stringify(node),start)
   local vals={}
-  for i=start,#node do
-   local v={eval_node(node[i])}
-   --log('EAV',i,stringify(v))
-   add(vals,v)
+  for i=start or 1,#node do
+   add(vals,{eval_node(node[i])})
   end
   return vals
- end
-
- local function eval_seq(node,start)
-  --log('ESEQ',stringify(node))
-  local vals=eval_all(node,start)
-  return unpack(vals[#vals])
  end
 
  eval_node=function(node)
@@ -249,12 +241,13 @@ function _eval_scope(ast,locals,start)
   return cmd(unpack(vals))
  end
 
- return eval_seq(ast,start)
+ local vals=eval_all(ast,start)
+ return unpack(vals[#vals])
 end
 
 function eval(src)
  local parsed=parse('('..src..')')
- return _eval_scope(parsed,{},1)
+ return _eval_scope(parsed,{})
 end
 
 function take(i,...)
