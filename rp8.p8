@@ -1011,8 +1011,8 @@ function ui_new()
 
  function obj:update(state)
   local input=0
-  if (btnp(5)) input+=1
-  if (btnp(4)) input-=1
+  if (btnp(2)) input+=1
+  if (btnp(3)) input-=1
 
   self.mx,self.my,click=stat(32),stat(33),stat(34)
   local mx,my,k=self.mx,self.my
