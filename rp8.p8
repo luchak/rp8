@@ -9,46 +9,47 @@ __lua__
 semitone=2^(1/12)
 
 -- settle audio before starting synthesis
-eval[[(
-(set audio_wait (fn (frames) (
+eval[[
+(set audio_wait (fn (frames)
  (set pause_t $frames)
  (set audio_root)
-)))
+))
 (audio_wait 6)
-(set copy_state (fn () (
+(set copy_state (fn ()
  (audio_wait 2)
  (printh ((@ $state save) $state) @clip)
-)))
-(set paste_state (fn () (
+))
+(set paste_state (fn ()
  (audio_wait 2)
  (let pd (stat 4))
  (if (not (eq $pd "")) (
   (set state (or (state_load $pd) $state))
   (@= $seq_helper state $state)
  ) ())
-)))
+))
 (set show_help true)
-(set toggle_help (fn () (
+(set toggle_help (fn ()
  (set show_help (not $show_help))
  (menuitem 4 (trn $show_help "hide tooltips" "show tooltips") $toggle_help)
-)))
+))
 (set audio_rec false)
-(set start_rec (fn () (
+(set start_rec (fn ()
  (set audio_rec true)
  (extcmd audio_rec)
  (menuitem 3 "stop export" $stop_rec)
-)))
-(set stop_rec (fn () (
+))
+(set stop_rec (fn ()
  (if $audio_rec (extcmd audio_end))
  (menuitem 3 "start export" $start_rec)
-)))
-)]]
+))
+]]
 
 function _init()
- eval[[(
+ eval[[
 (cls)
 (set ui (ui_new))
 (set state (state_new))
+(assert state aaa)
 (set add_ui (fn (w) ((@ $ui add_widget) $ui $w)))
 (header_ui_init $add_ui)
 (syn_ui_init $add_ui b0 7 32)
@@ -58,7 +59,7 @@ function _init()
 (menuitem 2 "load from clip" $paste_state)
 (stop_rec)
 (toggle_help)
-)]]
+]]
 
  local syn0,syn1=synth_new(7),synth_new(19)
  local drums={
@@ -697,15 +698,15 @@ function state_new(savedata)
   pat_patch=`(copy $default_patch),
  }]]
 
- eval[[(fn (s dat) (
- (if $dat (
+ eval[[(fn (s dat)
+ (if $dat ((fn ()
   (@= $s tl (timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
   (@= $s song_mode (@ $dat song_mode))
   (@= $s pat_store (map_table (@ $dat pat_store) $dec_bytes 2))
   (@= $s samp (dec_bytes (@ $dat samp)))
- ))
- ))]](s,savedata)
+ )))
+ )]](s,savedata)
 
  function _init_tick()
   local patch=s.patch
@@ -1209,13 +1210,11 @@ transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
  $state_is_song_mode
 ))]]
 
-syn_ui_init=eval[[(fn (add_ui key base_idx yp) (
+syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
- (
-  (let xp (* (+ $i -1) 8)),
-  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key $i)),
-  (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
- )
+ (let xp (* (+ $i -1) 8)),
+ (add_ui (syn_note_btn_new $xp (+ $yp 24) $key $i)),
+ (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
 ))
 (add_ui (merge (push_new 24 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) $b))
@@ -1264,9 +1263,9 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp) (
  (toggle_new 32 $yp 2 3 waveform (state_make_get_set_param_bool (+ $base_idx 5)))
 )
 (map 0 4 0 $yp 16 2)
-))]]
+)]]
 
-drum_ui_init=eval[[(fn (add_ui) (
+drum_ui_init=eval[[(fn (add_ui)
 (for 1 16 (fn (i) (add_ui
  (step_btn_new (* (+ $i -1) 8) 120 dr $i (' (19 20 36 35)))
 )))
@@ -1279,7 +1278,7 @@ drum_ui_init=eval[[(fn (add_ui) (
   {k=pc,x=96,y=104,s=158,b=50,tt=percussion}
   {k=sp,x=96,y=112,s=174,b=53,tt=sample}
  ))
- (fn (d) (
+ (fn (d)
   (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
   (foreach
    (' ({x=8,o=2,tt=level} {x=16,o=0,tt=tune} {x=24,o=1,tt=decay}))
@@ -1287,7 +1286,7 @@ drum_ui_init=eval[[(fn (add_ui) (
     (dial_new (+ (@ $d x) (@ $c x)) (@ $d y) 112 16 (+ (@ $d b) (@ $c o)) (cat (cat (@ $d k) " ") (@ $c tt)))
    ))
   )
- ))
+ )
 )
 (foreach
  (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
@@ -1311,7 +1310,7 @@ drum_ui_init=eval[[(fn (add_ui) (
  (pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
 )))
 (map 0 8 0 96 16 4)
-))]]
+)]]
 
 function rec_not_yellow(s) return (not s.tl.has_override) or s.tl.rec end
 
@@ -1324,7 +1323,7 @@ function header_ui_init(add_ui)
  (fn (w s_not_song) (add_ui (wrap_override $w $s_not_song $state_is_song_mode false)))
  )]](add_ui)
 
- eval[[(fn (add_ui song_only hdial) (
+ eval[[(fn (add_ui song_only hdial)
 (add_ui (toggle_new
  0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
@@ -1359,9 +1358,9 @@ function header_ui_init(add_ui)
   (48 24 58 "filter resonance")
   (64 24 59 "filter wet/dry")
   (80 24 61 "filter env decay")
- )) (fn (s) (
+ )) (fn (s)
   (hdial (unpack $s))
- ))
+ )
 )
 (let get_set_filt_pat (pack (state_make_get_set_param 60)))
 (add_ui (merge
@@ -1373,12 +1372,12 @@ function header_ui_init(add_ui)
  (' {drag_amt=0.02})
 ))
 (let dts (pack))
-(foreach (' ("" t d)) (fn (suffix) (
- (for 1 16 (fn (dt) (
+(foreach (' ("" t d)) (fn (suffix)
+ (for 1 16 (fn (dt)
   (if (eq $suffix d) (let dt (+ $dt -1)))
   (add $dts (cat (cat $dt $suffix) ",0,15"))
- )))
-)))
+ ))
+))
 (add_ui (merge
  (spin_btn_new 16 24 $dts "delay time" (state_make_get_set_param 4))
  (' {w=3})
@@ -1392,9 +1391,8 @@ function header_ui_init(add_ui)
  (state_make_get_set_param 56 1)
 ))
 
-
 (map 0 0 0 0 16 4)
-))]](add_ui,song_only,hdial)
+)]](add_ui,song_only,hdial)
 
  for syn,sd in pairs(parse[[{b0={y=8,tt="synth 1 "},b1={y=16,tt="synth 2 "},dr={y=24, tt="drums "}}]]) do
   local base_idx=syn_base_idx[syn]
