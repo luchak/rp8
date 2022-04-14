@@ -106,6 +106,7 @@ state_new
 step_btn_new
 stop_rec
 svf_pats
+syn_base_idx
 syn_note_btn_new
 syn_pat_template
 syn_ui_init
@@ -119,6 +120,7 @@ toggle_new
 toggle_playing
 toggle_rec
 toggle_song_mode
+transport_number_new
 transpose_pat
 trn
 tt
