@@ -168,15 +168,10 @@ function _draw()
 end
 
 #include driver.lua
-
 #include synth.lua
-
 #include fx.lua
-
 #include events.lua
-
 #include state.lua
-
 #include ui.lua
 
 __gfx__
