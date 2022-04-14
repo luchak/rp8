@@ -184,23 +184,10 @@ function _eval_scope(ast,locals,start)
   let=function(a1,a2) locals[a1]=a2 end,
  }
 
- local function lookup(s)
-  return locals[s] or _ENV[s] or builtins[s]
- end
-
- local eval_node
-
- local function eval_all(node,start)
-  local vals={}
-  for i=start or 1,#node do
-   add(vals,{eval_node(node[i])})
-  end
-  return vals
- end
-
- eval_node=function(node)
+ local function eval_node(node)
   if sub(node,1,1)=='$' then
-   return lookup(sub(node,2))
+   local name=sub(node,2)
+   return locals[name] or _ENV[name]
   end
   if (type(node)!='table') return node
 
@@ -225,11 +212,12 @@ function _eval_scope(ast,locals,start)
 
   cmd=eval_node(cmd)
   if type(cmd)=='string' then
-   cmd=lookup(cmd)
+   cmd=locals[cmd] or _ENV[cmd] or builtins[cmd]
   end
 
   local vals={}
-  for ret in all(eval_all(node,2)) do
+  for i=2,#node do
+   local ret={eval_node(node[i])}
    for rv in all(ret) do
     add(vals,rv)
    end
@@ -238,8 +226,8 @@ function _eval_scope(ast,locals,start)
   return cmd(unpack(vals))
  end
 
- local vals=eval_all(ast,start)
- return unpack(vals[#vals])
+ for i=start or 1,#ast-1 do eval_node(ast[i]) end
+ return eval_node(ast[#ast])
 end
 
 function eval(src)
