@@ -22,6 +22,7 @@ function ui_new()
  }]]
  -- focus
  -- hover
+ -- overlay
 
  function obj:add_widget(w)
   w=merge(copy(widget_defaults),w)
@@ -38,8 +39,8 @@ function ui_new()
 
  function obj:draw(state)
   -- restore screen from mouse
-  local mx,my,off=self.mx,self.my,self.mouse_restore_offset
-  if (off) memcpy(0x6000+off,0x9000+off,448)
+  local mx,my,off=self.mx,self.my,self.restore_offset
+  if (off) memcpy(0x6000+off,0x9000+off,self.restore_size)
 
   -- draw changed widgets
   for id,w in pairs(self.widgets) do
@@ -74,17 +75,19 @@ function ui_new()
   end
 
   -- store rows behind mouse and draw mouse
-  local next_off=mid(0,my,122)<<6
+  local tt_my=mid(0,my,122)
+  local next_off=tt_my<<6
   memcpy(0x9000+next_off,0x6000+next_off,448)
   local hover=self.hover
   spr(15,mx,my)
   if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
    local tt=hover.tt
    local xp=trn(mx<56,mx+7,mx-2-4*#tt)
-   rectfill(xp,my,xp+4*#tt,my+6,1)
-   print(tt,xp+1,my+1,7)
+   rectfill(xp,tt_my,xp+4*#tt,tt_my+6,1)
+   print(tt,xp+1,tt_my+1,7)
   end
-  self.mouse_restore_offset=next_off
+  self.restore_offset=next_off
+  self.restore_size=448
  end
 
  function obj:update(state)
