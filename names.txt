@@ -19,7 +19,10 @@ click_act
 copy
 copy_buf_drum
 copy_buf_syn
+copy_overrides_to_loop
+copy_seq
 copy_state
+cut_seq
 cy
 dec_bytes
 def_bar
@@ -44,6 +47,7 @@ header_ui_init
 help_on
 hh
 hover_t
+insert_seq
 ipairs
 len
 let
@@ -68,6 +72,7 @@ p0
 p1
 pack
 parse
+paste_seq
 paste_state
 pat_btn_new
 pat_patch
