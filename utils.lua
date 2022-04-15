@@ -9,6 +9,7 @@ function log(...)
  printh(s,'log')
 end
 
+-- be careful, both t and f get evaluated
 function trn(c,t,f)
  if (c) return t else return f
 end
@@ -59,9 +60,6 @@ function unpack_patch(patch,first,last)
  return unpack(r)
 end
 
-function pow3(x) return x*x*x end
-function pow4(x) return pow3(x)*x end
-
 function stringify(v)
  local t=type(v)
  if t=='number' or t=='boolean' then return tostr(v)
@@ -81,6 +79,7 @@ function stringify(v)
   end
   return s..'}'
  else
+  -- won't parse, but nice for debugging
   return t..'[?]'
  end
 end
@@ -240,6 +239,9 @@ end
 function take(i,...)
  return pack(...)[i]
 end
+
+function pow3(x) return x*x*x end
+function pow4(x) return pow3(x)*x end
 
 eval[[
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
