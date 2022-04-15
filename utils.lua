@@ -38,9 +38,7 @@ function enc_bytes(a)
 end
 
 function dec_bytes(s)
- local a={}
- for i=1,#s do a[i]=ord(s,i) end
- return a
+ return pack(ord(s,1,#s))
 end
 
 function map_table(a,f,d)
