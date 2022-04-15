@@ -25,7 +25,7 @@ function synth_new(base)
   _detune=semitone^(flr(24*(tun-0.5)+0.5))
   _ac=patstep==n_ac or patstep==n_ac_sl
   _sl=patstep==n_sl or patstep==n_ac_sl
-  if (patstep==n_off) return
+  if (patstep==n_off or not state.playing) return
 
   _gate=true
   local f=55*(semitone^(pat.nt[step]+3))
@@ -113,7 +113,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
    -- TODO: update params every step?
    _detune=2^(1.5*tun-0.75)
    _op,_dp=0,(_dp0<<16)*_detune
-   _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
+   if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
    _ted=0.5*pow4(te_base-te_scale*dec)
    _aed=1-ae_ratio*_ted
@@ -145,14 +145,16 @@ function snare_new()
   if s!=n_off then
    _detune=2^(2*tun-1)
    _op,_dp=0,_dp0*_detune
-   _aes,_aen=0.7,0.4
-   if (s==n_ac) _aes,_aen=1.5,0.85
-   local lev2,aeo=lev*lev,(tun-0.5)*0.2
-   _aes-=aeo
-   _aen+=aeo
-   _aes*=lev2
-   _aen*=lev2
-   _aemax=_aes*0.5
+   if state.playing then
+    _aes,_aen=0.7,0.4
+    if (s==n_ac) _aes,_aen=1.5,0.85
+    local lev2,aeo=lev*lev,(tun-0.5)*0.2
+    _aes-=aeo
+    _aen+=aeo
+    _aes*=lev2
+    _aen*=lev2
+    _aemax=_aes*0.5
+   end
    local pd4=pow4(0.65-0.25*dec)
    _aesd=1-0.1*pd4
    _aend=1-0.04*pd4
@@ -184,13 +186,12 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  if s!=n_off then
+  if s!=n_off and state.playing then
    _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,2.0,0.8)
-
-   _detune=2^(tbase+tscale*tun)
-
-   _aed=1-0.04*pow4(dbase-dscale*dec)
   end
+
+  _detune=2^(tbase+tscale*tun)
+  _aed=1-0.04*pow4(dbase-dscale*dec)
  end
 
  function obj:subupdate(b,first,last)
@@ -229,7 +230,7 @@ function sample_new(base)
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   _dec=1-(0.2*(1-dec)^2)
   _detune=2^(flr((tun-0.5)*24+0.5)/12)
-  if s!=n_off then
+  if s!=n_off and state.playing then
    _pos=1
    _amp=lev*lev*trn(s==n_ac,1,0.5)
   end

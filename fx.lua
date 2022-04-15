@@ -163,7 +163,7 @@ function svf_new()
    _rc=1-r*0.96
    local svf_pat=svf_pats[patch[60]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
-   if (pat_val>=0) _fe=pat_val>>4
+   if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-(pow3(1-dec)>>7)
    _bp=(bp&0x0.02>0 and 1) or 0
    _gc=gc*gc+0x0.02
