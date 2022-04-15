@@ -91,7 +91,6 @@ function _init()
     state.patch,
     state.pat_seqs,
     state.pat_status
-   if (not state.playing) return
    local now,nl,bar=state.tick,state.base_note_len,state.bar
    if (pstat.b0.on) syn0:note(pseq.b0,patch,now,nl)
    if (pstat.b1.on) syn1:note(pseq.b1,patch,now,nl)
@@ -119,7 +118,7 @@ function _init()
 
    comp.th=0.05+0.95*pow3(comp_th)
 
-   state:next_tick()
+   if (state.playing) state:next_tick()
   end
  )
 

@@ -102,6 +102,8 @@ function state_new(savedata)
   if self.playing then
    if (tl.rec) tl:toggle_rec()
    tl:clear_overrides()
+  else
+   seq_helper:reset()
   end
   load_bar()
   self.playing=not self.playing
@@ -245,11 +247,11 @@ state_is_song_mode=function(state) return state.song_mode end
 
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
- _t=1000
- _cost=3
+ local _t,_cost=state.note_len,3
  return {
   state=state,
   root=root,
+  reset=function(self) _t=self.state.note_len end,
   run=function(self,b,todo)
    local p=1
    while todo>0 do
@@ -265,7 +267,6 @@ function seq_helper_new(state,root,note_fn)
     p+=n
     todo-=n
    end
-   if (not self.state.playing) _t=0
    return p-1
   end
  }
