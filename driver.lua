@@ -5,8 +5,8 @@ sample_rate=5512.5
 _dcf=0
 
 function audio_update()
- if stat(108)<512 then
-  local todo,buf,dcf=93,{},_dcf
+ if stat(108)<768 then
+  local todo,buf,dcf=94,{},_dcf
   if audio_root then
    todo=audio_root:run(buf,todo)
   else
