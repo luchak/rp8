@@ -319,7 +319,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 )
 (add_ui
- (spin_btn_new 0 (+ $yp 8) (' (162 163 164 165)) "bank select"
+ (spin_btn_new 0 (+ $yp 8) (' (162 163 164 165 166 167 168 169)) "bank select"
   (state_make_get_set (cat $key _bank))
  )
 )
@@ -385,7 +385,7 @@ drum_ui_init=eval[[(fn (add_ui)
  0 104 188 189 active (state_make_get_set_param_bool 34)
 ))
 (add_ui (spin_btn_new
- 0 112 (' (166 167 168 169)) "bank select" (state_make_get_set dr_bank)
+ 0 112 (' (240 241 242 243 244 245 246 247)) "bank select" (state_make_get_set dr_bank)
 ))
 (for 1 6 (fn (i) (add_ui
  (pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
