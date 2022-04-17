@@ -271,14 +271,14 @@ function number_new(x,y,w,tt,get,input)
  }
 end
 
-function wrap_override(w,s_override,get_not_override,active)
+function wrap_override(w,s_override,get_not_override,override_active)
  local get_sprite=w.get_sprite
  w.get_sprite=function(self,state)
   if get_not_override(state) then
    self.active=true
    return get_sprite(self,state)
   else
-   self.active=active
+   self.active=override_active
    return s_override
   end
  end
@@ -393,7 +393,8 @@ drum_ui_init=eval[[(fn (add_ui)
 (map 0 8 0 96 16 4)
 )]]
 
-function rec_not_yellow(s) return (not s.tl.has_override) or s.tl.rec end
+function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
+function has_uncommitted(s) return not no_uncommitted(s) end
 
 header_ui_init=eval[[(fn (add_ui)
 (let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
@@ -410,20 +411,26 @@ header_ui_init=eval[[(fn (add_ui)
 (song_only (wrap_override (toggle_new
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
  (make_obj_cb toggle_rec)
-) 239 $rec_not_yellow true) 233)
+) 196 $no_uncommitted true) 233)
 (song_only (push_new 16 0 5 (fn (s)
  ((@ $s go_to_bar) $s
   (trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
  )
 ) rewind) 5)
 
-(add_ui (push_new 0 8 242 (make_obj_cb copy_seq) "copy loop"))
-(song_only (push_new 8 8 241 (make_obj_cb cut_seq) "cut loop") 199)
-(add_ui (push_new 0 16 247 (make_obj_cb paste_seq) "fill loop"))
-(song_only (push_new 8 16 243 (make_obj_cb insert_seq) "insert loop") 201)
-(song_only
- (push_new 8 24 246 (make_obj_cb copy_overrides_to_loop) "commit changes")
-204)
+(add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
+(song_only (push_new 8 8 199 (make_obj_cb cut_seq) "cut loop") 198)
+(add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))
+(song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
+
+(add_ui (wrap_override 
+ (push_new 8 24 205 (make_obj_cb copy_overrides_to_loop) "commit changes")
+ 204 $has_uncommitted)
+)
+(add_ui (wrap_override 
+ (push_new 0 24 207 (make_obj_cb clear_overrides) "clear changes")
+ 206 $has_uncommitted)
+)
 
 (foreach (' (
   (16 8 1 tempo)
