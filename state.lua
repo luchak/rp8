@@ -109,6 +109,10 @@ function state_new(savedata)
   self.playing=not self.playing
  end
 
+ function s:toggle_loop()
+  self.tl.loop=not self.tl.loop
+ end
+
  function s:toggle_rec()
   self.tl:toggle_rec()
  end

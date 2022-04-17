@@ -102,6 +102,8 @@ function ui_new()
   if (stat(30)) k=stat(31)
   if (k=='h') toggle_help()
   if (k==' ') state:toggle_playing()
+  if (k=='\t') state:toggle_song_mode()
+  if (k=='l') state:toggle_loop()
 
   local focus=self.focus
   local new_focus=self.focus
