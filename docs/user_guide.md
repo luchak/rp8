@@ -11,37 +11,53 @@ sequencing, effects to enrich the sound, a pattern mode for immediate hands-on c
 music.
 
 Unlike the original, the audio output is 8 bit 5.5kHz mono sound, and the user interface is rendered in glorious
-128x128 4-bit color.
+128x128 16 color graphics.
 
 ![The RP-8 user interface.](img/rp8.png "RP-8 Screenshot"){width=60%}
-
-This guide will introduce you to the instrument, its major features and underlying concepts, and how to go about
-designing sounds and composing songs.
 
 Thank you for trying RP-8, and please don't hesitate to let me know what might make RP-8 more pleasant or interesting to
 use.^[You can contact me at [luchak@gmail.com](mailto:luchak@gmail.com) or via the [RP-8
 thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS.]
 
-# Overview
+## Using This Guide
+
+This guide will introduce you to the instrument, its major features and underlying concepts, and how to go about
+designing sounds and composing songs. **If you have never used ReBirth**, you should consider continuing directly to
+the Getting Started and Usage sections of this guide. **If you have used ReBirth**, most of the functionality should be
+familiar and you should probably dive right in -- however, there are some differences, so you might want to refer back
+to this guide if you encounter anything unexpected.
+
+# Getting Started
+
+## Running RP-8
+
+RP-8 is a [Pico-8](https://www.lexaloffle.com/pico-8.php) cartridge, or "cart". You can run it on your own copy of
+Pico-8 or on the web-based [Pico-8 Educational Edition](https://www.pico-8-edu.com) by loading the cart PNG file from
+the [RP-8 thread](https://www.lexaloffle.com/bbs/?tid=47284) on the Lexaloffle BBS, or by typing `load #rp8` at the
+Pico-8 prompt. (This latter approach will always get you the latest version.) You can also run RP-8 directly from the
+Lexaloffle BBS thread. If you are running RP-8 in a browser, please keep your volume low to start, and see the [Web
+Compatibility][] section for further details.
 
 ## Controls
 
-RP-8 is controlled primarily using the mouse. Each control on the screen responds either to clicks or to (vertical) drags.
+RP-8 is controlled primarily using the mouse. Each control on the screen responds either to clicks or drags.
+Typically, button and toggle controls respond to clicks, and dial or note controls respond to vertical dragging. Drag
+controls also respond to the up and down arrows and to the mousewheel for fine adjustments. You can access the menu by
+pressing **enter**, and toggle tooltips by pressing **h**. There are other [Keyboard Controls][] too, but they're just
+present for convenience; you don't need them to get started.
 
-### Hotkeys
+## Your First Pattern
 
-key       | action
-----------|-------
-**h**     | toggle tooltips on/off
-**space** | toggle play/pause
-**tab**   | toggle pattern/song mode
-**l**     | toggle loop on/off
-**up**    | increase selected control one step
-**down**  | decrease selected control one step
+Okay! You've got RP-8 loaded and you want to make some sounds. 
 
 # Usage
 
-## Running RP-8
+## Modes
+
+RP-8 has two major modes: **pattern mode** and **song mode**. Pattern mode is ideal for learning the controls,
+experimentation, and coming up with new ideas, since you are in immediate, direct control of every parameter on the
+display. Song mode is best for when you want to start recording multi-bar sequences and complex automation.
+
 
 ## Making Patterns
 
@@ -60,3 +76,15 @@ key       | action
 ## Drum Controls
 
 ## Web Compatibility
+
+## Keyboard Controls
+
+key       | action
+----------|-------
+**enter** | access the menu
+**h**     | toggle tooltips on/off
+**space** | toggle play/pause
+**tab**   | toggle pattern/song mode
+**l**     | toggle loop on/off
+**up**    | increase selected control one step
+**down**  | decrease selected control one step
