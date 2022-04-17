@@ -202,6 +202,11 @@ function state_new(savedata)
   load_bar()
  end
 
+ function s:clear_overrides()
+  self.tl:clear_overrides()
+  if (not self.playing) self:load_bar()
+ end
+
  function s:copy_overrides_to_loop()
   self.tl:copy_overrides_to_loop()
  end
