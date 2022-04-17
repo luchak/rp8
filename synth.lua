@@ -16,9 +16,9 @@ function synth_new(base)
   _env=env*env+0.1
   _acc=acc*1.9+0.1
   _saw=saw>0
-  local pd=dec-1
-  if (patstep==n_ac or patstep==n_ac_sl) pd=-0.99
-  _med=0.999-0.01*pow4(pd)
+  local pd=1-dec
+  if (patstep==n_ac or patstep==n_ac_sl) pd=1
+  _med=0.999-0.008*pow4(pd)
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
