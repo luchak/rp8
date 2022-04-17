@@ -471,7 +471,7 @@ header_ui_init=eval[[(fn (add_ui)
  (' {click_act=false,drag_amt=0.01})
 ))
 (add_ui (spin_btn_new
- 64 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
+ 48 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
  (state_make_get_set_param 56 1)
 ))
 
