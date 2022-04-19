@@ -4,21 +4,21 @@
 function delay_new()
  local obj,_dl,_p,_f1={l=20,fb=0},{},1,0
 
- for i=1,0x7fff do
+ for i=0,0x7fff do
   _dl[i]=0
  end
 
  function obj:update(b,first,last)
-  local dl,l,fb,p,f1=_dl,flr(self.l),self.fb,_p,_f1
+  local dl,tap,fb,p,f1=_dl,p-flr(self.l),self.fb,_p,_f1
   for i=first,last do
-   local tap=p-l
-   if (tap<1) tap+=0x7fff
+   tap%=0x8000
    local x,y=b[i],dl[tap]
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
    dl[p]=y-(f1>>2)
-   if (p==0x7fff) p=1 else p+=1
+   p=(p+1)%0x8000
+   tap+=1
   end
   _p,_f1=p,f1
  end
