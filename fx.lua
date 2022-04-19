@@ -9,15 +9,16 @@ function delay_new()
  end
 
  function obj:update(b,first,last)
-  local dl,l,fb,p,f1=_dl,self.l,self.fb,_p,_f1
+  local dl,l,fb,p,f1=_dl,flr(self.l),self.fb,_p,_f1
   for i=first,last do
-   local x,y=b[i],dl[p]
+   local tap=p-l
+   if (tap<1) tap+=0x7fff
+   local x,y=b[i],dl[tap]
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
    dl[p]=y-(f1>>2)
-   p+=1
-   if (p>l) p=1
+   if (p==0x7fff) p=1 else p+=1
   end
   _p,_f1=p,f1
  end
