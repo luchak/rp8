@@ -9,6 +9,12 @@ widget_defaults=parse[[{
  drag_amt=0
 }]]
 
+-- overlay is:
+-- draw
+-- input
+-- row range
+-- pixels behind (updates every frame)
+
 function ui_new()
  local obj=parse[[{
   widgets={},
@@ -18,7 +24,8 @@ function ui_new()
   mx=0,
   my=0,
   hover_t=0,
-  help_on=false
+  help_on=false,
+  overlays={}
  }]]
  -- focus
  -- hover
