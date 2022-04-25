@@ -4,11 +4,10 @@ title: "RP-8 User Guide"
 
 # Introduction
 
-RP-8 is a Pico-8 demake of Propellerhead Software's [ReBirth
-RB-338](https://en.wikipedia.org/wiki/ReBirth_RB-33://en.wikipedia.org/wiki/ReBirth_RB-338), one of the first
-commercially successful software synthesizers. Like the original, it provides two synth voices, drums, pattern-based
-sequencing, effects to enrich the sound, a pattern mode for immediate hands-on control, and a song mode for recording
-music.
+RP-8 is a Pico-8 demake of Propellerhead Software's [ReBirth RB-338](https://en.wikipedia.org/wiki/ReBirth_RB-338), one
+of the first commercially successful software synthesizers. Like the original, it provides two synth voices, drums,
+pattern-based sequencing, effects to enrich the sound, a pattern mode for immediate hands-on control, and a song mode
+for recording music.
 
 Unlike the original, the audio output is 8 bit 5.5kHz mono sound, and the user interface is rendered in glorious
 128x128 16 color graphics.
