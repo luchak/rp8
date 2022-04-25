@@ -12,13 +12,13 @@ function synth_new(base)
   local patstep,saw,tun,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+11)
 
   _fc=(100/sample_rate)*(2^(4*cut))/_os
-  _fr=sqrt(res)*7
+  _fr=(res+sqrt(res))*3.4
   _env=env*env+0.1
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd=1-dec
   if (patstep==n_ac or patstep==n_ac_sl) pd=1
-  _med=0.999-0.008*pow4(pd)
+  _med=0.998-0.008*pd
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
@@ -50,6 +50,7 @@ function synth_new(base)
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
   local env,saw,lev,acc=_env,_saw,_lev,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
+  local res_comp=7/(fr+7)
   for i=first,last do
    local fc=min(0.4/os,fcb+((me*env)>>4))
    -- janky dewarping
@@ -92,7 +93,7 @@ function synth_new(base)
    end
    local out=(f4*ae)>>2
    if (ac) out+=acc*me*out
-   b[i]=out
+   b[i]=out*res_comp
   end
   _op,_odp,_gate=op,odp,gate
   _f1,_f2,_f3,_f4,_fosc,_ffb=f1,f2,f3,f4,fosc,ffb
@@ -137,13 +138,13 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'0.08,0.042,0,0.05,0,0,10,0.99,0.996,0.4'
+  {},unpack_split'0.08,0.04,0,0.05,0,0,10,0.99,0.996,0.4'
 
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,41,43)
   if s!=n_off then
-   _detune=2^(2*tun-1)
+   _detune=2^(tun-0.5)
    _op,_dp=0,_dp0*_detune
    if state.playing then
     _aes,_aen=0.7,0.4
@@ -167,7 +168,7 @@ function snare_new()
   local aemax=_aemax
   for i=first,last do
    op+=dp
-   dp+=(dp1-dp)>>7
+   dp+=(dp1-dp)>>6
    aes*=aesd
    aen*=aend
    if (op>=1) op-=2
@@ -181,13 +182,13 @@ end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj,_ae,_f1,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
-  {},unpack_split'0,0,0,14745.6,0,17039.36,0,15400.96,0,15892.48,0.995,1'
+  {},unpack_split'0,0,0,14745.6,0,17039.36,0,15600,0,16200,0.995,1'
 
  function obj:note(pat,patch,step)
   local s=pat[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off and state.playing then
-   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,2.0,0.8)
+   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,1.5,0.6)
   end
 
   _detune=2^(tbase+tscale*tun)
