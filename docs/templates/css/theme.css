@@ -754,6 +754,31 @@ table > caption code {
 .note.purple td { background: var(--highlight-purple); }
 
 /* }}} */
+/* ----- Definition lists ---------------------------------------------- {{{ */
+dl {
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  font-size: var(--table-font-size);
+}
+dt {
+  float: left;
+  width: 30%;
+  /* adjust the width; make sure the total of both is 100% */
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+  clear: left;
+}
+dd {
+  float: left;
+  width: 70%;
+  /* adjust the width; make sure the total of both is 100% */
+  padding: 0;
+  margin: 0
+}
+/* }}} */
 /* ----- Table of contents --------------------------------------------- {{{ */
 
 .date.before-toc {
