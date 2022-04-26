@@ -3,9 +3,9 @@
 
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_os,_env,_acc,
-       _detune,_fc,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
-       _ae,_aed,_nt,_nl={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0,0.99,0,0.997,900'
+       _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
+       _ae,_aed,_nt,_nl,_fcbf={},
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.997,900,900,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
@@ -18,7 +18,7 @@ function synth_new(base)
   _saw=saw>0
   local pd=1-dec
   if (patstep==n_ac or patstep==n_ac_sl) pd=1
-  _med=0.998-0.008*pd
+  _med=0.9995-0.0095*pd
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
@@ -46,13 +46,14 @@ function synth_new(base)
  function obj:update(b,first,last)
   local odp,op,detune,todp,todpr=_odp,_op,_detune,_todp,_todpr
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
-  local fr,fcb,os=_fr,_fc,_os
+  local fr,fcb,os,fcbf=_fr,_fc,_os,_fcbf
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
   local env,saw,lev,acc=_env,_saw,_lev,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=7/(fr+7)
   for i=first,last do
-   local fc=min(0.4/os,fcb+((me*env)>>4))
+   fcbf+=(fcb-fcbf)>>8
+   local fc=min(0.4/os,fcbf+((me*env)>>4))
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
@@ -96,7 +97,7 @@ function synth_new(base)
    b[i]=out*res_comp
   end
   _op,_odp,_gate=op,odp,gate
-  _f1,_f2,_f3,_f4,_fosc,_ffb=f1,f2,f3,f4,fosc,ffb
+  _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf
   _me,_ae,_mr=me,ae,mr
  end
 
