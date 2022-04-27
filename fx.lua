@@ -33,7 +33,7 @@ function drum_mixer_new(srcs)
  return {
   srcs=srcs,
   fx=127,
-  note=function(self,patch) self.fx=patch[37] end,
+  note=function(self,patch) self.fx=patch[45] end,
   update=function(self,b,first,last,bypass)
    for i=first,last do
     b[i]=0
@@ -50,15 +50,15 @@ end
 filtmap=parse[[{b0=3,b1=4,dr=5}]]
 mixer_params=parse[[{
  b0={p0=7,p1=9,lev=8},
- b1={p0=19,p1=21,lev=8},
- dr={p0=31,p1=33,lev=16},
+ b1={p0=23,p1=25,lev=8},
+ dr={p0=39,p1=41,lev=16},
 }]]
 function mixer_new(_srcs,_fx,_filt,_lev)
  local _tmp,_bypass,_fxbuf,_filtsrc,_xp1={},{},{},1,parse[[{b0=0,b1=0,dr=0}]]
  return {
   note=function(self,patch)
    _lev=pow3(patch[3]>>7)*8
-   _filtsrc=flr(patch[56]>>1)
+   _filtsrc=patch[64]
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
     local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
@@ -160,14 +160,13 @@ function svf_new()
  local _z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec=unpack_split'0,0,0.1,0.2,1,1,0,1'
  return {
   note=function(self,patch,bar,tick)
-   local r,bp,gc,dec
-   bp,gc,r,_wet,_,dec=unpack_patch(patch,56,61)
+   local r,gc,dec
+   _bp,gc,r,_wet,_,dec=unpack_patch(patch,65,70)
    _rc=1-r*0.96
-   local svf_pat=svf_pats[patch[60]]
+   local svf_pat=svf_pats[patch[69]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-(pow3(1-dec)>>7)
-   _bp=(bp&0x0.02>0 and 1) or 0
    _gc=gc*gc+0x0.02
   end,
   update=function(self,b,first,last)
