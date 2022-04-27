@@ -338,15 +338,18 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 ))
 (foreach (' (
- {x=40,o=6,tt="tune"}
- {x=56,o=7,tt="filter cutoff"}
- {x=72,o=8,tt="filter resonance"}
- {x=88,o=9,tt="filter env amount"}
- {x=104,o=10,tt="filter env decay"}
- {x=120,o=11,tt="accent depth"}
+ {x=56,o=6,tt="tune"}
+ {x=64,o=7,tt="osc 2 coarse"}
+ {x=72,o=8,tt="osc 2 fine"}
+ {x=80,o=9,tt="osc 2 mix"}
+ {x=88,o=10,tt="filter cutoff"}
+ {x=96,o=11,tt="filter resonance"}
+ {x=104,o=12,tt="filter env amount"}
+ {x=112,o=13,tt="filter env decay"}
+ {x=120,o=14,tt="accent depth"}
  ))
  (fn (d) (add_ui
-  (dial_new (@ $d x) $yp 43 21 (+ $base_idx (@ $d o)) (@ $d tt))
+  (dial_new (@ $d x) $yp 48 16 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
 )
 (add_ui
@@ -361,12 +364,12 @@ drum_ui_init=eval[[(fn (add_ui)
 )))
 (foreach
  (' (
-  {k=bd,x=32,y=104,s=150,b=38,tt="bass drum"}
-  {k=sd,x=32,y=112,s=152,b=41,tt="snare drum"}
-  {k=hh,x=64,y=104,s=154,b=44,tt=hihat}
-  {k=cy,x=64,y=112,s=156,b=47,tt=cymbal}
-  {k=pc,x=96,y=104,s=158,b=50,tt=percussion}
-  {k=sp,x=96,y=112,s=174,b=53,tt=sample}
+  {k=bd,x=32,y=104,s=150,b=46,tt="bass drum"}
+  {k=sd,x=32,y=112,s=152,b=49,tt="snare drum"}
+  {k=hh,x=64,y=104,s=154,b=52,tt=hihat}
+  {k=cy,x=64,y=112,s=156,b=55,tt=cymbal}
+  {k=pc,x=96,y=104,s=158,b=58,tt=percussion}
+  {k=sp,x=96,y=112,s=174,b=61,tt=sample}
  ))
  (fn (d)
   (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
@@ -391,7 +394,7 @@ drum_ui_init=eval[[(fn (add_ui)
  16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
 ))
 (add_ui (toggle_new
- 0 104 188 189 active (state_make_get_set_param_bool 34)
+ 0 104 188 189 active (state_make_get_set_param_bool 42)
 ))
 (add_ui (spin_btn_new
  0 112 (' (240 241 242 243 244 245 246 247)) "bank select" (state_make_get_set dr_bank)
@@ -447,15 +450,15 @@ header_ui_init=eval[[(fn (add_ui)
   (32 16 6 "compressor threshold")
   (16 16 2 shuffle)
   (32 24 5 "delay feedback")
-  (48 16 57 "filter cutoff")
-  (48 24 58 "filter resonance")
-  (64 24 59 "filter wet/dry")
-  (80 24 61 "filter env decay")
+  (48 16 66 "filter cutoff")
+  (48 24 67 "filter resonance")
+  (64 24 68 "filter wet/dry")
+  (80 24 70 "filter env decay")
  )) (fn (s)
   (hdial (unpack $s))
  )
 )
-(let get_set_filt_pat (pack (state_make_get_set_param 60)))
+(let get_set_filt_pat (pack (state_make_get_set_param 69)))
 (add_ui (merge
  (number_new 80 16 2 "filter pattern" (@ $get_set_filt_pat 1)
   (fn (s b)
@@ -476,12 +479,12 @@ header_ui_init=eval[[(fn (add_ui)
  (' {w=3})
 ))
 (add_ui (merge
- (toggle_new 64 16 234 235 "filter lp/bp" (state_make_get_set_param_bool 56 0))
+ (toggle_new 64 16 234 235 "filter lp/bp" (state_make_get_set_param_bool 65 0))
  (' {click_act=false,drag_amt=0.01})
 ))
 (add_ui (spin_btn_new
  48 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
- (state_make_get_set_param 56 1)
+ (state_make_get_set_param 64)
 ))
 
 (foreach (' ({s=b0 y=8 tt="synth 1 "} {s=b1 y=16 tt="synth 2 "} {s=dr y=24 tt="drums "})) (fn (syn)

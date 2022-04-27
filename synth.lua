@@ -4,13 +4,14 @@
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_os,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
-       _ae,_aed,_nt,_nl,_fcbf={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.997,900,900,0'
+       _ae,_aed,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.997,900,900,0,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
-  local patstep,saw,tun,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+11)
+  local patstep,saw,tun,o2coarse,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
+  _o2mix=o2mix
   _fc=(100/sample_rate)*(2^(4*cut))/_os
   _fr=(res+sqrt(res))*3.4
   _env=env*env+0.1
@@ -23,12 +24,13 @@ function synth_new(base)
   _lsl=_sl
   _gate=false
   _detune=semitone^(flr(24*(tun-0.5)+0.5))
+  _o2detune=_detune*semitone^(flr(o2coarse*24)+o2fine-12.5)
   _ac=patstep==n_ac or patstep==n_ac_sl
   _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off or not state.playing) return
 
   _gate=true
-  local f=55*(semitone^(pat.nt[step]+3))
+  local f=55*(2^((pat.nt[step]+3)/12))
   --ordered for safety
   _todp=(f/_os)/(sample_rate>>16)
 
@@ -44,15 +46,17 @@ function synth_new(base)
  end
 
  function obj:update(b,first,last)
-  local odp,op,detune,todp,todpr=_odp,_op,_detune,_todp,_todpr
+  local odp,op,detune,todp,todpr,o2p=_odp,_op,_detune,_todp,_todpr,_o2p
+  local o2detune,o2mix=_o2detune,_o2mix>>2
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
   local fr,fcb,os,fcbf=_fr,_fc,_os,_fcbf
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
   local env,saw,lev,acc=_env,_saw,_lev,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=7/(fr+7)
+  local mix1,mix2=cos(o2mix),sin(o2mix+0.5)
   for i=first,last do
-   fcbf+=(fcb-fcbf)>>8
+   fcbf+=(fcb-fcbf)>>6
    local fc=min(0.4/os,fcbf+((me*env)>>4))
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
@@ -71,32 +75,36 @@ function synth_new(base)
     me*=med
    end
    odp+=todpr*(todp-odp)
-   local dodp=odp*detune
+   local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for j=1,os do
-    local osc=op>>15
+    local osc,osc2=op>>15,o2p>>15
     if not saw then
      osc=0.5+((osc&0x8000)>>15)
+     osc2=0.5+((osc2&0x8000)>>15)
     end
+    osc=mix1*osc+mix2*osc2
     fosc+=(osc-fosc)>>5
     osc-=fosc
     ffb+=(f4-ffb)>>5
     local x=osc-fr*(f4-ffb-osc)
-    local xc=mid(-1,x,1)
+    local xc=mid(-0.25,x,0.25)
     x=xc+(x-xc)*0.9840
 
     f1+=(x-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
+    out+=f4
 
     op+=dodp
+    o2p+=dodp2
    end
-   local out=(f4*ae)>>2
+   out=(out*ae/_os)>>3
    if (ac) out+=acc*me*out
    b[i]=out*res_comp
   end
-  _op,_odp,_gate=op,odp,gate
+  _op,_odp,_gate,_o2p=op,odp,gate,o2p
   _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf
   _me,_ae,_mr=me,ae,mr
  end
@@ -143,7 +151,7 @@ function snare_new()
 
  function obj:note(pat,patch,step)
   local s=pat[step]
-  local tun,dec,lev=unpack_patch(patch,41,43)
+  local tun,dec,lev=unpack_patch(patch,49,51)
   if s!=n_off then
    _detune=2^(tun-0.5)
    _op,_dp=0,_dp0*_detune
