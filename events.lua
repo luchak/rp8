@@ -1,6 +1,6 @@
 -- see notes 001, 002
 
-no_event_params=parse[[{10=true,11=true,22=true,23=true,34=true,35=true}]]
+no_event_params=parse[[{10=true,11=true,26=true,27=true,42=true,43=true}]]
 
 function timeline_new(default_patch, savedata)
  local timeline=parse[[{

@@ -323,12 +323,12 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 )
 (add_ui
- (toggle_new 0 $yp 186 187 active
+ (toggle_new 0 $yp 107 108 active
   (state_make_get_set_param_bool (+ $base_idx 3))
  )
 )
 (add_ui
- (spin_btn_new 0 (+ $yp 8) (' (162 163 164 165 166 167 168 169)) "bank select"
+ (spin_btn_new 0 (+ $yp 8) (' (248 249 250 251 252 253 254 255)) "bank select"
   (state_make_get_set (cat $key _bank))
  )
 )
@@ -369,7 +369,7 @@ drum_ui_init=eval[[(fn (add_ui)
   {k=hh,x=64,y=104,s=154,b=52,tt=hihat}
   {k=cy,x=64,y=112,s=156,b=55,tt=cymbal}
   {k=pc,x=96,y=104,s=158,b=58,tt=percussion}
-  {k=sp,x=96,y=112,s=174,b=61,tt=sample}
+  {k=sp,x=96,y=112,s=145,b=61,tt=sample}
  ))
  (fn (d)
   (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
@@ -384,7 +384,7 @@ drum_ui_init=eval[[(fn (add_ui)
 (foreach
  (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
  (fn (c) (add_ui (toggle_new
-  (@ $c x) 96 170 171 (cat (@ $c tt) "fx bypass") (state_make_get_set_param_bool 37 (@ $c b))
+  (@ $c x) 96 101 102 (cat (@ $c tt) "fx bypass") (state_make_get_set_param_bool 37 (@ $c b))
  )))
 )
 (add_ui (push_new
@@ -394,7 +394,7 @@ drum_ui_init=eval[[(fn (add_ui)
  16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
 ))
 (add_ui (toggle_new
- 0 104 188 189 active (state_make_get_set_param_bool 42)
+ 0 104 109 110 active (state_make_get_set_param_bool 42)
 ))
 (add_ui (spin_btn_new
  0 112 (' (240 241 242 243 244 245 246 247)) "bank select" (state_make_get_set dr_bank)
@@ -418,7 +418,7 @@ header_ui_init=eval[[(fn (add_ui)
  0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
 (add_ui (toggle_new
- 24 0 172 173 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
+ 24 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
 ))
 (song_only (wrap_override (toggle_new
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
