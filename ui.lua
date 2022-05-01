@@ -19,7 +19,6 @@ function ui_new()
  local obj=parse[[{
   widgets={},
   sprites={},
-  dirty={},
   mtiles={},
   mx=0,
   my=0,
@@ -49,28 +48,25 @@ function ui_new()
   local mx,my,off=self.mx,self.my,self.restore_offset
   if (off) memcpy(0x6000+off,0x9000+off,self.restore_size)
 
+  palt(0,false)
   -- draw changed widgets
   for id,w in pairs(self.widgets) do
    local ns=w:get_sprite(state)
-   if ns!=self.sprites[id] then
-    self.sprites[id],self.dirty[id]=ns,true
+   if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
+    self.sprites[id]=ns
+    local w,sp=self.widgets[id],self.sprites[id]
+    local wx,wy=w.x,w.y
+    -- see note 004
+    if type(sp)=='number' then
+     spr(self.sprites[id],wx,wy,1,1)
+    else
+     local tw,text,bg,fg=w.w*4,unpack_split(sp)
+     text=tostr(text)
+     rectfill(wx,wy,wx+tw-1,wy+7,bg)
+     print(text,wx+tw-#text*4,wy+1,fg)
+    end
    end
   end
-  palt(0,false)
-  for id,_ in pairs(self.dirty) do
-   local w,sp=self.widgets[id],self.sprites[id]
-   local wx,wy=w.x,w.y
-   -- see note 004
-   if type(sp)=='number' then
-    spr(self.sprites[id],wx,wy,1,1)
-   else
-    local tw,text,bg,fg=w.w*4,unpack_split(sp)
-    text=tostr(text)
-    rectfill(wx,wy,wx+tw-1,wy+7,bg)
-    print(text,wx+tw-#text*4,wy+1,fg)
-   end
-  end
-  self.dirty={}
 
   local f=self.focus
   palt(0,true)
@@ -135,19 +131,13 @@ function ui_new()
    poke(0x5f2d,1)
   end
 
-  if new_focus!=focus then
-   if (focus) self.dirty[focus.id]=true
-   if (new_focus) self.dirty[new_focus.id]=true
-   focus=new_focus
-  end
-
-  if focus then
-   input+=trn(focus.drag_amt>0,stat(36),0)
-   if (input!=0) focus:input(state,input)
+  if new_focus then
+   input+=trn(new_focus.drag_amt>0,stat(36),0)
+   if (input!=0) new_focus:input(state,input)
   end
   if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
 
-  self.last_click,self.hover,self.last_my,self.focus=click,hover,my,focus
+  self.last_click,self.hover,self.last_my,self.focus,self.old_focus=click,hover,my,new_focus,focus
  end
 
  return obj
