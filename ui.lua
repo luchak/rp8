@@ -349,7 +349,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  {x=120,o=14,tt="accent depth"}
  ))
  (fn (d) (add_ui
-  (dial_new (@ $d x) $yp 160 31 (+ $base_idx (@ $d o)) (@ $d tt))
+  (dial_new (@ $d x) $yp 160 29 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
 )
 (add_ui
