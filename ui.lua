@@ -34,13 +34,23 @@ function ui_new()
   w=merge(copy(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
-  w.id,w.tx,w.ty=#widgets,w.x\4,w.y\4
-  local tile=w.tx+w.ty*32
+  w.id,w.tx,w.ty,w.tiles=#widgets,w.x\4,w.y\4,{}
+  local tile_base=w.tx+w.ty*32
   for dx=0,w.w-1 do
    for dy=0,w.h-1 do
-    self.mtiles[tile+dx+dy*32]=w
+    local tile=tile_base+dx+dy*32
+    add(w.tiles,tile)
    end
   end
+  self:show_widget(w)
+ end
+
+ function obj:show_widget(w)
+  for tile in all(w.tiles) do self.mtiles[tile]=w end
+ end
+
+ function obj:hide_widget(w)
+  for tile in all(w.tiles) do if self.mtiles[tile]==w then self.mtiles[tile]=nil end end
  end
 
  function obj:draw(state)
@@ -339,7 +349,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  {x=120,o=14,tt="accent depth"}
  ))
  (fn (d) (add_ui
-  (dial_new (@ $d x) $yp 47 17 (+ $base_idx (@ $d o)) (@ $d tt))
+  (dial_new (@ $d x) $yp 160 31 (+ $base_idx (@ $d o)) (@ $d tt))
  ))
 )
 (add_ui
