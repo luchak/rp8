@@ -148,7 +148,7 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'0.08,0.04,0,0.05,0,0,10,0.99,0.996,0.4'
+  {},unpack_split'2620,1310.5,0,0.05,0,0,10,0.99,0.996,0.4'
 
  function obj:note(pat,patch,step)
   local s=pat[step]
@@ -181,8 +181,7 @@ function snare_new()
    dp+=(dp1-dp)>>6
    aes*=aesd
    aen*=aend
-   if (op>=1) op-=2
-   b[i]+=(min(aemax,aes)*sin(op)+aen*(2*rnd()-1))*0.3
+   b[i]+=(min(aemax,aes)*sin(op>>15)+aen*(2*rnd()-1))*0.3
   end
   _dp,_op,_aes,_aen=dp,op,aes,aen
  end
