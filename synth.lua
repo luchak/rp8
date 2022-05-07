@@ -57,7 +57,7 @@ function synth_new(base)
   local mix1,mix2=cos(o2mix),sin(o2mix+0.5)
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.4/os,fcbf+((me*env)>>4))
+   local fc=min(0.4/os,fcbf+(me>>4)*env)
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
@@ -138,7 +138,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   b[i]+=min(ae,aemax)*sin(0.5+(op>>16))
+   b[i]+=min(ae,aemax)*sin(op>>16)
   end
   _op,_dp,_ae=op,dp,ae
  end
@@ -181,7 +181,7 @@ function snare_new()
    dp+=(dp1-dp)>>6
    aes*=aesd
    aen*=aend
-   b[i]+=(min(aemax,aes)*sin(op>>15)+aen*(2*rnd()-1))*0.3
+   b[i]+=(min(aemax,aes)*sin(op>>15)+aen*(rnd(2)-1))*0.3
   end
   _dp,_op,_aes,_aen=dp,op,aes,aen
  end
