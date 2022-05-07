@@ -61,7 +61,7 @@ function ui_new()
   palt(0,false)
   -- draw changed widgets
   for id,w in pairs(self.widgets) do
-   local ns=w:get_sprite(state)
+   local ns=w.get_sprite(state)
    if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
     self.sprites[id]=ns
     local w,sp=self.widgets[id],self.sprites[id]
@@ -156,7 +156,7 @@ end
 function syn_note_btn_new(x,y,syn,step)
  return {
   x=x,y=y,drag_amt=0.05,tt='note (drag)',
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return 64+state.pat_seqs[syn].nt[step]
   end,
   input=function(self,state,b)
@@ -170,7 +170,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
   x=x,y=y,tt=tt,drag_amt=0.01,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return sprites[get(state)]
   end,
   input=function(self,state,b)
@@ -185,7 +185,7 @@ function step_btn_new(x,y,syn,step,sprites)
  local n=#sprites-1
  return {
   x=x,y=y,tt='step edit',click_act=true,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    if (state.playing and state.tick==step) return sprites[n+1]
    local v=state:get_pat_steps(syn)[step]
    return sprites[v-63]
@@ -202,7 +202,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  bins-=0x0.0001
  return {
   x=x,y=y,tt=tt,drag_amt=0.33,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
@@ -215,7 +215,7 @@ end
 function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return trn(get(state),s_on,s_off)
   end,
   input=function(self,state)
@@ -239,7 +239,7 @@ end
 function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,tt=tt,click_act=true,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return trn(get(state)==val,s_on,s_off)
   end,
   input=function(self,state)
@@ -254,7 +254,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local ret_prefix=pib..','..c_bg..','
  return {
   x=x,y=y,tt='pattern select',w=1,click_act=true,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
    local val=bank*bank_size-bank_size+pib
@@ -273,7 +273,7 @@ end
 function number_new(x,y,w,tt,get,input)
  return {
   x=x,y=y,w=w,drag_amt=0.05,tt=tt,
-  get_sprite=function(self,state)
+  get_sprite=function(state)
    return tostr(get(state))..',0,15'
   end,
   input=function(self,state,b) input(state,b) end
@@ -282,12 +282,12 @@ end
 
 function wrap_override(w,s_override,get_not_override,override_active)
  local get_sprite=w.get_sprite
- w.get_sprite=function(self,state)
+ w.get_sprite=function(state)
   if get_not_override(state) then
-   self.active=true
-   return get_sprite(self,state)
+   w.active=true
+   return get_sprite(state)
   else
-   self.active=override_active
+   w.active=override_active
    return s_override
   end
  end
