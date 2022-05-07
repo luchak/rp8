@@ -78,20 +78,21 @@ function synth_new(base)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for j=1,os do
-    local osc,osc2=op>>15,o2p>>15
+    local osc=op>>15
+    local osc2=o2p>>15
     if not saw then
-     osc=0.5+((osc&0x8000)>>15)
-     osc2=0.5+((osc2&0x8000)>>15)
+     osc-=(op^^0x8000)>>15
+     osc2-=(o2p^^0x8000)>>15
     end
     osc=mix1*osc+mix2*osc2
     fosc+=(osc-fosc)>>5
     osc-=fosc
     ffb+=(f4-ffb)>>5
-    local x=osc-fr*(f4-ffb-osc)
-    local xc=mid(-0.25,x,0.25)
-    x=xc+(x-xc)*0.9840
+    osc-=fr*(f4-ffb-osc)
+    local clip=mid(-0.25,osc,0.25)
+    osc=clip+(osc-clip)*0.9840
 
-    f1+=(x-f1)*fc1
+    f1+=(osc-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
@@ -233,7 +234,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 end
 
 function sample_new(base)
- local obj,_pos,_detune,_dec,_amp={},unpack_split'1,0,0,1,0.99,0.5'
+ local obj,_pos,_detune,_dec,_amp={},unpack_split'32767,0,0,1,0.99,0.5'
 
  function obj:note(pat,patch,step)
   local s=pat[step]
@@ -248,15 +249,14 @@ function sample_new(base)
 
  function obj:subupdate(b,first,last)
   local pos,samp=_pos,state.samp
-  if (pos<0) return
   local amp,dec,detune,n=_amp,_dec,_detune,#samp
   for i=first,last do
-   if (pos>=n) pos=-1 break
+   if (pos>=n) break
    local pi=pos&0xffff.0000
-   local po,s0,s1=pos-pi,samp[pi],samp[pi+1]
-   local val=s0+po*(s1-s0)
+   local s0=samp[pi]
 
-   b[i]+=amp*((val>>7)-1)
+   --b[i]+=amp*(((s0+(pos-pi)*(samp[pi+1]-s0))>>7)-1)
+   b[i]+=amp*(((s0+(pos-pi)*(samp[pi+1]-s0))>>7)-1)
    if (pi&0xff==0) amp*=dec
    pos+=detune
   end
