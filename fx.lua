@@ -10,16 +10,15 @@ function delay_new()
 
  function obj:update(b,first,last)
   local dl,fb,p,f1=_dl,self.fb,_p,_f1
-  local tap=p-flr(self.l)
+  local tap=(p-flr(self.l))&0x7fff
   for i=first,last do
-   tap%=0x8000
    local x,y=b[i],dl[tap]
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
    dl[p]=y-(f1>>2)
-   p=(p+1)%0x8000
-   tap+=1
+   p=(p+1)&0x7fff
+   tap=(tap+1)&0x7fff
   end
   _p,_f1=p,f1
  end
@@ -80,7 +79,11 @@ function mixer_new(_srcs,_fx,_filt,_lev)
      local x1,x0=tmp[i]
      x0,xp1=(xp1+x1)>>1,x1
      local pre=x1+x0
-     x0,x1=mid(-1.5,x0*odg,1.5),mid(-1.5,x1*odg,1.5)
+     x0*=odg
+     x1*=odg
+     local m0,m1=x0>>31,x1>>31
+     if (x0^^m0>1.5) x0=1.5^^m0
+     if (x1^^m1>1.5) x1=1.5^^m1
      tmp[i]+=(odgi*(x0+x1-0.148148*(x0*x0*x0+x1*x1*x1))-pre)>>1
      tmp[i]*=src.lev
     end
@@ -115,7 +118,8 @@ function comp_new(src,th,_ratio,_att,_rel)
    -- makeup targets 0.6
    local makeup=max(1,0.6/((0.6-th)*ratio+th))
    for i=first,last do
-    local x=abs(b[i])
+    local x=b[i]
+    x^^=x>>31
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
@@ -173,11 +177,11 @@ function svf_new()
    local z1,z2,rc,gc_base,wet,fe,is_bp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec
    for i=first,last do
     gc=gc_base*fe
-    local rrpg=2*rc+gc
+    local rrpg=(rc<<1)+gc
     local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
-    z1,z2=hpgc+bp,2*bp*gc+z2
+    z1,z2=hpgc+bp,((bp*gc)<<1)+z2
 
     -- 2x oversample
     hpgc=(inp-rrpg*z1-z2)/hpn
