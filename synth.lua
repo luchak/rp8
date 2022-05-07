@@ -89,10 +89,10 @@ function synth_new(base)
     osc-=fosc
     ffb+=(f4-ffb)>>5
     osc-=fr*(f4-ffb-osc)
-    local clip=mid(-0.25,osc,0.25)
-    osc=clip+(osc-clip)*0.9840
+    local m,clip=osc>>31,osc
+    if (osc^^m>0.25) clip=0.25^^m
 
-    f1+=(osc-f1)*fc1
+    f1+=(clip+(osc-clip)*0.9840-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
@@ -211,11 +211,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
 
   for i=first,last do
-   local osc=1.0
-   osc+=(op1&0x8000)>>16
-   osc+=(op2&0x8000)>>16
-   osc+=(op3&0x8000)>>16
-   osc+=(op4&0x8000)>>16
+   local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
 
    local r=nlev*(rnd()-0.5)+tlev*osc
    f1+=0.8*(r-f1)
