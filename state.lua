@@ -3,7 +3,7 @@
 
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
-syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,sp=61}]]
+syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,s1=58,s2=61}]]
 
 pat_param_idx=parse[[{b0=11,b1=27,dr=43}]]
 
@@ -12,16 +12,17 @@ default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,6
 
 syn_pat_template=parse[[{
  nt=`(rep 16 19)
+ dt=`(rep 16 64)
  st=`(rep 16 64)
 }]]
 
 drum_pat_template=parse[[{
- bd=`(rep 16 64)
- sd=`(rep 16 64)
- hh=`(rep 16 64)
- cy=`(rep 16 64)
- pc=`(rep 16 64)
- sp=`(rep 16 64)
+ bd={st=`(rep 16 64) nt=`(rep 16 19)}
+ sd={st=`(rep 16 64) nt=`(rep 16 19)}
+ hh={st=`(rep 16 64) nt=`(rep 16 19)}
+ cy={st=`(rep 16 64) nt=`(rep 16 19)}
+ s1={st=`(rep 16 64) nt=`(rep 16 19)}
+ s2={st=`(rep 16 64) nt=`(rep 16 19)}
 }]]
 
 function state_new(savedata)
@@ -153,7 +154,7 @@ function state_new(savedata)
 
  function s:get_pat_steps(syn)
   -- pats are aliased, always editing current
-  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn].st)
+  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel].st,self.pat_seqs[syn].st)
  end
 
  function s:save()
