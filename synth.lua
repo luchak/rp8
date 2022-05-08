@@ -118,7 +118,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   {},unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
 
  function obj:note(pat,patch,step)
-  local s=pat[step]
+  local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off then
    -- TODO: update params every step?

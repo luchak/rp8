@@ -17,13 +17,13 @@ widget_defaults=parse[[{
 
 function ui_new()
  local obj=parse[[{
-  widgets={},
-  sprites={},
-  mtiles={},
-  mx=0,
-  my=0,
-  hover_t=0,
-  help_on=false,
+  widgets={}
+  sprites={}
+  mtiles={}
+  mx=0
+  my=0
+  hover_t=0
+  help_on=false
   overlays={}
  }]]
  -- focus
@@ -68,9 +68,9 @@ function ui_new()
     local wx,wy=w.x,w.y
     -- see note 004
     if type(sp)=='number' then
-     spr(self.sprites[id],wx,wy,1,1)
+     spr(sp,wx,wy)
     else
-     local tw,text,bg,fg=w.w*4,unpack_split(sp)
+     local tw,text,bg,fg=w.w<<2,unpack_split(sp)
      text=tostr(text)
      rectfill(wx,wy,wx+tw-1,wy+7,bg)
      print(text,wx+tw-#text*4,wy+1,fg)
@@ -83,7 +83,7 @@ function ui_new()
 
   -- draw focus box
   if f then
-   spr(1,f.x,f.y,1,1)
+   spr(1,f.x,f.y)
    sspr(32,0,4,8,f.x+f.w*4-4,f.y)
   end
 
@@ -368,8 +368,8 @@ drum_ui_init=eval[[(fn (add_ui)
   {k=sd,x=32,y=112,s=152,b=49,tt="snare drum"}
   {k=hh,x=64,y=104,s=154,b=52,tt=hihat}
   {k=cy,x=64,y=112,s=156,b=55,tt=cymbal}
-  {k=pc,x=96,y=104,s=158,b=58,tt=percussion}
-  {k=sp,x=96,y=112,s=145,b=61,tt=sample}
+  {k=s1,x=96,y=104,s=158,b=58,tt=percussion}
+  {k=s2,x=96,y=112,s=145,b=61,tt=sample}
  ))
  (fn (d)
   (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
