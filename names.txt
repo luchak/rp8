@@ -87,6 +87,8 @@ push_new
 radio_btn_new
 rec
 rec_not_yellow
+s1
+s2
 samp
 save
 sd

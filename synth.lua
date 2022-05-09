@@ -24,7 +24,7 @@ function synth_new(base)
   _lsl=_sl
   _gate=false
   _detune=semitone^(flr(24*(tun-0.5)+0.5))
-  _o2detune=_detune*semitone^(flr(o2coarse*24)+o2fine-12.5)
+  _o2detune=_detune*semitone^(flr(o2coarse*24+pat.dt[step]-64)+o2fine-12.5)
   _ac=patstep==n_ac or patstep==n_ac_sl
   _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off or not state.playing) return
@@ -122,7 +122,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off then
    -- TODO: update params every step?
-   _detune=2^(1.5*tun-0.75)
+   _detune=2^(1.5*tun-0.75+(pat.dt[step]-64)/12)
    _op,_dp=0,(_dp0<<16)*_detune
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
@@ -151,10 +151,10 @@ function snare_new()
   {},unpack_split'2620,1310.5,0,0.05,0,0,10,0.99,0.996,0.4'
 
  function obj:note(pat,patch,step)
-  local s=pat[step]
+  local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,49,51)
   if s!=n_off then
-   _detune=2^(tun-0.5)
+   _detune=2^(tun-0.5+(pat.dt[step]-64)/12)
    _op,_dp=0,_dp0*_detune
    if state.playing then
     _aes,_aen=0.7,0.4
@@ -194,13 +194,13 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   {},unpack_split'0,0,0,14745.6,0,17039.36,0,15600,0,16200,0.995,1'
 
  function obj:note(pat,patch,step)
-  local s=pat[step]
+  local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off and state.playing then
    _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,1.5,0.6)
   end
 
-  _detune=2^(tbase+tscale*tun)
+  _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)
   _aed=1-0.04*pow4(dbase-dscale*dec)
  end
 
@@ -232,10 +232,10 @@ function sample_new(base)
  local obj,_pos,_detune,_dec,_amp={},unpack_split'32767,0,0,1,0.99,0.5'
 
  function obj:note(pat,patch,step)
-  local s=pat[step]
+  local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   _dec=1-(0.2*(1-dec)^2)
-  _detune=2^(flr((tun-0.5)*24+0.5)/12)
+  _detune=2^(flr((tun-0.5)*24+0.5)/12+(pat.dt[step]-64)/12)
   if s!=n_off and state.playing then
    _pos=1
    _amp=lev*lev*trn(s==n_ac,1,0.5)
