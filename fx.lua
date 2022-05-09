@@ -119,7 +119,7 @@ function comp_new(src,th,_ratio,_att,_rel)
    local makeup=max(1,0.6/((0.6-th)*ratio+th))
    for i=first,last do
     local x=b[i]
-    x^^=x>>31
+    x=x^^(x>>31)
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)

@@ -140,3 +140,13 @@ widgets
 wrap_override
 x
 y
+get_ui_pat
+page
+pages
+add_page
+visible
+get_page
+set_page
+no_uncommitted
+has_uncommitted
+dt
