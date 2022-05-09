@@ -25,12 +25,19 @@ function ui_new()
   hover_t=0
   help_on=false
   overlays={}
+  page=1
+  pages={}
+  visible={}
  }]]
  -- focus
  -- hover
  -- overlay
 
- function obj:add_widget(w)
+ function obj:add_page(idx)
+  self.pages[idx]={}
+ end
+
+ function obj:add_widget(w,page)
   w=merge(copy(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
@@ -42,15 +49,33 @@ function ui_new()
     add(w.tiles,tile)
    end
   end
-  self:show_widget(w)
+  if page then
+   add(self.pages[page],w)
+  end
+  if page==self.page or not page then self:show_widget(w) end
+ end
+
+ function obj:set_page(p)
+  if p==self.page then return end
+  for w in all(self.pages[self.page]) do
+   self:hide_widget(w)
+  end
+  for w in all(self.pages[p]) do
+   self:show_widget(w)
+  end
+  self.page=p
  end
 
  function obj:show_widget(w)
   for tile in all(w.tiles) do self.mtiles[tile]=w end
+  self.visible[w.id]=w
+  -- force redraw
+  self.sprites[w.id]=nil
  end
 
  function obj:hide_widget(w)
   for tile in all(w.tiles) do if self.mtiles[tile]==w then self.mtiles[tile]=nil end end
+  self.visible[w.id]=nil
  end
 
  function obj:draw(state)
@@ -60,7 +85,7 @@ function ui_new()
 
   palt(0,false)
   -- draw changed widgets
-  for id,w in pairs(self.widgets) do
+  for id,w in pairs(self.visible) do
    local ns=w.get_sprite(state)
    if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
     self.sprites[id]=ns
@@ -115,7 +140,7 @@ function ui_new()
   if (stat(30)) k=stat(31)
   if (k=='h') toggle_help()
   if (k==' ') state:toggle_playing()
-  if (k=='\t') state:toggle_song_mode()
+  if (k=='\t') ui:set_page(3-ui.page)
   if (k=='l') state:toggle_loop()
 
   local focus=self.focus
@@ -153,15 +178,16 @@ function ui_new()
  return obj
 end
 
-function syn_note_btn_new(x,y,syn,step)
+function syn_note_btn_new(x,y,syn,key,step,sp0,nt0,nmin,nmax)
+ local offset=sp0-nt0
  return {
   x=x,y=y,drag_amt=0.05,tt='note (drag)',
   get_sprite=function(state)
-   return 64+state.pat_seqs[syn].nt[step]
+   return offset+state:get_ui_pat(syn)[key][step]
   end,
   input=function(self,state,b)
-   local n=state.pat_seqs[syn].nt
-   n[step]=mid(0,36,n[step]+b)
+   local n=state:get_ui_pat(syn)[key]
+   n[step]=mid(nmin,nmax,n[step]+b)
   end
  }
 end
@@ -174,8 +200,13 @@ function spin_btn_new(x,y,sprites,tt,get,set)
    return sprites[get(state)]
   end,
   input=function(self,state,b)
-   local sval=get(state)
-   set(state,mid(1,get(state)+b,n))
+   local sval=get(state)+b
+   if self.wrap then
+    if (sval>n) sval-=n
+   else
+    sval=mid(1,sval,n)
+   end
+   set(state,sval)
   end
  }
 end
@@ -187,11 +218,11 @@ function step_btn_new(x,y,syn,step,sprites)
   x=x,y=y,tt='step edit',click_act=true,
   get_sprite=function(state)
    if (state.playing and state.tick==step) return sprites[n+1]
-   local v=state:get_pat_steps(syn)[step]
+   local v=state:get_ui_pat(syn).st[step]
    return sprites[v-63]
   end,
   input=function(self,state,b)
-   local st=state:get_pat_steps(syn)
+   local st=state:get_ui_pat(syn).st
    st[step]=(st[step]+b-64+n)%n+64
   end
  }
@@ -302,14 +333,19 @@ transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
 
 syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
- (let xp (* (~ $i 1) 8)),
- (add_ui (syn_note_btn_new $xp (+ $yp 24) $key $i)),
- (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32)))),
+ (let xp (* (~ $i 1) 8))
+ (add_ui (syn_note_btn_new $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
+ (add_ui (syn_note_btn_new $xp (+ $yp 24) $key dt $i 50 64 52 76) 2)
+ (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
 ))
 (add_ui (merge (push_new 24 $yp 26
- (fn (state b) (transpose_pat (@ $state pat_seqs $key) $b))
+ (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose (drag)"
-) (' {click_act=false drag_amt=0.05})))
+) (' {click_act=false drag_amt=0.05})) 1)
+(add_ui (merge (push_new 24 $yp 26
+ (fn (state b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
+ "transpose (drag)"
+) (' {click_act=false drag_amt=0.05})) 2)
 (add_ui
  (push_new 8 $yp 28
   (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))))
@@ -359,9 +395,11 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 )]]
 
 drum_ui_init=eval[[(fn (add_ui)
-(for 1 16 (fn (i) (add_ui
- (step_btn_new (* (~ $i 1) 8) 120 dr $i (' (19 20 36 35)))
-)))
+(for 1 16 (fn (i)
+ (let xp (* (~ $i 1) 8))
+ (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 35))) 1)
+ (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
+))
 (foreach
  (' (
   {k=bd,x=32,y=104,s=150,b=46,tt="bass drum"}
@@ -407,6 +445,8 @@ drum_ui_init=eval[[(fn (add_ui)
 
 function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
 function has_uncommitted(s) return not no_uncommitted(s) end
+function get_page() return ui.page end
+function set_page(_,p) ui:set_page(p) end
 
 header_ui_init=eval[[(fn (add_ui)
 (let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
@@ -430,6 +470,7 @@ header_ui_init=eval[[(fn (add_ui)
  )
 ) rewind) 5)
 
+(add_ui (merge (spin_btn_new 96 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
 (song_only (push_new 8 8 199 (make_obj_cb cut_seq) "cut loop") 198)
 (add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))

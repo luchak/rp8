@@ -17,12 +17,12 @@ syn_pat_template=parse[[{
 }]]
 
 drum_pat_template=parse[[{
- bd={st=`(rep 16 64) nt=`(rep 16 19)}
- sd={st=`(rep 16 64) nt=`(rep 16 19)}
- hh={st=`(rep 16 64) nt=`(rep 16 19)}
- cy={st=`(rep 16 64) nt=`(rep 16 19)}
- s1={st=`(rep 16 64) nt=`(rep 16 19)}
- s2={st=`(rep 16 64) nt=`(rep 16 19)}
+ bd={st=`(rep 16 64) dt=`(rep 16 64)}
+ sd={st=`(rep 16 64) dt=`(rep 16 64)}
+ hh={st=`(rep 16 64) dt=`(rep 16 64)}
+ cy={st=`(rep 16 64) dt=`(rep 16 64)}
+ s1={st=`(rep 16 64) dt=`(rep 16 64)}
+ s2={st=`(rep 16 64) dt=`(rep 16 64)}
 }]]
 
 function state_new(savedata)
@@ -50,7 +50,9 @@ function state_new(savedata)
   (@= $s tl (timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
   (@= $s song_mode (@ $dat song_mode))
-  (@= $s pat_store (map_table (@ $dat pat_store) $dec_bytes 2))
+  (@= (@ $s pat_store) b0 (map_table (@ (@ $dat pat_store) b0) $dec_bytes 1))
+  (@= (@ $s pat_store) b1 (map_table (@ (@ $dat pat_store) b1) $dec_bytes 1))
+  (@= (@ $s pat_store) dr (map_table (@ (@ $dat pat_store) dr) $dec_bytes 2))
   (@= $s samp (dec_bytes (@ $dat samp)))
  )))
  )]](s,savedata)
@@ -152,9 +154,9 @@ function state_new(savedata)
   load_bar(mid(1,bar,999))
  end
 
- function s:get_pat_steps(syn)
+ function s:get_ui_pat(syn)
   -- pats are aliased, always editing current
-  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel].st,self.pat_seqs[syn].st)
+  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn])
  end
 
  function s:save()
@@ -162,7 +164,11 @@ function state_new(savedata)
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
    pat_patch=enc_bytes(self.pat_patch),
-   pat_store=map_table(self.pat_store,enc_bytes,2),
+   pat_store={
+    b0=map_table(self.pat_store.b0,enc_bytes,1),
+    b1=map_table(self.pat_store.b1,enc_bytes,1),
+    dr=map_table(self.pat_store.dr,enc_bytes,2),
+   },
    samp=enc_bytes(self.samp)
   })
  end
@@ -224,9 +230,9 @@ state_load=eval[[(fn (s)
  (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
 )]]
 
-function transpose_pat(pat,d)
+function transpose_pat(pat,key,d,vmin,vmax)
  for i=1,16 do
-  pat.nt[i]=mid(0,pat.nt[i]+d,36)
+  pat[key][i]=mid(vmin,pat[key][i]+d,vmax)
  end
 end
 
