@@ -68,8 +68,8 @@ function stringify(v)
   for i=1,#v do
    local c=sub(v,i,i)
    local o=ord(c)
-   -- escape control chars, ", and \
-   if o<16 or o==34 or o==92 then s..='\\'..chr(o+35) else s..=c end
+   -- escape non-printables, ", and \
+   if o<35 or o==92 or o>126 then s..='\\'..chr(48+(o>>4&0x0f),48+(o&0x0f)) else s..=c end
   end
   return s..'"'
  elseif t=='table' then
@@ -112,7 +112,7 @@ function parse(s)
  local function consume(test)
   local s,c='',''
   repeat
-   if (c=='\\') c=chr(ord(read())-35)
+   if (c=='\\') c=chr(ord(read())-48<<4 | ord(read())-48)
    s..=c
    c=read()
   until not test(c)
@@ -216,7 +216,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='let' then locals[a1]=a2
   elseif cmd=='eq' then return a1==a2
   elseif cmd=='gt' then return a1>a2
-  elseif cmd=='cat' then return a1..a2
+  elseif cmd=='cat' then if a3 then return a1..a2..a3 else return a1..a2 end
   elseif cmd=='len' then return #a1
   else
    if type(cmd)=='string' then
