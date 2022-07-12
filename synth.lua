@@ -228,34 +228,32 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  return obj
 end
 
-function sample_new(base)
- local obj,_pos,_detune,_dec,_amp={},unpack_split'32767,0,0,1,0.99,0.5'
+function fm_new(base)
+ local obj,_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp={},unpack_split'0,0,0,0,0.995,0,0.995,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  _dec=1-(0.2*(1-dec)^2)
-  _detune=2^(flr((tun-0.5)*24+0.5)/12+(pat.dt[step]-64)/12)
+  _adec=1-pow4(0.32-0.17*dec)
+  _mdec=1-pow4(0.3-0.2*dec)
   if s!=n_off and state.playing then
-   _pos=1
-   _amp=lev*lev*trn(s==n_ac,1,0.5)
+   _cdet=(2^((pat.dt[step]-64)/12)*392/5512)<<16
+   _amp=lev*lev*trn(s==n_ac,0.7,0.3)
+   _mamp=0.8
   end
+  _mdet=_cdet*2^((tun-0.5)*4)
  end
 
  function obj:subupdate(b,first,last)
-  local pos,samp=_pos,state.samp
-  local amp,dec,detune,n=_amp,_dec,_detune,#samp
+  local mdet,cdet,mphase,cphase,adec,amp,mdec,mamp=_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp
   for i=first,last do
-   if (pos>=n) break
-   local pi=pos&0xffff.0000
-   local s0=samp[pi]
-
-   --b[i]+=amp*(((s0+(pos-pi)*(samp[pi+1]-s0))>>7)-1)
-   b[i]+=amp*(((s0+(pos-pi)*(samp[pi+1]-s0))>>7)-1)
-   if (pi&0xff==0) amp*=dec
-   pos+=detune
+   mphase+=mdet
+   cphase+=cdet*(1+mamp*sin(mphase>>16))
+   b[i]+=amp*sin(cphase>>16)
+   amp*=adec
+   mamp*=mdec
   end
-  _pos,_amp=pos,amp
+  _mphase,_cphase,_amp,_mamp=mphase,cphase,amp,mamp
  end
 
  return obj

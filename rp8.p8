@@ -71,7 +71,7 @@ function _init()
   hh_cy_new(unpack_split'52,1,0.8,0.75,0.35,-1,2'),
   hh_cy_new(unpack_split'55,1.3,0.5,0.65,0.35,0,1.1'),
   sweep_new(unpack_split'58,0.09,0.06,0.2,1,0.85,0.6'),
-  sample_new(61)
+  fm_new(61)
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()

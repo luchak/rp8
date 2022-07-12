@@ -37,7 +37,6 @@ function state_new(savedata)
   b1_bank=1,
   dr_bank=1,
   song_mode=false,
-  samp=(0),
   patch={},
   pat_seqs={},
   pat_status={},
@@ -53,7 +52,6 @@ function state_new(savedata)
   (@= (@ $s pat_store) b0 (map_table (@ (@ $dat pat_store) b0) $dec_bytes 1))
   (@= (@ $s pat_store) b1 (map_table (@ (@ $dat pat_store) b1) $dec_bytes 1))
   (@= (@ $s pat_store) dr (map_table (@ (@ $dat pat_store) dr) $dec_bytes 2))
-  (@= $s samp (dec_bytes (@ $dat samp)))
  )))
  )]](s,savedata)
 
@@ -168,8 +166,7 @@ function state_new(savedata)
     b0=map_table(self.pat_store.b0,enc_bytes,1),
     b1=map_table(self.pat_store.b1,enc_bytes,1),
     dr=map_table(self.pat_store.dr,enc_bytes,2),
-   },
-   samp=enc_bytes(self.samp)
+   }
   })
  end
 
