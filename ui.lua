@@ -197,7 +197,8 @@ function spin_btn_new(x,y,sprites,tt,get,set)
  return {
   x=x,y=y,tt=tt,drag_amt=0.01,
   get_sprite=function(state)
-   return sprites[get(state)]
+   local val=get(state)
+   return sprites[val>0 and val or #sprites]
   end,
   input=function(self,state,b)
    local sval=get(state)+b
@@ -251,6 +252,18 @@ function toggle_new(x,y,s_off,s_on,tt,get,set)
   end,
   input=function(self,state)
    set(state,not get(state))
+  end
+ }
+end
+
+function multitoggle_new(x,y,states,tt,get,set)
+ return {
+  x=x,y=y,click_act=true,tt=tt,
+  get_sprite=function(state)
+   return states[get(state)+1]
+  end,
+  input=function(self,state,b)
+   set(state,(get(state)+b+#states)%#states)
   end
  }
 end
@@ -420,9 +433,9 @@ drum_ui_init=eval[[(fn (add_ui)
  )
 )
 (foreach
- (' ({x=32,b=0,tt="bd/sd "} {x=64,b=1,tt="hh/cy "} {x=96,b=2,tt="pc/sp "}))
- (fn (c) (add_ui (toggle_new
-  (@ $c x) 96 101 102 (cat (@ $c tt) "fx bypass") (state_make_get_set_param_bool 37 (@ $c b))
+ (' ({x=32,b=0,tt="bd/sd "} {x=64,b=2,tt="hh/cy "} {x=96,b=4,tt="pc/sp "}))
+ (fn (c) (add_ui (multitoggle_new
+  (@ $c x) 96 (' (101 102 103 104)) (cat (@ $c tt) "fx bypass") (state_make_get_set_param 45 (@ $c b) 2)
  )))
 )
 (add_ui (push_new

@@ -92,7 +92,7 @@ function synth_new(base)
     local m,clip=osc>>31,osc
     if (osc^^m>0.25) clip=0.25^^m
 
-    f1+=(clip+(osc-clip)*0.9840-f1)*fc1
+    f1+=(clip+(osc-clip)*0.98-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
