@@ -27,7 +27,7 @@ function delay_new()
 end
 
 
-dr_fx_masks=split'1,1,2,2,4,4'
+dr_fx_masks=split'1,2,4,8,16,32'
 function drum_mixer_new(srcs)
  return {
   srcs=srcs,

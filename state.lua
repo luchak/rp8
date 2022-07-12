@@ -236,13 +236,14 @@ function transpose_pat(pat,key,d,vmin,vmax)
  end
 end
 
-function state_make_get_set_param(idx,shift)
- local shift=shift or 0
- local mask=(1<<shift)-1
+function state_make_get_set_param(idx,lsb,size)
+ local lsb=lsb or 0
+ local size=size or 8
+ local mask=(1<<(lsb+size))-(1<<lsb)
  return
-  function(state) return (state.patch[idx]>>shift)&0xffff.0000 end,
+  function(state) return (state.patch[idx]&mask)>>lsb end,
   function(state,val)
-   state._apply_diff(idx,val<<shift | (state.patch[idx]&mask))
+   state._apply_diff(idx,((val<<lsb)&mask) | (state.patch[idx]&(~mask)))
   end
 end
 
