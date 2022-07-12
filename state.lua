@@ -14,21 +14,23 @@ syn_pat_template=parse[[{
  nt=`(rep 16 19)
  dt=`(rep 16 64)
  st=`(rep 16 64)
+ l=16
 }]]
 
 drum_pat_template=parse[[{
- bd={st=`(rep 16 64) dt=`(rep 16 64)}
- sd={st=`(rep 16 64) dt=`(rep 16 64)}
- hh={st=`(rep 16 64) dt=`(rep 16 64)}
- cy={st=`(rep 16 64) dt=`(rep 16 64)}
- s1={st=`(rep 16 64) dt=`(rep 16 64)}
- s2={st=`(rep 16 64) dt=`(rep 16 64)}
+ bd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ sd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ hh={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ cy={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ s1={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ s2={st=`(rep 16 64) dt=`(rep 16 64) l=16}
 }]]
 
 function state_new(savedata)
  local s=parse[[{
   pat_store={},
   tick=1,
+  ptick={},
   playing=false,
   base_note_len=750,
   note_len=750,
@@ -60,6 +62,12 @@ function state_new(savedata)
   local nl=sample_rate*(15/(60+patch[1]))
   local shuf_diff=nl*(patch[2]>>7)*(0.5-(s.tick&1))
   s.note_len,s.base_note_len=flr(0.5+nl+shuf_diff),nl
+  local gtick=s.tick+s.bar*16-17
+  s.ptick.b0=gtick%(s.pat_seqs.b0.l or 16)+1
+  s.ptick.b1=gtick%(s.pat_seqs.b1.l or 16)+1
+  for k,p in pairs(s.pat_seqs.dr) do
+   s.ptick[k]=gtick%(p.l or 16)+1
+  end
  end
 
  function s:load_bar(i)
@@ -155,6 +163,11 @@ function state_new(savedata)
  function s:get_ui_pat(syn)
   -- pats are aliased, always editing current
   return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn])
+ end
+
+ function s:get_ptick(syn)
+  -- pats are aliased, always editing current
+  return trn(syn=='dr',self.ptick[self.drum_sel],self.ptick[syn])
  end
 
  function s:save()
@@ -255,6 +268,12 @@ function state_make_get_set(a,b)
  return
   function(s) if b then return s[a][b] else return s[a] end end,
   function(s,v) if b then s[a][b]=v else s[a]=v end end
+end
+
+function state_make_get_set_pat_len(syn)
+ return
+  function(s) return s:get_ui_pat(syn).l or 16 end,
+  function(s,l) s:get_ui_pat(syn).l=l end
 end
 
 state_is_song_mode=function(state) return state.song_mode end

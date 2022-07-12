@@ -95,13 +95,13 @@ function _init()
     state.patch,
     state.pat_seqs,
     state.pat_status
-   local now,nl,bar=state.tick,state.base_note_len,state.bar
-   if (pstat.b0.on) syn0:note(pseq.b0,patch,now,nl)
-   if (pstat.b1.on) syn1:note(pseq.b1,patch,now,nl)
+   local now,ptick,nl,bar=state.tick,state.ptick,state.base_note_len,state.bar
+   if (pstat.b0.on) syn0:note(pseq.b0,patch,ptick.b0,nl)
+   if (pstat.b1.on) syn1:note(pseq.b1,patch,ptick.b1,nl)
    if pstat.dr.on then
     local dseq=pseq.dr
     for idx,drum in ipairs(drums) do
-     drum:note(dseq[drum_keys[idx]],patch,now)
+     drum:note(dseq[drum_keys[idx]],patch,ptick[drum_keys[idx]])
     end
    end
    drum_mixer:note(patch)

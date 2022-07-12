@@ -3,6 +3,7 @@ active
 add_page
 add_ui
 add_widget
+amp
 assert
 audio_root_obj
 audio_wait
@@ -42,6 +43,7 @@ eq
 ev
 eval
 get_page
+get_ptick
 get_ui_pat
 go_to_bar
 gt
@@ -54,6 +56,7 @@ hh
 hover_t
 insert_seq
 ipairs
+l
 len
 let
 lev
@@ -61,10 +64,12 @@ log
 loop
 loop_len
 loop_start
+lsb
 make_obj_cb
 map_table
 merge
 mtiles
+multitoggle_new
 mx
 my
 no_uncommitted
@@ -83,6 +88,7 @@ parse
 paste_seq
 paste_state
 pat_btn_new
+pat_lens
 pat_patch
 pat_seqs
 pat_status
@@ -91,10 +97,12 @@ patch
 pause_t
 pc
 playing
+ptick
 push_new
 radio_btn_new
 rec
 rec_not_yellow
+s
 s1
 s2
 samp
@@ -118,6 +126,7 @@ state_load
 state_make_get_set
 state_make_get_set_param
 state_make_get_set_param_bool
+state_make_get_set_pat_len
 state_new
 step_btn_new
 stop_rec
@@ -144,6 +153,7 @@ ui
 ui_new
 unpack
 unpack_split
+val
 visible
 w
 widgets
