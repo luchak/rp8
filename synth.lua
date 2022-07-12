@@ -239,7 +239,7 @@ function fm_new(base)
   if s!=n_off and state.playing then
    _cdet=(2^((pat.dt[step]-64)/12)*392/5512)<<16
    _amp=lev*lev*trn(s==n_ac,0.7,0.3)
-   _mamp=0.8
+   _mamp=1.0
   end
   _mdet=_cdet*2^((tun-0.5)*4)
  end
