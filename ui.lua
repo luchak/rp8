@@ -218,7 +218,7 @@ function step_btn_new(x,y,syn,step,sprites)
  return {
   x=x,y=y,tt='step edit',click_act=true,
   get_sprite=function(state)
-   if (state.playing and state.tick==step) return sprites[n+1]
+   if (state.playing and state:get_ptick(syn)==step) return sprites[n+1]
    local v=state:get_ui_pat(syn).st[step]
    return sprites[v-63]
   end,
@@ -338,6 +338,13 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
+eval[[
+(set pat_lens (pack))
+(for 1 16 (fn (l)
+ (add $pat_lens (cat $l ",0,14"))
+))
+]]
+
 transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
  (number_new $x $y $w $tt (take 1 (state_make_get_set $obj $key)) $input)
  "--,0,15"
@@ -350,6 +357,10 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key dt $i 50 64 52 76) 2)
  (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
+))
+(add_ui (merge
+ (spin_btn_new 32 $yp $pat_lens "pattern length" (state_make_get_set_pat_len $key))
+ (' {w=2 drag_amt=0.03})
 ))
 (add_ui (merge (push_new 24 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
@@ -402,7 +413,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  ))
 )
 (add_ui
- (toggle_new 32 $yp 2 3 waveform (state_make_get_set_param_bool (+ $base_idx 5)))
+ (toggle_new 48 $yp 2 3 waveform (state_make_get_set_param_bool (+ $base_idx 5)))
 )
 (map 0 4 0 $yp 16 2)
 )]]
@@ -412,6 +423,10 @@ drum_ui_init=eval[[(fn (add_ui)
  (let xp (* (~ $i 1) 8))
  (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 35))) 1)
  (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
+))
+(add_ui (merge
+ (spin_btn_new 0 96 $pat_lens "pattern length" (state_make_get_set_pat_len dr))
+ (' {w=2 drag_amt=0.03})
 ))
 (foreach
  (' (

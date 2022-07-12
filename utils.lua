@@ -35,10 +35,12 @@ function unpack_split(s)
 end
 
 function enc_bytes(a)
+ if (type(a)=='number') return a
  return chr(unpack(a))
 end
 
 function dec_bytes(s)
+ if (type(s)=='number') return s
  return pack(ord(s,1,#s))
 end
 

@@ -237,7 +237,7 @@ function fm_new(base)
   _adec=1-pow4(0.32-0.17*dec)
   _mdec=1-pow4(0.3-0.2*dec)
   if s!=n_off and state.playing then
-   _cdet=(2^((pat.dt[step]-64)/12)*392/5512)<<16
+   _cdet=(2^((pat.dt[step]-64)/12)*0.0711)<<16
    _amp=lev*lev*trn(s==n_ac,0.7,0.3)
    _mamp=1.0
   end
