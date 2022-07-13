@@ -175,6 +175,7 @@ function svf_new()
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc_base,wet,fe,is_bp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec
+   is_bp=is_bp>0 and 1 or 0
    for i=first,last do
     gc=gc_base*fe
     local rrpg=(rc<<1)+gc

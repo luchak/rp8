@@ -5,11 +5,11 @@ function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_os,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
        _ae,_aed,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.997,900,900,0,0,1,0'
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.9971,900,900,0,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
-  local patstep,saw,tun,o2coarse,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
+  local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc,atk=pat.st[step],unpack_patch(patch,base+5,base+15)
 
   _o2mix=o2mix
   _fc=(100/sample_rate)*(2^(4*cut))/_os
@@ -24,7 +24,7 @@ function synth_new(base)
   _lsl=_sl
   _gate=false
   _detune=semitone^(flr(24*(tun-0.5)+0.5))
-  _o2detune=_detune*semitone^(flr(o2coarse*24+pat.dt[step]-64)+o2fine-12.5)
+  _o2detune=_detune*semitone^(flr(pat.dt[step]-64)+o2fine-0.5)
   _ac=patstep==n_ac or patstep==n_ac_sl
   _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off or not state.playing) return
@@ -85,7 +85,7 @@ function synth_new(base)
      osc2-=(o2p^^0x8000)>>15
     end
     osc=mix1*osc+mix2*osc2
-    fosc+=(osc-fosc)>>5
+    fosc+=(osc-fosc)/20
     osc-=fosc
     ffb+=(f4-ffb)>>5
     osc-=fr*(f4-ffb-osc)
@@ -101,7 +101,7 @@ function synth_new(base)
     op+=dodp
     o2p+=dodp2
    end
-   out=(out*ae/_os)>>3
+   out=(out*ae/_os)/7
    if (ac) out+=acc*me*out
    b[i]=out*res_comp
   end
