@@ -2,11 +2,10 @@
 -- utils
 
 function log(...)
- local s=''
  for arg in all({...}) do
-  s..=tostr(arg)..' '
+  printh(tostr(arg)..' \0','log')
  end
- printh(s,'log')
+ printh('','log')
 end
 
 -- be careful, both t and f get evaluated
