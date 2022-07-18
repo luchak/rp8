@@ -157,6 +157,7 @@ val
 visible
 w
 widgets
+wrap
 wrap_override
 x
 y

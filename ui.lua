@@ -398,8 +398,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 ))
 (foreach (' (
- {x=56,o=6,tt="tune"}
- {x=64,o=7,tt="osc 2 coarse"}
+ {x=64,o=6,tt="tune"}
  {x=72,o=8,tt="osc 2 fine"}
  {x=80,o=9,tt="osc 2 mix"}
  {x=88,o=10,tt="filter cutoff"}

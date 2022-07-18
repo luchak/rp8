@@ -85,7 +85,7 @@ function synth_new(base)
      osc2-=(o2p^^0x8000)>>15
     end
     osc=mix1*osc+mix2*osc2
-    fosc+=(osc-fosc)/20
+    fosc+=(osc-fosc)/24
     osc-=fosc
     ffb+=(f4-ffb)>>5
     osc-=fr*(f4-ffb-osc)
@@ -126,8 +126,8 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
    _op,_dp=0,(_dp0<<16)*_detune
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
-   _ted=0.5*pow4(te_base-te_scale*dec)
-   _aed=1-ae_ratio*_ted
+   _ted=0.36*pow4(te_base-te_scale*dec)
+   _aed=1-ae_ratio*1.389*_ted
   end
  end
 
