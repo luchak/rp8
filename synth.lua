@@ -13,13 +13,13 @@ function synth_new(base)
 
   _o2mix=o2mix
   _fc=(100/sample_rate)*(2^(4*cut))/_os
-  _fr=(res+sqrt(res))*3.4
+  _fr=(res+sqrt(res))*3.5
   _env=env*env+0.1
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd=1-dec
   if (patstep==n_ac or patstep==n_ac_sl) pd=1
-  _med=0.9995-0.0095*pd
+  _med=0.9996-0.0086*pd*pd
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
@@ -81,18 +81,18 @@ function synth_new(base)
     local osc=op>>15
     local osc2=o2p>>15
     if not saw then
-     osc-=(op^^0x8000)>>15
-     osc2-=(o2p^^0x8000)>>15
+     osc-=(op^^0x8000)>>16
+     osc2-=(o2p^^0x8000)>>16
     end
     osc=mix1*osc+mix2*osc2
-    fosc+=(osc-fosc)/24
+    fosc+=(osc-fosc)/104
     osc-=fosc
-    ffb+=(f4-ffb)>>5
+    ffb+=(f4-ffb)/36
     osc-=fr*(f4-ffb-osc)
     local m,clip=osc>>31,osc
     if (osc^^m>0.25) clip=0.25^^m
 
-    f1+=(clip+(osc-clip)*0.98-f1)*fc1
+    f1+=(clip+(osc-clip)*0.94-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
@@ -113,7 +113,7 @@ function synth_new(base)
  return obj
 end
 
-function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
+function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
  local obj,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
   {},unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
 
@@ -123,10 +123,10 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_base,te_scale)
   if s!=n_off then
    -- TODO: update params every step?
    _detune=2^(1.5*tun-0.75+(pat.dt[step]-64)/12)
-   _op,_dp=0,(_dp0<<16)*_detune
+   _op,_dp=0,(_dp0<<16)*(1+_detune)/2
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
-   _ted=0.36*pow4(te_base-te_scale*dec)
+   _ted=(te_max+(te_min-te_max)*dec^0.5)
    _aed=1-ae_ratio*1.389*_ted
   end
  end
@@ -148,7 +148,7 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'2620,1310.5,0,0.05,0,0,10,0.99,0.996,0.4'
+  {},unpack_split'2440,1220,0,0.05,0,0,10,0.99,0.996,0.4'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -157,8 +157,8 @@ function snare_new()
    _detune=2^(tun-0.5+(pat.dt[step]-64)/12)
    _op,_dp=0,_dp0*_detune
    if state.playing then
-    _aes,_aen=0.7,0.4
-    if (s==n_ac) _aes,_aen=1.5,0.85
+    _aes,_aen=0.8,0.4
+    if (s==n_ac) _aes,_aen=1.6,0.9
     local lev2,aeo=lev*lev,(tun-0.5)*0.2
     _aes-=aeo
     _aen+=aeo
@@ -166,9 +166,9 @@ function snare_new()
     _aen*=lev2
     _aemax=_aes*0.5
    end
-   local pd4=pow4(0.65-0.25*dec)
-   _aesd=1-0.1*pd4
-   _aend=1-0.04*pd4
+   local pd2=0.18-0.1625*dec^0.5
+   _aesd=0.992-0.02*pd2
+   _aend=1-0.05*pd2
   end
  end
 
@@ -178,7 +178,7 @@ function snare_new()
   local aemax=_aemax
   for i=first,last do
    op+=dp
-   dp+=(dp1-dp)>>6
+   dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
    b[i]+=(min(aemax,aes)*sin(op>>15)+aen*(rnd(2)-1))*0.3
