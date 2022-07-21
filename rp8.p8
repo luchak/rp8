@@ -66,11 +66,11 @@ function _init()
 
  local syn0,syn1=synth_new(7),synth_new(23)
  local drums={
-  sweep_new(unpack_split'46,0.08,0.012,0.12,0.7,0.7,0.4'),
+  sweep_new(unpack_split'46,0.08,0.01,0.12,0.85,0.0099,0.03'),
   snare_new(),
-  hh_cy_new(unpack_split'52,1,0.8,0.75,0.35,-1,2'),
-  hh_cy_new(unpack_split'55,1.3,0.5,0.65,0.35,0,1.1'),
-  sweep_new(unpack_split'58,0.09,0.06,0.2,1,0.85,0.6'),
+  hh_cy_new(unpack_split'52,1,0.8,0.75,0.35,-0.5,1.5'),
+  hh_cy_new(unpack_split'55,1.15,0.65,0.65,0.35,-0.3,1.4'),
+  sweep_new(unpack_split'58,0.1,0.05,0.2,1,0.004,0.08'),
   fm_new(61)
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
