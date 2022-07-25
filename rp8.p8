@@ -120,7 +120,7 @@ function _init()
    delay.l=dl_t*nl
    delay.fb=sqrt(dl_fb)*0.95
 
-   comp.th=0.05+0.95*pow3(comp_th)
+   comp.th=0.05+0.95*comp_th*comp_th
 
    if (state.playing) state:next_tick()
   end

@@ -78,21 +78,25 @@ function synth_new(base)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for j=1,os do
-    local osc=op>>15
-    local osc2=o2p>>15
+    local osc=op
+    local osc2=o2p
     if not saw then
-     osc-=(op^^0x8000)>>16
-     osc2-=(o2p^^0x8000)>>16
+     osc=(op>>16)^^0x8000
+     osc2=(o2p>>16)^^0x8000
     end
-    osc=mix1*osc+mix2*osc2
+    osc=mix1*(osc>>15)+mix2*(osc2>>15)
     fosc+=(osc-fosc)/104
     osc-=fosc
     ffb+=(f4-ffb)/36
     osc-=fr*(f4-ffb-osc)
     local m,clip=osc>>31,osc
-    if (osc^^m>0.25) clip=0.25^^m
+    if (osc^^m>0.18) clip=0.18^^m
+    -- if (osc^^m>0.75) clip=0.5^^m else clip-=0.5926*clip*clip*clip
+    -- if (osc^^m>1.5) clip=1^^m else clip-=0.14815*clip*clip*clip
 
     f1+=(clip+(osc-clip)*0.94-f1)*fc1
+    -- f1+=(clip+(osc-clip)*0.55-f1)*fc1
+    -- f1+=(clip-f1)*fc1
     f2+=(f1-f2)*fc
     f3+=(f2-f3)*fc
     f4+=(f3-f4)*fc
