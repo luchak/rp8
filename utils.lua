@@ -40,7 +40,7 @@ end
 
 function dec_bytes(s)
  if (type(s)=='number') return s
- return pack(ord(s,1,#s))
+ return {ord(s,1,#s)}
 end
 
 function map_table(a,f,d)

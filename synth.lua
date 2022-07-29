@@ -81,8 +81,8 @@ function synth_new(base)
     local osc=op
     local osc2=o2p
     if not saw then
-     osc=(op>>16)^^0x8000
-     osc2=(o2p>>16)^^0x8000
+     osc=(op>>31)^^0x8000
+     osc2=(o2p>>31)^^0x8000
     end
     osc=mix1*(osc>>15)+mix2*(osc2>>15)
     fosc+=(osc-fosc)/104
