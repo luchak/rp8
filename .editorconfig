@@ -1,0 +1,5 @@
+root = true
+
+[*.{lua,p8}]
+indent_style = space
+indent_size = 1
