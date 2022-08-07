@@ -10,7 +10,7 @@ function delay_new()
 
  function obj:update(b,first,last)
   local dl,fb,p,f1=_dl,self.fb,_p,_f1
-  local tap=(p-flr(self.l))&0x7fff
+  local tap=(p-(self.l&-1))&0x7fff
   for i=first,last do
    local x,y=b[i],dl[tap]
    b[i]=y
@@ -53,11 +53,12 @@ mixer_params=parse[[{
  dr={p0=39,p1=41,lev=16},
 }]]
 function mixer_new(_srcs,_fx,_filt,_lev)
- local _tmp,_bypass,_fxbuf,_filtsrc,_xp1={},{},{},1,parse[[{b0=0,b1=0,dr=0}]]
+ local _tmp,_bypass,_fxbuf,_filtsrc,_state,_bias={},{},{},1,parse[[{b0=(0 0),b1=(0 0),dr=(0 0)}]],0
  return {
   note=function(self,patch)
    _lev=pow3(patch[3]>>7)*8
    _filtsrc=patch[64]
+   _bias=patch[71]>>7
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
     local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
@@ -71,23 +72,28 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
 
    for k,src in pairs(_srcs) do
-    local od,fx,xp1=src.od,src.fx,_xp1[k]
+    local od,fx,xp1,hpf=src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
     local odg=0.2+71.8*od
-    local odgi=(1+4*od)/odg
+    local bias_od=_bias*od^0.2
+    local bias=1.49*bias_od/odg
+    local odgi=(1+4*od*(1+5*bias))/odg
+    local bc=odgi*(2.98*bias_od-0.98013*pow3(bias_od))
     for i=first,last do
-     local x1,x0=tmp[i]
+     local tmp_i=tmp[i]
+     local x1,x0=tmp_i
      x0,xp1=(xp1+x1)>>1,x1
-     local pre=x1+x0
-     x0*=odg
-     x1*=odg
+     local pre=x1+x0+bc
+     x0=(x0+bias)*odg
+     x1=(x1+bias)*odg
      local m0,m1=x0>>31,x1>>31
      if (x0^^m0>1.5) x0=1.5^^m0
      if (x1^^m1>1.5) x1=1.5^^m1
-     tmp[i]+=(odgi*(x0+x1-0.148148*(x0*x0*x0+x1*x1*x1))-pre)>>1
-     tmp[i]*=src.lev
+     local diff=(odgi*(x0+x1-0.148148*(x0*x0*x0+x1*x1*x1))-pre)>>1
+     hpf+=(diff-hpf)>>8
+     tmp[i]=(tmp_i+diff-hpf)*src.lev
     end
-    _xp1[k]=xp1
+    _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
     for i=first,last do
      local x=tmp[i]
@@ -118,14 +124,14 @@ function comp_new(src,th,_ratio,_att,_rel)
    -- makeup targets 0.6
    local makeup=max(1,0.6/((0.6-th)*ratio+th))
    for i=first,last do
-    local x=b[i]
-    x=x^^(x>>31)
+    local s=b[i]
+    local x=s^^(s>>31)
     local c
     if (x>env) c=att else c=rel
     env+=c*(x-env)
     local g,te=makeup,th/(env+0x0.0010)
     if (env>th) g*=te+ratio*(1-te)
-    b[i]*=g
+    b[i]=s*g
    end
    _env=env
   end

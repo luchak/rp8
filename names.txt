@@ -14,6 +14,7 @@ b1_bank
 bar
 bars
 base_note_len
+bc
 bd
 cat
 clear_overrides
@@ -54,6 +55,7 @@ header_ui_init
 help_on
 hh
 hover_t
+hpf
 insert_seq
 ipairs
 l
