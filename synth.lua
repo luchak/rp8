@@ -70,7 +70,7 @@ function synth_new(base)
    end
    if mr then
     me+=(1-me)>>2
-    mr=not (me>0.99)
+    mr=me<=0.99
    else
     me*=med
    end
