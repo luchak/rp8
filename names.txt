@@ -114,6 +114,7 @@ seq_helper
 seq_helper_new
 set
 set_page
+set_toast
 show_help
 song_mode
 song_only
@@ -142,6 +143,8 @@ take
 tick
 timeline_new
 tl
+toast
+toast_t
 toggle_help
 toggle_new
 toggle_playing

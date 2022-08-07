@@ -78,9 +78,10 @@ function ui_new()
  function obj:draw(state)
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.restore_offset
-  if (off) memcpy(0x6000+off,0x9000+off,self.restore_size)
+  if (off) memcpy(0x6000+off,0x9000+off,448) memcpy(0x6080,0xb000,448)
 
   palt(0,false)
+
   -- draw changed widgets
   for id,w in pairs(self.visible) do
    local ns=w.get_sprite(state)
@@ -109,6 +110,17 @@ function ui_new()
    sspr(32,0,4,8,f.x+f.w*4-4,f.y)
   end
 
+  -- store rows behind toast and draw toast
+  memcpy(0xb000,0x6080,448)
+  local toast,toast_t=self.toast,self.toast_t
+  if toast_t and toast_t>0 then
+   rectfill(1,2,1+4*#toast,8,2)
+   print(toast,2,3,7)
+   self.toast_t-=1
+  else
+   self.toast_t=nil
+  end
+
   -- store rows behind mouse and draw mouse
   local tt_my=mid(0,my,122)
   local next_off=tt_my<<6
@@ -122,7 +134,6 @@ function ui_new()
    print(tt,xp+1,tt_my+1,7)
   end
   self.restore_offset=next_off
-  self.restore_size=448
  end
 
  function obj:update(state)
@@ -369,13 +380,13 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 ) (' {click_act=false drag_amt=0.05})) 2)
 (add_ui
  (push_new 8 $yp 28
-  (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))))
+  (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))) (set_toast "synth pattern copied"))
   "copy pattern"
  )
 )
 (add_ui
  (push_new 16 $yp 27
-  (fn (state) (if $copy_buf_syn (merge (@ $state pat_seqs $key) $copy_buf_syn) nil))
+  (fn (state) (if $copy_buf_syn (merge (@ $state pat_seqs $key) $copy_buf_syn) nil) (set_toast "synth pattern pasted"))
   "paste pattern"
  )
 )
@@ -450,10 +461,10 @@ drum_ui_init=eval[[(fn (add_ui)
  )))
 )
 (add_ui (push_new
- 8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr)))) "copy pattern"
+ 8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
 ))
 (add_ui (push_new
- 16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum)) "paste pattern"
+ 16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")) "paste pattern"
 ))
 (add_ui (toggle_new
  0 104 109 110 active (state_make_get_set_param_bool 42)
