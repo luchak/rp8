@@ -84,7 +84,7 @@ function ui_new()
 
   -- draw changed widgets
   for id,w in pairs(self.visible) do
-   local ns=w.get_sprite(state)
+   local ns=w:get_sprite(state)
    if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
     self.sprites[id]=ns
     local w,sp=self.widgets[id],self.sprites[id]
@@ -122,7 +122,7 @@ function ui_new()
   end
 
   -- store rows behind mouse and draw mouse
-  local tt_my=mid(0,my,122)
+  local tt_my=mid(0,my,121)
   local next_off=tt_my<<6
   memcpy(0x9000+next_off,0x6000+next_off,448)
   local hover=self.hover
@@ -153,6 +153,7 @@ function ui_new()
 
   local focus=self.focus
   local new_focus=self.focus
+  new_focus=trn(new_focus and new_focus.active,new_focus,nil)
 
   if click>0 then
    if focus and click==self.last_click then
@@ -190,7 +191,7 @@ function syn_note_btn_new(x,y,syn,key,step,sp0,nt0,nmin,nmax)
  local offset=sp0-nt0
  return {
   x=x,y=y,drag_amt=0.05,tt='note (drag)',
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return offset+state:get_ui_pat(syn)[key][step]
   end,
   input=function(self,state,b)
@@ -204,7 +205,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
   x=x,y=y,tt=tt,drag_amt=0.01,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    local val=get(state)
    return sprites[val>0 and val or #sprites]
   end,
@@ -225,7 +226,7 @@ function step_btn_new(x,y,syn,step,sprites)
  local n=#sprites-1
  return {
   x=x,y=y,tt='step edit',click_act=true,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    if (state.playing and state:get_ptick(syn)==step) return sprites[n+1]
    local v=state:get_ui_pat(syn).st[step]
    return sprites[v-63]
@@ -242,7 +243,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  bins-=0x0.0001
  return {
   x=x,y=y,tt=tt,drag_amt=0.33,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
@@ -255,7 +256,7 @@ end
 function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return trn(get(state),s_on,s_off)
   end,
   input=function(self,state)
@@ -267,7 +268,7 @@ end
 function multitoggle_new(x,y,states,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return states[get(state)+1]
   end,
   input=function(self,state,b)
@@ -291,7 +292,7 @@ end
 function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,tt=tt,click_act=true,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return trn(get(state)==val,s_on,s_off)
   end,
   input=function(self,state)
@@ -306,7 +307,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local ret_prefix=pib..','..c_bg..','
  return {
   x=x,y=y,tt='pattern select',w=1,click_act=true,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
    local val=bank*bank_size-bank_size+pib
@@ -325,7 +326,7 @@ end
 function number_new(x,y,w,tt,get,input)
  return {
   x=x,y=y,w=w,drag_amt=0.05,tt=tt,
-  get_sprite=function(state)
+  get_sprite=function(self,state)
    return tostr(get(state))..',0,15'
   end,
   input=function(self,state,b) input(state,b) end
@@ -334,12 +335,12 @@ end
 
 function wrap_override(w,s_override,get_not_override,override_active)
  local get_sprite=w.get_sprite
- w.get_sprite=function(state)
+ w.get_sprite=function(self,state)
   if get_not_override(state) then
-   w.active=true
-   return get_sprite(state)
+   self.active=true
+   return get_sprite(self,state)
   else
-   w.active=override_active
+   self.active=false
    return s_override
   end
  end

@@ -32,7 +32,7 @@ eval[[
 (set show_help true)
 (set toggle_help (fn ()
  (set show_help (not $show_help))
- (set_toast (trn $show_help "tooltips on" "press h for tooltips") 90)
+ (set_toast (trn $show_help "tooltips on" "press h for tooltips") 120)
  (menuitem 4 (trn $show_help "hide tooltips" "show tooltips") $toggle_help)
 ))
 (set audio_rec false)
