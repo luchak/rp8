@@ -72,6 +72,7 @@ function ui_new()
  function obj:hide_widget(w)
   for tile in all(w.tiles) do if self.mtiles[tile]==w then self.mtiles[tile]=nil end end
   self.visible[w.id]=nil
+  if (self.focus==w) self.focus=nil
  end
 
  function obj:draw(state)
