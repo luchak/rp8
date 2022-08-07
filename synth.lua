@@ -194,14 +194,14 @@ function snare_new()
 end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
- local obj,_ae,_f1,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
-  {},unpack_split'0,0,0,14745.6,0,17039.36,0,15600,0,16200,0.995,1'
+ local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
+  {},unpack_split'0,0,0,0,14745.6,0,17039.36,0,15600,0,16200,0.995,1'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off and state.playing then
-   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,9,3.6)
+   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,0.75,0.3)
   end
 
   _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)
@@ -209,7 +209,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  end
 
  function obj:subupdate(b,first,last)
-  local ae,f1,aed,tlev,nlev=_ae,_f1,_aed,_tlev,_nlev
+  local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
 
@@ -217,15 +217,16 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
 
    local r=nlev*((rnd()&0.5)-0.25)+tlev*osc
-   f1+=0.96*(r-f1)
    ae*=aed
-   b[i]+=ae*(r-f1)
+   b[i]+=ae*(f1-((r+f2)>>1))
+   f1=r
+   f2=f1
    op1+=odp1
    op2+=odp2
    op3+=odp3
    op4+=odp4
   end
-  _ae,_f1=ae,f1
+  _ae,_f1,_f2=ae,f1,f2
   _op1,_op2,_op3,_op4=op1,op2,op3,op4
  end
 
