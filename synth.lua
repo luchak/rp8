@@ -2,17 +2,17 @@
 -- audio gen
 
 function synth_new(base)
- local obj,_op,_odp,_todp,_todpr,_fc,_fr,_os,_env,_acc,
+ local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
        _ae,_aed,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,4,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.9971,900,900,0,0,1,0'
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.9971,900,900,0,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc,atk=pat.st[step],unpack_patch(patch,base+5,base+15)
 
   _o2mix=o2mix
-  _fc=(100/sample_rate)*(2^(4*cut))/_os
+  _fc=(100/sample_rate)*(2^(4*cut))/4
   _fr=(res+sqrt(res))*3.5
   _env=env*env+0.1
   _acc=acc*1.9+0.1
@@ -32,7 +32,7 @@ function synth_new(base)
   _gate=true
   local f=55*(2^((pat.nt[step]+3)/12))
   --ordered for safety
-  _todp=(f/_os)/(sample_rate>>16)
+  _todp=(f/4)/(sample_rate>>16)
 
   if (_ac) _env+=acc
   if _lsl then
@@ -49,7 +49,7 @@ function synth_new(base)
   local odp,op,detune,todp,todpr,o2p=_odp,_op,_detune,_todp,_todpr,_o2p
   local o2detune,o2mix=_o2detune,_o2mix>>2
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
-  local fr,fcb,os,fcbf=_fr,_fc,_os,_fcbf
+  local fr,fcb,fcbf=_fr,_fc,_fcbf
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
   local env,saw,lev,acc=_env,_saw,_lev,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
@@ -57,11 +57,11 @@ function synth_new(base)
   local mix1,mix2=cos(o2mix),sin(o2mix+0.5)
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.4/os,fcbf+(me>>4)*env)
+   local fc=min(0.1,fcbf+(me>>4)*env)
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
-   local fc1=(0.6+fc)>>1
+   local fc1=(0.5+fc)>>1
    if gate then
     ae+=(1-ae)>>2
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
@@ -77,7 +77,7 @@ function synth_new(base)
    odp+=todpr*(todp-odp)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
-   for j=1,os do
+   for j=1,4 do
     local osc=(op>>31)^^0x8000
     local osc2=(o2p>>31)^^0x8000
     if saw then
@@ -105,7 +105,7 @@ function synth_new(base)
     op+=dodp
     o2p+=dodp2
    end
-   out=(out*ae/_os)/7
+   out=(out*ae)/28 -- 7 * oversample
    if (ac) out+=acc*me*out
    b[i]=out*res_comp
   end
@@ -142,7 +142,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   b[i]+=min(ae,aemax)*sin(op>>16)
+   b[i]+=(aemax<ae and aemax or ae)*sin(op>>16)
   end
   _op,_dp,_ae=op,dp,ae
  end
@@ -185,7 +185,7 @@ function snare_new()
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   b[i]+=(min(aemax,aes)*sin(op>>15)+aen*(rnd(2)-1))*0.3
+   b[i]+=((aemax<aes and aemax or aes)*sin(op>>15)+aen*(rnd(2)-1))*0.3
   end
   _dp,_op,_aes,_aen=dp,op,aes,aen
  end
@@ -216,7 +216,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   for i=first,last do
    local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
 
-   local r=nlev*(((rnd()&0.5))-0.25)+tlev*osc
+   local r=nlev*((rnd()&0.5)-0.25)+tlev*osc
    f1+=0.96*(r-f1)
    ae*=aed
    b[i]+=ae*(r-f1)
