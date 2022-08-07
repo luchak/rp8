@@ -78,11 +78,11 @@ function synth_new(base)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for j=1,os do
-    local osc=op
-    local osc2=o2p
-    if not saw then
-     osc=(op>>31)^^0x8000
-     osc2=(o2p>>31)^^0x8000
+    local osc=(op>>31)^^0x8000
+    local osc2=(o2p>>31)^^0x8000
+    if saw then
+     osc=op
+     osc2=o2p
     end
     osc=mix1*(osc>>15)+mix2*(osc2>>15)
     fosc+=(osc-fosc)/104
@@ -131,7 +131,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
    _ted=(te_max+(te_min-te_max)*dec^0.5)
-   _aed=1-ae_ratio*1.389*_ted
+   _aed=1-ae_ratio*_ted
   end
  end
 
@@ -201,7 +201,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off and state.playing then
-   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,1.5,0.6)
+   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,9,3.6)
   end
 
   _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)
@@ -216,8 +216,8 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   for i=first,last do
    local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
 
-   local r=nlev*(rnd()-0.5)+tlev*osc
-   f1+=0.8*(r-f1)
+   local r=nlev*(((rnd()&0.5))-0.25)+tlev*osc
+   f1+=0.96*(r-f1)
    ae*=aed
    b[i]+=ae*(r-f1)
    op1+=odp1

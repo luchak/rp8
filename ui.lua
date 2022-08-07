@@ -26,16 +26,12 @@ function ui_new()
   help_on=false
   overlays={}
   page=1
-  pages={}
+  pages=({} {})
   visible={}
  }]]
  -- focus
  -- hover
  -- overlay
-
- function obj:add_page(idx)
-  self.pages[idx]={}
- end
 
  function obj:add_widget(w,page)
   w=merge(copy(widget_defaults),w)
@@ -398,9 +394,9 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 ))
 (foreach (' (
- {x=64,o=6,tt="tune"}
+ {x=64,o=6,tt="global tune"}
  {x=72,o=8,tt="osc 2 fine"}
- {x=80,o=9,tt="osc 2 mix"}
+ {x=80,o=9,tt="osc mix"}
  {x=88,o=10,tt="filter cutoff"}
  {x=96,o=11,tt="filter resonance"}
  {x=104,o=12,tt="filter env amount"}
@@ -515,6 +511,7 @@ header_ui_init=eval[[(fn (add_ui)
 (foreach (' (
   (16 8 1 tempo)
   (32 8 3 level)
+  (48 8 71 "overdrive grit")
   (32 16 6 "compressor threshold")
   (16 16 2 shuffle)
   (32 24 5 "delay feedback")
@@ -551,7 +548,7 @@ header_ui_init=eval[[(fn (add_ui)
  (' {click_act=false,drag_amt=0.01})
 ))
 (add_ui (spin_btn_new
- 48 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
+ 80 8 (' ("--,0,15" "MA,0,15" "S1,0,15" "S2,0,15" "DR,0,15")) "filter source"
  (state_make_get_set_param 64)
 ))
 
