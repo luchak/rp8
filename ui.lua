@@ -511,7 +511,7 @@ header_ui_init=eval[[(fn (add_ui)
 (foreach (' (
   (16 8 1 tempo)
   (32 8 3 level)
-  (48 8 71 "overdrive grit")
+  (48 8 71 "overdrive bias")
   (32 16 6 "compressor threshold")
   (16 16 2 shuffle)
   (32 24 5 "delay feedback")
