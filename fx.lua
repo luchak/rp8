@@ -126,10 +126,9 @@ function comp_new(src,th,_ratio,_att,_rel)
    for i=first,last do
     local s=b[i]
     local x=s^^(s>>31)
-    local c
-    if (x>env) c=att else c=rel
-    env+=c*(x-env)
-    local g,te=makeup,th/(env+0x0.0010)
+    env+=(x>env and att or rel)*(x-env)
+    local g=makeup
+    local te=th/(env+0x0.0010)
     if (env>th) g*=te+ratio*(1-te)
     b[i]=s*g
    end
@@ -188,13 +187,15 @@ function svf_new()
     local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
-    z1,z2=hpgc+bp,((bp*gc)<<1)+z2
+    z1=hpgc+bp
+    z2+=((bp*gc)<<1)
 
     -- 2x oversample
     hpgc=(inp-rrpg*z1-z2)/hpn
     bp=hpgc+z1
     local lp=bp*gc+z2
-    z1,z2=hpgc+bp,bp*gc+lp
+    z1=hpgc+bp
+    z2=bp*gc+lp
 
     -- rc*bp is 1/2 of unity gain bp
     b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
