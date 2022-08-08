@@ -51,7 +51,7 @@ function synth_new(base)
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
   local fr,fcb,fcbf=_fr,_fc,_fcbf
   local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
-  local env,saw,lev,acc=_env,_saw,_lev,_acc
+  local env,saw,acc=_env,_saw,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=7/(fr+7)
   local mix1,mix2=cos(o2mix),sin(o2mix+0.5)
@@ -77,7 +77,7 @@ function synth_new(base)
    odp+=todpr*(todp-odp)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
-   for j=1,4 do
+   for _=1,4 do
     local osc=(op>>31)^^0x8000
     local osc2=(o2p>>31)^^0x8000
     if saw then

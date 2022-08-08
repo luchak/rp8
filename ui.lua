@@ -93,7 +93,7 @@ function ui_new()
    local ns=w:get_sprite(state)
    if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
     self.sprites[id]=ns
-    local w,sp=self.widgets[id],self.sprites[id]
+    local sp=self.sprites[id]
     local wx,wy=w.x,w.y
     -- see note 004
     if type(sp)=='number' then
@@ -145,8 +145,8 @@ function ui_new()
   if (btnp(2)) input+=1
   if (btnp(3)) input-=1
 
-  self.mx,self.my,click=stat(32),stat(33),stat(34)
-  local mx,my,k=self.mx,self.my
+  self.mx,self.my=stat(32),stat(33)
+  local click,mx,my,k=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
   if (stat(30)) k=stat(31)
@@ -251,8 +251,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
-   local x=mid(0,128,get(state)+b)
-   set(state,x)
+   set(state,mid(0,128,get(state)+b))
   end
  }
 end
@@ -344,7 +343,7 @@ function wrap_override(w,s_override,get_not_override,override_active)
    self.active=true
    return get_sprite(self,state)
   else
-   self.active=false
+   self.active=override_active
    return s_override
   end
  end

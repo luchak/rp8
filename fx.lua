@@ -112,11 +112,11 @@ function mixer_new(_srcs,_fx,_filt,_lev)
  }
 end
 
-function comp_new(src,th,_ratio,_att,_rel)
+function comp_new(src,_th,_ratio,_att,_rel)
  local _env=0
  return {
   src=src,
-  th=th,
+  th=_th,
   update=function(self,b,first,last)
    self.src:update(b,first,last)
    local env,att,rel=_env,_att,_rel
@@ -169,7 +169,7 @@ function svf_new()
  local _z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec=unpack_split'0,0,0.1,0.2,1,1,0,1'
  return {
   note=function(self,patch,bar,tick)
-   local r,gc,dec
+   local r,gc,dec,_
    _bp,gc,r,_wet,_,dec=unpack_patch(patch,65,70)
    _rc=1-r*0.96
    local svf_pat=svf_pats[patch[69]]
@@ -182,7 +182,7 @@ function svf_new()
    local z1,z2,rc,gc_base,wet,fe,is_bp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec
    is_bp=is_bp>0 and 1 or 0
    for i=first,last do
-    gc=gc_base*fe
+    local gc=gc_base*fe
     local rrpg=(rc<<1)+gc
     local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn

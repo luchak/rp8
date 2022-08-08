@@ -75,8 +75,8 @@ function stringify(v)
   return s..'"'
  elseif t=='table' then
   local s='{'
-  for k,v in pairs(v) do
-   s..=k..'='..stringify(v)..','
+  for vk,vv in pairs(v) do
+   s..=vk..'='..stringify(vv)..','
   end
   return s..'}'
  else
@@ -111,13 +111,13 @@ function parse(s)
  end
 
  local function consume(test)
-  local s,c='',''
+  local ss,c='',''
   repeat
    if (c=='\\') c=chr(ord(read())-48<<4 | ord(read())-48)
-   s..=c
+   ss..=c
    c=read()
   until not test(c)
-  return s
+  return ss
  end
 
  local function _parse()
@@ -129,9 +129,9 @@ function parse(s)
   if c=='"' then
    return consume(mkmatch('"',true))
   elseif is_num(c) then
-   local s=c..consume(is_num)
+   local n=c..consume(is_num)
    read(-1)
-   return tonum(s)
+   return tonum(n)
   elseif c=='(' then
    local t={}
    repeat
@@ -152,12 +152,12 @@ function parse(s)
    return _eval_scope({_parse()},{})
   else
    -- allow (most) bare strings
-   local s=c..consume(is_id)
+   local b=c..consume(is_id)
    read(-1)
-   if (s=='true') return true
-   if (s=='false') return false
-   if (s=='nil') return nil
-   return s
+   if (b=='true') return true
+   if (b=='false') return false
+   if (b=='nil') return nil
+   return b
   end
  end
 
@@ -202,23 +202,23 @@ function _eval_scope(ast,locals,start)
    end
   end
 
-  local a1,a2,a3=unpack(vals)
+  local v1,v2,v3=unpack(vals)
 
   if cmd=='seq' then return vals[#vals]
-  elseif cmd=='+' then return a1+a2
-  elseif cmd=='*' then return a1*a2
-  elseif cmd=='~' then return a1-a2
-  elseif cmd=='not' then return not a1
-  elseif cmd=='or' then return a1 or a2
-  elseif cmd=='@' then if a3 then return a1[a2][a3] else return a1[a2] end
-  elseif cmd=='@=' then a1[a2]=a3
-  elseif cmd=='for' then for i=a1,a2 do a3(i) end
-  elseif cmd=='set' then _ENV[a1]=a2
-  elseif cmd=='let' then locals[a1]=a2
-  elseif cmd=='eq' then return a1==a2
-  elseif cmd=='gt' then return a1>a2
-  elseif cmd=='cat' then if a3 then return a1..a2..a3 else return a1..a2 end
-  elseif cmd=='len' then return #a1
+  elseif cmd=='+' then return v1+v2
+  elseif cmd=='*' then return v1*v2
+  elseif cmd=='~' then return v1-v2
+  elseif cmd=='not' then return not v1
+  elseif cmd=='or' then return v1 or v2
+  elseif cmd=='@' then if v3 then return v1[v2][v3] else return v1[v2] end
+  elseif cmd=='@=' then v1[v2]=v3
+  elseif cmd=='for' then for i=v1,v2 do v3(i) end
+  elseif cmd=='set' then _ENV[v1]=v2
+  elseif cmd=='let' then locals[v1]=v2
+  elseif cmd=='eq' then return v1==v2
+  elseif cmd=='gt' then return v1>v2
+  elseif cmd=='cat' then if v3 then return v1..v2..v3 else return v1..v2 end
+  elseif cmd=='len' then return #v1
   else
    if type(cmd)=='string' then
     cmd=locals[cmd] or _ENV[cmd]

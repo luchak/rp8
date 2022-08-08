@@ -53,7 +53,7 @@ function timeline_new(default_patch, savedata)
    patch[k]=v[tick]
   end
   merge(patch,op)
-  local bars,bar,bar_events,bar_start=self.bars,self.bar,self.bar_events,self.bar_start
+  local bar_events,bar_start=self.bar_events,self.bar_start
   if self.rec then
    for k,v in pairs(op) do
     if not no_event_params[k] then

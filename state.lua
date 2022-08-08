@@ -211,7 +211,6 @@ function state_new(savedata)
  function s:paste_seq()
   if (not copy_buf_seq) return
   self:stop_playing()
-  local n=#copy_buf_seq
   if self.song_mode then
    set_toast("loop pasted")
    self.tl:paste_seq(copy_buf_seq)
@@ -256,8 +255,8 @@ function transpose_pat(pat,key,d,vmin,vmax)
 end
 
 function state_make_get_set_param(idx,lsb,size)
- local lsb=lsb or 0
- local size=size or 8
+ lsb=lsb or 0
+ size=size or 8
  local mask=(1<<(lsb+size))-(1<<lsb)
  return
   function(state) return (state.patch[idx]&mask)>>lsb end,
