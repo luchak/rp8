@@ -3,7 +3,7 @@
 
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
-syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,s1=58,s2=61}]]
+syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}]]
 
 pat_param_idx=parse[[{b0=11,b1=27,dr=43}]]
 
@@ -22,8 +22,8 @@ drum_pat_template=parse[[{
  sd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  hh={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  cy={st=`(rep 16 64) dt=`(rep 16 64) l=16}
- s1={st=`(rep 16 64) dt=`(rep 16 64) l=16}
- s2={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ pc={st=`(rep 16 64) dt=`(rep 16 64) l=16}
+ fm={st=`(rep 16 64) dt=`(rep 16 64) l=16}
 }]]
 
 function state_new(savedata)

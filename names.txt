@@ -43,6 +43,7 @@ enc_bytes
 eq
 ev
 eval
+fm
 get_page
 get_ptick
 get_ui_pat
@@ -105,8 +106,6 @@ radio_btn_new
 rec
 rec_not_yellow
 s
-s1
-s2
 samp
 save
 sd

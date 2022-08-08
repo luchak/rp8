@@ -1,6 +1,12 @@
 -->8
 -- ui
 
+function outline_text(s,x,y,c,o)
+ color(o)
+ print('\-f'..s..'\^g\-h'..s..'\^g\|f'..s..'\^g\|h'..s,x,y)
+ print(s,x,y,c)
+end
+
 widget_defaults=parse[[{
  w=2,
  h=2,
@@ -112,10 +118,9 @@ function ui_new()
 
   -- store rows behind toast and draw toast
   memcpy(0xb000,0x6080,448)
-  local toast,toast_t=self.toast,self.toast_t
+  local toast_t=self.toast_t
   if toast_t and toast_t>0 then
-   rectfill(1,2,1+4*#toast,8,2)
-   print(toast,2,3,7)
+   outline_text(self.toast,2,3,7,1)
    self.toast_t-=1
   else
    self.toast_t=nil
@@ -130,8 +135,7 @@ function ui_new()
   if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
    local tt=hover.tt
    local xp=trn(mx<56,mx+7,mx-2-4*#tt)
-   rectfill(xp,tt_my,xp+4*#tt,tt_my+6,1)
-   print(tt,xp+1,tt_my+1,7)
+   outline_text(tt,xp+1,tt_my+1,12,1)
   end
   self.restore_offset=next_off
  end
@@ -442,8 +446,8 @@ drum_ui_init=eval[[(fn (add_ui)
   {k=sd,x=32,y=112,s=152,b=49,tt="snare drum"}
   {k=hh,x=64,y=104,s=154,b=52,tt=hihat}
   {k=cy,x=64,y=112,s=156,b=55,tt=cymbal}
-  {k=s1,x=96,y=104,s=158,b=58,tt=percussion}
-  {k=s2,x=96,y=112,s=145,b=61,tt=sample}
+  {k=pc,x=96,y=104,s=158,b=58,tt=percussion}
+  {k=fm,x=96,y=112,s=145,b=61,tt="2-op fm"}
  ))
  (fn (d)
   (add_ui (radio_btn_new (@ $d x) (@ $d y) (@ $d k) (@ $d s) (+ 1 (@ $d s)) (@ $d tt) (state_make_get_set drum_sel)))
@@ -456,7 +460,7 @@ drum_ui_init=eval[[(fn (add_ui)
  )
 )
 (foreach
- (' ({x=32,b=0,tt="bd/sd "} {x=64,b=2,tt="hh/cy "} {x=96,b=4,tt="pc/sp "}))
+ (' ({x=32,b=0,tt="bd/sd "} {x=64,b=2,tt="hh/cy "} {x=96,b=4,tt="pc/fm "}))
  (fn (c) (add_ui (multitoggle_new
   (@ $c x) 96 (' (101 102 103 104)) (cat (@ $c tt) "fx bypass") (state_make_get_set_param 45 (@ $c b) 2)
  )))

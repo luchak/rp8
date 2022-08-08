@@ -78,7 +78,7 @@ function _init()
  }
  local kick,snare,hh,cy,perc,sp=unpack(drums)
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()
- local drum_keys=split'bd,sd,hh,cy,s1,s2'
+ local drum_keys=split'bd,sd,hh,cy,pc,fm'
 
  local mixer=mixer_new(
   {
