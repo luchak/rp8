@@ -20,6 +20,7 @@ eval[[
  (let saved ((@ $state save) $state))
  (printh $saved @clip)
  (printh $saved (cat rp8_ (stat 90) (cat _ (stat 91) (cat _ (stat 92) (cat _ (stat 93) (cat _ (stat 94) (cat _ (stat 95))))))) true true)
+ (set_toast "song saved")
 ))
 (set paste_state (fn ()
  (audio_wait 2)
@@ -27,6 +28,7 @@ eval[[
  (if (not (eq $pd "")) (seq
   (set state (or (state_load $pd) $state))
   (@= $seq_helper state $state)
+  (set_toast "song loaded from clipboard")
  ))
 ))
 (set show_help true)
@@ -149,9 +151,9 @@ function _update60()
    local n=serial(0x800,0x5100,0x800)
    s..=chr(peek(0x5100,n))
   end
-  log('FILE LOAD',s)
   state=state_load(s) or state
   seq_helper.state=state
+  set_toast("song loaded from file")
 
   audio_wait(10)
  end
