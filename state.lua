@@ -213,10 +213,10 @@ function state_new(savedata)
   self:stop_playing()
   local n=#copy_buf_seq
   if self.song_mode then
-   set_toast("loop pasted into")
+   set_toast("loop pasted")
    self.tl:paste_seq(copy_buf_seq)
   else
-   set_toast("pattern pasted into")
+   set_toast("pattern pasted")
    self.pat_patch=dec_bytes(copy_buf_seq[1].t0)
   end
   load_bar()
