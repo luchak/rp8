@@ -395,7 +395,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
  )
 )
 (add_ui
- (toggle_new 0 $yp 107 108 active
+ (toggle_new 0 $yp 107 108 on/off
   (state_make_get_set_param_bool (+ $base_idx 3))
  )
 )
@@ -471,7 +471,7 @@ drum_ui_init=eval[[(fn (add_ui)
  16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")) "paste pattern"
 ))
 (add_ui (toggle_new
- 0 104 109 110 active (state_make_get_set_param_bool 42)
+ 0 104 109 110 on/off (state_make_get_set_param_bool 42)
 ))
 (add_ui (spin_btn_new
  0 112 (' (240 241 242 243 244 245 246 247)) "bank select" (state_make_get_set dr_bank)
