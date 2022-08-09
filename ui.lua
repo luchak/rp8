@@ -494,7 +494,7 @@ header_ui_init=eval[[(fn (add_ui)
 )
 
 (add_ui (toggle_new
- 0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
+ 0 0 6 7 play/pause (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
 (add_ui (toggle_new
  24 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)

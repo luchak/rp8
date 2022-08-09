@@ -176,8 +176,6 @@ function _draw()
  ui:draw(state)
  t_draw=stat(1)-t0
  --log('times',t_audio,t_ui,t_draw)
- --rectfill(0,0,30,7,0)
- --print(stat(0),0,0,7)
  palt(0,false)
 end
 
