@@ -6,8 +6,6 @@ __lua__
 
 #include utils.lua
 
-semitone=2^(1/12)
-
 -- settle audio before starting synthesis
 eval[[
 (set audio_wait (fn (frames)
@@ -176,7 +174,6 @@ function _draw()
  ui:draw(state)
  t_draw=stat(1)-t0
  --log('times',t_audio,t_ui,t_draw)
- palt(0,false)
 end
 
 #include driver.lua
