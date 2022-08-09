@@ -10,6 +10,9 @@
 *.bd
 *.clear_overrides
 *.click_act
+*.copy_overrides_to_loop
+*.copy_seq
+*.cut_seq
 *.cy
 *.def_bar
 *.dr
@@ -25,6 +28,7 @@
 *.help_on
 *.hh
 *.hover_t
+*.insert_seq
 *.lev
 *.loop
 *.loop_len
@@ -40,6 +44,7 @@
 *.p1
 *.page
 *.pages
+*.paste_seq
 *.pat_patch
 *.pat_seqs
 *.pat_status
