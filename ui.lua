@@ -608,4 +608,6 @@ hotkey_map=parse[[{
  r=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
  u=`(id $paste_state)
  s=`(id $copy_state)
+ x=`(fn () (mcall $state clear_overrides))
+ c=`(fn () (mcall $state copy_overrides_to_loop))
 }]]
