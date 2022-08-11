@@ -127,6 +127,7 @@ timeline_new
 toggle_help
 toggle_new
 transport_number_new
+transpose_pat
 trn
 ui
 ui_new
