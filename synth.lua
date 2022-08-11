@@ -241,21 +241,23 @@ function fm_new(base)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   _adec=1-pow4(0.32-0.17*dec)
-  _mdec=1-pow4(0.3-0.2*dec)
+  _mdec=1-pow4(0.28-0.18*dec)
   if s!=n_off and state.playing then
-   _cdet=(semitone^(pat.dt[step]-64)*0.0711)<<16
+   _cdet=semitone^(pat.dt[step]-64)*1165.06958
    _amp=lev*lev*trn(s==n_ac,0.7,0.3)
    _mamp=1.0
   end
-  _mdet=_cdet*2^((tun-0.5)*4)
+  tun<<=2
+  local ratio=(0.25<<(tun&7))*(1+(tun&0x0.ffff))
+  _mdet=_cdet*ratio
  end
 
  function obj:subupdate(b,first,last)
   local mdet,cdet,mphase,cphase,adec,amp,mdec,mamp=_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp
   for i=first,last do
    mphase+=mdet
-   cphase+=cdet*(1+mamp*sin(mphase>>16))
-   b[i]+=amp*sin(cphase>>16)
+   cphase+=cdet*(1+mamp*sin(mphase>>14))
+   b[i]+=amp*sin(cphase>>14)
    amp*=adec
    mamp*=mdec
   end
