@@ -38,12 +38,15 @@ eval[[
 (set audio_rec false)
 (set start_rec (fn ()
  (set audio_rec true)
+ (set_toast "audio export started")
  (extcmd audio_rec)
  (menuitem 3 "stop export" $stop_rec)
 ))
 (set stop_rec (fn ()
+ (set_toast "audio export stopped")
  (if $audio_rec (extcmd audio_end))
  (menuitem 3 "start export" $start_rec)
+ (set audio_rec false)
 ))
 ]]
 

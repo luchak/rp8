@@ -145,7 +145,8 @@ function parse(s)
    repeat
     skip()
     if (c=='}') return t
-    local k=c..consume(mkmatch('=',true))
+    read(-1)
+    local k=consume(mkmatch('=',true))
     t[tonum(k) or k]=_parse()
    until false
   elseif c=='`' then
@@ -251,5 +252,6 @@ eval[[
  (for 1 $n (fn () (add $a $x)))
  $a
 ))
+(set id (fn (x) $x))
+(set mcall (fn (obj m) ((@ $obj $m) $obj)))
 ]]
-

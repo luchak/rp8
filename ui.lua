@@ -149,11 +149,8 @@ function ui_new()
   local click,mx,my,k=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
-  if (stat(30)) k=stat(31)
-  if (k=='h') toggle_help()
-  if (k==' ') state:toggle_playing()
-  if (k=='\t') ui:set_page(3-ui.page)
-  if (k=='l') state:toggle_loop()
+  hotkey_action=hotkey_map[stat(30) and stat(31)]
+  if (hotkey_action) hotkey_action()
 
   local focus=self.focus
   local new_focus=self.focus
@@ -486,6 +483,14 @@ function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
 function has_uncommitted(s) return not no_uncommitted(s) end
 function get_page() return ui.page end
 function set_page(_,p) ui:set_page(p) end
+eval[[
+(set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
+(set rewind (fn ()
+ ((@ $state go_to_bar) $state
+  (trn (gt (@ $state tl bar) (@ $state tl loop_start)) (@ $state tl loop_start) 1)
+ )
+))
+]]
 
 header_ui_init=eval[[(fn (add_ui)
 (let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
@@ -503,11 +508,7 @@ header_ui_init=eval[[(fn (add_ui)
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
  (make_obj_cb toggle_rec)
 ) 196 $no_uncommitted true) 233)
-(song_only (push_new 16 0 5 (fn (s)
- ((@ $s go_to_bar) $s
-  (trn (gt (@ $s tl bar) (@ $s tl loop_start)) (@ $s tl loop_start) 1)
- )
-) rewind) 5)
+(song_only (push_new 16 0 5 $rewind rewind) 5)
 
 (add_ui (merge (spin_btn_new 96 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
@@ -595,3 +596,16 @@ header_ui_init=eval[[(fn (add_ui)
 
 (map 0 0 0 0 16 4)
 )]]
+
+hotkey_map=parse[[{
+ h=`(id $toggle_help)
+ \20=`(fn () (mcall $state toggle_playing))
+ \09=`(id $next_page)
+ \08=`(id $rewind)
+ q=`(id $next_page)
+ l=`(fn () (mcall $state toggle_loop))
+ e=`(fn () (if $audio_rec (stop_rec) (start_rec)))
+ r=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
+ u=`(id $paste_state)
+ s=`(id $copy_state)
+}]]
