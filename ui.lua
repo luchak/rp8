@@ -101,7 +101,7 @@ function ui_new()
     else
      local tw,text,bg,fg=w.w<<2,unpack_split(sp)
      text=tostr(text)
-     rectfill(wx,wy,wx+tw-1,wy+6,bg)
+     rectfill(wx,wy,wx+tw-1,wy+7,bg)
      print(text,wx+tw-#text*4,wy+1,fg)
     end
    end
