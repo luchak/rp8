@@ -517,11 +517,11 @@ header_ui_init=eval[[(fn (add_ui)
 (song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
 
 (add_ui (wrap_override 
- (push_new 8 24 205 (make_obj_cb copy_overrides_to_loop) "commit changes")
+ (push_new 8 24 205 (make_obj_cb copy_overrides_to_loop) "commit overrides")
  204 $has_uncommitted)
 )
 (add_ui (wrap_override 
- (push_new 0 24 207 (make_obj_cb clear_overrides) "clear changes")
+ (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides")
  206 $has_uncommitted)
 )
 

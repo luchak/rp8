@@ -230,13 +230,13 @@ function state_new(savedata)
  end
 
  function s:clear_overrides()
-  set_toast("changes cleared")
+  set_toast("overrides cleared")
   self.tl:clear_overrides()
   if (not self.playing) self:load_bar()
  end
 
  function s:copy_overrides_to_loop()
-  set_toast("changes committed to loop")
+  set_toast("overrides committed")
   self.tl:copy_overrides_to_loop()
  end
 
