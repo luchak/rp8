@@ -487,7 +487,7 @@ eval[[
 (set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
 (set rewind (fn ()
  ((@ $state go_to_bar) $state
-  (trn (gt (@ $state tl bar) (@ $state tl loop_start)) (@ $state tl loop_start) 1)
+  (if (gt (@ $state tl bar) (@ $state tl loop_start)) (@ $state tl loop_start) 1)
  )
 ))
 ]]
@@ -602,7 +602,6 @@ hotkey_map=parse[[{
  \20=`(fn () (mcall $state toggle_playing))
  \09=`(id $next_page)
  \08=`(id $rewind)
- q=`(id $next_page)
  l=`(fn () (mcall $state toggle_loop))
  e=`(fn () (if $audio_rec (stop_rec) (start_rec)))
  r=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))

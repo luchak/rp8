@@ -21,6 +21,7 @@ function timeline_new(default_patch, savedata)
   i=i or self.bar
   local bar_data=self.bars[i] or copy(self.def_bar)
   local op=self.overrides
+  bar_data.t0..=sub(self.def_bar.t0,#bar_data.t0+1)
   self.bar_start=merge(dec_bytes(bar_data.t0),op)
   merge(patch,self.bar_start)
   if self.rec then

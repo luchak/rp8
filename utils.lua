@@ -20,8 +20,7 @@ end
 function merge(base,new)
  for k,v in pairs(new) do
   if type(v)=='table' then
-   local bk=base[k]
-   if type(bk)=='table' then merge(bk,v) else base[k]=copy(v) end
+   if type(base[k])=='table' then merge(base[k],v) else base[k]=copy(v) end
   else
    base[k]=v
   end
