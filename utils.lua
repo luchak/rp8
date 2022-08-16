@@ -244,7 +244,7 @@ end
 function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
-eval[[
+eval--[[language::loaf]][[
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
 (set rep (fn (n x)
  (let a (pack))

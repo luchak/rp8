@@ -7,7 +7,7 @@ __lua__
 #include utils.lua
 
 -- settle audio before starting synthesis
-eval[[
+eval--[[language::loaf]][[
 (set audio_wait (fn (frames)
  (set pause_t $frames)
  (set audio_root)
@@ -51,7 +51,7 @@ eval[[
 ]]
 
 function _init()
- eval[[
+ eval--[[language::loaf]][[
 (cls)
 (set ui (ui_new))
 (set set_toast (fn (text frames)

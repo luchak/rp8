@@ -89,7 +89,7 @@ function timeline_new(default_patch, savedata)
   self.has_override=true
  end
 
- eval[[(fn (timeline) (@= $timeline clear_overrides
+ eval--[[language::loaf]][[(fn (timeline) (@= $timeline clear_overrides
  (fn (self) (@= $self overrides (pack)) (@= $self has_override false))
  ))]](timeline)
 

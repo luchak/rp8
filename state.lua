@@ -1,6 +1,8 @@
 -->8
 -- state
 
+--lint: copy_buf_seq
+
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
 syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}]]
@@ -46,7 +48,7 @@ function state_new(savedata)
   pat_patch=`(copy $default_patch),
  }]]
 
- eval[[(fn (s dat)
+ eval--[[language::loaf]][[(fn (s dat)
  (if $dat ((fn ()
   (@= $s tl (timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
@@ -245,7 +247,7 @@ function state_new(savedata)
  return s
 end
 
-state_load=eval[[(fn (s)
+state_load=eval--[[language::loaf]][[(fn (s)
  (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
 )]]
 

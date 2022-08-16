@@ -149,7 +149,7 @@ function ui_new()
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
-  hotkey_action=hotkey_map[stat(30) and stat(31)]
+  local hotkey_action=hotkey_map[stat(30) and stat(31)]
   if (hotkey_action) hotkey_action()
 
   local focus=self.focus
@@ -347,20 +347,20 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-eval[[
+eval--[[language::loaf]][[
 (set pat_lens (pack))
 (for 1 16 (fn (l)
  (add $pat_lens (cat $l ",0,14"))
 ))
 ]]
 
-transport_number_new=eval[[(fn (x y w obj key tt input) (wrap_override
+transport_number_new=eval--[[language::loaf]][[(fn (x y w obj key tt input) (wrap_override
  (number_new $x $y $w $tt (take 1 (state_make_get_set $obj $key)) $input)
  "--,0,15"
  $state_is_song_mode
 ))]]
 
-syn_ui_init=eval[[(fn (add_ui key base_idx yp)
+syn_ui_init=eval--[[language::loaf]][[(fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
@@ -426,7 +426,7 @@ syn_ui_init=eval[[(fn (add_ui key base_idx yp)
 (map 0 4 0 $yp 16 2)
 )]]
 
-drum_ui_init=eval[[(fn (add_ui)
+drum_ui_init=eval--[[language::loaf]][[(fn (add_ui)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 35))) 1)
@@ -483,7 +483,7 @@ function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
 function has_uncommitted(s) return not no_uncommitted(s) end
 function get_page() return ui.page end
 function set_page(_,p) ui:set_page(p) end
-eval[[
+eval--[[language::loaf]][[
 (set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
 (set rewind (fn ()
  ((@ $state go_to_bar) $state
@@ -492,7 +492,7 @@ eval[[
 ))
 ]]
 
-header_ui_init=eval[[(fn (add_ui)
+header_ui_init=eval--[[language::loaf]][[(fn (add_ui)
 (let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
 (let song_only
  (fn (w s_not_song) (add_ui (wrap_override $w $s_not_song $state_is_song_mode false)))
