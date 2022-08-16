@@ -79,7 +79,6 @@ function _init()
   sweep_new(unpack_split'58,0.1,0.05,0.2778,1,0.004,0.08'),
   fm_new(61)
  }
- local kick,snare,hh,cy,perc,sp=unpack(drums)
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()
  local drum_keys=split'bd,sd,hh,cy,pc,fm'
 

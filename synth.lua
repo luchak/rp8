@@ -203,7 +203,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off and state.playing then
-   _op,_dp,_ae=0,_dp0,lev*lev*trn(s==n_ac,9,3.6)
+   _ae=lev*lev*trn(s==n_ac,9,3.6)
   end
 
   _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)

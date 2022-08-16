@@ -233,7 +233,7 @@ function _eval_scope(ast,locals,start)
 end
 
 function eval(src)
- local parsed=parse('('..src..')')
+ local parsed=parse('(seq '..src..')')
  return _eval_scope(parsed,{})
 end
 

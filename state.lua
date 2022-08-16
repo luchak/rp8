@@ -57,7 +57,7 @@ function state_new(savedata)
  )))
  )]](s,savedata)
 
- function _init_tick()
+ local function _init_tick()
   local patch=s.patch
   local nl=sample_rate*(15/(60+patch[1]))
   local shuf_diff=nl*(patch[2]>>7)*(0.5-(s.tick&1))
@@ -69,6 +69,31 @@ function state_new(savedata)
    s.ptick[k]=gtick%(p.l or 16)+1
   end
  end
+
+ local function _sync_pats()
+  local ps,patch=s.pat_store,s.patch
+  for syn,param_idx in pairs(pat_param_idx) do
+   local syn_pats=ps[syn]
+   if not syn_pats then
+    syn_pats={}
+    s.pat_store[syn]=syn_pats
+   end
+   local pat_idx=patch[param_idx]
+   local pat=syn_pats[pat_idx]
+   if not pat then
+    if (syn=='b0' or syn=='b1') pat=copy(syn_pat_template) else pat=copy(drum_pat_template)
+    syn_pats[pat_idx]=pat
+   end
+   s.pat_seqs[syn]=pat
+  end
+  for group,idx in pairs(pat_param_idx) do
+   s.pat_status[group]={
+    on=patch[idx-1]>0,
+    idx=patch[idx],
+   }
+  end
+ end
+
 
  function s:load_bar(i)
   local tl=self.tl
@@ -131,30 +156,6 @@ function state_new(savedata)
   self.song_mode=not self.song_mode
   self:stop_playing()
   load_bar()
- end
-
- function _sync_pats()
-  local ps,patch=s.pat_store,s.patch
-  for syn,param_idx in pairs(pat_param_idx) do
-   local syn_pats=ps[syn]
-   if not syn_pats then
-    syn_pats={}
-    s.pat_store[syn]=syn_pats
-   end
-   local pat_idx=patch[param_idx]
-   local pat=syn_pats[pat_idx]
-   if not pat then
-    if (syn=='b0' or syn=='b1') pat=copy(syn_pat_template) else pat=copy(drum_pat_template)
-    syn_pats[pat_idx]=pat
-   end
-   s.pat_seqs[syn]=pat
-  end
-  for group,idx in pairs(pat_param_idx) do
-   s.pat_status[group]={
-    on=patch[idx-1]>0,
-    idx=patch[idx],
-   }
-  end
  end
 
  function s:go_to_bar(bar)

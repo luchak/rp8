@@ -146,7 +146,7 @@ function ui_new()
   if (btnp(3)) input-=1
 
   self.mx,self.my=stat(32),stat(33)
-  local click,mx,my,k=stat(34),self.mx,self.my
+  local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
   hotkey_action=hotkey_map[stat(30) and stat(31)]
