@@ -65,8 +65,7 @@ function stringify(v)
  if t=='number' or t=='boolean' then return tostr(v)
  elseif t=='string' then
   local s='"'
-  for i=1,#v do
-   local c=sub(v,i,i)
+  for c in all(split(v,1)) do
    local o=ord(c)
    -- escape non-printables, ", and \
    if o<35 or o==92 or o>126 then s..='\\'..chr(48+(o>>4&0x0f),48+(o&0x0f)) else s..=c end
@@ -78,9 +77,11 @@ function stringify(v)
    s..=vk..'='..stringify(vv)..','
   end
   return s..'}'
+  --[[
  else
   -- won't parse, but nice for debugging
   return t..'[?]'
+  ]]
  end
 end
 
@@ -168,7 +169,7 @@ nil_value = '__NIL_VALUE__'
 
 function _eval_scope(ast,locals,start)
  local function eval_node(node)
-  if sub(node,1,1)=='$' then
+  if ord(node)==36 then
    local name=sub(node,2)
    local val=locals[name] or _ENV[name]
    if (val==nil_value) return nil else return val
