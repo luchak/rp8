@@ -27,7 +27,16 @@ function delay_new()
 end
 
 
-dr_fx_masks=split'1,2,4,8,16,32'
+eval--[[language::loaf]][[
+(set filtmap (' {b0=3,b1=4,dr=5}))
+(set mixer_params (' {
+ b0={p0=7,p1=9,lev=8},
+ b1={p0=23,p1=25,lev=8},
+ dr={p0=39,p1=41,lev=16},
+}))
+(set dr_fx_masks (' (1 2 4 8 16 32)))
+]]
+
 function drum_mixer_new(srcs)
  return {
   srcs=srcs,
@@ -46,20 +55,11 @@ function drum_mixer_new(srcs)
  }
 end
 
-eval--[[language::loaf]][[
-(set filtmap (' {b0=3,b1=4,dr=5}))
-(set mixer_params (' {
- b0={p0=7,p1=9,lev=8},
- b1={p0=23,p1=25,lev=8},
- dr={p0=39,p1=41,lev=16},
-}))
-]]
-
 function mixer_new(_srcs,_fx,_filt,_lev)
  local _tmp,_bypass,_fxbuf,_filtsrc,_state,_bias={},{},{},1,parse--[[language::loon]][[{b0=(0 0),b1=(0 0),dr=(0 0)}]],0
  return {
   note=function(self,patch)
-   _lev=pow3(patch[3]>>7)*8
+   _lev=pow3(patch[3]>>7)<<3
    _filtsrc=patch[64]
    _bias=patch[71]>>7
    for key,src in pairs(mixer_params) do
@@ -81,6 +81,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     local bias_od=_bias*od^0.2
     local bias=1.49*bias_od/odg
     local odgi=(1+4*od*(1+5*bias))/odg
+    -- constants are chosen so 0 DC -> 0 DC
     local bc=odgi*(2.98*bias_od-0.98013*pow3(bias_od))
     for i=first,last do
      local tmp_i=tmp[i]
@@ -182,16 +183,16 @@ function svf_new()
    _gc=gc*gc*gc*gc*0x0.fe+0x0.02
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc_base,wet,fe,is_bp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec
-   is_bp=is_bp>0 and 1 or 0
+   local z1,z2,rc,gc_base,wet,fe,is_lp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp==0,_dec
+   local rc1=rc<<1
    for i=first,last do
     local gc=gc_base*fe
-    local rrpg=(rc<<1)+gc
+    local rrpg=rc1+gc
     local hpn,inp=1/gc+rrpg,b[i]
     local hpgc=(inp-rrpg*z1-z2)/hpn
     local bp=hpgc+z1
     z1=hpgc+bp
-    z2+=((bp*gc)<<1)
+    z2+=(bp*gc)<<1
 
     -- 2x oversample
     hpgc=(inp-rrpg*z1-z2)/hpn
@@ -201,7 +202,7 @@ function svf_new()
     z2=bp*gc+lp
 
     -- rc*bp is 1/2 of unity gain bp
-    b[i]=inp+wet*(lp+is_bp*(rc*bp+bp-lp)-inp)
+    b[i]=inp+wet*((is_lp and lp or rc*bp+bp)-inp)
     fe*=dec
    end
    _z1,_z2,_fe=z1,z2,fe

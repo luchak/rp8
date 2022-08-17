@@ -13,7 +13,7 @@ function synth_new(base)
 
   _o2mix=o2mix
   -- constant is (100/(4*5512.5))
-  _fc=0.00454*(2^(4*cut))
+  _fc=0.00454*(2^(cut<<2))
   _fr=(res+sqrt(res))*3.5
   _env=env*env+0.1
   _acc=acc*1.9+0.1
@@ -31,10 +31,8 @@ function synth_new(base)
   if (patstep==n_off or not state.playing) return
 
   _gate=true
-  local f=55*2^(pat.nt[step]/12+0.25)
-  --ordered for safety
-  -- constant is 65536/(5512.5 * 4)
-  _todp=f*2.97215
+  -- constant is 55*65536/(5512.5 * 4)
+  _todp=2^(pat.nt[step]/12+0.25)*163.46848
 
   if (_ac) _env+=acc
   if _lsl then
@@ -56,7 +54,7 @@ function synth_new(base)
   local env,saw,acc=_env,_saw,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=7/(fr+7)
-  local mix1,mix2=cos(o2mix),sin(o2mix+0.5)
+  local mix1,mix2=cos(o2mix),-sin(o2mix)
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
    local fc=min(0.1,fcbf+(me>>4)*env)
@@ -65,7 +63,8 @@ function synth_new(base)
    fc=4.71*fc/(1+fc)
    local fc1=(0.5+fc)>>1
    if gate then
-    ae+=(1-ae)>>2
+    -- 1/7 amp multiplier * 1/4 oversampling normalization
+    ae+=(0.03571-ae)>>2
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
    else
     ae*=aed
@@ -107,7 +106,7 @@ function synth_new(base)
     op+=dodp
     o2p+=dodp2
    end
-   out=(out*ae)/28 -- 7 * oversample
+   out*=ae
    if (ac) out+=acc*me*out
    b[i]=out*res_comp
   end
@@ -129,9 +128,9 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
   if s!=n_off then
    -- TODO: update params every step?
    _detune=2^((18*tun-9+(pat.dt[step]-64))/12)
-   _op,_dp=0,(_dp0<<16)*(1+_detune)/2
+   _op,_dp=0,(_dp0<<15)*(1+_detune)
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
-   _aemax=0.5*_ae
+   _aemax=_ae>>1
    _ted=(te_max+(te_min-te_max)*dec^0.5)
    _aed=1-ae_ratio*_ted
   end
@@ -169,8 +168,8 @@ function snare_new()
     _aes-=aeo
     _aen+=aeo
     _aes*=lev2
-    _aen*=lev2
-    _aemax=_aes*0.5
+    _aen*=lev2*0.6
+    _aemax=_aes>>1
    end
    local pd2=0.18-0.1625*dec^0.5
    _aesd=0.992-0.02*pd2
@@ -187,7 +186,7 @@ function snare_new()
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   b[i]+=((aemax<aes and aemax or aes)*sin(op>>15)+aen*(rnd(2)-1))*0.3
+   b[i]+=((aemax<aes and aemax or aes)*sin(op>>15)+aen*(rnd()-0.5))
   end
   _dp,_op,_aes,_aen=dp,op,aes,aen
  end

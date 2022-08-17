@@ -114,7 +114,7 @@ function _init()
    svf:note(patch,bar,now)
 
    local mix_lev,dl_t,dl_fb,comp_th=unpack_patch(patch,3,6)
-   mixer.lev=pow3(mix_lev)*8
+   mixer.lev=pow3(mix_lev)<<3
 
    dl_t=(dl_t<<7)
    if dl_t>32 then

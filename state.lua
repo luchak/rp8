@@ -289,6 +289,8 @@ end
 
 state_is_song_mode=function(state) return state.song_mode end
 
+--taf=0.75
+
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
  local _t,_cost=state.note_len,3
@@ -306,7 +308,10 @@ function seq_helper_new(state,root,note_fn)
      todo-=_cost
     end
     local n=min(self.state.note_len-_t,todo)
+    --local t0=stat(1)
     self.root:update(b,p,p+n-1)
+    --local t_audio=(stat(1)-t0)*94/n
+    --if (n>50) taf+=0.01*(t_audio-taf) log('tps', taf)
     _t+=n
     p+=n
     todo-=n
