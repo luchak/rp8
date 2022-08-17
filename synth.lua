@@ -14,7 +14,8 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc,atk=pat.st[step],unpack_patch(patch,base+5,base+15)
 
   _o2mix=o2mix
-  _fc=(100/sample_rate)*(2^(4*cut))/4
+  -- constant is (100/(4*5512.5))
+  _fc=0.00454*(2^(4*cut))
   _fr=(res+sqrt(res))*3.5
   _env=env*env+0.1
   _acc=acc*1.9+0.1
@@ -34,7 +35,8 @@ function synth_new(base)
   _gate=true
   local f=55*semitone^(pat.nt[step]+3)
   --ordered for safety
-  _todp=(f/4)/(sample_rate>>16)
+  -- constant is 65536/(5512.5 * 4)
+  _todp=f*2.97215
 
   if (_ac) _env+=acc
   if _lsl then

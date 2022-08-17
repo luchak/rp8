@@ -1,7 +1,6 @@
 -->8
 -- audio driver
 
-sample_rate=5512.5
 _dcf=0
 
 function audio_update()

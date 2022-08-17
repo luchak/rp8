@@ -61,7 +61,7 @@ function state_new(savedata)
 
  local function _init_tick()
   local patch=s.patch
-  local nl=sample_rate*(15/(60+patch[1]))
+  local nl=5512.5*(15/(60+patch[1]))
   local shuf_diff=nl*(patch[2]>>7)*(0.5-(s.tick&1))
   s.note_len,s.base_note_len=flr(0.5+nl+shuf_diff),nl
   local gtick=s.tick+s.bar*16-17

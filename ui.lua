@@ -90,7 +90,7 @@ function ui_new()
  function obj:draw(state)
   -- restore screen from mouse
   local mx,my,off=self.mx,self.my,self.restore_offset
-  if (off) memcpy(0x6000+off,0x9000+off,448) memcpy(0x6080,0xb000,448)
+  if (off) memcpy(0x6000+off,0x9000,448) memcpy(0x6080,0x9200,448)
 
   palt(0,false)
 
@@ -123,7 +123,7 @@ function ui_new()
   end
 
   -- store rows behind toast and draw toast
-  memcpy(0xb000,0x6080,448)
+  memcpy(0x9200,0x6080,448)
   local toast_t=self.toast_t
   if toast_t and toast_t>0 then
    outline_text(self.toast,2,3,7,1)
@@ -135,7 +135,7 @@ function ui_new()
   -- store rows behind mouse and draw mouse
   local tt_my=mid(0,my,121)
   local next_off=tt_my<<6
-  memcpy(0x9000+next_off,0x6000+next_off,448)
+  memcpy(0x9000,0x6000+next_off,448)
   local hover=self.hover
   spr(15,mx,my)
   if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
@@ -159,8 +159,7 @@ function ui_new()
   if (hotkey_action) hotkey_action()
 
   local focus=self.focus
-  local new_focus=self.focus
-  new_focus=trn(new_focus and new_focus.active,new_focus,nil)
+  local new_focus=trn(focus and focus.active,focus,nil)
 
   if click>0 then
    if focus and click==self.last_click then
@@ -595,7 +594,10 @@ eval--[[language::loaf]][[
 
 (map 0 0 0 0 16 4)
 ))
+]]
 
+
+eval--[[language::loaf]][[
 (set hotkey_map (' {
  8=`(id $rewind)
  9=`(id $next_page)

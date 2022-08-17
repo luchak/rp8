@@ -165,7 +165,7 @@ function parse(s)
  return _parse()
 end
 
-nil_value = '__NIL_VALUE__'
+nil_value = '\0NIL_VALUE\0'
 
 function _eval_scope(ast,locals,start)
  local function eval_node(node)
