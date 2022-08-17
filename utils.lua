@@ -164,12 +164,14 @@ function parse(s)
  return _parse()
 end
 
+nil_value = '__NIL_VALUE__'
 
 function _eval_scope(ast,locals,start)
  local function eval_node(node)
   if sub(node,1,1)=='$' then
    local name=sub(node,2)
-   return locals[name] or _ENV[name]
+   local val=locals[name] or _ENV[name]
+   if (val==nil_value) return nil else return val
   end
   if (type(node)!='table') return node
 
@@ -186,7 +188,9 @@ function _eval_scope(ast,locals,start)
      new_locals[k]=v
     end
     for k,v in ipairs(a1) do
-     new_locals[v]=args[k]
+     local val = args[k]
+     if (val==nil) val=nil_value
+     new_locals[v]=val
     end
     return _eval_scope(node,new_locals,3)
    end
@@ -214,7 +218,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='@=' then v1[v2]=v3
   elseif cmd=='for' then for i=v1,v2 do v3(i) end
   elseif cmd=='set' then _ENV[v1]=v2
-  elseif cmd=='let' then locals[v1]=v2
+  elseif cmd=='let' then if v2==nil then locals[v1]=nil_value else locals[v1]=v2 end
   elseif cmd=='eq' then return v1==v2
   elseif cmd=='gt' then return v1>v2
   elseif cmd=='cat' then if v3 then return v1..v2..v3 else return v1..v2 end
