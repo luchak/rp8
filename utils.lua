@@ -188,7 +188,7 @@ function _eval_scope(ast,locals,start)
      new_locals[k]=v
     end
     for k,v in ipairs(a1) do
-     local val = args[k]
+     local val=args[k]
      if (val==nil) val=nil_value
      new_locals[v]=val
     end
