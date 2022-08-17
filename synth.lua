@@ -1,8 +1,6 @@
 -->8
 -- audio gen
 
-semitone=2^(1/12)
-
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
@@ -26,14 +24,14 @@ function synth_new(base)
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
-  _detune=semitone^(flr(24*(tun-0.5)+0.5))
-  _o2detune=_detune*semitone^(flr(pat.dt[step]-64)+o2fine-0.5)
+  _detune=2^(flr(24*(tun-0.5)+0.5)/12)
+  _o2detune=_detune*2^((flr(pat.dt[step]-64)+o2fine-0.5)/12)
   _ac=patstep==n_ac or patstep==n_ac_sl
   _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off or not state.playing) return
 
   _gate=true
-  local f=55*semitone^(pat.nt[step]+3)
+  local f=55*2^(pat.nt[step]/12+0.25)
   --ordered for safety
   -- constant is 65536/(5512.5 * 4)
   _todp=f*2.97215
@@ -130,7 +128,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off then
    -- TODO: update params every step?
-   _detune=semitone^(18*tun-9+(pat.dt[step]-64))
+   _detune=2^((18*tun-9+(pat.dt[step]-64))/12)
    _op,_dp=0,(_dp0<<16)*(1+_detune)/2
    if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
    _aemax=0.5*_ae
@@ -162,7 +160,7 @@ function snare_new()
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,49,51)
   if s!=n_off then
-   _detune=semitone^(12*tun-6+(pat.dt[step]-64))
+   _detune=2^((12*tun-6+(pat.dt[step]-64))/12)
    _op,_dp=0,_dp0*_detune
    if state.playing then
     _aes,_aen=0.8,0.4
@@ -245,7 +243,7 @@ function fm_new(base)
   _adec=1-pow4(0.32-0.17*dec)
   _mdec=1-pow4(0.28-0.18*dec)
   if s!=n_off and state.playing then
-   _cdet=semitone^(pat.dt[step]-64)*1165.06958
+   _cdet=2^((pat.dt[step]-64)/12)*1165.06958
    _amp=lev*lev*trn(s==n_ac,0.7,0.3)
    _mamp=1.0
   end
