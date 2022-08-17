@@ -140,7 +140,7 @@ function ui_new()
   spr(15,mx,my)
   if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
    local tt=hover.tt
-   local xp=trn(mx<56,mx+7,mx-2-4*#tt)
+   local xp=mx<56 and mx+7 or mx-2-4*#tt
    outline_text(tt,xp+1,tt_my+1,12,1)
   end
   self.restore_offset=next_off

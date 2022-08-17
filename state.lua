@@ -166,12 +166,12 @@ function state_new(savedata)
 
  function s:get_ui_pat(syn)
   -- pats are aliased, always editing current
-  return trn(syn=='dr',self.pat_seqs.dr[self.drum_sel],self.pat_seqs[syn])
+  return syn=='dr' and self.pat_seqs.dr[self.drum_sel] or self.pat_seqs[syn]
  end
 
  function s:get_ptick(syn)
   -- pats are aliased, always editing current
-  return trn(syn=='dr',self.ptick[self.drum_sel],self.ptick[syn])
+  return syn=='dr' and self.ptick[self.drum_sel] or self.ptick[syn]
  end
 
  function s:save()
@@ -272,7 +272,7 @@ function state_make_get_set_param_bool(idx,bit)
  local mask=1<<(bit or 0)
  return
   function(state) return (state.patch[idx]&mask)>0 end,
-  function(state,val) local old=state.patch[idx] state._apply_diff(idx,trn(val,old|mask,old&(~mask))) end
+  function(state,val) local old=state.patch[idx] state._apply_diff(idx,val and old|mask or old&(~mask)) end
 end
 
 function state_make_get_set(a,b)
