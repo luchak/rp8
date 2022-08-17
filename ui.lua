@@ -387,7 +387,7 @@ syn_ui_init=eval--[[language::loaf]][[(fn (add_ui key base_idx yp)
 )
 (add_ui
  (push_new 16 $yp 27
-  (fn (state) (if $copy_buf_syn (merge (@ $state pat_seqs $key) $copy_buf_syn) nil) (set_toast "synth pattern pasted"))
+  (fn (state) (if $copy_buf_syn (seq (merge (@ $state pat_seqs $key) $copy_buf_syn) (set_toast "synth pattern pasted"))))
   "paste pattern"
  )
 )
@@ -465,7 +465,7 @@ drum_ui_init=eval--[[language::loaf]][[(fn (add_ui)
  8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
 ))
 (add_ui (push_new
- 16 104 10 (fn (state) (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")) "paste pattern"
+ 16 104 10 (fn (state) (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
 ))
 (add_ui (toggle_new
  0 104 109 110 on/off (state_make_get_set_param_bool 42)
