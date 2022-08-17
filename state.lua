@@ -5,28 +5,28 @@
 
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
-syn_base_idx=parse--[[language::loon]][[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}]]
-
-pat_param_idx=parse--[[language::loon]][[{b0=11,b1=27,dr=43}]]
 
 -- see note 003
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,1,0,64,64,128,1,128,0'
 
-syn_pat_template=parse--[[language::loon]][[{
+eval--[[language::loaf]][[
+(set syn_base_idx (' {b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}))
+(set pat_param_idx (' {b0=11,b1=27,dr=43}))
+(set syn_pat_template (' {
  nt=`(rep 16 19)
  dt=`(rep 16 64)
  st=`(rep 16 64)
  l=16
-}]]
-
-drum_pat_template=parse--[[language::loon]][[{
+}))
+(set drum_pat_template (' {
  bd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  sd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  hh={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  cy={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  pc={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  fm={st=`(rep 16 64) dt=`(rep 16 64) l=16}
-}]]
+}))
+]]
 
 function state_new(savedata)
  local s=parse--[[language::loon]][[{

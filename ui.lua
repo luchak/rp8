@@ -7,13 +7,19 @@ function outline_text(s,x,y,c,o)
  print(s,x,y,c)
 end
 
-widget_defaults=parse--[[language::loon]][[{
+eval--[[language::loaf]][[
+(set widget_defaults (' {
  w=2,
  h=2,
  active=true,
  click_act=false,
  drag_amt=0
-}]]
+}))
+(set pat_lens (pack))
+(for 1 16 (fn (l)
+ (add $pat_lens (cat $l ",0,14"))
+))
+]]
 
 -- overlay is:
 -- draw
@@ -347,20 +353,19 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-eval--[[language::loaf]][[
-(set pat_lens (pack))
-(for 1 16 (fn (l)
- (add $pat_lens (cat $l ",0,14"))
-))
-]]
+function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
+function has_uncommitted(s) return not no_uncommitted(s) end
+function get_page() return ui.page end
+function set_page(_,p) ui:set_page(p) end
 
-transport_number_new=eval--[[language::loaf]][[(fn (x y w obj key tt input) (wrap_override
+eval--[[language::loaf]][[
+(set transport_number_new (fn (x y w obj key tt input) (wrap_override
  (number_new $x $y $w $tt (take 1 (state_make_get_set $obj $key)) $input)
  "--,0,15"
  $state_is_song_mode
-))]]
+)))
 
-syn_ui_init=eval--[[language::loaf]][[(fn (add_ui key base_idx yp)
+(set syn_ui_init (fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (syn_note_btn_new $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
@@ -424,9 +429,9 @@ syn_ui_init=eval--[[language::loaf]][[(fn (add_ui key base_idx yp)
  (toggle_new 48 $yp 2 3 waveform (state_make_get_set_param_bool (+ $base_idx 5)))
 )
 (map 0 4 0 $yp 16 2)
-)]]
+))
 
-drum_ui_init=eval--[[language::loaf]][[(fn (add_ui)
+(set drum_ui_init (fn (add_ui)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 35))) 1)
@@ -477,22 +482,16 @@ drum_ui_init=eval--[[language::loaf]][[(fn (add_ui)
  (pat_btn_new (+ 5 (* $i 4)) 112 dr 6 $i 2 14 8 5)
 )))
 (map 0 8 0 96 16 4)
-)]]
+))
 
-function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
-function has_uncommitted(s) return not no_uncommitted(s) end
-function get_page() return ui.page end
-function set_page(_,p) ui:set_page(p) end
-eval--[[language::loaf]][[
 (set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
 (set rewind (fn ()
  ((@ $state go_to_bar) $state
   (if (gt (@ $state tl bar) (@ $state tl loop_start)) (@ $state tl loop_start) 1)
  )
 ))
-]]
 
-header_ui_init=eval--[[language::loaf]][[(fn (add_ui)
+(set header_ui_init (fn (add_ui)
 (let hdial (fn (x y idx tt) (add_ui (dial_new $x $y 128 16 $idx $tt))))
 (let song_only
  (fn (w s_not_song) (add_ui (wrap_override $w $s_not_song $state_is_song_mode false)))
@@ -595,18 +594,19 @@ header_ui_init=eval--[[language::loaf]][[(fn (add_ui)
 )))
 
 (map 0 0 0 0 16 4)
-)]]
+))
 
-hotkey_map=parse--[[language::loon]][[{
- 104=`(id $toggle_help)
- 32=`(fn () (mcall $state toggle_playing))
- 9=`(id $next_page)
+(set hotkey_map (' {
  8=`(id $rewind)
- 108=`(fn () (mcall $state toggle_loop))
- 101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
- 114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
- 117=`(id $paste_state)
- 115=`(id $copy_state)
- 120=`(fn () (mcall $state clear_overrides))
+ 9=`(id $next_page)
+ 32=`(fn () (mcall $state toggle_playing))
  99=`(fn () (mcall $state commit_overrides))
-}]]
+ 101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
+ 104=`(id $toggle_help)
+ 108=`(fn () (mcall $state toggle_loop))
+ 114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
+ 115=`(id $copy_state)
+ 117=`(id $paste_state)
+ 120=`(fn () (mcall $state clear_overrides))
+}))
+]]
