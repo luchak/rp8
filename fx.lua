@@ -46,14 +46,14 @@ function drum_mixer_new(srcs)
  }
 end
 
-filtmap=parse[[{b0=3,b1=4,dr=5}]]
-mixer_params=parse[[{
+filtmap=parse--[[language::loon]][[{b0=3,b1=4,dr=5}]]
+mixer_params=parse--[[language::loon]][[{
  b0={p0=7,p1=9,lev=8},
  b1={p0=23,p1=25,lev=8},
  dr={p0=39,p1=41,lev=16},
 }]]
 function mixer_new(_srcs,_fx,_filt,_lev)
- local _tmp,_bypass,_fxbuf,_filtsrc,_state,_bias={},{},{},1,parse[[{b0=(0 0),b1=(0 0),dr=(0 0)}]],0
+ local _tmp,_bypass,_fxbuf,_filtsrc,_state,_bias={},{},{},1,parse--[[language::loon]][[{b0=(0 0),b1=(0 0),dr=(0 0)}]],0
  return {
   note=function(self,patch)
    _lev=pow3(patch[3]>>7)*8
@@ -137,7 +137,7 @@ function comp_new(src,_th,_ratio,_att,_rel)
  }
 end
 
-svf_pats=parse[[(
+svf_pats=parse--[[language::loon]][[(
 "@///////////////"
 "@///////"
 "@///"

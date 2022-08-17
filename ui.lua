@@ -7,7 +7,7 @@ function outline_text(s,x,y,c,o)
  print(s,x,y,c)
 end
 
-widget_defaults=parse[[{
+widget_defaults=parse--[[language::loon]][[{
  w=2,
  h=2,
  active=true,
@@ -22,7 +22,7 @@ widget_defaults=parse[[{
 -- pixels behind (updates every frame)
 
 function ui_new()
- local obj=parse[[{
+ local obj=parse--[[language::loon]][[{
   widgets={}
   sprites={}
   mtiles={}
@@ -149,7 +149,7 @@ function ui_new()
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
-  local hotkey_action=hotkey_map[stat(30) and stat(31)]
+  local hotkey_action=hotkey_map[stat(30) and ord(stat(31),1)]
   if (hotkey_action) hotkey_action()
 
   local focus=self.focus
@@ -517,7 +517,7 @@ header_ui_init=eval--[[language::loaf]][[(fn (add_ui)
 (song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
 
 (add_ui (wrap_override 
- (push_new 8 24 205 (make_obj_cb copy_overrides_to_loop) "commit overrides")
+ (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides")
  204 $has_uncommitted)
 )
 (add_ui (wrap_override 
@@ -597,16 +597,16 @@ header_ui_init=eval--[[language::loaf]][[(fn (add_ui)
 (map 0 0 0 0 16 4)
 )]]
 
-hotkey_map=parse[[{
- h=`(id $toggle_help)
- \20=`(fn () (mcall $state toggle_playing))
- \09=`(id $next_page)
- \08=`(id $rewind)
- l=`(fn () (mcall $state toggle_loop))
- e=`(fn () (if $audio_rec (stop_rec) (start_rec)))
- r=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
- u=`(id $paste_state)
- s=`(id $copy_state)
- x=`(fn () (mcall $state clear_overrides))
- c=`(fn () (mcall $state copy_overrides_to_loop))
+hotkey_map=parse--[[language::loon]][[{
+ 104=`(id $toggle_help)
+ 32=`(fn () (mcall $state toggle_playing))
+ 9=`(id $next_page)
+ 8=`(id $rewind)
+ 108=`(fn () (mcall $state toggle_loop))
+ 101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
+ 114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
+ 117=`(id $paste_state)
+ 115=`(id $copy_state)
+ 120=`(fn () (mcall $state clear_overrides))
+ 99=`(fn () (mcall $state commit_overrides))
 }]]

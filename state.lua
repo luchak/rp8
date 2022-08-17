@@ -5,21 +5,21 @@
 
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
 
-syn_base_idx=parse[[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}]]
+syn_base_idx=parse--[[language::loon]][[{b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}]]
 
-pat_param_idx=parse[[{b0=11,b1=27,dr=43}]]
+pat_param_idx=parse--[[language::loon]][[{b0=11,b1=27,dr=43}]]
 
 -- see note 003
 default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,1,0,64,64,128,1,128,0'
 
-syn_pat_template=parse[[{
+syn_pat_template=parse--[[language::loon]][[{
  nt=`(rep 16 19)
  dt=`(rep 16 64)
  st=`(rep 16 64)
  l=16
 }]]
 
-drum_pat_template=parse[[{
+drum_pat_template=parse--[[language::loon]][[{
  bd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  sd={st=`(rep 16 64) dt=`(rep 16 64) l=16}
  hh={st=`(rep 16 64) dt=`(rep 16 64) l=16}
@@ -29,7 +29,7 @@ drum_pat_template=parse[[{
 }]]
 
 function state_new(savedata)
- local s=parse[[{
+ local s=parse--[[language::loon]][[{
   pat_store={},
   tick=1,
   ptick={},
@@ -238,9 +238,9 @@ function state_new(savedata)
   if (not self.playing) self:load_bar()
  end
 
- function s:copy_overrides_to_loop()
+ function s:commit_overrides()
   set_toast("overrides committed")
-  self.tl:copy_overrides_to_loop()
+  self.tl:commit_overrides()
  end
 
  load_bar()

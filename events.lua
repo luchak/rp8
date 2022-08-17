@@ -1,9 +1,9 @@
 -- see notes 001, 002
 
-no_event_params=parse[[{10=true,11=true,26=true,27=true,42=true,43=true}]]
+no_event_params=parse--[[language::loon]][[{10=true,11=true,26=true,27=true,42=true,43=true}]]
 
 function timeline_new(default_patch, savedata)
- local timeline=parse[[{
+ local timeline=parse--[[language::loon]][[{
   bars={},
   overrides={},
   def_bar={t0=`(enc_bytes $default_patch),ev={}},
@@ -135,7 +135,7 @@ function timeline_new(default_patch, savedata)
   end
  end
 
- function timeline:copy_overrides_to_loop()
+ function timeline:commit_overrides()
   local op=self.overrides
   for i=0,self.loop_len-1 do
    local bar_idx=self.loop_start+i
