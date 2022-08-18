@@ -617,7 +617,6 @@ eval--[[language::loaf]][[
    (let pat (@ $state patch (@ $pat_param_idx $syn)))
    (@= $state (cat $syn _bank) (+ (flr (* (~ $pat 1) 0.16667)) 1))
   ))
-  (set_toast "banks set to current pattern")
 ))
 ]]
 
