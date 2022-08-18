@@ -83,7 +83,7 @@ function state_new(savedata)
    local pat_idx=patch[param_idx]
    local pat=syn_pats[pat_idx]
    if not pat then
-    if (syn=='b0' or syn=='b1') pat=copy(syn_pat_template) else pat=copy(drum_pat_template)
+    pat=(syn=='b0' or syn=='b1') and copy(syn_pat_template) or copy(drum_pat_template)
     syn_pats[pat_idx]=pat
    end
    s.pat_seqs[syn]=pat
@@ -269,10 +269,10 @@ function state_make_get_set_param(idx,lsb,size)
 end
 
 function state_make_get_set_param_bool(idx,bit)
- local mask=1<<(bit or 0)
+ local get,set=state_make_get_set_param(idx,bit or 0,1)
  return
-  function(state) return (state.patch[idx]&mask)>0 end,
-  function(state,val) local old=state.patch[idx] state._apply_diff(idx,val and old|mask or old&(~mask)) end
+  function(state) return get(state)>0 end,
+  function(state,val) set(state, val and 1 or 0) end
 end
 
 function state_make_get_set(a,b)

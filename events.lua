@@ -1,6 +1,8 @@
 -- see notes 001, 002
 
-no_event_params=parse--[[language::loon]][[{10=true,11=true,26=true,27=true,42=true,43=true}]]
+eval--[[language::loaf]][[
+(set no_event_params (' {10=true,11=true,26=true,27=true,42=true,43=true}))
+]]
 
 function timeline_new(default_patch, savedata)
  local timeline=parse--[[language::loon]][[{
@@ -78,7 +80,7 @@ function timeline_new(default_patch, savedata)
  end
 
  function timeline:_finalize_bar()
-  if (not self.bars[self.bar]) self.bars[self.bar]=copy(self.def_bar)
+  self.bars[self.bar]=self.bars[self.bar] or copy(self.def_bar)
   self.bars[self.bar].ev=map_table(self.bar_events,enc_bytes)
  end
 
@@ -156,11 +158,7 @@ function timeline_new(default_patch, savedata)
    self.loop_len,
    {}
   for i,b in pairs(bs) do
-   if i>=ls then
-    nbs[i+ll]=b
-   else
-    nbs[i]=b
-   end
+   nbs[i>=ls and i+ll or i]=b
   end
   self.bars=nbs
   self:paste_seq(seq)

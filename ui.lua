@@ -47,6 +47,10 @@ function ui_new()
   page=1
   pages=({} {})
   visible={}
+  ftoast_t=0
+  toast_t=0
+  click_t=0
+  restores={}
  }]]
  -- focus
  -- hover
@@ -94,17 +98,28 @@ function ui_new()
   if (self.focus==w) self.focus=nil
  end
 
+ local function save_region(scratch,screen,size)
+  screen+=0x6000
+  memcpy(scratch,screen,size)
+  add(obj.restores,{screen,scratch,size},1)
+ end
+
  function obj:draw(state)
   -- restore screen from mouse
-  local mx,my,off=self.mx,self.my,self.mouse_offset
-  if (off) memcpy(0x6000+self.focus_offset,0x9400,448) memcpy(0x6000+off,0x9000,448) memcpy(0x60c0,0x9200,448)
+  local mx,my=self.mx,self.my
+  for r in all(self.restores) do
+   memcpy(unpack(r))
+  end
+  self.restores={}
 
   palt(0,false)
+
+  local f=self.focus
 
   -- draw changed widgets
   for id,w in pairs(self.visible) do
    local ns=w:get_sprite(state)
-   if ns!=self.sprites[id] or w==self.focus or w==self.old_focus then
+   if ns!=self.sprites[id] or w==f or w==self.old_focus then
     self.sprites[id]=ns
     local sp=self.sprites[id]
     local wx,wy=w.x,w.y
@@ -120,7 +135,6 @@ function ui_new()
    end
   end
 
-  local f=self.focus
   palt(0,true)
 
   -- draw focus box
@@ -130,8 +144,8 @@ function ui_new()
   end
 
   -- store rows behind toast and draw toast
-  memcpy(0x9200,0x60c0,448)
-  if self.toast_t and self.toast_t>0 then
+  save_region(0x9200,0xc0,448)
+  if self.toast_t>0 then
    outline_text(self.toast,2,4,7,0)
    self.toast_t-=1
   end
@@ -139,23 +153,20 @@ function ui_new()
   -- store rows behind mouse and draw mouse
   local tt_my=mid(0,my,121)
   local next_off=tt_my<<6
-  memcpy(0x9000,0x6000+next_off,448)
+  save_region(0x9000,next_off,448)
   local hover=self.hover
   spr(15,mx,my)
   if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
-   local tt=hover.tt
-   local xp=mx<56 and mx+7 or mx-2-4*#tt
-   outline_text(tt,xp+1,tt_my+1,12,1)
+   local xp=mx<56 and mx+7 or mx-2-4*#hover.tt
+   outline_text(hover.tt,xp+1,tt_my+1,12,1)
   end
-  self.mouse_offset=next_off
 
   -- store rows behind focus toast value and draw focus toast
-  local ftoast_t,focus_off=self.ftoast_t or 0,(f and f.y+9 or 0)<<6
-  memcpy(0x9400,0x6000+focus_off,448)
-  self.focus_offset=focus_off
-  if self.ftoast_w==f and ftoast_t>0 then
+  local focus_off=(f and f.y+9 or 0)<<6
+  save_region(0x9400,focus_off,448)
+  if self.ftoast_w==f and self.ftoast_t>0 then
    outline_text(self.ftoast,f.x-2,f.y+10,12,0)
-   self.ftoast_t=ftoast_t-1
+   self.ftoast_t-=1
   end
 
  end
@@ -189,11 +200,17 @@ function ui_new()
     poke(0x5f2d,5)
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=trn(hover and hover.active,hover,nil)
-    if (new_focus and new_focus.click_act) input=trn(click==1,1,-1)
+    if new_focus then
+     if (new_focus.click_act) input=trn(click==1,1,-1)
+     if (self.click_t>0 and new_focus.doubleclick) new_focus.doubleclick(state)
+    end
+    self.click_t=12
    end
   else
    poke(0x5f2d,1)
   end
+
+  self.click_t=max(self.click_t-1,0)
 
   if new_focus then
    input+=trn(new_focus.drag_amt>0,stat(36),0)
@@ -262,15 +279,17 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  local get,set=state_make_get_set_param(param_idx)
  bins-=0x0.0001
  return {
-  x=x,y=y,tt=tt,vt='',drag_amt=0.33,
+  x=x,y=y,tt=tt,drag_amt=0.33,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
    local val=mid(0,128,get(state)+b)
-   self.vt=tostr(val)
-   set_ftoast(self,leftpad(self.vt, 3))
+   set_ftoast(self,leftpad(tostr(val), 3))
    set(state,val)
+  end,
+  doubleclick=function(state)
+   set(state,default_patch[param_idx])
   end
  }
 end
@@ -531,11 +550,11 @@ eval--[[language::loaf]][[
 (add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))
 (song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
 
-(add_ui (wrap_override 
+(add_ui (wrap_override
  (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides")
  204 $has_uncommitted)
 )
-(add_ui (wrap_override 
+(add_ui (wrap_override
  (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides")
  206 $has_uncommitted)
 )
