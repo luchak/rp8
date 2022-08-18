@@ -24,9 +24,13 @@ eval--[[language::loaf]][[
  (audio_wait 2)
  (let pd (stat 4))
  (if (not (eq $pd "")) (seq
+  (let playing (@ $state playing))
+  (let bar (@ $state bar))
   (set state (or (state_load $pd) $state))
   (@= $seq_helper state $state)
   (set_toast "song loaded from clipboard")
+  ((@ $state go_to_bar) $state $bar)
+  (if $playing ((@ $state toggle_playing) $state))
  ))
 ))
 (set show_help true)

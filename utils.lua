@@ -171,8 +171,14 @@ function _eval_scope(ast,locals,start)
  local function eval_node(node)
   if ord(node)==36 then
    local name=sub(node,2)
-   local val=locals[name] or _ENV[name]
-   if (val==nil_value) return nil else return val
+   local val=locals[name]
+   if val==nil then
+    return _ENV[name]
+   elseif val==nil_value then
+    return nil
+   else
+    return val
+   end
   end
   if (type(node)!='table') return node
 
