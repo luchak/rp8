@@ -180,7 +180,7 @@ function svf_new()
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-(pow3(1-dec)>>7)
-   _gc=gc*gc*gc*gc*0x0.fe+0x0.02
+   _gc=gc*gc*0x0.fe+0x0.02
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc_base,wet,fe,is_lp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp==0,_dec

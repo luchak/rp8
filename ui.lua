@@ -1,6 +1,13 @@
 -->8
 -- ui
 
+function leftpad(s,l)
+ while #s<l do
+  s=' '..s
+ end
+ return s
+end
+
 function outline_text(s,x,y,c,o)
  color(o)
  print('\-f'..s..'\^g\-h'..s..'\^g\|f'..s..'\^g\|h'..s,x,y)
@@ -89,8 +96,8 @@ function ui_new()
 
  function obj:draw(state)
   -- restore screen from mouse
-  local mx,my,off=self.mx,self.my,self.restore_offset
-  if (off) memcpy(0x6000+off,0x9000,448) memcpy(0x6080,0x9200,448)
+  local mx,my,off=self.mx,self.my,self.mouse_offset
+  if (off) memcpy(0x6000+self.focus_offset,0x9400,448) memcpy(0x6000+off,0x9000,448) memcpy(0x60c0,0x9200,448)
 
   palt(0,false)
 
@@ -123,13 +130,10 @@ function ui_new()
   end
 
   -- store rows behind toast and draw toast
-  memcpy(0x9200,0x6080,448)
-  local toast_t=self.toast_t
-  if toast_t and toast_t>0 then
-   outline_text(self.toast,2,3,7,1)
+  memcpy(0x9200,0x60c0,448)
+  if self.toast_t and self.toast_t>0 then
+   outline_text(self.toast,2,4,7,0)
    self.toast_t-=1
-  else
-   self.toast_t=nil
   end
 
   -- store rows behind mouse and draw mouse
@@ -143,7 +147,17 @@ function ui_new()
    local xp=mx<56 and mx+7 or mx-2-4*#tt
    outline_text(tt,xp+1,tt_my+1,12,1)
   end
-  self.restore_offset=next_off
+  self.mouse_offset=next_off
+
+  -- store rows behind focus toast value and draw focus toast
+  local ftoast_t,focus_off=self.ftoast_t or 0,(f and f.y+9 or 0)<<6
+  memcpy(0x9400,0x6000+focus_off,448)
+  self.focus_offset=focus_off
+  if self.ftoast_w==f and ftoast_t>0 then
+   outline_text(self.ftoast,f.x-2,f.y+10,12,0)
+   self.ftoast_t=ftoast_t-1
+  end
+
  end
 
  function obj:update(state)
@@ -164,7 +178,7 @@ function ui_new()
   if click>0 then
    if focus and click==self.last_click then
     local drag=stat(39)
-    drag=trn(drag==0,(my-self.last_my)<<2,drag)
+    drag=drag==0 and (my-self.last_my)<<2 or drag
     self.drag_dist+=drag
     local diff=flr(focus.drag_amt*(self.last_drag-self.drag_dist)+0.5)
     if diff!=0 then
@@ -248,12 +262,15 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  local get,set=state_make_get_set_param(param_idx)
  bins-=0x0.0001
  return {
-  x=x,y=y,tt=tt,drag_amt=0.33,
+  x=x,y=y,tt=tt,vt='',drag_amt=0.33,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
-   set(state,mid(0,128,get(state)+b))
+   local val=mid(0,128,get(state)+b)
+   self.vt=tostr(val)
+   set_ftoast(self,leftpad(self.vt, 3))
+   set(state,val)
   end
  }
 end
