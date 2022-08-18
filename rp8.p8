@@ -36,7 +36,7 @@ eval--[[language::loaf]][[
 (set show_help true)
 (set toggle_help (fn ()
  (set show_help (not $show_help))
- (set_toast (if $show_help "tooltips on" "press h for tooltips") 120)
+ (if (not $show_help) (set_toast "press h for tooltips" 120))
  (menuitem 4 (if $show_help "hide tooltips" "show tooltips") $toggle_help)
 ))
 (set audio_rec false)
