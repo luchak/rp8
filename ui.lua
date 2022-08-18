@@ -615,7 +615,7 @@ eval--[[language::loaf]][[
 (set jump_to_banks (fn ()
   (foreach (' (b0 b1 dr)) (fn (syn)
    (let pat (@ $state patch (@ $pat_param_idx $syn)))
-   (@= $state (cat $syn _bank) (+ (flr (* (~ $pat 1) 0.16667)) 1))
+   (@= $state (cat $syn _bank) (+ (flr (* (~ $pat 1) 0.1667)) 1))
   ))
 ))
 ]]
