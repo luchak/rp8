@@ -594,6 +594,14 @@ eval--[[language::loaf]][[
 
 (map 0 0 0 0 16 4)
 ))
+
+(set jump_to_banks (fn ()
+  (foreach (' (b0 b1 dr)) (fn (syn)
+   (let pat (@ $state patch (@ $pat_param_idx $syn)))
+   (@= $state (cat $syn _bank) (+ (flr (* (~ $pat 1) 0.16667)) 1))
+  ))
+  (set_toast "banks set to current pattern")
+))
 ]]
 
 
@@ -605,6 +613,7 @@ eval--[[language::loaf]][[
  99=`(fn () (mcall $state commit_overrides))
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
  104=`(id $toggle_help)
+ 106=`(id $jump_to_banks)
  108=`(fn () (mcall $state toggle_loop))
  114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
  115=`(id $copy_state)
