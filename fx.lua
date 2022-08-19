@@ -77,11 +77,11 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for k,src in pairs(_srcs) do
     local od,fx,xp1,hpf=src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
-    local odg=0.2+71.8*od
+    local odg=0.2+95.8*od
     local bias_od=_bias*od^0.2
     local bias=1.49*bias_od/odg
     local odgi=(1+4*od*(1+5*bias))/odg
-    -- constants are chosen so 0 DC -> 0 DC
+    -- ensure 0 DC -> 0 DC
     local bc=odgi*(2.98*bias_od-0.98013*pow3(bias_od))
     for i=first,last do
      local tmp_i=tmp[i]
@@ -180,7 +180,7 @@ function svf_new()
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-(pow3(1-dec)>>7)
-   _gc=gc*gc*0x0.fe+0x0.02
+   _gc=pow3(gc)*0x0.fe+0x0.02
   end,
   update=function(self,b,first,last)
    local z1,z2,rc,gc_base,wet,fe,is_lp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp==0,_dec

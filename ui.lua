@@ -93,7 +93,7 @@ function ui_new()
  end
 
  function obj:hide_widget(w)
-  for tile in all(w.tiles) do if self.mtiles[tile]==w then self.mtiles[tile]=nil end end
+  for tile in all(w.tiles) do self.mtiles[tile]=nil end
   self.visible[w.id]=nil
   if (self.focus==w) self.focus=nil
  end
@@ -176,7 +176,7 @@ function ui_new()
   if (btnp(2)) input+=1
   if (btnp(3)) input-=1
 
-  self.mx,self.my=stat(32),stat(33)
+  self.mx,self.my=mid(0,stat(32),127),mid(0,stat(33),127)
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
@@ -533,7 +533,7 @@ eval--[[language::loaf]][[
 )
 
 (add_ui (toggle_new
- 0 0 6 7 play/pause (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
+ 0 0 6 7 "play/pause (space)" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
 (add_ui (toggle_new
  24 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
@@ -542,20 +542,20 @@ eval--[[language::loaf]][[
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
  (make_obj_cb toggle_rec)
 ) 196 $no_uncommitted true) 233)
-(song_only (push_new 16 0 5 $rewind rewind) 5)
+(song_only (push_new 16 0 5 $rewind "rewind (backspace)") 5)
 
-(add_ui (merge (spin_btn_new 96 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
+(add_ui (merge (spin_btn_new 96 0 (' (189 190)) "ui page (tab)" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
 (song_only (push_new 8 8 199 (make_obj_cb cut_seq) "cut loop") 198)
 (add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))
 (song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
 
 (add_ui (wrap_override
- (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides")
+ (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides (c)")
  204 $has_uncommitted)
 )
 (add_ui (wrap_override
- (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides")
+ (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides (x)")
  206 $has_uncommitted)
 )
 
