@@ -19,15 +19,15 @@ function synth_new(base)
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd=1-dec
-  if (patstep==n_ac or patstep==n_ac_sl) pd=1
+  _ac=patstep==n_ac or patstep==n_ac_sl
+  _sl=patstep>=n_sl
+  if (_ac) pd=1
   _med=0.9996-0.0086*pd*pd
   _nt,_nl=0,note_len
   _lsl=_sl
   _gate=false
   _detune=2^(flr(24*(tun-0.5)+0.5)/12)
   _o2detune=_detune*2^((flr(pat.dt[step]-64)+o2fine-0.5)/12)
-  _ac=patstep==n_ac or patstep==n_ac_sl
-  _sl=patstep==n_sl or patstep==n_ac_sl
   if (patstep==n_off or not state.playing) return
 
   _gate=true
@@ -79,28 +79,24 @@ function synth_new(base)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for _=1,4 do
-    local osc=(op>>31)^^0x8000
-    local osc2=(o2p>>31)^^0x8000
-    if saw then
-     osc=op
-     osc2=o2p
-    end
-    osc=mix1*(osc>>15)+mix2*(osc2>>15)
+    local osc=mix1*((saw and op or (op>>31)^^0x8000)>>15) +
+              mix2*((saw and o2p or (o2p>>31)^^0x8000)>>15)
     fosc+=(osc-fosc)/104
     osc-=fosc
     ffb+=(f4-ffb)/36
     osc-=fr*(f4-ffb-osc)
-    local m,clip=osc>>31,osc
-    if (osc^^m>0.18) clip=0.18^^m
+    local m=osc>>31
+    local clip=osc^^m<0.18 and osc or 0.18^^m
+    --if (osc^^m>0.18) clip=0.18^^m
     -- if (osc^^m>0.75) clip=0.5^^m else clip-=0.5926*clip*clip*clip
     -- if (osc^^m>1.5) clip=1^^m else clip-=0.14815*clip*clip*clip
 
     f1+=(clip+(osc-clip)*0.94-f1)*fc1
     -- f1+=(clip+(osc-clip)*0.55-f1)*fc1
     -- f1+=(clip-f1)*fc1
-    f2+=(f1-f2)*fc
-    f3+=(f2-f3)*fc
-    f4+=(f3-f4)*fc
+    f2+=fc*(f1-f2)
+    f3+=fc*(f2-f3)
+    f4+=fc*(f3-f4)
     out+=f4
 
     op+=dodp
