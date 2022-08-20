@@ -228,7 +228,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='let' then if v2==nil then locals[v1]=nil_value else locals[v1]=v2 end
   elseif cmd=='eq' then return v1==v2
   elseif cmd=='gt' then return v1>v2
-  elseif cmd=='cat' then if v3 then return v1..v2..v3 else return v1..v2 end
+  elseif cmd=='cat' then return v1..v2
   elseif cmd=='len' then return #v1
   else
    if type(cmd)=='string' then
