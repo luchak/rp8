@@ -19,8 +19,7 @@ function synth_new(base)
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd=1-dec
-  _ac=patstep==n_ac or patstep==n_ac_sl
-  _sl=patstep>=n_sl
+  _ac,_sl=get_ac_mode(patstep)
   if (_ac) pd=1
   _med=0.9996-0.0086*pd*pd
   _nt,_nl=0,note_len
@@ -115,17 +114,19 @@ function synth_new(base)
 end
 
 function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
- local obj,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
-  {},unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
+ local obj,_tri,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
+  {},false,unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   if s!=n_off then
+   local ac
+   ac,_tri=get_ac_mode(s)
    -- TODO: update params every step?
    _detune=2^((18*tun-9+(pat.dt[step]-64))/12)
    _op,_dp=0,(_dp0<<15)*(1+_detune)
-   if (state.playing) _ae=lev*lev*boost*trn(s==n_ac,1.5,0.6)
+   if (state.playing) _ae=lev*lev*boost*trn(ac,1.5,0.6)
    _aemax=_ae>>1
    _ted=(te_max+(te_min-te_max)*dec^0.5)
    _aed=1-ae_ratio*_ted
@@ -133,13 +134,13 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
  end
 
  function obj:subupdate(b,first,last)
-  local op,dp,dp1,ae,aed,ted=_op,_dp,(_dp1<<16)*_detune,_ae,_aed,_ted
+  local op,dp,dp1,ae,aed,ted,tri=_op,_dp,(_dp1<<16)*_detune,_ae,_aed,_ted,_tri
   local aemax=_aemax
   for i=first,last do
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   b[i]+=(aemax<ae and aemax or ae)*sin(op>>16)
+   b[i]+=(aemax<ae and aemax or ae)*(tri and ((op>>14)^^(op>>31))-1 or sin(op>>16))
   end
   _op,_dp,_ae=op,dp,ae
  end
@@ -191,22 +192,24 @@ function snare_new()
 end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
- local obj,_ae,_f1,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune=
-  {},unpack_split'0,0,0,14745.6,0,17039.36,0,15600,0,16200,0.995,1'
+ local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune,_dec_mod=
+  {},unpack_split'0,0,0,0,14600,0,17000.36,0,15600,0,16200,0.995,1,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
+  local ac,mode=get_ac_mode(s)
   if s!=n_off and state.playing then
-   _ae=lev*lev*trn(s==n_ac,9,3.6)
+   _ae=lev*lev*trn(ac,9,3.6)
+   _dec_mod=mode and 0.5 or 0
   end
 
   _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)
-  _aed=1-0.04*pow4(dbase-dscale*dec)
+  _aed=1-0.04*pow4(dbase-dscale*(dec*0.5+_dec_mod))
  end
 
  function obj:subupdate(b,first,last)
-  local ae,f1,aed,tlev,nlev=_ae,_f1,_aed,_tlev,_nlev
+  local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
 
@@ -214,15 +217,16 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
 
    local r=nlev*((rnd()&0.5)-0.25)+tlev*osc
-   f1+=0.96*(r-f1)
+   f1+=0.98*(r-f1)
+   f2+=0.98*(f1-f2)
    ae*=aed
-   b[i]+=ae*(r-f1)
+   b[i]+=ae*(r-f2)
    op1+=odp1
    op2+=odp2
    op3+=odp3
    op4+=odp4
   end
-  _ae,_f1=ae,f1
+  _ae,_f1,_f2=ae,f1,f2
   _op1,_op2,_op3,_op4=op1,op2,op3,op4
  end
 

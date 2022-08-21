@@ -84,8 +84,8 @@ function _init()
  local drums={
   sweep_new(unpack_split'46,0.08,0.01,0.1667,0.85,0.006,0.03'),
   snare_new(),
-  hh_cy_new(unpack_split'52,1,0.8,0.75,0.35,-0.5,1.5'),
-  hh_cy_new(unpack_split'55,1.15,0.65,0.65,0.35,-0.3,1.4'),
+  hh_cy_new(unpack_split'52,1,0.8,0.75,0.4,-0.5,1.5'),
+  hh_cy_new(unpack_split'55,1.15,0.65,0.55,0.28,-0.3,1.4'),
   sweep_new(unpack_split'58,0.1,0.05,0.14,1,0.01,0.1'),
   fm_new(61)
  }

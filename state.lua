@@ -4,6 +4,9 @@
 --lint: copy_buf_seq
 
 n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
+function get_ac_mode(note)
+ return note==n_ac or note==n_ac_sl,note>=n_sl
+end
 
 
 -- see note 003

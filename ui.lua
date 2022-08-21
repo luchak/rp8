@@ -469,7 +469,7 @@ eval--[[language::loaf]][[
 (set drum_ui_init (fn (add_ui)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
- (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 35))) 1)
+ (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
  (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
 ))
 (add_ui (merge
