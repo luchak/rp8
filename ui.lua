@@ -53,6 +53,7 @@ function ui_new()
   restores={}
  }]]
  -- focus
+ -- last_focus
  -- hover
  -- overlay
 
@@ -119,7 +120,7 @@ function ui_new()
   -- draw changed widgets
   for id,w in pairs(self.visible) do
    local ns=w:get_sprite(state)
-   if ns!=self.sprites[id] or w==f or w==self.old_focus then
+   if ns!=self.sprites[id] or w==f or w==self.last_focus then
     self.sprites[id]=ns
     local sp=self.sprites[id]
     local wx,wy=w.x,w.y
@@ -141,6 +142,7 @@ function ui_new()
   if f then
    spr(1,f.x,f.y)
    sspr(32,0,4,8,f.x+f.w*4-4,f.y)
+   self.last_focus=f
   end
 
   -- store rows behind toast and draw toast
@@ -218,7 +220,7 @@ function ui_new()
   end
   if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
 
-  self.last_click,self.hover,self.last_my,self.focus,self.old_focus=click,hover,my,new_focus,focus
+  self.last_click,self.hover,self.last_my,self.focus=click,hover,my,new_focus
  end
 
  return obj
