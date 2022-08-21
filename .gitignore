@@ -4,3 +4,4 @@ log.p8l
 rp8_debug.p8
 rp8_min.p8
 __pycache__/
+.*.sw?
