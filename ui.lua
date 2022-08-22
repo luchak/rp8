@@ -1,6 +1,8 @@
 -->8
 -- ui
 
+is_digit=mkmatch'0123456789'
+
 function leftpad(s,l)
  while #s<l do
   s=' '..s
@@ -175,18 +177,23 @@ function ui_new()
 
  function obj:update(state)
   local input=0
-  if (btnp(2)) input+=1
-  if (btnp(3)) input-=1
 
   self.mx,self.my=mid(0,stat(32),127),mid(0,stat(33),127)
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
-  local hotkey_action=hotkey_map[stat(30) and ord(stat(31),1)]
-  if (hotkey_action) hotkey_action()
-
   local focus=self.focus
   local new_focus=trn(focus and focus.active,focus,nil)
+
+  local hotkey=stat(30) and stat(31)
+  local shift=stat(28,225) or stat(28,229)
+  local hotkey_action=hotkey_map[ord(hotkey)]
+  if (hotkey_action) hotkey_action()
+  if (focus and focus.on_num and is_digit(hotkey)) focus.on_num(state,tonum(hotkey))
+
+  local step=(shift and focus and focus.bigstep) or 1
+  if (btnp(2)) input+=step
+  if (btnp(3)) input-=step
 
   if click>0 then
    if focus and click==self.last_click then
@@ -229,7 +236,7 @@ end
 function syn_note_btn_new(x,y,syn,key,step,sp0,nt0,nmin,nmax)
  local offset=sp0-nt0
  return {
-  x=x,y=y,drag_amt=0.05,tt='note (drag)',
+  x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
   get_sprite=function(self,state)
    return offset+state:get_ui_pat(syn)[key][step]
   end,
@@ -272,7 +279,11 @@ function step_btn_new(x,y,syn,step,sprites)
   end,
   input=function(self,state,b)
    local st=state:get_ui_pat(syn).st
-   st[step]=(st[step]+b-64+n)%n+64
+   st[step]=(st[step]+b-64)%n+64
+  end,
+  on_num=function(state,num)
+   local st=state:get_ui_pat(syn).st
+   st[step]=(num-65)%n+64
   end
  }
 end
@@ -416,11 +427,11 @@ eval--[[language::loaf]][[
 (add_ui (merge (push_new 24 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose (drag)"
-) (' {click_act=false drag_amt=0.05})) 1)
+) (' {click_act=false drag_amt=0.05 bigstep=12})) 1)
 (add_ui (merge (push_new 24 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
  "transpose (drag)"
-) (' {click_act=false drag_amt=0.05})) 2)
+) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui
  (push_new 8 $yp 28
   (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))) (set_toast "synth pattern copied"))
@@ -474,9 +485,13 @@ eval--[[language::loaf]][[
  (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
  (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
 ))
+(add_ui (merge (push_new 24 104 111
+ (fn (state b) (transpose_pat ((@ $state get_ui_pat) $state dr) dt $b 52 76))
+ "transpose (drag)"
+) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui (merge
  (spin_btn_new 0 96 $pat_lens "pattern length" (state_make_get_set_pat_len dr))
- (' {w=2 drag_amt=0.03})
+ (' {w=2 drag_amt=0.03 bigstep=4})
 ))
 (foreach
  (' (
