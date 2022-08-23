@@ -8,6 +8,13 @@ __lua__
 
 -- settle audio before starting synthesis
 eval--[[language::loaf]][[
+(set join (fn (sep ss)
+ (let res (pack ""))
+ (foreach $ss (fn (s)
+  (@= $res 1 (cat (cat (@ $res 1) $s) $sep)
+ )))
+ (sub (@ $res 1) 1 -2)
+))
 (set audio_wait (fn (frames)
  (set pause_t $frames)
  (set audio_root)
@@ -17,7 +24,7 @@ eval--[[language::loaf]][[
  (audio_wait 2)
  (let saved ((@ $state save) $state))
  (printh $saved @clip)
- (printh $saved (cat rp8_ (stat 90) (cat _ (stat 91) (cat _ (stat 92) (cat _ (stat 93) (cat _ (stat 94) (cat _ (stat 95))))))) true true)
+ (printh $saved (join _ (pack rp8 (stat 90) (stat 91) (stat 92) (stat 93) (stat 94) (stat 95))) true true)
  (set_toast "song saved")
 ))
 (set paste_state (fn ()
