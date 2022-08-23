@@ -18,12 +18,12 @@ function synth_new(base)
   _env=env*env+0.1
   _acc=acc*1.9+0.1
   _saw=saw>0
-  local pd=1-dec
-  _ac,_sl=get_ac_mode(patstep)
+  local pd,nsl=1-dec
+  _ac,nsl=get_ac_mode(patstep)
   if (_ac) pd=1
   _med=0.9996-0.0086*pd*pd
   _nt,_nl=0,note_len
-  _lsl=_sl
+  _lsl,_sl=_sl,nsl
   _gate=false
   _detune=2^(flr(24*(tun-0.5)+0.5)/12)
   _o2detune=_detune*2^((flr(pat.dt[step]-64)+o2fine-0.5)/12)
