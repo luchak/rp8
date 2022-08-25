@@ -12,16 +12,16 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc,atk=pat.st[step],unpack_patch(patch,base+5,base+15)
 
   _o2mix=o2mix
-  -- constant is (100/(4*5512.5))
-  _fc=0.00454*(2^(cut<<2))
-  _fr=(res+sqrt(res))*3.5
-  _env=env*env+0.1
+  -- constant is (50/(4*5512.5))
+  _fc=0.00227*(2^(cut<<2))
+  _fr=((res+0.0001)^0.2)*18
+  _env=env+0.05
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd,nsl=1-dec
   _ac,nsl=get_ac_mode(patstep)
-  if (_ac) pd=1
-  _med=0.9996-0.0086*pd*pd
+  if (_ac) pd=0.7+0.3*pd
+  _med=0.9997-0.006*pd*pd
   _nt,_nl=0,note_len
   _lsl,_sl=_sl,nsl
   _gate=false
@@ -33,10 +33,11 @@ function synth_new(base)
   -- constant is 55*65536/(5512.5 * 4)
   _todp=2^(pat.nt[step]/12+0.25)*163.46848
 
-  if (_ac) _env+=acc
+  if (_ac) _env+=acc>>1
   if _lsl then
    _todpr=0.015
   else
+   _o2p=_op
    _todpr=0.995
    _mr=true
   end
@@ -56,7 +57,7 @@ function synth_new(base)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.1,fcbf+(me>>4)*env)
+   local fc=min(0.1,fcbf+(me/12)*env)
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
@@ -82,17 +83,14 @@ function synth_new(base)
               mix2*((saw and o2p or (o2p>>31)^^0x8000)>>15)
     fosc+=(osc-fosc)/104
     osc-=fosc
-    ffb+=(f4-ffb)/36
+    ffb+=(f4-ffb)>>2
     osc-=fr*(f4-ffb-osc)
     local m=osc>>31
-    local clip=osc^^m<0.18 and osc or 0.18^^m
-    --if (osc^^m>0.18) clip=0.18^^m
-    -- if (osc^^m>0.75) clip=0.5^^m else clip-=0.5926*clip*clip*clip
-    -- if (osc^^m>1.5) clip=1^^m else clip-=0.14815*clip*clip*clip
+    local clip=osc^^m>0.18 and 0.18^^m or osc
+    --osc=osc^^m>6 and 6^^m or osc
 
-    f1+=(clip+(osc-clip)*0.94-f1)*fc1
-    -- f1+=(clip+(osc-clip)*0.55-f1)*fc1
-    -- f1+=(clip-f1)*fc1
+    f1+=(clip+(osc-clip)*0.88-f1)*fc1
+    --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1
     f2+=fc*(f1-f2)
     f3+=fc*(f2-f3)
     f4+=fc*(f3-f4)
