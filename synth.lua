@@ -4,8 +4,8 @@
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
-       _ae,_aed,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,0.9971,900,900,0,0,1,0'
+       _ae,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
+       unpack_split'0,0.001,0.001,0.999,0.5,3.6,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,900,900,0,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
@@ -50,7 +50,7 @@ function synth_new(base)
   local o2detune,o2mix=_o2detune,_o2mix>>2
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
   local fr,fcb,fcbf=_fr,_fc,_fcbf
-  local ae,aed,me,med,mr=_ae,_aed,_me,_med,_mr
+  local ae,me,med,mr=_ae,_me,_med,_mr
   local env,saw,acc=_env,_saw,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=7/(fr+7)
@@ -67,7 +67,7 @@ function synth_new(base)
     ae+=(0.03571-ae)>>2
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
    else
-    ae*=aed
+    ae*=0.9974
    end
    if mr then
     me+=(1-me)>>2
