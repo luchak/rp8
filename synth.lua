@@ -14,7 +14,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))
   _fc=0.00227*(2^(cut<<2))
-  _fr=((res+0.0001)^0.2)*18
+  _fr=((res+0.0001)^0.25)*8
   _env=env+0.05
   _acc=acc*1.9+0.1
   _saw=saw>0
@@ -57,7 +57,7 @@ function synth_new(base)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.1,fcbf+(me/12)*env)
+   local fc=min(0.1,fcbf+(me/32)*env)
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    fc=4.71*fc/(1+fc)
@@ -83,13 +83,13 @@ function synth_new(base)
               mix2*((saw and o2p or (o2p>>31)^^0x8000)>>15)
     fosc+=(osc-fosc)/104
     osc-=fosc
-    ffb+=(f4-ffb)>>2
+    ffb+=(f4-ffb)/20
     osc-=fr*(f4-ffb-osc)
     local m=osc>>31
-    local clip=osc^^m>0.18 and 0.18^^m or osc
+    local clip=osc^^m>0.25 and 0.25^^m or osc
     --osc=osc^^m>6 and 6^^m or osc
 
-    f1+=(clip+(osc-clip)*0.88-f1)*fc1
+    f1+=(clip+(osc-clip)*0.87-f1)*fc1
     --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1
     f2+=fc*(f1-f2)
     f3+=fc*(f2-f3)
