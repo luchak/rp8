@@ -21,7 +21,7 @@ function synth_new(base)
   local pd,nsl=1-dec
   _ac,nsl=get_ac_mode(patstep)
   if (_ac) pd=0.7+0.3*pd
-  _med=0.99975-0.005*pd*pd
+  _med=0.9997-0.005*pd*pd
   _nt,_nl=0,note_len
   _lsl,_sl=_sl,nsl
   _gate=false
@@ -65,14 +65,14 @@ function synth_new(base)
    local fc1=(0.5+3*fc)>>2
    if gate then
     -- 1/7 amp multiplier * 1/4 oversampling normalization
-    ae+=(0.03571-ae)>>2
+    ae+=(0.03571-ae)>>3
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
    else
     ae*=0.9974
    end
    if mr then
-    me+=(1-me)>>2
-    mr=me<=0.99
+    me+=(1-me)>>3
+    mr=me<=0.995
    else
     me*=med
    end
