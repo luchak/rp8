@@ -13,15 +13,15 @@ function synth_new(base)
 
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))
-  _fc=0.00227*16*cut*cut
-  _fr=(res+0.0001)*32
+  _fc=0.00227*16*cut
+  _fr=(res+0.0002)*14
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
   local pd,nsl=1-dec
   _ac,nsl=get_ac_mode(patstep)
   if (_ac) pd=0.7+0.3*pd
-  _med=0.9997-0.006*pd*pd
+  _med=0.9997-0.005*pd*pd
   _nt,_nl=0,note_len
   _lsl,_sl=_sl,nsl
   _gate=false
@@ -55,12 +55,13 @@ function synth_new(base)
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=24/(fr+24)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/3
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.12,fcbf+(me/16)*env)
+   local fc=min(0.12,fcbf+(me/12)*env)<<2
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
-   fc=4.71*fc/(1+fc)
+   --fc=4.71*fc/(1+fc)
    local fc1=(0.5+fc)>>1
    if gate then
     -- 1/7 amp multiplier * 1/4 oversampling normalization
@@ -83,15 +84,15 @@ function synth_new(base)
               mix2*((saw and o2p or (o2p>>31)^^0x8000)>>15)
     fosc+=(osc-fosc)/104
     osc-=fosc
-    ffb+=(f4-ffb)/16
+    ffb+=(f4-ffb)/14
     osc-=fr*(f4-ffb-osc)
     --local m=osc>>31
     --local clip=osc^^m>0.25 and 0.25^^m or osc
     --osc=osc^^m>6 and 6^^m or osc
     local m=osc>>31
-    osc=osc~m>10.5 and 10.5~m or osc
-    local osc2=osc*osc
-    osc*=(27+osc2/9)/(27+osc2)
+    --local osc2=osc*osc
+    --osc=osc~m>9 and 3~m or osc*(27+osc2/9)/(27+osc2)
+    osc=osc~m>11.4 and 3~m or osc*tanh_over_x[(osc*tanh_scale+512.5)&-1]
 
     --f1+=(clip+(osc-clip)*0.87-f1)*fc1
     --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1

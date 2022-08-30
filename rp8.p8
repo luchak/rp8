@@ -85,7 +85,15 @@ function _init()
 (stop_rec)
 (toggle_help)
 (pal 10 135 1)
+(set tanh_over_x (pack))
+(set tanh_scale 134.73684)
 ]]
+
+ for i=0,1024 do
+  local x=2*(i-512)/tanh_scale
+  local x2=x*x
+  tanh_over_x[i]=50.41509*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)
+ end
 
  local syn0,syn1=synth_new(7),synth_new(23)
  local drums={
