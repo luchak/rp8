@@ -77,7 +77,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for k,src in pairs(_srcs) do
     local od,fx,xp1,hpf=src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
-    od=od^0.6
+    od=od^0.8
     local odg=0.2+79.8*od
     local bias_od=_bias*od^0.2
     local bias=1.49*bias_od/odg

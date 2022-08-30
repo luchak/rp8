@@ -55,7 +55,7 @@ function synth_new(base)
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
   local res_comp=24/(fr+24)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/3
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/4
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
    local fc=min(0.12,fcbf+(me/12)*env)<<2
@@ -91,8 +91,8 @@ function synth_new(base)
     --osc=osc^^m>6 and 6^^m or osc
     local m=osc>>31
     --local osc2=osc*osc
-    --osc=osc~m>9 and 3~m or osc*(27+osc2/9)/(27+osc2)
-    osc=osc~m>11.4 and 3~m or osc*tanh_over_x[(osc*tanh_scale+512.5)&-1]
+    --osc=osc^^m>9 and 3^^m or osc*(27+osc2/9)/(27+osc2)
+    osc=osc^^m>15.2 and 4^^m or osc*tanh_over_x[(osc*tanh_scale+512.5)&-1]
 
     --f1+=(clip+(osc-clip)*0.87-f1)*fc1
     --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1

@@ -87,10 +87,12 @@ function _init()
 (pal 10 135 1)
 (set tanh_over_x (pack))
 (set tanh_scale 134.73684)
+(set tanh_scale_half (* $tanh_scale 0.5))
+(set tanh_scale_third (* $tanh_scale 0.33333))
 ]]
 
  for i=0,1024 do
-  local x=2*(i-512)/tanh_scale
+  local x=(i-512)/tanh_scale_half
   local x2=x*x
   tanh_over_x[i]=50.41509*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)
  end
