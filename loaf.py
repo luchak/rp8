@@ -172,9 +172,9 @@ def loaf_parse(str, init_is_code):
         substr = ''
         ch = read()
         while test(ch):
-            substr = substr + ch
             if ch == '\\':
                 ch = chr((ord(read()) - 48) << 4 | (ord(read()) - 48))
+            substr = substr + ch
             ch = read()
         return substr
 

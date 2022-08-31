@@ -160,7 +160,7 @@ function ui_new()
   save_region(0x9000,next_off,448)
   local hover=self.hover
   spr(15,mx,my)
-  if show_help and self.hover_t>30 and hover and hover.active and hover.tt then
+  if show_tooltips and self.hover_t>30 and hover and hover.active and hover.tt then
    local xp=mx<56 and mx+7 or mx-2-4*#hover.tt
    outline_text(hover.tt,xp+1,tt_my+1,12,1)
   end
@@ -176,6 +176,7 @@ function ui_new()
  end
 
  function obj:update(state)
+  if (display_mode!='ui') return
   local input=0
 
   self.mx,self.my=mid(0,stat(32),127),mid(0,stat(33),127)
@@ -292,7 +293,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  local get,set=state_make_get_set_param(param_idx)
  bins-=0x0.0001
  return {
-  x=x,y=y,tt=tt,drag_amt=0.33,
+  x=x,y=y,tt=tt,drag_amt=0.33,bigstep=16,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
@@ -669,6 +670,7 @@ eval--[[language::loaf]][[
  108=`(fn () (mcall $state toggle_loop))
  114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
  115=`(id $copy_state)
+ 116=`(id $toggle_tooltips)
  117=`(id $paste_state)
  120=`(fn () (mcall $state clear_overrides))
 }))
