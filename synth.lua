@@ -92,7 +92,7 @@ function synth_new(base)
     local m=osc>>31
     --local osc2=osc*osc
     --osc=osc^^m>9 and 3^^m or osc*(27+osc2/9)/(27+osc2)
-    osc=osc^^m>15.2 and 4^^m or osc*tanh_over_x[(osc*tanh_scale+1024.5)&-1]
+    osc=osc^^m>15.2 and 4^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
     --f1+=(clip+(osc-clip)*0.87-f1)*fc1
     --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1

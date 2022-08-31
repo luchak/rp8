@@ -78,19 +78,19 @@ eval--[[language::loaf]][[
  (print "  rp-8 hELP / ANY KEY TO EXIT   ", nil, nil, 7)
  (print " HTTPS://LUCHAK.GITHUB.IO/RP8/  ", nil, nil, 6)
  (print "")
- (print "\0<7t     \0<6TOOLTIPS                  ")
- (print "\0<7<TAB> \0<6UI PAGE   \0<7<SP> \0<6PLAY/PAUSE ")
- (print "\0<7s     \0<6SAVE/COPY \0<7u    \0<6LOAD CLIP  ")
- (print "\0<7g     \0<6GOTO BANKS\0<7e    \0<6EXPORT wav ")
+ (print "\0<at    \0<6TOOLTIPS                  ")
+ (print "\0<a<TAB>\0<6UI PAGE    \0<a<SPC>\0<6PLAY/PAUSE ")
+ (print "\0<as    \0<6SAVE/COPY  \0<au    \0<6LOAD CLIP  ")
+ (print "\0<ag    \0<6GOTO BANKS \0<ae    \0<6EXPORT wav ")
  (print "                                ")
- (print "\0<7UP/DOWN \0<6INC/DEC SELECTED CTRL  ")
- (print "\0<7+ SHIFT \0<6BIGGER STEPS           ")
- (print "\0<7NUMBERS \0<6SELECTED CTRL SPECIFIC ")
+ (print "\0<aUP/DOWN \0<6INC/DEC SELECTED CTRL  ")
+ (print "\0<aSHIFT   \0<6W/ABOVE FOR BIG STEPS  ")
+ (print "\0<aNUMBERS \0<6SELECTED CTRL SPECIFIC ")
  (print "                                ")
  (print "           sONG mODE            ", nil, nil, 7)
- (print "\0<7<BKS> \0<6REWIND                    ")
- (print "\0<7l     \0<6LOOP      \0<7r   \0<6RECORD      ")
- (print "\0<7c     \0<6CLEAR EDIT\0<7x   \0<6COMMIT EDIT ")
+ (print "\0<a<BKS>\0<6REWIND                    ")
+ (print "\0<al    \0<6LOOP       \0<ar   \0<6RECORD      ")
+ (print "\0<ac    \0<6CLEAR EDIT \0<ax   \0<6COMMIT EDIT ")
 ))
 
 (set draw_help (fn ()
@@ -124,14 +124,13 @@ function _init()
 (set_toast "press h for help" 180)
 (pal 10 135 1)
 (set tanh_over_x (pack))
-(set tanh_scale 269.47368)
+(set tanh_scale 538.94737)
 (set tanh_scale_half (* $tanh_scale 0.5))
 (set tanh_scale_third (* $tanh_scale 0.33333))
 ]]
 
- for i=0,2048 do
-  local x=(i-1024)/tanh_scale_half
-  local x2=x*x
+ for i=0,4096 do
+  local x2=((i-2048)/tanh_scale_half)^2
   tanh_over_x[i]=50.41509*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)
  end
 
