@@ -20,7 +20,7 @@ function synth_new(base)
   _saw=saw>0
   local pd,nsl=1-dec
   _ac,nsl=get_ac_mode(patstep)
-  if (_ac) pd=0.7+0.3*pd
+  if (_ac) pd=0.8+0.2*pd
   _med=0.9997-0.005*pd*pd
   _nt,_nl=0,note_len
   _lsl,_sl=_sl,nsl
