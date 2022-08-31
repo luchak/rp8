@@ -188,15 +188,15 @@ function svf_new()
    local rc1=rc<<1
    for i=first,last do
     local gc=gc_base*fe
-    local rrpg=rc1+gc
-    local hpn,inp=1/gc+rrpg,b[i]
-    local hpgc=(inp-rrpg*z1-z2)/hpn
+    local rc1gc=rc1+gc
+    local hpn,inp=1/gc+rc1gc,b[i]
+    local hpgc=(inp-rc1gc*z1-z2)/hpn
     local bp=hpgc+z1
     z1=hpgc+bp
     z2+=(bp*gc)<<1
 
     -- 2x oversample
-    hpgc=(inp-rrpg*z1-z2)/hpn
+    hpgc=(inp-rc1gc*z1-z2)/hpn
     bp=hpgc+z1
     local lp=bp*gc+z2
     z1=hpgc+bp
