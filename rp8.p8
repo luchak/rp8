@@ -188,7 +188,7 @@ function _init()
     dl_t=(dl_t-16)*0.66667
    end
    delay.l=dl_t*nl
-   delay.fb=sqrt(dl_fb)*0.95
+   delay.fb=sqrt(dl_fb)*0.98
 
    comp.th=0.05+0.95*comp_th*comp_th
 

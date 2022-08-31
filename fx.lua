@@ -16,7 +16,7 @@ function delay_new()
    b[i]=y
    y=x+fb*y
    f1+=(y-f1)>>4
-   dl[p]=y-(f1>>2)
+   dl[p]=y-f1
    p=(p+1)&0x7fff
    tap=(tap+1)&0x7fff
   end

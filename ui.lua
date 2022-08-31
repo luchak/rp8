@@ -169,7 +169,7 @@ function ui_new()
   local focus_off=(f and f.y+9 or 0)<<6
   save_region(0x9400,focus_off,448)
   if self.ftoast_w==f and self.ftoast_t>0 then
-   outline_text(self.ftoast,f.x-2,f.y+10,12,0)
+   outline_text(self.ftoast,mid(0,f.x-2,116),f.y+10,12,0)
    self.ftoast_t-=1
   end
 
