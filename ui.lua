@@ -581,7 +581,7 @@ eval--[[language::loaf]][[
 (foreach (' (
   (16 8 1 tempo)
   (32 8 3 level)
-  (48 8 71 "overdrive bias")
+  (48 8 71 "overdrive shape")
   (32 16 6 "compressor threshold")
   (16 16 2 shuffle)
   (32 24 5 "delay feedback")

@@ -74,5 +74,5 @@
  -- 68 fl_amt=0
  -- 69 fl_pat=1 (int)
  -- 70 fl_dec=0.5
- -- 71 od_tone=0
+ -- 71 od_shape=0
 

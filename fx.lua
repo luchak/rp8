@@ -85,7 +85,7 @@ function drum_mixer_new(srcs)
 end
 
 function mixer_new(_srcs,_fx,_filt,_lev)
- local _tmp,_bypass,_fxbuf,_filtsrc,_state,_bias=eval--[[language::loaf]][[
+ local _tmp,_bypass,_fxbuf,_filtsrc,_state,_shape=eval--[[language::loaf]][[
  (unpack (' ({} {} {} 1 {b0=(0 0) b1=(0 0) dr=(0 0)} 0)))
  ]]
 
@@ -93,7 +93,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
   note=function(self,patch)
    _lev=pow3(patch[3]>>7)<<3
    _filtsrc=patch[64]
-   _bias=patch[71]>>7
+   _shape=patch[71]>>8
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
     local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
@@ -101,7 +101,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
   end,
   update=function(self,b,first,last)
-   local fxbuf,tmp,bypass,lev,filtsrc=_fxbuf,_tmp,_bypass,_lev,_filtsrc
+   local fxbuf,tmp,bypass,lev,filtsrc,shape=_fxbuf,_tmp,_bypass,_lev,_filtsrc,_shape
    for i=first,last do
     b[i],fxbuf[i]=0,0
    end
@@ -111,22 +111,19 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     src.obj:update(tmp,first,last,bypass)
     od=od^0.8
     local odg=0.2+79.8*od
-    local bias_od=_bias*od^0.2
-    local bias=1.49*bias_od/odg
-    local odgi=(1+4*od*(1+5*bias))/odg
+    local odgi=(1+4*od)/odg
     -- ensure 0 DC -> 0 DC
-    local bc=odgi*(2.98*bias_od-0.98013*pow3(bias_od))
     for i=first,last do
      local tmp_i=tmp[i]
-     local x1,x0=tmp_i
-     x0,xp1=(xp1+x1)>>1,x1
-     local pre=x1+x0+bc
-     x0=(x0+bias)*odg
-     x1=(x1+bias)*odg
+     local x1,xp1,x0=tmp_i,tmp_i,(tmp_i+xp1)>>1
+     local pre=x1+x0
+     x0*=odg
+     x1*=odg
      local m0,m1=x0>>31,x1>>31
      if (x0^^m0>1.5) x0=1.5^^m0
      if (x1^^m1>1.5) x1=1.5^^m1
-     local diff=(odgi*(x0+x1-0.148148*(x0*x0*x0+x1*x1*x1))-pre)>>1
+     local x02,x12=x0*x0,x1*x1
+     local diff=(odgi*(x0+x1+shape*(x02+x12)-0.148148*(x02*x0+x12*x1))-pre)>>1
      hpf+=(diff-hpf)>>8
      tmp[i]=(tmp_i+diff-hpf)*src.lev
     end
