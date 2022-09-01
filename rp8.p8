@@ -103,6 +103,11 @@ eval--[[language::loaf]][[
 
 ]]
 
+-- can easily be called per-frame, so no scripting
+function set_ftoast(widget,text,frames)
+ ui.ftoast_w,ui.ftoast,ui.ftoast_t=widget,text,frames or 40
+end
+
 function _init()
  eval--[[language::loaf]][[
 (cls)
@@ -110,11 +115,6 @@ function _init()
 (set set_toast (fn (text frames)
  (@= $ui toast $text)
  (@= $ui toast_t (or $frames 40))
-))
-(set set_ftoast (fn (widget text frames)
- (@= $ui ftoast_w $widget)
- (@= $ui ftoast $text)
- (@= $ui ftoast_t (or $frames 40))
 ))
 (set state (state_new))
 (set add_ui (fn (w page) ((@ $ui add_widget) $ui $w $page)))

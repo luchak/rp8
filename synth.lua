@@ -5,7 +5,7 @@ function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
        _ae,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
-       unpack_split'0,0.001,0.001,0.999,0.5,3.6,0.5,0.5,1,0,0,0,0,0,0,0,0.99,0,900,900,0,0,1,0'
+       unpack_split'0,.001,.001,.999,.5,3.6,.5,.5,1,0,0,0,0,0,0,0,.99,0,900,900,0,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
@@ -86,16 +86,9 @@ function synth_new(base)
     osc-=fosc
     ffb+=(f4-ffb)/14
     osc-=fr*(f4-ffb-osc)
-    --local m=osc>>31
-    --local clip=osc^^m>0.25 and 0.25^^m or osc
-    --osc=osc^^m>6 and 6^^m or osc
     local m=osc>>31
-    --local osc2=osc*osc
-    --osc=osc^^m>9 and 3^^m or osc*(27+osc2/9)/(27+osc2)
     osc=osc^^m>15.2 and 4^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
-    --f1+=(clip+(osc-clip)*0.87-f1)*fc1
-    --f1+=(osc-0.009259*osc*osc*osc-f1)*fc1
     f1+=(osc-f1)*fc1
     f2+=fc*(f1-f2)
     f3+=fc*(f2-f3)
@@ -155,7 +148,7 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'2440,1220,0,0.05,0,0,10,0.99,0.996,0.4'
+  {},unpack_split'2440,1220,0,.05,0,0,10,.99,.996,.4'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -198,7 +191,7 @@ end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune,_dec_mod=
-  {},unpack_split'0,0,0,0,14600,0,17000.36,0,15600,0,16200,0.995,1,0'
+  {},unpack_split'0,0,0,0,14600,0,17000.36,0,15600,0,16200,.995,1,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -239,7 +232,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 end
 
 function fm_new(base)
- local obj,_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp={},unpack_split'0,0,0,0,0.995,0,0.995,0'
+ local obj,_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp={},unpack_split'0,0,0,0,.995,0,.995,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]

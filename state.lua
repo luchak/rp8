@@ -3,16 +3,14 @@
 
 --lint: copy_buf_seq
 
-n_off,n_on,n_ac,n_sl,n_ac_sl=unpack_split'64,65,66,67,68'
-function get_ac_mode(note)
- return note==n_ac or note==n_ac_sl,note>=n_sl
-end
-
-
 -- see note 003
-default_patch=split'64,0,64,3,64,128,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,1,64,64,64,0,64,64,64,64,64,64,64,0,0,1,1,64,127,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,1,0,64,64,128,1,128,0'
-
 eval--[[language::loaf]][[
+(set n_off 64)
+(set n_on 65)
+(set n_ac 66)
+(set n_sl 67)
+(set n_ac_sl 68)
+(set default_patch (' (64 0 64 3 64 128 64 0 0 1 1 1 64 64 64 0 64 64 64 64 64 64 64 0 0 1 1 1 64 64 64 0 64 64 64 64 64 64 64 0 0 1 1 64 127 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 1 0 64 64 128 1 128 0)))
 (set syn_base_idx (' {b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}))
 (set pat_param_idx (' {b0=11,b1=27,dr=43}))
 (set syn_pat_template (' {
@@ -30,6 +28,10 @@ eval--[[language::loaf]][[
  fm={st=`(rep 16 64) dt=`(rep 16 64) l=16}
 }))
 ]]
+
+function get_ac_mode(note)
+ return note==n_ac or note==n_ac_sl,note>=n_sl
+end
 
 function state_new(savedata)
  local s=parse--[[language::loon]][[{
