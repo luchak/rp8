@@ -51,8 +51,8 @@ function synth_new(base)
   local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
   local fr,fcb,fcbf=_fr,_fc,_fcbf
   local ae,me,med,mr=_ae,_me,_med,_mr
-  local env,saw,acc=_env,_saw,_acc
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
+  local env,saw,acc=_env,_saw,ac and _acc or 0
   local res_comp=16/(fr+16)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
   local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/4
@@ -98,9 +98,7 @@ function synth_new(base)
     op+=dodp
     o2p+=dodp2
    end
-   out*=ae
-   if (ac) out+=acc*me*out
-   b[i]=out*res_comp
+   b[i]=out*ae*(1+acc*me)*res_comp
   end
   _op,_odp,_gate,_o2p=op,odp,gate,o2p
   _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf
