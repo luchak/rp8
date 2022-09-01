@@ -281,9 +281,13 @@ function state_make_get_set_param_bool(idx,bit)
 end
 
 function state_make_get_set(a,b)
- return
-  function(s) if b then return s[a][b] else return s[a] end end,
-  function(s,v) if b then s[a][b]=v else s[a]=v end end
+ if b then return
+  function(s) return s[a][b] end,
+  function(s,v) s[a][b]=v end
+ else return
+  function(s) return s[a] end,
+  function(s,v) s[a]=v end
+ end
 end
 
 function state_make_get_set_pat_len(syn)
