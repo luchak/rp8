@@ -5,7 +5,7 @@ _dcf=0
 
 function audio_update()
  if stat(108)<512 then
-  local todo,buf,dcf=94,{},_dcf
+  local todo,buf,dcf=95,{},_dcf
   if audio_root then
    todo=audio_root:run(buf,todo)
   else

@@ -244,7 +244,7 @@ function _draw()
   draw_help()
  end
  t_draw=stat(1)-t0
- --log('times',t_audio,t_ui,t_draw)
+ log('times',t_audio,t_ui,t_draw)
 end
 
 #include driver.lua

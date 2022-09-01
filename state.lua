@@ -127,7 +127,7 @@ function state_new(savedata)
  end
 
  function s:next_tick()
-  local tl=self.tl
+  local before,tl=self.tick,self.tl
   if self.song_mode then
    tl:next_tick(self.patch,load_bar)
    self.bar,self.tick=tl.bar,tl.tick
@@ -135,7 +135,7 @@ function state_new(savedata)
    self.tick+=1
    if (self.tick>16) load_bar()
   end
-  _init_tick()
+  if (self.tick>before) _init_tick()
  end
 
  function s:toggle_playing()
@@ -298,7 +298,7 @@ state_is_song_mode=function(state) return state.song_mode end
 
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
- local _t,_cost=state.note_len,3
+ local _t,_cost=state.note_len,5
  return {
   state=state,
   root=root,
