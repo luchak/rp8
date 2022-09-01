@@ -107,6 +107,7 @@ function ui_new()
  end
 
  function obj:draw(state)
+  state:update_ui_vars()
   -- restore screen from mouse
   local mx,my=self.mx,self.my
   for r in all(self.restores) do
@@ -175,6 +176,7 @@ function ui_new()
  end
 
  function obj:update(state)
+  state:update_ui_vars()
   if (display_mode!='ui') return
   local input=0
 
@@ -238,10 +240,10 @@ function syn_note_btn_new(x,y,syn,key,step,sp0,nt0,nmin,nmax)
  return {
   x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
   get_sprite=function(self,state)
-   return offset+state:get_ui_pat(syn)[key][step]
+   return offset+state.ui_pats[syn][key][step]
   end,
   input=function(self,state,b)
-   local n=state:get_ui_pat(syn)[key]
+   local n=state.ui_pats[syn][key]
    n[step]=mid(nmin,nmax,n[step]+b)
   end
  }
@@ -273,16 +275,16 @@ function step_btn_new(x,y,syn,step,sprites)
  return {
   x=x,y=y,tt='step edit',click_act=true,
   get_sprite=function(self,state)
-   if (state.playing and state:get_ptick(syn)==step) return sprites[n+1]
-   local v=state:get_ui_pat(syn).st[step]
+   if (state.playing and state.ui_pticks[syn]==step) return sprites[n+1]
+   local v=state.ui_pats[syn].st[step]
    return sprites[v-63]
   end,
   input=function(self,state,b)
-   local st=state:get_ui_pat(syn).st
+   local st=state.ui_pats[syn].st
    st[step]=(st[step]+b-64)%n+64
   end,
   on_num=function(state,num)
-   local st=state:get_ui_pat(syn).st
+   local st=state.ui_pats[syn].st
    st[step]=(num-65)%n+64
   end
  }
@@ -486,7 +488,7 @@ eval--[[language::loaf]][[
  (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
 ))
 (add_ui (merge (push_new 24 104 111
- (fn (state b) (transpose_pat ((@ $state get_ui_pat) $state dr) dt $b 52 76))
+ (fn (state b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
  "transpose (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui (merge

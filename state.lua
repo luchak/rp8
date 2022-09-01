@@ -169,14 +169,14 @@ function state_new(savedata)
   load_bar(mid(1,bar,999))
  end
 
- function s:get_ui_pat(syn)
+ function s:update_ui_vars()
   -- pats are aliased, always editing current
-  return syn=='dr' and self.pat_seqs.dr[self.drum_sel] or self.pat_seqs[syn]
- end
-
- function s:get_ptick(syn)
-  -- pats are aliased, always editing current
-  return syn=='dr' and self.ptick[self.drum_sel] or self.ptick[syn]
+  self.ui_pats={
+   b0=self.pat_seqs.b0,b1=self.pat_seqs.b1,dr=self.pat_seqs.dr[self.drum_sel]
+  }
+  self.ui_pticks={
+   b0=self.ptick.b0,b1=self.ptick.b1,dr=self.ptick[self.drum_sel]
+  }
  end
 
  function s:save()
@@ -288,8 +288,8 @@ end
 
 function state_make_get_set_pat_len(syn)
  return
-  function(s) return s:get_ui_pat(syn).l or 16 end,
-  function(s,l) s:get_ui_pat(syn).l=l end
+  function(s) return s.ui_pats[syn].l or 16 end,
+  function(s,l) s.ui_pats[syn].l=l end
 end
 
 state_is_song_mode=function(state) return state.song_mode end
