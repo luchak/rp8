@@ -302,7 +302,7 @@ state_is_song_mode=function(state) return state.song_mode end
 
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(state,root,note_fn)
- local _t,_cost=state.note_len,5
+ local _t,_cost=state.note_len,3
  return {
   state=state,
   root=root,

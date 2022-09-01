@@ -212,7 +212,7 @@ function ui_new()
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=trn(hover and hover.active,hover,nil)
     if new_focus then
-     if (new_focus.click_act) input=trn(click==1,1,-1)
+     if (new_focus.click_act) input=click==1 and 1 or -1
      if (self.click_t>0 and new_focus.doubleclick) new_focus.doubleclick(state)
     end
     self.click_t=12
@@ -224,7 +224,7 @@ function ui_new()
   self.click_t=max(self.click_t-1,0)
 
   if new_focus then
-   input+=trn(new_focus.drag_amt>0,stat(36),0)
+   input+=new_focus.drag_amt>0 and stat(36) or 0
    if (input!=0) new_focus:input(state,input)
   end
   if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
@@ -313,7 +313,7 @@ function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
   get_sprite=function(self,state)
-   return trn(get(state),s_on,s_off)
+   return get(state) and s_on or s_off
   end,
   input=function(self,state)
    set(state,not get(state))
@@ -349,7 +349,7 @@ function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,tt=tt,click_act=true,
   get_sprite=function(self,state)
-   return trn(get(state)==val,s_on,s_off)
+   return get(state)==val and s_on or s_off
   end,
   input=function(self,state)
    set(state,val)
@@ -367,7 +367,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
    local val=bank*bank_size-bank_size+pib
-   local col=trn(pat==val,c_on,c_off)
+   local col=pat==val and c_on or c_off
    if (pending==val and pending!=pat) col=c_next
    return ret_prefix..col
   end,
