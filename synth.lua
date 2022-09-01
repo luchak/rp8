@@ -14,7 +14,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))
   _fc=0.00227*18*cut
-  _fr=(res^1.2+0.0002)*14
+  _fr=(res^1.2)*18
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
