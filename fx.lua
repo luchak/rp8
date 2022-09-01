@@ -176,23 +176,24 @@ end
 
 -- see note 005
 function svf_new()
- local _z1,_z2,_rc,_gc,_wet,_fe,_bp,_dec=unpack_split'0,0,.1,.2,1,1,0,1'
+ local _z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp,_dec=unpack_split'0,0,.1,.2,1,1,0,0,1'
  return {
   note=function(self,patch,bar,tick)
-   local r,gc,dec,_
-   _bp,gc,r,_wet,_,dec=unpack_patch(patch,65,70)
+   local r,gc_base,amt,dec,_
+   _bp,gc_base,r,amt,_,dec=unpack_patch(patch,65,70)
    _rc=1-r*0.96
    local svf_pat=svf_pats[patch[69]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-(pow3(1-dec)>>7)
-   _gc=pow3(gc)*0x0.fe+0x0.02
+   _gc_base=pow3(gc_base)*0x0.fe+0x0.02
+   _gc_range=pow3(amt)*(1-_gc_base)
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc_base,wet,fe,is_lp,dec=_z1,_z2,_rc,_gc,_wet,_fe,_bp==0,_dec
+   local z1,z2,rc,gc_base,gc_range,fe,gc,is_lp,dec=_z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp==0,_dec
    local rc1=rc<<1
    for i=first,last do
-    local gc=gc_base*fe
+    gc+=(gc_base+gc_range*fe-gc)>>5
     local rc1gc=rc1+gc
     local hpn,inp=1/gc+rc1gc,b[i]
     local hpgc=(inp-rc1gc*z1-z2)/hpn
@@ -208,10 +209,10 @@ function svf_new()
     z2=bp*gc+lp
 
     -- rc*bp is 1/2 of unity gain bp
-    b[i]=inp+wet*((is_lp and lp or rc*bp+bp)-inp)
+    b[i]=is_lp and lp or rc*bp+bp
     fe*=dec
    end
-   _z1,_z2,_fe=z1,z2,fe
+   _z1,_z2,_fe,_gc=z1,z2,fe,gc
   end
  }
 end

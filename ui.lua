@@ -298,7 +298,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
   end,
   input=function(self,state,b)
    local val=mid(0,128,get(state)+b)
-   set_ftoast(self,leftpad(tostr(val), 3))
+   set_ftoast(self,leftpad(tostr(val),3))
    set(state,val)
   end,
   doubleclick=function(state)
@@ -656,7 +656,7 @@ eval--[[language::loaf]][[
 ))
 ]]
 
-
+-- due to how quoting/interpolation works, this needs to be parsed after prereqs have been defined
 eval--[[language::loaf]][[
 (set hotkey_map (' {
  8=`(id $rewind)

@@ -69,10 +69,10 @@
  -- 63 sp_lev=0.5,
  -- 64 fl_src=1
  -- 65 fl_type=0
- -- 66 fl_cut=0.5
+ -- 66 fl_cut=1
  -- 67 fl_res=0.5
- -- 68 fl_wet=1
+ -- 68 fl_amt=0
  -- 69 fl_pat=1 (int)
- -- 70 fl_dec=1 (real)
+ -- 70 fl_dec=0.5
  -- 71 od_tone=0
 
