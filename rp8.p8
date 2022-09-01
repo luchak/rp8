@@ -81,7 +81,7 @@ eval--[[language::loaf]][[
  (print "\0<at    \0<6TOOLTIPS                  ")
  (print "\0<a<TAB>\0<6UI PAGE    \0<a<SPC>\0<6PLAY/PAUSE ")
  (print "\0<as    \0<6SAVE/COPY  \0<au    \0<6LOAD CLIP  ")
- (print "\0<ag    \0<6GOTO BANKS \0<ae    \0<6EXPORT wav ")
+ (print "\0<ab    \0<6GOTO BANKS \0<ae    \0<6EXPORT wav ")
  (print "                                ")
  (print "\0<aUP/DOWN \0<6INC/DEC SELECTED CTRL  ")
  (print "\0<aSHIFT   \0<6W/ABOVE FOR BIG STEPS  ")
@@ -90,7 +90,7 @@ eval--[[language::loaf]][[
  (print "           sONG mODE            ", nil, nil, 7)
  (print "\0<a<BKS>\0<6REWIND                    ")
  (print "\0<al    \0<6LOOP       \0<ar   \0<6RECORD      ")
- (print "\0<ac    \0<6CLEAR EDIT \0<ax   \0<6COMMIT EDIT ")
+ (print "\0<ax    \0<6CLEAR EDIT \0<ac   \0<6COMMIT EDIT ")
 ))
 
 (set draw_help (fn ()
