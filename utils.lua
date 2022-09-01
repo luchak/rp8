@@ -28,10 +28,6 @@ function merge(base,new)
  return base
 end
 
-function unpack_split(s)
- return unpack(split(s))
-end
-
 function enc_bytes(a)
  if (type(a)=='number') return a
  return chr(unpack(a))
@@ -155,10 +151,9 @@ function parse(s)
    -- allow (most) bare strings
    local b=c..consume(is_id)
    read(-1)
-   if (b=='true') return true
    if (b=='false') return false
    if (b=='nil') return nil
-   return b
+   return b=='true' or b
   end
  end
 
@@ -257,12 +252,13 @@ function pow3(x) return x*x*x end
 function pow4(x) return pow3(x)*x end
 
 eval--[[language::loaf]][[
+(set unpack_split (fn (s) (unpack (split $s)) ))
 (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
+(set mcall (fn (obj m) ((@ $obj $m) $obj)))
 (set rep (fn (n x)
  (let a (pack))
  (for 1 $n (fn () (add $a $x)))
  $a
 ))
 (set id (fn (x) $x))
-(set mcall (fn (obj m) ((@ $obj $m) $obj)))
 ]]

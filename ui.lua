@@ -1,8 +1,6 @@
 -->8
 -- ui
 
-is_digit=mkmatch'0123456789'
-
 function leftpad(s,l)
  while #s<l do
   s=' '..s
@@ -17,6 +15,7 @@ function outline_text(s,x,y,c,o)
 end
 
 eval--[[language::loaf]][[
+(set is_digit (mkmatch "0123456789"))
 (set widget_defaults (' {
  w=2,
  h=2,
