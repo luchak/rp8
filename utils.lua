@@ -184,6 +184,7 @@ function _eval_scope(ast,locals,start)
 
   local cmd,a1,a2,a3=unpack(node)
 
+  -- verbs that affect list interpretation
   if cmd=='\'' then
    return a1
   elseif cmd=='if' then
@@ -215,19 +216,19 @@ function _eval_scope(ast,locals,start)
 
   local v1,v2,v3=unpack(vals)
 
-  if cmd=='seq' then return vals[#vals]
-  elseif cmd=='+' then return v1+v2
-  elseif cmd=='*' then return v1*v2
-  elseif cmd=='~' then return v1-v2
+  if cmd=='seq'     then return vals[#vals]
+  elseif cmd=='+'   then return v1+v2
+  elseif cmd=='*'   then return v1*v2
+  elseif cmd=='~'   then return v1-v2
   elseif cmd=='not' then return not v1
-  elseif cmd=='or' then return v1 or v2
-  elseif cmd=='@' then if v3 then return v1[v2][v3] else return v1[v2] end
-  elseif cmd=='@=' then v1[v2]=v3
+  elseif cmd=='or'  then return v1 or v2
+  elseif cmd=='@'   then if v3 then return v1[v2][v3] else return v1[v2] end
+  elseif cmd=='@='  then v1[v2]=v3
   elseif cmd=='for' then for i=v1,v2 do v3(i) end
   elseif cmd=='set' then _ENV[v1]=v2
   elseif cmd=='let' then if v2==nil then locals[v1]=nil_value else locals[v1]=v2 end
-  elseif cmd=='eq' then return v1==v2
-  elseif cmd=='gt' then return v1>v2
+  elseif cmd=='eq'  then return v1==v2
+  elseif cmd=='gt'  then return v1>v2
   elseif cmd=='cat' then return v1..v2
   elseif cmd=='len' then return #v1
   else
