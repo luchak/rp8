@@ -88,7 +88,7 @@ end
 function mkmatch(s,inv)
  return function(c)
   for i=1,#s do
-   if (c==sub(s,i,i)) return not inv
+   if (c==s[i]) return not inv
   end
   return inv
  end
@@ -107,7 +107,7 @@ function parse(s)
    s=sub(s,0x4001)
    p-=0x4000
   end
-  return sub(s,p,p)
+  return s[p]
  end
 
  local function consume(test)

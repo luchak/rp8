@@ -9,7 +9,7 @@ function synth_new(base)
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
-  local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc,atk=pat.st[step],unpack_patch(patch,base+5,base+15)
+  local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))
