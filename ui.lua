@@ -429,14 +429,18 @@ eval--[[language::loaf]][[
  (add_ui (step_btn_new (cat sst $key) $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
 ))
 (add_ui (merge
- (spin_btn_new 32 $yp $pat_lens "pattern length" (state_make_get_set_pat_len $key))
+ (spin_btn_new 24 $yp $pat_lens "pattern length" (state_make_get_set_pat_len $key))
  (' {w=2 drag_amt=0.03})
 ))
-(add_ui (merge (push_new 24 $yp 26
+(add_ui (merge (push_new 40 $yp 238
+ (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
+ "rotate (drag)"
+) (' {click_act=false drag_amt=0.05 bigstep=4})))
+(add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 1)
-(add_ui (merge (push_new 24 $yp 26
+(add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
  "transpose (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
@@ -495,7 +499,12 @@ eval--[[language::loaf]][[
  (add_ui (step_btn_new drs $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
  (add_ui (note_btn_new drn $xp 120 dr dt $i 50 64 52 76) 2)
 ))
-(add_ui (merge (push_new 24 104 111
+(add_ui (merge (push_new 8 96 192 (fn ()) "") (' {active=false})) 1)
+(add_ui (merge (push_new 16 96 239
+ (fn (state b) (rotate_pat (@ $state ui_pats dr) (' (st dt)) $b))
+ "rotate (drag)"
+) (' {click_act=false drag_amt=0.05 bigstep=4})))
+(add_ui (merge (push_new 8 96 111
  (fn (state b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
  "transpose (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)

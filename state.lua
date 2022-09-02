@@ -262,6 +262,15 @@ function transpose_pat(pat,key,d,vmin,vmax)
  end
 end
 
+function rotate_pat(pat,keys,d)
+ local pc=copy(pat)
+ for key in all(keys) do
+  for i=1,16 do
+   pat[key][i]=pc[key][(i-d-1)%16+1]
+  end
+ end
+end
+
 function state_make_get_set_param(idx,lsb,size)
  lsb=lsb or 0
  size=size or 8
