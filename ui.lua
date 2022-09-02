@@ -184,8 +184,7 @@ function ui_new()
   local focus=self.focus
   local new_focus=trn(focus and focus.active,focus,nil)
 
-  local hotkey=stat(30) and stat(31)
-  local shift=stat(28,225) or stat(28,229)
+  local hotkey,shift=stat(30) and stat(31),stat(28,225) or stat(28,229)
   local hotkey_action=hotkey_map[ord(hotkey)]
   if (hotkey_action) hotkey_action()
   if (focus and focus.on_num and is_digit(hotkey)) focus.on_num(state,tonum(hotkey))
@@ -196,7 +195,7 @@ function ui_new()
   if (btnp(0)) nav=-2
   if (btnp(1)) nav=0
 
-  if nav and focus.grp then
+  if nav and focus and focus.grp then
    new_focus=self.grps[focus.grp][(focus.step+nav)%16+1]
   end
 
@@ -678,10 +677,11 @@ eval--[[language::loaf]][[
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
  104=`(id $toggle_help)
  108=`(fn () (mcall $state toggle_loop))
+ 111=`(id $paste_state)
+ 112=`(fn () (poke 24368 1) (copy_state true))
  114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
  115=`(id $copy_state)
  116=`(id $toggle_tooltips)
- 117=`(id $paste_state)
  120=`(fn () (mcall $state clear_overrides))
 }))
 ]]

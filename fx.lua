@@ -111,7 +111,6 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     src.obj:update(tmp,first,last,bypass)
     local odg=0.2+79.8*od
     local odgi=(1+4*od)/odg
-    -- ensure 0 DC -> 0 DC
     for i=first,last do
      local tmp_i=tmp[i]
      local x1,xp1,x0=tmp_i,tmp_i,(tmp_i+xp1)>>1

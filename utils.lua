@@ -192,8 +192,7 @@ function _eval_scope(ast,locals,start)
     end
     for k,v in ipairs(a1) do
      local val=args[k]
-     if (val==nil) val=nil_value
-     new_locals[v]=val
+     new_locals[v]=(val==nil) and nil_value or val
     end
     return _eval_scope(node,new_locals,3)
    end
@@ -240,8 +239,7 @@ function _eval_scope(ast,locals,start)
 end
 
 function eval(src)
- local parsed=parse('(seq '..src..')')
- return _eval_scope(parsed,{})
+ return _eval_scope(parse('(seq '..src..')'),{})
 end
 
 function take(i,...)
