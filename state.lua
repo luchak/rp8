@@ -35,7 +35,7 @@ end
 
 function state_new(savedata)
  local s=parse--[[language::loon]][[{
-  name="new_rp8_song",
+  name="new song",
   pat_store={},
   tick=1,
   ptick={},
