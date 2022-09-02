@@ -17,8 +17,16 @@ eval--[[language::loaf]][[
  drag_amt=0
 }))
 (set pat_lens (pack))
+(set make_thin_ones (fn (s)
+ (let s (tostr $s))
+ (let r (pack ""))
+ (for 1 (len $s) (fn (i)
+  (if (eq (@ $s $i) "1") (@= $r 1 (cat (@ $r 1) "|")) (@= $r 1 (cat (@ $r 1) (@ $s $i))))
+ ))
+ (@ $r 1)
+))
 (for 1 16 (fn (l)
- (add $pat_lens (cat $l ",0,14"))
+ (add $pat_lens (cat (make_thin_ones $l) ",0,14"))
 ))
 ]]
 
@@ -620,10 +628,7 @@ eval--[[language::loaf]][[
 ))
 (let tempos (pack))
 (for 60 188 (fn (t)
- (if (gt $t 99) (let t
-  (cat "|" (sub (tostr $t) 2))
- ))
- (add $tempos (cat $t ",0,15"))
+ (add $tempos (cat (make_thin_ones $t) ",0,15"))
 ))
 (let get_set_tempo (pack (state_make_get_set_param 1)))
 (add_ui (merge
