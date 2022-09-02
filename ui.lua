@@ -687,7 +687,7 @@ eval--[[language::loaf]][[
 )
 
 (@= $loop_len_ctrl on_num
- (fn (s num) (set_loop_len (@ $s tl) (<< 1 (~ $num 1))))
+ (fn (s num) (set_loop_len (@ $s tl) (<< 1 $num)))
 )
 
 (add_ui $loop_len_ctrl)
