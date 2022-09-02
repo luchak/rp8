@@ -52,6 +52,7 @@ function ui_new()
   toast_t=0
   click_t=0
   restores={}
+  grps={}
  }]]
  -- focus
  -- last_focus
@@ -72,6 +73,11 @@ function ui_new()
   end
   if page then
    add(self.pages[page],w)
+  end
+  if w.grp then
+   local grp=self.grps[w.grp] or {}
+   add(grp,w)
+   self.grps[w.grp]=grp
   end
   if page==self.page or not page then self:show_widget(w) end
  end
@@ -178,7 +184,7 @@ function ui_new()
  function obj:update(state)
   state:update_ui_vars()
   if (display_mode!='ui') return
-  local input=0
+  local input,nav=0
 
   self.mx,self.my=mid(0,stat(32),127),mid(0,stat(33),127)
   local click,mx,my=stat(34),self.mx,self.my
@@ -196,6 +202,12 @@ function ui_new()
   local step=(shift and focus and focus.bigstep) or 1
   if (btnp(2)) input+=step
   if (btnp(3)) input-=step
+  if (btnp(0)) nav=-1
+  if (btnp(1)) nav=1
+
+  if nav and focus.grp then
+   new_focus=self.grps[focus.grp][(focus.step-1+nav)%16+1]
+  end
 
   if click>0 then
    if focus and click==self.last_click then
@@ -235,10 +247,10 @@ function ui_new()
  return obj
 end
 
-function syn_note_btn_new(x,y,syn,key,step,sp0,nt0,nmin,nmax)
+function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
  local offset=sp0-nt0
  return {
-  x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
+  grp=grp,step=step,x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
   get_sprite=function(self,state)
    return offset+state.ui_pats[syn][key][step]
   end,
@@ -269,11 +281,11 @@ function spin_btn_new(x,y,sprites,tt,get,set)
  }
 end
 
-function step_btn_new(x,y,syn,step,sprites)
+function step_btn_new(grp,x,y,syn,step,sprites)
  -- last sprite is for current step
  local n=#sprites-1
  return {
-  x=x,y=y,tt='step edit',click_act=true,
+  grp=grp,step=step,x=x,y=y,tt='step edit',click_act=true,
   get_sprite=function(self,state)
    if (state.playing and state.ui_pticks[syn]==step) return sprites[n+1]
    local v=state.ui_pats[syn].st[step]
@@ -418,9 +430,9 @@ eval--[[language::loaf]][[
 (set syn_ui_init (fn (add_ui key base_idx yp)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
- (add_ui (syn_note_btn_new $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
- (add_ui (syn_note_btn_new $xp (+ $yp 24) $key dt $i 50 64 52 76) 2)
- (add_ui (step_btn_new $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
+ (add_ui (note_btn_new (cat sn1 $key) $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
+ (add_ui (note_btn_new (cat sn2 $key) $xp (+ $yp 24) $key dt $i 50 64 52 76) 2)
+ (add_ui (step_btn_new (cat sst $key) $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
 ))
 (add_ui (merge
  (spin_btn_new 32 $yp $pat_lens "pattern length" (state_make_get_set_pat_len $key))
@@ -484,8 +496,8 @@ eval--[[language::loaf]][[
 (set drum_ui_init (fn (add_ui)
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
- (add_ui (step_btn_new $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
- (add_ui (syn_note_btn_new $xp 120 dr dt $i 50 64 52 76) 2)
+ (add_ui (step_btn_new drs $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
+ (add_ui (note_btn_new drn $xp 120 dr dt $i 50 64 52 76) 2)
 ))
 (add_ui (merge (push_new 24 104 111
  (fn (state b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
