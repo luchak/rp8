@@ -226,9 +226,15 @@ function _update60()
    local n=serial(0x800,0x5100,0x800)
    s..=chr(peek(0x5100,n))
   end
-  state=state_load(s) or state
-  seq_helper.state=state
-  set_toast("song loaded from file")
+  local st=state_load(s)
+  if st then
+   printh(s,'@clip')
+   state=st
+   seq_helper.state=state
+   set_toast"song loaded from file"
+  else
+   set_toast"could not load song"
+  end
 
   audio_wait(10)
  end
