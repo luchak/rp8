@@ -107,9 +107,8 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    end
 
    for k,src in pairs(_srcs) do
-    local od,fx,xp1,hpf=src.od,src.fx,unpack(_state[k])
+    local slev,od,fx,xp1,hpf=src.lev,src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
-    od=od^0.8
     local odg=0.2+79.8*od
     local odgi=(1+4*od)/odg
     -- ensure 0 DC -> 0 DC
@@ -125,7 +124,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
      local x02,x12=x0*x0,x1*x1
      local diff=(odgi*(x0+x1+shape*(x02+x12)-0.148148*(x02*x0+x12*x1))-pre)>>1
      hpf+=(diff-hpf)>>8
-     tmp[i]=(tmp_i+diff-hpf)*src.lev
+     tmp[i]=(tmp_i+diff-hpf)*slev
     end
     _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
