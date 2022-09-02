@@ -20,6 +20,9 @@ eval--[[language::loaf]][[
  (set audio_root)
 ))
 (audio_wait 6)
+(set get_filename (fn ()
+ (join _ (pack (@ $state name) (stat 90) (stat 91) (stat 92) (stat 93) (stat 94) (stat 95)))
+))
 (set copy_state (fn (skip_write)
  (audio_wait 2)
  (let saved ((@ $state save) $state))
@@ -27,7 +30,7 @@ eval--[[language::loaf]][[
  (if $skip_write
   (set_toast "saved to clipboard")
   (seq
-   (printh $saved (join _ (pack rp8 (stat 90) (stat 91) (stat 92) (stat 93) (stat 94) (stat 95))) true true)
+   (printh $saved (get_filename) true true)
    (set_toast "song saved")
   )
  )
@@ -53,6 +56,7 @@ eval--[[language::loaf]][[
 (set audio_rec false)
 (set start_rec (fn ()
  (set audio_rec true)
+ (extcmd set_filename (get_filename))
  (set_toast "audio export started")
  (extcmd audio_rec)
  (menuitem 3 "stop export" $stop_rec)
@@ -66,26 +70,33 @@ eval--[[language::loaf]][[
 
 (set display_mode ui)
 
-(set toggle_help (fn ()
- (if (eq $display_mode help) (seq
+(set set_display_mode (fn (new_mode)
+ (if (eq $new_mode ui) (seq
   (memcpy 24576 40960 8192)
   (set display_mode ui)
  ) (seq
-  (memcpy 40960 24576 8192)
-  (set display_mode help)
-  (show_help)
+  (if (eq $display_mode ui) (memcpy 40960 24576 8192))
+  (set display_mode $new_mode)
  ))
 ))
 
-(set show_help (fn ()
+(set enter_rename (fn ()
+ (set_display_mode rename)
+ (set new_song_name (@ $state name))
+ false
+))
+
+(set enter_help (fn ()
+ (set_display_mode help)
  (cls)
  (print "  rp-8 hELP / ANY KEY TO EXIT   ", nil, nil, 7)
  (print " HTTPS://LUCHAK.GITHUB.IO/RP8/  ", nil, nil, 6)
  (print "")
  (print "\0<at    \0<6TOOLTIPS   \0<as    \0<6SAVE\17DISK ")
  (print "\0<ao    \0<6LOAD\16CLIP  \0<ap    \0<6SAVE\17CLIP ")
- (print "\0<a<TAB>\0<6UI PAGE    \0<a<SPC>\0<6PLAY/PAUSE ")
- (print "\0<ab    \0<6GOTO BANKS \0<ae    \0<6EXPORT wav ")
+ (print "\0<a<TAB>\0<6FLIP PAGE  \0<a<SPC>\0<6PLAY/PAUSE ")
+ (print "\0<am    \0<6FLIP MODE  \0<ae    \0<6EXPORT wav ")
+ (print "\0<ab    \0<6GOTO BANKS \0<an    \0<6SET NAME   ")
  (print "")
  (print "\0<aUP/DN   \0<6INC/DEC SELECTED CTRL  ")
  (print "\0<aSHIFT   \0<6W/ABOVE TO GO FASTER   ")
@@ -96,10 +107,38 @@ eval--[[language::loaf]][[
  (print "\0<a<BKS>\0<6REWIND                    ")
  (print "\0<al    \0<6LOOP       \0<ar   \0<6RECORD      ")
  (print "\0<ax    \0<6CLEAR EDIT \0<ac   \0<6COMMIT EDIT ")
+ false
 ))
 
 (set draw_help (fn ()
- (if (stat 30) (seq (stat 31) (toggle_help)))
+ (if (stat 30) (seq (stat 31) (set_display_mode ui)))
+))
+
+(set set_song_name (fn (name)
+ (if (id $state) (@= $state name $name))
+ (extcmd set_title (cat "RP-8 - " $name))
+))
+
+(set draw_rename (fn ()
+ (cls)
+ (print "sONG nAME:" 0 0 6)
+ (print "")
+ (print (cat $new_song_name "\0<a\10") nil nil 7)
+ (print "")
+ (print "<ENTER> TO RETURN" nil nil 6)
+ (print "dELETE NAME TO CANCEL" nil nil 6)
+ (if (stat 30) (seq
+  (let k (stat 31))
+  (let o (ord $k))
+  (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
+  (if (eq $o 13)
+   (seq (set_display_mode ui) (if (gt (len $new_song_name) 0) (set_song_name $new_song_name)))
+   (if (eq $o 8)
+    (set new_song_name (sub $new_song_name 1 -2))
+    (if (not (or (gt $o 126) (gt 32 $o))) (set new_song_name (sub (cat $new_song_name $k) 1 31)))
+   )
+  )
+ ))
 ))
 
 (set t_audio 0)
@@ -127,8 +166,9 @@ function _init()
 (syn_ui_init $add_ui b0 7 32)
 (syn_ui_init $add_ui b1 23 64)
 (drum_ui_init $add_ui)
-(menuitem 1 "show help" (fn () (if (not (eq $display_mode help)) (toggle_help)) false))
+(menuitem 1 "show help" $enter_help)
 (menuitem 2 "save song" $copy_state)
+(menuitem 4 "set song name" $enter_rename)
 (stop_rec)
 (toggle_tooltips)
 (set_toast "press h for help" 180)
@@ -149,7 +189,7 @@ function _init()
 ))
 ]]
 
- -- yes mouse / faster repeat (pokes above)
+ -- yes mouse / faster repeat
  -- no output lpf
  poke(0x5f36,@0x5f36^^0x20)
 
@@ -256,6 +296,8 @@ function _draw()
  local t0=stat(1)
  if display_mode=='ui' then
   ui:draw(state)
+ elseif display_mode=='rename' then
+  draw_rename()
  else
   draw_help()
  end

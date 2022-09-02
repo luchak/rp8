@@ -35,6 +35,7 @@ end
 
 function state_new(savedata)
  local s=parse--[[language::loon]][[{
+  name="new_rp8_song",
   pat_store={},
   tick=1,
   ptick={},
@@ -55,6 +56,7 @@ function state_new(savedata)
 
  eval--[[language::loaf]][[(fn (s dat)
  (if $dat ((fn ()
+  (@= $s name (or (@ $dat name) (@ $s name)))
   (@= $s tl (timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
   (@= $s song_mode (@ $dat song_mode))
@@ -62,6 +64,7 @@ function state_new(savedata)
   (@= (@ $s pat_store) b1 (map_table (@ (@ $dat pat_store) b1) $dec_bytes 1))
   (@= (@ $s pat_store) dr (map_table (@ (@ $dat pat_store) dr) $dec_bytes 2))
  )))
+ (set_song_name (@ $s name))
  )]](s,savedata)
 
  local function _init_tick()
@@ -181,6 +184,7 @@ function state_new(savedata)
 
  function s:save()
   return 'rp80'..stringify({
+   name=self.name,
    tl=self.tl:get_serializable(),
    song_mode=self.song_mode,
    pat_patch=enc_bytes(self.pat_patch),

@@ -22,6 +22,7 @@
 *.loop
 *.loop_len
 *.loop_start
+*.name
 *.nt
 *.paste_seq
 *.pat_patch
