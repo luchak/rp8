@@ -10,7 +10,7 @@ from utils import LazyDict
 
 loaf_builtins = {
     '\'', 'if', 'fn', 'seq', '+', '*', '~', 'not', 'or', '@', '@=', 'for',
-    'set', 'let', 'eq', 'gt', 'cat', 'len', '`'
+    'set', 'let', 'eq', 'gt', 'cat', 'len', '`', '<<'
 }
 
 class LoafNodeKind(Enum):
@@ -403,7 +403,7 @@ def loaf_rename(root, globals, members, locals):
             assert(node.name not in loaf_builtins)
             node.name = globals[node.name]
         elif node.kind == LoafNodeKind.FN:
-            node.args = [locals[node.arg_objs[arg]] for arg in node.args]
+            node.args = [locals[node.arg_objs[arg]] if node.arg_objs[arg] in locals else arg for arg in node.args]
 
     loaf_walk(root, cb_pre)
 

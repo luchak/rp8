@@ -659,10 +659,22 @@ eval--[[language::loaf]][[
  (@= $tl loop_len (mid 1 (@ $tl loop_len) (~ 1000 $ns)))
 )))
 
-(add_ui (transport_number_new 84 0 3 tl loop_len "loop length" (fn (s b)
- (let tl (@ $s tl))
- (@= $tl loop_len (mid 1 (+ (@ $tl loop_len) $b) (~ 1000 (@ $tl loop_start))))
-)))
+(let set_loop_len (fn (tl l)
+  (@= $tl loop_len (mid 1 $l (~ 1000 (@ $tl loop_start))))
+))
+
+(let loop_len_ctrl
+ (transport_number_new 84 0 3 tl loop_len "loop length" (fn (s b)
+  (let tl (@ $s tl))
+  (set_loop_len $tl (+ (@ $tl loop_len) $b))
+ ))
+)
+
+(@= $loop_len_ctrl on_num
+ (fn (s num) (set_loop_len (@ $s tl) (<< 1 (~ $num 1))))
+)
+
+(add_ui $loop_len_ctrl)
 
 (map 0 0 0 0 16 4)
 ))

@@ -225,6 +225,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='gt'  then return v1>v2
   elseif cmd=='cat' then return v1..v2
   elseif cmd=='len' then return #v1
+  elseif cmd=='<<' then return v1<<v2
   else
    if type(cmd)=='string' then
     cmd=locals[cmd] or _ENV[cmd]
