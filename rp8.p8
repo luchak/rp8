@@ -31,7 +31,7 @@ eval--[[language::loaf]][[
   (set_toast "saved to clipboard")
   (seq
    (printh $saved (get_filename) true true)
-   (set_toast "song saved")
+   (set_toast "saved to desktop")
   )
  )
 ))
