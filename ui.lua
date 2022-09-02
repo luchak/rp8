@@ -1,13 +1,6 @@
 -->8
 -- ui
 
-function leftpad(s,l)
- while #s<l do
-  s=' '..s
- end
- return s
-end
-
 function outline_text(s,x,y,c,o)
  color(o)
  print('\-f'..s..'\^g\-h'..s..'\^g\|f'..s..'\^g\|h'..s,x,y)
@@ -104,10 +97,10 @@ function ui_new()
   if (self.focus==w) self.focus=nil
  end
 
- local function save_region(scratch,screen,size)
+ local function save_band(scratch,screen)
   screen+=0x6000
-  memcpy(scratch,screen,size)
-  add(obj.restores,{screen,scratch,size},1)
+  memcpy(scratch,screen,448)
+  add(obj.restores,{screen,scratch,448},1)
  end
 
  function obj:draw(state)
@@ -152,7 +145,7 @@ function ui_new()
   end
 
   -- store rows behind toast and draw toast
-  save_region(0x9200,0xc0,448)
+  save_band(0x9200,0xc0)
   if self.toast_t>0 then
    outline_text(self.toast,2,4,7,0)
    self.toast_t-=1
@@ -161,7 +154,7 @@ function ui_new()
   -- store rows behind mouse and draw mouse
   local tt_my=mid(0,my,121)
   local next_off=tt_my<<6
-  save_region(0x9000,next_off,448)
+  save_band(0x9000,next_off)
   local hover=self.hover
   spr(15,mx,my)
   if show_tooltips and self.hover_t>30 and hover and hover.active and hover.tt then
@@ -171,7 +164,7 @@ function ui_new()
 
   -- store rows behind focus toast value and draw focus toast
   local focus_off=(f and f.y+9 or 0)<<6
-  save_region(0x9400,focus_off,448)
+  save_band(0x9400,focus_off)
   if self.ftoast_w==f and self.ftoast_t>0 then
    outline_text(self.ftoast,mid(0,f.x-2,116),f.y+10,12,0)
    self.ftoast_t-=1
@@ -246,8 +239,8 @@ function ui_new()
 end
 
 function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
- return {
-  grp=grp,step=step,x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
+ return merge(parse--[[language::loon]][[{drag_amt=0.05 tt="note (drag)" bigstep=12}]], {
+  grp=grp,step=step,x=x,y=y,
   get_sprite=function(self,state)
    return sp0-nt0+state.ui_pats[syn][key][step]
   end,
@@ -255,7 +248,7 @@ function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
    local n=state.ui_pats[syn][key]
    n[step]=mid(nmin,nmax,n[step]+b)
   end
- }
+  })
 end
 
 function spin_btn_new(x,y,sprites,tt,get,set)
@@ -269,7 +262,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
   input=function(self,state,b)
    local sval=get(state)+b
    if self.wrap then
-    if (sval>n) sval-=n
+    if sval>n then sval-=n end
    else
     sval=mid(1,sval,n)
    end
@@ -309,7 +302,9 @@ function dial_new(x,y,s0,bins,param_idx,tt)
   end,
   input=function(self,state,b)
    local val=mid(0,128,get(state)+b)
-   set_ftoast(self,leftpad(tostr(val),3))
+   local s=tostr(val)
+   while (#s<3) s=' '..s
+   set_ftoast(self,s)
    set(state,val)
   end,
   doubleclick=function(state)

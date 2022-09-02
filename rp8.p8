@@ -83,8 +83,9 @@ eval--[[language::loaf]][[
  (print "\0<as    \0<6SAVE/COPY  \0<au    \0<6LOAD CLIP  ")
  (print "\0<ab    \0<6GOTO BANKS \0<ae    \0<6EXPORT wav ")
  (print "                                ")
- (print "\0<aUP/DOWN \0<6INC/DEC SELECTED CTRL  ")
- (print "\0<aSHIFT   \0<6W/ABOVE FOR BIG STEPS  ")
+ (print "\0<aUP/DN   \0<6INC/DEC SELECTED CTRL  ")
+ (print "\0<aSHIFT   \0<6W/ABOVE TO GO FASTER   ")
+ (print "\0<aLT/RT   \0<6PREV/NEXT STEP         ")
  (print "\0<aNUMBERS \0<6SELECTED CTRL SPECIFIC ")
  (print "                                ")
  (print "           sONG mODE            ", nil, nil, 7)
@@ -135,6 +136,13 @@ function _init()
 (poke 24365 1)
 (poke 24412 5)
 (poke 24413 1)
+
+(set init_mix_obj (fn (obj)
+ (let result (pack))
+ (@= $result obj $obj)
+ (merge $result (' {lev=0.5 od=0 fx=0}))
+ $result
+))
 ]]
 
  -- yes mouse / faster repeat (pokes above)
@@ -146,22 +154,21 @@ function _init()
   tanh_over_x[i]=50.41509*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)
  end
 
- local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[(
-  `(sweep_new 46 0.08 0.01 0.1667 0.85 0.006 0.03)
-  `(snare_new)
-  `(hh_cy_new 52 1 0.8 0.75 0.4 -0.5 1.5)
-  `(hh_cy_new 55 1.15 0.65 0.55 0.28 -0.3 1.4)
-  `(sweep_new 58 0.1 0.05 0.14 1 0.01 0.1)
-  `(fm_new 61)
- )]]
+ local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[{
+  bd=`(sweep_new 46 0.08 0.01 0.1667 0.85 0.006 0.03)
+  sd=`(snare_new)
+  hh=`(hh_cy_new 52 1 0.8 0.75 0.4 -0.5 1.5)
+  cy=`(hh_cy_new 55 1.15 0.65 0.55 0.28 -0.3 1.4)
+  pc=`(sweep_new 58 0.1 0.05 0.14 1 0.01 0.1)
+  fm=`(fm_new 61)
+ }]]
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()
- local drum_keys=split'bd,sd,hh,cy,pc,fm'
 
  local mixer=mixer_new(
   {
-   b0={obj=syn0,lev=0.5,od=0.0,fx=0},
-   b1={obj=syn1,lev=0.5,od=0.5,fx=0},
-   dr={obj=drum_mixer,lev=0.5,od=0.5,fx=0},
+   b0=init_mix_obj(syn0),
+   b1=init_mix_obj(syn1),
+   dr=init_mix_obj(drum_mixer),
   },
   delay,
   svf,
@@ -179,9 +186,8 @@ function _init()
    if (pstat.b0.on) syn0:note(pseq.b0,patch,ptick.b0,nl)
    if (pstat.b1.on) syn1:note(pseq.b1,patch,ptick.b1,nl)
    if pstat.dr.on then
-    local dseq=pseq.dr
-    for idx,drum in ipairs(drums) do
-     drum:note(dseq[drum_keys[idx]],patch,ptick[drum_keys[idx]])
+    for key,drum in pairs(drums) do
+     drum:note(pseq.dr[key],patch,ptick[key])
     end
    end
    drum_mixer:note(patch)

@@ -36,7 +36,7 @@ eval--[[language::loaf]][[
  b1={p0=23,p1=25,lev=8},
  dr={p0=39,p1=41,lev=16},
 }))
-(set dr_fx_masks (' (1 2 4 8 16 32)))
+(set dr_fx_masks (' {bd=1 sd=2 hh=4 cy=8 pc=16 fm=32}))
 
 (set svf_pats (' (
 "@///////////////"
@@ -77,8 +77,8 @@ function drum_mixer_new(srcs)
     bypass[i]=0
    end
 
-   for i,src in ipairs(self.srcs) do
-    if (self.fx&dr_fx_masks[i]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
+   for key,src in pairs(self.srcs) do
+    if (self.fx&dr_fx_masks[key]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
    end
   end
  }
