@@ -75,9 +75,7 @@ function ui_new()
    add(self.pages[page],w)
   end
   if w.grp then
-   local grp=self.grps[w.grp] or {}
-   add(grp,w)
-   self.grps[w.grp]=grp
+   add(self.grps[w.grp],w)
   end
   if page==self.page or not page then self:show_widget(w) end
  end
@@ -202,11 +200,11 @@ function ui_new()
   local step=(shift and focus and focus.bigstep) or 1
   if (btnp(2)) input+=step
   if (btnp(3)) input-=step
-  if (btnp(0)) nav=-1
-  if (btnp(1)) nav=1
+  if (btnp(0)) nav=-2
+  if (btnp(1)) nav=0
 
   if nav and focus.grp then
-   new_focus=self.grps[focus.grp][(focus.step-1+nav)%16+1]
+   new_focus=self.grps[focus.grp][(focus.step+nav)%16+1]
   end
 
   if click>0 then
@@ -248,11 +246,10 @@ function ui_new()
 end
 
 function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
- local offset=sp0-nt0
  return {
   grp=grp,step=step,x=x,y=y,drag_amt=0.05,tt='note (drag)',bigstep=12,
   get_sprite=function(self,state)
-   return offset+state.ui_pats[syn][key][step]
+   return sp0-nt0+state.ui_pats[syn][key][step]
   end,
   input=function(self,state,b)
    local n=state.ui_pats[syn][key]
@@ -267,7 +264,7 @@ function spin_btn_new(x,y,sprites,tt,get,set)
   x=x,y=y,tt=tt,drag_amt=0.01,
   get_sprite=function(self,state)
    local val=get(state)
-   return sprites[val>0 and val or #sprites]
+   return sprites[val>0 and val or n]
   end,
   input=function(self,state,b)
    local sval=get(state)+b
@@ -428,6 +425,9 @@ eval--[[language::loaf]][[
 )))
 
 (set syn_ui_init (fn (add_ui key base_idx yp)
+(@= (@ $ui grps) (cat sn1 $key) (pack))
+(@= (@ $ui grps) (cat sn2 $key) (pack))
+(@= (@ $ui grps) (cat sst $key) (pack))
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (note_btn_new (cat sn1 $key) $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
@@ -494,6 +494,8 @@ eval--[[language::loaf]][[
 ))
 
 (set drum_ui_init (fn (add_ui)
+(@= (@ $ui grps) drs (pack))
+(@= (@ $ui grps) drn (pack))
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
  (add_ui (step_btn_new drs $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
