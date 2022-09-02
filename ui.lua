@@ -596,7 +596,6 @@ eval--[[language::loaf]][[
 )
 
 (foreach (' (
-  (16 8 1 tempo)
   (32 8 3 level)
   (48 8 71 "overdrive shape")
   (32 16 6 "compressor threshold")
@@ -618,6 +617,18 @@ eval--[[language::loaf]][[
   )
  )
  (' {drag_amt=0.02})
+))
+(let tempos (pack))
+(for 60 188 (fn (t)
+ (if (gt $t 99) (let t
+  (cat "|" (sub (tostr $t) 2))
+ ))
+ (add $tempos (cat $t ",0,15"))
+))
+(let get_set_tempo (pack (state_make_get_set_param 1)))
+(add_ui (merge
+ (spin_btn_new 16 8 $tempos "song tempo" (fn (s) (+ ((@ $get_set_tempo 1) $s) 1)) (fn (s b) ((@ $get_set_tempo 2) $s (~ $b 1))))
+ (' {w=3 drag_amt=0.2})
 ))
 (let dts (pack))
 (foreach (' ("" t d)) (fn (suffix)
