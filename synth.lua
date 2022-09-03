@@ -80,8 +80,8 @@ function synth_new(base)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
    for _=1,4 do
-    local osc=mix1*((saw and op or (op>>31)^^0x8000)>>15) +
-              mix2*((saw and o2p or (o2p>>31)^^0x8000)>>15)
+    local osc=mix1*(saw and op>>15 or (op>>31)^^1) +
+              mix2*(saw and o2p>>15 or (o2p>>31)^^1)
     fosc+=(osc-fosc)>>7
     osc-=fosc
     ffb+=(f4-ffb)/14
