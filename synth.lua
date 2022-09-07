@@ -146,7 +146,7 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'2440,1220,0,.05,0,0,10,.99,.996,.4'
+  {},unpack_split'0.07446,0.03273,0,.05,0,0,10,.99,.996,.4'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -179,7 +179,7 @@ function snare_new()
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   b[i]+=((aemax<aes and aemax or aes)*sin(op>>15)+aen*(rnd()-0.5))
+   b[i]+=((aemax<aes and aemax or aes)*sin(op)+aen*(rnd()-0.5))
   end
   _dp,_op,_aes,_aen=dp,op,aes,aen
  end
@@ -189,7 +189,7 @@ end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune,_dec_mod=
-  {},unpack_split'0,0,0,0,14600,0,17000.36,0,15600,0,16200,.995,1,0'
+  {},unpack_split'0,0,0,0,0.22278,0,0.25490,0,0.23804,0,0.24719,.995,1,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -210,7 +210,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
 
   for i=first,last do
-   local osc=1.0+((op1&0x8000)>>16)+((op2&0x8000)>>16)+((op3&0x8000)>>16)+((op4&0x8000)>>16)
+   local osc=(op1&0.5)+(op2&0.5)+(op3&0.5)+(op4&0.5)-1
 
    local r=nlev*((rnd()&0.5)-0.25)+tlev*osc
    f1+=0.98*(r-f1)
@@ -238,7 +238,7 @@ function fm_new(base)
   _adec=1-pow4(0.32-0.17*dec)
   _mdec=1-pow4(0.28-0.18*dec)
   if s!=n_off and state.playing then
-   _cdet=2^((pat.dt[step]-64)/12)*1165.06958
+   _cdet=2^((pat.dt[step]-64)/12)*0.07111
    _amp=lev*lev*trn(s==n_ac,0.7,0.3)
    _mamp=1.0
   end
@@ -251,8 +251,8 @@ function fm_new(base)
   local mdet,cdet,mphase,cphase,adec,amp,mdec,mamp=_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp
   for i=first,last do
    mphase+=mdet
-   cphase+=cdet*(1+mamp*sin(mphase>>14))
-   b[i]+=amp*sin(cphase>>14)
+   cphase+=cdet*(1+mamp*sin(mphase))
+   b[i]+=amp*sin(cphase)
    amp*=adec
    mamp*=mdec
   end
