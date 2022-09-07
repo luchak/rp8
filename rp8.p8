@@ -98,7 +98,7 @@ eval--[[language::loaf]][[
  (print "\0<ao    \0<6LOAD\16CLIP  \0<ap    \0<6SAVE\17CLIP ")
  (print "\0<a<TAB>\0<6FLIP PAGE  \0<a<SPC>\0<6PLAY/PAUSE ")
  (print "\0<am    \0<6FLIP MODE  \0<ae    \0<6EXPORT wav ")
- (print "\0<ab    \0<6GOTO BANKS \0<an    \0<6SET NAME   ")
+ (print "\0<ab    \0<6GOTO BANKS \0<af    \0<6FILE MGMT. ")
  (print "")
  (print "\0<aUP/DN   \0<6INC/DEC SELECTED CTRL  ")
  (print "\0<aSHIFT   \0<6W/ABOVE TO GO FASTER   ")

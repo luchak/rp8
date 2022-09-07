@@ -12,8 +12,8 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
-  -- constant is (50/(4*5512.5))
-  _fc=0.00227*18*cut
+  -- constant is (50/(4*5512.5))*18
+  _fc=0.04086*cut
   _fr=(res^1.2)*18
   _env=env+0.02
   _acc=acc*1.9+0.1
@@ -62,7 +62,7 @@ function synth_new(base)
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    --fc=4.71*fc/(1+fc)
-   local fc1=(0.5+3*fc)>>2
+   local fc1=(0.48+3*fc)>>2
    if gate then
     -- 1/7 amp multiplier * 1/4 oversampling normalization
     ae+=(0.03571-ae)>>3
