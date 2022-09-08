@@ -475,78 +475,6 @@ def loaf_write_string(root, is_code, omit_names=False):
     return result
 
 
-test_loaf_code_old='''
-(set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
-(set rep (fn (n x)
- (let a (pack))
- (set q 7)
- (for 1 $n (fn () (add $a $x)))
- $a
-))
-(set b (' {q=5}))
-(@= $b r 71)
-(set q (+ 0 0))
-(print (@ $b q))
-(print (@ $b q oops))
-'''
-
-test_loaf_code='''
-(set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
-(set rep (fn (n x)
- (let a (pack))
- (for 1 $n (fn () (add $a $x)))
- $a
-))
-(set id (fn (x) $x))
-(set mcall (fn (obj m) ((@ $obj $m) $obj)))
-'''
-
-# parsed = loaf_parse(test_loaf_code, True)
-# loaf_construct_scopes(parsed)
-# loaf_print_indent(parsed)
-
-# res=loaf_write_string(loaf_parse(test_loaf_code, True))
-# res2=loaf_write_string(loaf_parse(res, True))
-# print(res)
-# print('---')
-# print(res2)
-# assert(res==res2)
-
-# print('GLOBALS')
-# globs=loaf_find_set_globals(loaf_parse('''
-# (set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
-# (set rep (fn (n x)
-#  (let a (pack))
-#  (set q 7)
-#  (for 1 $n (fn () (add $a $x)))
-#  $a
-# ))
-# (set b (' {q=5}))
-# ''', True))
-# print(globs)
-# 
-# loaf_print_indent(loaf_parse('''
-# {
-#   pat_store={},
-#   tick=1,
-#   ptick={},
-#   playing=false,
-#   base_note_len=750,
-#   note_len=750,
-#   drum_sel=bd,
-#   b0_bank=1,
-#   b1_bank=1,
-#   dr_bank=1,
-#   song_mode=false,
-#   patch={},
-#   pat_seqs={},
-#   pat_status={},
-#   tl=`(timeline_new $default_patch),
-#   pat_patch=`(copy $default_patch),
-#  }
-# ''', False))
-
-
 class LoafLanguageBase(SubLanguageBase):
     # called to parse the sub-language from a string
     # (strings consist of raw pico-8 chars ('\0' to '\xff') - not real unicode)
@@ -605,20 +533,6 @@ class LoafLanguageBase(SubLanguageBase):
 
     # called (after rename) to return a minified string
     def minify(self, **_):
-        # this gives false positives with renaming since the second parse is missing scopes
-        # pt = str(self.ast)
-        # res = loaf_write_string(self.ast, self.is_code)
-        # pt2 = str(loaf_parse(res, self.is_code))
-        # if pt != pt2:
-        #     print('MISMATCH!!!!')
-        #     print(self.text)
-        #     print('-----------')
-        #     print(res)
-        #     print('-----------')
-        #     print(pt)
-        #     print('-----------')
-        #     print(pt2)
-
         return loaf_write_string(self.ast, self.is_code)
 
 class LoafLanguage(LoafLanguageBase):
