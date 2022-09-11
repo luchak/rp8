@@ -222,7 +222,13 @@ function ui_new()
     self.click_x,self.click_y,self.drag_dist,self.last_drag=mx,my,0,0
     new_focus=trn(hover and hover.active,hover,nil)
     if new_focus then
-     if (new_focus.click_act) input=click==1 and 1 or -1
+     if new_focus.click_act then
+      if new_focus.grp and focus and new_focus!=focus and focus.grp==new_focus.grp then
+       self.lastval=new_focus:input(state,nil,self.lastval)
+      else
+       input=click==1 and 1 or -1
+      end
+     end
      if (self.click_t>0 and new_focus.doubleclick) new_focus.doubleclick(state)
     end
     self.click_t=12
@@ -235,7 +241,7 @@ function ui_new()
 
   if new_focus then
    input+=new_focus.drag_amt>0 and stat(36) or 0
-   if (input!=0) new_focus:input(state,input)
+   if (input!=0) self.lastval=new_focus:input(state,input)
   end
   if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
 
@@ -251,9 +257,11 @@ function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
   get_sprite=function(self,state)
    return sp0-nt0+state.ui_pats[syn][key][step]
   end,
-  input=function(self,state,b)
+  input=function(self,state,b,v)
    local n=state.ui_pats[syn][key]
-   n[step]=mid(nmin,nmax,n[step]+b)
+   v=v or mid(nmin,nmax,n[step]+b)
+   n[step]=v
+   return v
   end
   })
 end
@@ -288,9 +296,11 @@ function step_btn_new(grp,x,y,syn,step,sprites)
    local v=state.ui_pats[syn].st[step]
    return sprites[v-63]
   end,
-  input=function(self,state,b)
+  input=function(self,state,b,v)
    local st=state.ui_pats[syn].st
-   st[step]=(st[step]+b-64)%n+64
+   v=v or (st[step]+b-64)%n+64
+   st[step]=v
+   return v
   end,
   on_num=function(state,num)
    local st=state.ui_pats[syn].st
