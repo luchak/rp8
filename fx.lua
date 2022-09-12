@@ -122,7 +122,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
      local m0,m1=x0>>31,x1>>31
      if (x0^^m0>1.5) x0=1.5^^m0
      if (x1^^m1>1.5) x1=1.5^^m1
-     local diff=(odgi*(x0+x1-bias-bias-0.148148*(1+bias)*(x0*x0*x0+x1*x1*x1-bias3x2))-pre)>>1
+     local diff=(odgi*(x0+x1-bias-bias-0.148148*(1+bias+bias)*(x0*x0*x0+x1*x1*x1-bias3x2))-pre)>>1
      local err=diff-hpf
      tmp[i]=(tmp_i+err)*slev
      hpf+=err>>8
