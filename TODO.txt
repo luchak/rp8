@@ -1,4 +1,3 @@
-diff FM
 numbers jump dials
 numbers jump pos
 itch.io builds / Makefile

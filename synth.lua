@@ -238,18 +238,20 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
 end
 
 function fm_new(base)
- local obj,_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp={},unpack_split'0,0,0,0,.995,0,.995,0'
+ local obj,_mdet,_cdet,_mphase,_cphase,_adec,_amp,_mdec,_mamp,_mode={},unpack_split'0,0,0,0,.995,0,.995,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
+  if s!=n_off and state.playing then
+   local ac
+   ac,_mode=get_ac_mode(s)
+   _cdet=2^((pat.dt[step]-64)/12)*0.07111
+   _amp=lev*lev*trn(ac,0.7,0.3)*(_mode and 0.85 or 1)
+   _mamp=_mode and 4 or 1
+  end
   _adec=1-pow4(0.32-0.17*dec)
   _mdec=1-pow4(0.28-0.18*dec)
-  if s!=n_off and state.playing then
-   _cdet=2^((pat.dt[step]-64)/12)*0.07111
-   _amp=lev*lev*trn(s==n_ac,0.7,0.3)
-   _mamp=1.0
-  end
   tun<<=2
   local ratio=(0.25<<(tun&7))*(1+(tun&0x0.ffff))
   _mdet=_cdet*ratio
