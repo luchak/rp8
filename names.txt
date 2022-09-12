@@ -13,6 +13,8 @@
 *.def_bar
 *.dr
 *.dr_bank
+*.drn
+*.drs
 *.drum_sel
 *.dt
 *.ev
