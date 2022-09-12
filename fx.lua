@@ -110,7 +110,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     local slev,od,fx,xp1,hpf=src.lev,src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
     local odg=0.2+79.8*od*od
-    local odgi=(1+79*od*od)/odg
+    local odgi=(1+9*od*od)/odg
     local bias=_shape*od*1.5
     local bias3x2=pow3(bias)<<1
     for i=first,last do
