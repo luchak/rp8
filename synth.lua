@@ -64,8 +64,8 @@ function synth_new(base)
    --fc=4.71*fc/(1+fc)
    local fc1=(0.48+3*fc)>>2
    if gate then
-    -- 1/7 amp multiplier * 1/4 oversampling normalization
-    ae+=(0.03571-ae)>>3
+    -- 1/7 amp multiplier
+    ae+=(0.14286-ae)>>3
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
    else
     ae*=0.9974
@@ -93,12 +93,15 @@ function synth_new(base)
     f2+=fc*(f1-f2)
     f3+=fc*(f2-f3)
     f4+=fc*(f3-f4)
-    out+=f4
 
     op+=dodp
     o2p+=dodp2
    end
-   b[i]=out*ae*(1+acc*me)*res_comp
+   -- no smoothing, just take last result, embrace the aliasing
+   -- if the filter took care of it then that's great!
+   -- otherwise too bad, losing the extra high end hurts and
+   -- averaging doesn't do much for the worst of the aliasing
+   b[i]=f4*ae*(1+acc*me)*res_comp
   end
   _op,_odp,_gate,_o2p=op,odp,gate,o2p
   _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf

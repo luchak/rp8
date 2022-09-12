@@ -6,5 +6,7 @@ itch.io builds / Makefile
 
 ? prettier pat len
 
-fix yellow vs red kick
+make red kick more 808-ish
 focus bug on page switch
+why is overdrive so bad for higher synths
+can we alias the synth less in high ranges
