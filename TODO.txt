@@ -2,7 +2,6 @@ diff snares
 diff FM
 numbers jump dials
 numbers jump pos
-pos big step is loop len
 itch.io builds / Makefile
 
 ? prettier pat len

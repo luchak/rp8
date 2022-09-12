@@ -448,7 +448,7 @@ eval--[[language::loaf]][[
 ))
 (add_ui (merge
  (spin_btn_new 24 $yp $pat_lens "pattern length" (state_make_get_set_pat_len $key))
- (' {w=2 drag_amt=0.03})
+ (' {w=2 drag_amt=0.03 bigstep=4})
 ))
 (add_ui (merge (push_new 40 $yp 238
  (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
@@ -672,18 +672,18 @@ eval--[[language::loaf]][[
  ))
 ))
 
-(add_ui (transport_number_new 32 0 4 tl bar "song position" (fn (s b)
+(add_ui (merge (transport_number_new 32 0 4 tl bar "song position" (fn (s b)
  ((@ $s go_to_bar) $s (+ (@ $state tl bar) $b))
-)))
+)) (' {bigstep=4})))
 
 (song_only (toggle_new 56 0 193 194 "loop on/off" (state_make_get_set tl loop)) 195)
 
-(add_ui (transport_number_new 64 0 4 tl loop_start "loop start" (fn (s b)
+(add_ui (merge (transport_number_new 64 0 4 tl loop_start "loop start" (fn (s b)
  (let tl (@ $s tl))
  (let ns (+ (@ $tl loop_start) $b))
  (@= $tl loop_start (mid 1 $ns 999))
  (@= $tl loop_len (mid 1 (@ $tl loop_len) (~ 1000 $ns)))
-)))
+)) (' {bigstep=4})))
 
 (let set_loop_len (fn (tl l)
   (@= $tl loop_len (mid 1 $l (~ 1000 (@ $tl loop_start))))
@@ -699,6 +699,8 @@ eval--[[language::loaf]][[
 (@= $loop_len_ctrl on_num
  (fn (s num) (set_loop_len (@ $s tl) (<< 1 $num)))
 )
+
+(@= $loop_len_ctrl bigstep 4)
 
 (add_ui $loop_len_ctrl)
 
