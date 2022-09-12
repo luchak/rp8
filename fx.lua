@@ -97,7 +97,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for key,src in pairs(mixer_params) do
     local sk=_srcs[key]
     local lev,od,fx=unpack_patch(patch,src.p0,src.p1)
-    sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od*od,pow3(fx)
+    sk.lev,sk.od,sk.fx=src.lev*pow3(lev),od,pow3(fx)
    end
   end,
   update=function(self,b,first,last)
@@ -109,22 +109,23 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for k,src in pairs(_srcs) do
     local slev,od,fx,xp1,hpf=src.lev,src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
-    local odg=0.2+79.8*od
-    local odgi=(1+79*od)/odg
-    local ods=sqrt(od)*_shape
+    local odg=0.2+79.8*od*od
+    local odgi=(1+79*od*od)/odg
+    local bias=_shape*od*1.5
+    local bias3x2=pow3(bias)<<1
     for i=first,last do
      local tmp_i=tmp[i]
      local x1,xp1,x0=tmp_i,tmp_i,(tmp_i+xp1)>>1
      local pre=x1+x0
-     x0*=odg
-     x1*=odg
+     x0=x0*odg+bias
+     x1=x1*odg+bias
      local m0,m1=x0>>31,x1>>31
      if (x0^^m0>1.5) x0=1.5^^m0
      if (x1^^m1>1.5) x1=1.5^^m1
-     local x02,x12=x0*x0,x1*x1
-     local diff=(odgi*(x0+x1+ods*(x02+x12-3)-0.148148*(x02*x0+x12*x1))-pre)>>1
-     hpf+=(diff-hpf)>>8
-     tmp[i]=(tmp_i+diff-hpf)*slev
+     local diff=(odgi*(x0+x1-bias-bias-0.148148*(1+bias)*(x0*x0*x0+x1*x1*x1-bias3x2))-pre)>>1
+     local err=diff-hpf
+     tmp[i]=(tmp_i+err)*slev
+     hpf+=err>>8
     end
     _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
