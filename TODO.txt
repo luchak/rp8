@@ -1,7 +1,6 @@
 diff snares
 diff FM
 paste-to-control
-click sets last value on editing same step group
 numbers jump dials
 numbers jump pos
 pos big step is loop len
