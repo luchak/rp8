@@ -1,4 +1,3 @@
-diff snares
 diff FM
 numbers jump dials
 numbers jump pos

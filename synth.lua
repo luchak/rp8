@@ -148,8 +148,8 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
 end
 
 function snare_new()
- local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax=
-  {},unpack_split'0.07446,0.03273,0,.05,0,0,10,.99,.996,.4'
+ local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax,_f1,_hpmix=
+  {},unpack_split'0.07446,0.03273,0,.05,0,0,10,.99,.996,.4,0,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -158,23 +158,26 @@ function snare_new()
    _detune=2^((12*tun-6+(pat.dt[step]-64))/12)
    _op,_dp=0,_dp0*_detune
    if state.playing then
-    _aes,_aen=0.8,0.4
-    if (s==n_ac) _aes,_aen=1.6,0.9
-    local lev2,aeo=lev*lev,(tun-0.5)*0.2
+    _aes,_aen=1,0.5
+    local ac,mode=get_ac_mode(s)
+    if (ac) _aes,_aen=1.9,1.1
+    local lev2,aeo=lev*lev,(tun-0.5)*0.1
+    _hpmix=mode and 2 or 0
     _aes-=aeo
     _aen+=aeo
     _aes*=lev2
     _aen*=lev2*0.6
     _aemax=_aes>>1
+    local pd2=0.18-0.1625*dec^0.5
+    if (not mode) pd2*=1.2 _aen*=1.6
+    _aesd=0.992-0.02*pd2
+    _aend=1-0.05*pd2
    end
-   local pd2=0.18-0.1625*dec^0.5
-   _aesd=0.992-0.02*pd2
-   _aend=1-0.05*pd2
   end
  end
 
  function obj:subupdate(b,first,last)
-  local op,dp,dp1=_op,_dp,_dp1*_detune
+  local op,dp,dp1,f1,hpmix=_op,_dp,_dp1*_detune,_f1,_hpmix
   local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
   local aemax=_aemax
   for i=first,last do
@@ -182,9 +185,11 @@ function snare_new()
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   b[i]+=((aemax<aes and aemax or aes)*sin(op)+aen*(rnd()-0.5))
+   local v=(aemax<aes and aemax or aes)*sin(op)+aen*(rnd()-0.5)
+   f1+=(v-f1)>>1
+   b[i]+=v-(f1>>hpmix)
   end
-  _dp,_op,_aes,_aen=dp,op,aes,aen
+  _dp,_op,_aes,_aen,_f1=dp,op,aes,aen,f1
  end
 
  return obj
