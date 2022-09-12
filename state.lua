@@ -202,9 +202,8 @@ function state_new(savedata)
 
  function s:cut_seq()
   set_toast("loop cut")
-  self:stop_playing()
   copy_buf_seq=self.tl:cut_seq()
-  load_bar()
+  if (not self.playing) load_bar()
  end
 
  function s:copy_seq()
@@ -222,7 +221,6 @@ function state_new(savedata)
 
  function s:paste_seq()
   if (not copy_buf_seq) return
-  self:stop_playing()
   if self.song_mode then
    set_toast("loop pasted")
    self.tl:paste_seq(copy_buf_seq)
@@ -230,21 +228,20 @@ function state_new(savedata)
    set_toast("pattern pasted")
    self.pat_patch=dec_bytes(copy_buf_seq[1].t0)
   end
-  load_bar()
+  if (not self.playing) load_bar()
  end
 
  function s:insert_seq()
   if (not copy_buf_seq) return
   set_toast("loop inserted")
-  self:stop_playing()
   self.tl:insert_seq(copy_buf_seq)
-  load_bar()
+  if (not self.playing) load_bar()
  end
 
  function s:clear_overrides()
   set_toast("overrides cleared")
   self.tl:clear_overrides()
-  if (not self.playing) self:load_bar()
+  if (not self.playing) load_bar()
  end
 
  function s:commit_overrides()
