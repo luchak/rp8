@@ -313,7 +313,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  local get,set=state_make_get_set_param(param_idx)
  bins-=0x0.0001
  return {
-  x=x,y=y,tt=tt,drag_amt=0.33,bigstep=16,
+  x=x,y=y,tt=tt,drag_amt=0.33,bigstep=16,param=param_idx,
   get_sprite=function(self,state)
    return s0+(get(state)>>7)*bins
   end,
@@ -719,6 +719,7 @@ eval--[[language::loaf]][[
  8=`(id $rewind)
  9=`(id $next_page)
  32=`(fn () (mcall $state toggle_playing))
+ 92=`(fn () (if (@ $ui focus) ((@ $state paste_ctrl) $state (@ $ui focus param))))
  98=`(id $jump_to_banks)
  99=`(fn () (mcall $state commit_overrides))
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))

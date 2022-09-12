@@ -137,6 +137,19 @@ function timeline_new(default_patch, savedata)
   end
  end
 
+ function timeline:paste_ctrl(seq,ctrl)
+  local n=#seq
+  for i=0,self.loop_len-1 do
+   local bar_idx=self.loop_start+i
+   local bar=self.bars[bar_idx] or copy(self.def_bar)
+   local src_bar=seq[i%n+1]
+   bar.t0=enc_bytes(merge(dec_bytes(bar.t0),{[ctrl]=dec_bytes(src_bar.t0)[ctrl]}))
+   bar.ev[ctrl]=src_bar.ev[ctrl]
+   self.bars[bar_idx]=bar
+  end
+  self:clear_overrides()
+ end
+
  function timeline:commit_overrides()
   local op=self.overrides
   for i=0,self.loop_len-1 do

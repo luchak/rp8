@@ -1,6 +1,5 @@
 diff snares
 diff FM
-paste-to-control
 numbers jump dials
 numbers jump pos
 pos big step is loop len

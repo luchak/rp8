@@ -231,6 +231,14 @@ function state_new(savedata)
   if (not self.playing) load_bar()
  end
 
+ function s:paste_ctrl(ctrl)
+  if self.song_mode and copy_buf_seq and ctrl then
+   set_toast("loop pasted (control only)")
+   self.tl:paste_ctrl(copy_buf_seq,ctrl)
+  end
+  if (not self.playing) load_bar()
+ end
+
  function s:insert_seq()
   if (not copy_buf_seq) return
   set_toast("loop inserted")

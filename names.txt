@@ -24,6 +24,7 @@
 *.loop_start
 *.name
 *.nt
+*.paste_ctrl
 *.paste_seq
 *.pat_patch
 *.pat_store
