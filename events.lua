@@ -147,7 +147,6 @@ function timeline_new(default_patch, savedata)
    bar.ev[ctrl]=src_bar.ev[ctrl]
    self.bars[bar_idx]=bar
   end
-  self:clear_overrides()
  end
 
  function timeline:commit_overrides()
