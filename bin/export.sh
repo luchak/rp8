@@ -1,8 +1,8 @@
 #!/bin/sh
 
 mkdir -p ./exports/html
-pico8 -export /tmp/rp8.html "$(grealpath ./rp8_min.p8.png)"
-pico8 -export /tmp/rp8.bin "$(grealpath ./rp8_min.p8.png)"
+pico8 -export /tmp/rp8.html "$(grealpath ./build/rp8_min.p8.png)"
+pico8 -export /tmp/rp8.bin "$(grealpath ./build/rp8_min.p8.png)"
 mv /tmp/rp8.html /tmp/rp8.js ./exports/html
 mv ./exports/html/rp8.html ./exports/html/index.html
 rm -r ./exports/rp8.bin
