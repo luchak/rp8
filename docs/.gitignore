@@ -2,3 +2,5 @@
 *.html
 *.pdf
 *.toc
+
+!index.html
