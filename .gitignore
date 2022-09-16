@@ -2,6 +2,7 @@
 __pycache__/
 .*.sw?
 
+build/
 exports/
 
 rp8_debug.p8
