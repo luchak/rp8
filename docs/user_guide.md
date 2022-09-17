@@ -74,21 +74,21 @@ tries to approximate the accent behavior of the TB-303, but it's a loose resembl
 
 Now that you've done some work, it's probably good to save your song so you don't lose it.
 
-**TASK**: Press **n** to bring up the song naming screen. Enter a name for your song, and then press **s** to save it.
+**TASK**: Press `n` to bring up the song naming screen. Enter a name for your song, and then press `s` to save it.
 You'll see that the song has been saved to your desktop.
 
-You can also press **p** to quicksave your song to the clipboard. This is useful for quickly checkpointing your work.
+You can also press `p` to quicksave your song to the clipboard. This is useful for quickly checkpointing your work.
 RP-8 does not have undo, so use this feature often, especially before you make changes you're not sure about! You can
-press **o** to quickload from the clipboard.
+press `o` to quickload from the clipboard.
 
 ### Check Out the Integrated Help
 
-By now you have probably noticed that RP-8 uses hotkeys for many features. You can press **h** at any point to view a
+By now you have probably noticed that RP-8 uses hotkeys for many features. You can press `h` at any point to view a
 help screen with a list of hotkeys (and the URL to this user guide).
 
 ![The RP-8 help screen](img/rp8_help.2048.png){width=50%}
 
-You can also press **t** in the main view to toggle tooltips on and off.
+You can also press `t` in the main view to toggle tooltips on and off.
 
 **TASK:** Try turning on tooltips and checking out some of the control labels.
 
@@ -116,7 +116,7 @@ There 8 banks (A-H) of 6 patterns each. You can drag on the bank selector to cha
 to pick a pattern in the bank. If RP-8 is paused, the pattern will change instantly, if it is playing, then the pattern
 will change at the beginning of the next bar.
 
-If you get lost and can't figure out which bank the current pattern is in, you can press **b** at any time to jump each
+If you get lost and can't figure out which bank the current pattern is in, you can press `b` at any time to jump each
 bank selector to the current pattern's bank.
 
 ![Pattern copy (left) and paste (right) buttons](img/ptn_copy_paste_btns.png){width=12.5%}
@@ -135,7 +135,7 @@ arrangement in song mode.
 
 Sometimes one bar of music just isn't enough. That's when it's time for song mode, which allows you to arrange multiple
 bars of music and record control movements. You can switch into song mode using the mode selector button, or by
-pressing **m**.
+pressing `m`.
 
 ![Pattern/song mode selector button](img/ps_mode_btn.png){width=6.25%}
 
@@ -160,7 +160,7 @@ an operation only on the bars contained in the current loop.
 
 **TASK:** Since we are starting a new song, let's set our loop to start at bar 1^[It's okay to start at bar 1 even if we think we
 might want to add an introduction, there are ways to move bars around later.] and be either 4 or 8 bars long.^[If you
-forget which control is loop start and which is loop length, you can turn on tooltips with **t** for a reminder.] 
+forget which control is loop start and which is loop length, you can turn on tooltips with `t` for a reminder.] 
 
 ### Copy A Loop From Pattern Mode
 
@@ -172,7 +172,7 @@ the top of the screen:
 
 We can use these buttons to copy information about all the sound controls.
 
-**TASK:** Switch back to pattern mode (by clicking the mode button or pressing **m**) and click the copy button, then
+**TASK:** Switch back to pattern mode (by clicking the mode button or pressing `m`) and click the copy button, then
 switch back to song mode, and click the paste button. Your loop should now be filled with the same control
 configuration you had in pattern mode!
 
@@ -215,7 +215,7 @@ to your new control automation!
 This section demonstrates the second recording method: realtime recording.
 
 The technique above is easy, but only lets you make changes in full-bar chunks. If you want a nice filter sweep, you'll
-have to use realtime recording instead. When you turn on record mode, by clicking the record button or pressing **r**,
+have to use realtime recording instead. When you turn on record mode, by clicking the record button or pressing `r`,
 the record button will light up bright red, and RP-8 will begin immediately recording all control changes you make to
 the song.
 
@@ -226,7 +226,7 @@ avoid recording over the start of your loop.
 When you pause playback, RP-8 will automatically exit record mode. You can also exit record mode by clicking the record
 button.
 
-**TASK:** Press **p** to quicksave your song in case something goes wrong or you record something you don't mean to.
+**TASK:** Press `p` to quicksave your song in case something goes wrong or you record something you don't mean to.
 
 **TASK:** Go to the beginning of your loop, enable recording, and hit play. Move the synth filter cutoff knobs. Each
 time the song loops is a new take, so keep trying as long as you like!
@@ -241,16 +241,16 @@ step recording. When record mode is active, any changed controls are written to 
 This means that you can enable recording, make some changes, and step forward or backward in the song to write those
 changes to each new bar.
 
-**TASK:** Press **p** to quicksave.
+**TASK:** Press `p` to quicksave.
 
-**TASK:** Sequence all the pattern changes you want in your loop! Go to the first bar of your loop and
-enter record mode. Then select the patterns you want to play on that bar. Then use the song
-position control (_carefully_) to go to the next bar,^[Or use the **.** key, which moves one bar forward.] and select
-the patterns you want to play on that bar. If you want to keep the same patterns for multiple bars, you can just skip
-through them, you do not need to click the pattern buttons again.^[This is why you need to be careful when navigating
-your song with recording active: every control modified in the current recording session will be written to every bar
-you visit! You can easily overwrite many bars worth of sequencer data if you're not careful.] If you make a mistake,
-you can backtrack to fix it, or if you make a big mistake, press **o** to quickload your last checkpoint.
+**TASK:** Sequence all the pattern changes you want in your loop! Go to the first bar of your loop and enter record
+mode. Then select the patterns you want to play on that bar. Then use the the `.` key to move one bar forward and
+select the patterns you want to play on that bar. If you want to keep the same patterns for multiple bars, you can just
+skip through them, you do not need to click the pattern buttons again.^[You can also use the mouse to drag the song
+position control to navigate, but you need to be careful. Every control modified in the current recording session will
+be written to every bar you visit! You can easily overwrite many bars worth of sequencer data if you're not careful.]
+If you make a mistake, you can backtrack with the `,` key to fix it, or if you make a big mistake, press `o` to
+quickload your last checkpoint.
 
 Congratulations! You now have a fully-sequenced loop. Let's finish this all off by copying your loop and making a
 variation.
@@ -290,8 +290,8 @@ recording to disable all three instruments for this section (click the red circl
 toggle whether it is enabled). Leave this loop enabled at the end of the song - you want to "trap" the playback
 position here after export so you don't get unexpected sounds at the end of your recording.
 
-**TASK:** Go back to the beginning of your song, and, while paused, press **e** to enable export. Then play your song
-to the end, and press **e** when done. You'll see a new .WAV file on your desktop containing your exported audio.
+**TASK:** Go back to the beginning of your song, and, while paused, press `e` to enable export. Then play your song
+to the end, and press `e` when done. You'll see a new .WAV file on your desktop containing your exported audio.
 
 
 ## Closing Thoughts
