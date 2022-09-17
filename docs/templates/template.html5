@@ -17,6 +17,7 @@ $if(description-meta)$
   <meta name="description" content="$description-meta$" />
 $endif$
   <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700" rel="stylesheet">
 $for(css)$
   <link rel="stylesheet" href="$css$" />
 $endfor$

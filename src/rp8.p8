@@ -110,7 +110,7 @@ eval--[[language::loaf]][[
  (print "\0<a<BKS>\0<6REWIND                    ")
  (print "\0<al    \0<6LOOP       \0<ar   \0<6RECORD      ")
  (print "\0<ax    \0<6CLEAR EDIT \0<ac   \0<6COMMIT EDIT ")
- (print "\0<a\5<    \0<6PASTE CTRL")
+ (print "\0<a\5<    \0<6PASTE CTRL \0<a,/. \0<6-1/+1 BAR ")
  false
  (fillp 0)
 ))

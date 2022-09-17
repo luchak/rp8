@@ -721,6 +721,8 @@ eval--[[language::loaf]][[
  8=`(id $rewind)
  9=`(id $next_page)
  32=`(fn () (mcall $state toggle_playing))
+ 44=`(fn () ((@ $state go_to_bar) $state (~ (@ $state tl bar) 1)))
+ 46=`(fn () ((@ $state go_to_bar) $state (+ (@ $state tl bar) 1)))
  92=`(fn () (if (@ $ui focus) ((@ $state paste_ctrl) $state (@ $ui focus param))))
  98=`(id $jump_to_banks)
  99=`(fn () (mcall $state commit_overrides))
