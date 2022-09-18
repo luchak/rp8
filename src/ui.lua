@@ -727,6 +727,7 @@ eval--[[language::loaf]][[
  98=`(id $jump_to_banks)
  99=`(fn () (mcall $state commit_overrides))
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
+ 102=`(id $enter_file)
  104=`(id $enter_help)
  108=`(fn () (mcall $state toggle_loop))
  109=`(fn () (mcall $state toggle_song_mode))

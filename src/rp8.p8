@@ -115,6 +115,12 @@ eval--[[language::loaf]][[
  (fillp 0)
 ))
 
+(set enter_file (fn ()
+ (set_display_mode file)
+ (set menu_pos 1)
+ false
+))
+
 (set draw_help (fn ()
  (if (stat 30) (seq (stat 31) (set_display_mode ui)))
 ))
@@ -145,6 +151,20 @@ eval--[[language::loaf]][[
     (if (not (or (eq $o 45) (or (gt $o 126) (gt 32 $o)))) (set new_song_name (sub (cat $new_song_name $k) 1 31)))
    )
   )
+ ))
+))
+
+(set file_menu_opts (' (
+ ("clear song" `(id $clear_song))
+ ("rename song" `(id $enter_rename))
+ ("open folder" `(fn () (extcmd folder)))
+)))
+
+(set draw_file (fn ()
+ (cls)
+ (for 1 (len $file_menu_opts) (fn (i)
+  (let item (@ $file_menu_opts $i))
+  (print (@ $item 1) nil nil (if (eq $i $menu_pos) 7 6))
  ))
 ))
 
@@ -305,6 +325,8 @@ function _draw()
   ui:draw(state)
  elseif display_mode=='rename' then
   draw_rename()
+ elseif display_mode=='file' then
+  draw_file()
  else
   draw_help()
  end
