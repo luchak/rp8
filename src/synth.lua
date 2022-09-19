@@ -21,7 +21,7 @@ function synth_new(base)
 
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))*20
-  _fc=0.04535*cut*cut
+  _fc=0.05442*cut*cut
   _fr=(res^1.2)*12
   _env=env+0.02
   _acc=acc*1.9+0.1
@@ -68,7 +68,7 @@ function synth_new(base)
 
   for i=first,last do
    fcbf+=(fcb-fcbf)>>5
-   local fc=min(0.12,fcbf+(me/16)*env)<<2
+   local fc=min(0.12,fcbf+(me/12)*env)<<2
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    --fc=4.71*fc/(1+fc)
