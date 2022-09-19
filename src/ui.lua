@@ -589,8 +589,9 @@ eval--[[language::loaf]][[
 (add_ui (toggle_new
  0 0 6 7 "play/pause (space)" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
+(add_ui (merge (spin_btn_new 24 0 (' (189 190)) "ui page (tab)" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (toggle_new
- 24 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
+ 32 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
 ))
 (song_only (wrap_override (toggle_new
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
@@ -598,7 +599,7 @@ eval--[[language::loaf]][[
 ) 196 $no_uncommitted true) 233)
 (song_only (push_new 16 0 5 $rewind "rewind (backspace)") 5)
 
-(add_ui (merge (spin_btn_new 96 0 (' (189 190)) "ui page (tab)" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
+(add_ui (push_new 96 0 191 $enter_file "file menu"))
 (add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
 (song_only (push_new 8 8 199 (make_obj_cb cut_seq) "cut loop") 198)
 (add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))
@@ -672,7 +673,7 @@ eval--[[language::loaf]][[
  ))
 ))
 
-(add_ui (merge (transport_number_new 32 0 4 tl bar "song position" (fn (s b)
+(add_ui (merge (transport_number_new 40 0 4 tl bar "song position" (fn (s b)
  ((@ $s go_to_bar) $s (+ (@ $state tl bar) $b))
 )) (' {bigstep=4})))
 
