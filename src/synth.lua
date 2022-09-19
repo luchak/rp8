@@ -101,7 +101,7 @@ function synth_new(base)
 
    local out=0
    for _=1,4 do
-    fosc+=0--(aa_osc-fosc)>>7
+    fosc+=(aa_osc-fosc)>>7
     local osc=aa_osc-fosc
     ffb+=(f4-ffb)>>3
     osc-=fr*(f4-ffb-osc)
