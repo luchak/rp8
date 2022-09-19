@@ -7,8 +7,7 @@ Like the original, it provides two synth voices, drums, pattern-based sequencing
 hands-on control, and a song mode for recording music. Unlike the original, the audio output is crunchy 8 bit 5.5kHz
 mono sound, and the user interface is rendered in 16 colors at a chunky 128x128 resolution.
 
-Thanks for trying RP-8, and let me know if you have any thoughts!^[You can find
-various ways to get hold of me via [the RP-8 page on Itch](https://luchak.itch.io/rp8).]
+Thanks for trying RP-8, and let me know if you have any thoughts!^[To download RP-8, check out [the RP-8 page on Itch](https://luchak.itch.io/rp8). For feedback, get in touch with me [on Twitter](https://twitter.com/its_luchak), or check out the [Itch page](https://luchak.itch.io/rp8) for other methods.]
 
 # Getting Started
 
