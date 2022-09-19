@@ -20,8 +20,8 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
-  -- constant is (50/(4*5512.5))*12
-  _fc=0.02721*cut
+  -- constant is (50/(4*5512.5))*20
+  _fc=0.04535*cut*cut
   _fr=(res^1.2)*12
   _env=env+0.02
   _acc=acc*1.9+0.1
@@ -33,7 +33,7 @@ function synth_new(base)
   _nt,_nl=0,note_len
   _lsl,_sl=_sl,nsl
   _gate=false
-  _detune=2^(flr(24*(tun-0.5)+0.5)/12)
+  _detune=2^(flr(24*tun-11.5)/12)
   _o2detune=_detune*2^((flr(pat.dt[step]-64)+o2fine-0.5)/12)
   if (patstep==n_off or not state.playing) return
 
@@ -67,8 +67,8 @@ function synth_new(base)
   local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/8
 
   for i=first,last do
-   fcbf+=(fcb-fcbf)>>6
-   local fc=min(0.12,fcbf+(me/12)*env)<<2
+   fcbf+=(fcb-fcbf)>>5
+   local fc=min(0.12,fcbf+(me/16)*env)<<2
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    --fc=4.71*fc/(1+fc)
@@ -89,9 +89,8 @@ function synth_new(base)
    odp+=todpr*(todp-odp)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
-   local out=0
 
-   local aa_osc=0
+   local aa_osc
    if saw then
     aa_osc=mix1*((op>>15)-pbstep(op,dodp))+mix2*((o2p>>15)-pbstep(o2p,dodp2))
    else
@@ -100,6 +99,7 @@ function synth_new(base)
    op+=dodp
    o2p+=dodp2
 
+   local out=0
    for _=1,4 do
     fosc+=0--(aa_osc-fosc)>>7
     local osc=aa_osc-fosc
