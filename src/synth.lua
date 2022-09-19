@@ -22,7 +22,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))*20
   _fc=0.05442*cut*cut
-  _fr=(res^1.2)*12
+  _fr=(res^1.2)*16
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
