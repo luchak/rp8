@@ -55,7 +55,8 @@ function synth_new(base)
   local env,saw,acc=_env,_saw,ac and _acc or 0
   local res_comp=16/(fr+16)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/4
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/3
+
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
    local fc=min(0.12,fcbf+(me/12)*env)<<2
@@ -84,10 +85,10 @@ function synth_new(base)
               mix2*(saw and o2p>>15 or (o2p>>31)^^1)
     fosc+=(osc-fosc)>>7
     osc-=fosc
-    ffb+=(f4-ffb)/14
+    ffb+=(f4-ffb)>>3
     osc-=fr*(f4-ffb-osc)
     local m=osc>>31
-    osc=osc^^m>15.2 and 4^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
+    osc=osc^^m>11.4 and 3^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
     f1+=(osc-f1)*fc1
     f2+=fc*(f1-f2)
