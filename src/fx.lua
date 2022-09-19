@@ -173,14 +173,13 @@ end
 
 -- see note 005
 function svf_new()
- local _z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp,_dec,_dr=unpack_split'0,0,.1,.2,1,1,0,0,1,0'
+ local _z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp,_dec=unpack_split'0,0,.1,.2,1,1,0,0,1'
  return {
   note=function(self,patch,bar,tick)
    local r,gc_base,amt,dec,_
    _bp,gc_base,r,amt,_,dec=unpack_patch(patch,65,70)
    r=r^0.5
    _rc=1-r*0.96
-   _dr=r>>2
    local svf_pat=svf_pats[patch[69]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
@@ -189,7 +188,7 @@ function svf_new()
    _gc_range=pow3(amt)*(1-_gc_base)
   end,
   update=function(self,b,first,last)
-   local z1,z2,rc,gc_base,gc_range,fe,gc,is_lp,dec,dr=_z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp==0,_dec,_dr
+   local z1,z2,rc,gc_base,gc_range,fe,gc,is_lp,dec=_z1,_z2,_rc,_gc_base,_gc_range,_fe,_gc,_bp==0,_dec
    local rc1=rc<<1
    for i=first,last do
     gc+=(gc_base+gc_range*fe-gc)>>2
@@ -197,12 +196,12 @@ function svf_new()
     local hpn,inp=1/gc+rc1gc,b[i]
     local hpgc=(inp-rc1gc*z1-z2)/hpn
     local bp=hpgc+z1
-    z1=hpgc+bp-dr*bp*bp*bp
+    z1=hpgc+bp
     z2+=(bp*gc)<<1
 
     -- 2x oversample
     hpgc=(inp-rc1gc*z1-z2)/hpn
-    bp=hpgc+z1-dr*bp*bp*bp
+    bp=hpgc+z1
     local lp=bp*gc+z2
     z1=hpgc+bp
     z2=bp*gc+lp

@@ -1,6 +1,14 @@
 -->8
 -- audio gen
 
+function pbstep(p,dp)
+ p=(p>>16)+0.5
+ dp>>=16
+ if (p<dp) rp=p/dp return rp+rp-rp*rp-1
+ if (p>1-dp) rp=(p-1)/dp return rp*rp+rp+rp+1
+ return 0
+end
+
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
@@ -14,7 +22,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))*12
   _fc=0.02721*cut
-  _fr=(res^1.2)*16
+  _fr=(res^1.2)*12
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
@@ -31,7 +39,8 @@ function synth_new(base)
 
   _gate=true
   -- constant is 55*65536/(5512.5 * 4)
-  _todp=2^(pat.nt[step]/12+0.25)*163.46848
+  --_todp=2^(pat.nt[step]/12+2.25)*163.46848
+  _todp=2^(pat.nt[step]/12)*777.59152
 
   if (_ac) _env+=acc>>1
   if _lsl then
@@ -55,7 +64,7 @@ function synth_new(base)
   local env,saw,acc=_env,_saw,ac and _acc or 0
   local res_comp=16/(fr+16)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/3
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/8
 
   for i=first,last do
    fcbf+=(fcb-fcbf)>>6
@@ -65,8 +74,8 @@ function synth_new(base)
    --fc=4.71*fc/(1+fc)
    local fc1=(0.48+3*fc)>>2
    if gate then
-    -- 1/7 amp multiplier
-    ae+=(0.14286-ae)>>3
+    -- 1/7 amp multiplier, 1/4 oversampling multiplier
+    ae+=(0.03572-ae)>>3
     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
    else
     ae*=0.9974
@@ -80,29 +89,33 @@ function synth_new(base)
    odp+=todpr*(todp-odp)
    local dodp,dodp2,out=odp*detune,odp*o2detune,0
    _nt+=1
+   local out=0
+
+   local aa_osc=0
+   if saw then
+    aa_osc=mix1*((op>>15)-pbstep(op,dodp))+mix2*((o2p>>15)-pbstep(o2p,dodp2))
+   else
+    aa_osc=mix1*(sgn(op)-pbstep(op,dodp)+pbstep(op+0x8000,dodp))+mix2*(sgn(o2p)-pbstep(o2p,dodp2)+pbstep(o2p+0x8000,dodp2))
+   end
+   op+=dodp
+   o2p+=dodp2
+
    for _=1,4 do
-    local osc=mix1*(saw and op>>15 or (op>>31)^^1) +
-              mix2*(saw and o2p>>15 or (o2p>>31)^^1)
-    fosc+=(osc-fosc)>>7
-    osc-=fosc
+    fosc+=0--(aa_osc-fosc)>>7
+    local osc=aa_osc-fosc
     ffb+=(f4-ffb)>>3
     osc-=fr*(f4-ffb-osc)
     local m=osc>>31
-    osc=osc^^m>11.4 and 3^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
+    osc=osc^^m>30.4 and 8^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
     f1+=(osc-f1)*fc1
     f2+=fc*(f1-f2)
     f3+=fc*(f2-f3)
     f4+=fc*(f3-f4)
 
-    op+=dodp
-    o2p+=dodp2
+    out+=f4
    end
-   -- no smoothing, just take last result, embrace the aliasing
-   -- if the filter took care of it then that's great!
-   -- otherwise too bad, losing the extra high end hurts and
-   -- averaging doesn't do much for the worst of the aliasing
-   b[i]=f4*ae*(1+acc*me)*res_comp
+   b[i]=out*ae*(1+acc*me)*res_comp
   end
   _op,_odp,_gate,_o2p=op,odp,gate,o2p
   _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf
