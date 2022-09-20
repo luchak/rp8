@@ -7,11 +7,83 @@ function pbstep(rp)
 end
 
 function synth_new(base)
- local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
-       _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
-       _ae,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix,_e1,_e2={},
-       unpack_split'0,.001,.001,.999,.5,3.6,.5,.5,1,0,0,0,0,0,0,0,.99,0,900,900,0,0,1,0,0,0'
+ local obj,_op,_todp,_todpr,_fc,_fr,_env,_acc,
+       _detune,_med,_nt,_nl,_o2p,_o2detune,_o2mix={},
+       unpack_split'0,.001,.999,.5,3.6,.5,.5,0,9,900,900,0,1,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
+
+ local function update(b,first,last)
+  local f1,f2,f3,f4,fosc,ffb,e1,e2,odp,fcbf,ae,me=0,0,0,0,0,0,0,0,0,0.1,0,0
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/6
+
+  repeat
+   b,first,last=yield()
+
+   local op,detune,todp,todpr,o2p=_op,_detune,_todp,_todpr,_o2p
+   local o2detune,o2mix=_o2detune,_o2mix>>2
+   local fr,fcb=_fr,_fc
+   local med,mr=_med,_mr
+   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
+   local env,saw,acc=_env,_saw,ac and _acc or 0
+   local res_comp=16/(fr+16)
+   local mix1,mix2=cos(o2mix),-sin(o2mix)
+
+   for i=first,last do
+    fcbf+=(fcb-fcbf)>>5
+    local fc=min(0.12,fcbf+(me/10)*env)<<2
+    -- janky dewarping
+    -- scaling constant is 0.75*2*pi because???
+    --fc=4.71*fc/(1+fc)
+    local fc1=(0.48+3*fc)>>2
+    if gate then
+     -- 1/7 amp multiplier, 1/4 oversampling multiplier
+     ae+=(0.03572-ae)>>3
+     if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
+    else
+     ae*=0.9974
+    end
+    if mr then
+     me+=(1-me)>>3
+     mr=me<=0.995
+    else
+     me*=med
+    end
+    odp+=todpr*(todp-odp)
+    local dodp,dodp2,out,aa_osc=odp*detune,odp*o2detune,0
+    _nt+=1
+
+    if saw then
+     aa_osc=mix1*((op>>15)-pbstep((op+0x8000)/dodp))+mix2*((o2p>>15)-pbstep((o2p+0x8000)/dodp2))
+    else
+     aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
+    end
+    aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
+    op+=dodp
+    o2p+=dodp2
+
+    for _=1,4 do
+     fosc+=(aa_osc-fosc)>>5
+     local osc=aa_osc-fosc
+     ffb+=(f4-ffb)>>4
+     osc-=fr*(f4-ffb-osc)
+     local m=osc>>31
+     osc=osc^^m>22.8 and 6^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
+
+     f1+=(osc-f1)*fc1
+     f2+=fc*(f1-f2)
+     f3+=fc*(f2-f3)
+     f4+=fc*(f3-f4)
+
+     out+=f4
+    end
+    b[i]=out*ae*(1+acc*me)*res_comp
+   end
+   _op,_gate,_o2p,_mr=op,gate,o2p,mr
+  until false
+ end
+
+ local _update=cocreate(update)
+ assert(coresume(_update))
 
  function obj:note(pat,patch,step,note_len)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
@@ -52,72 +124,7 @@ function synth_new(base)
  end
 
  function obj:update(b,first,last)
-  local odp,op,detune,todp,todpr,o2p=_odp,_op,_detune,_todp,_todpr,_o2p
-  local o2detune,o2mix=_o2detune,_o2mix>>2
-  local f1,f2,f3,f4,fosc,ffb,e1,e2=_f1,_f2,_f3,_f4,_fosc,_ffb,_e1,_e2
-  local fr,fcb,fcbf=_fr,_fc,_fcbf
-  local ae,me,med,mr=_ae,_me,_med,_mr
-  local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
-  local env,saw,acc=_env,_saw,ac and _acc or 0
-  local res_comp=16/(fr+16)
-  local mix1,mix2=cos(o2mix),-sin(o2mix)
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/6
-
-  for i=first,last do
-   fcbf+=(fcb-fcbf)>>5
-   local fc=min(0.12,fcbf+(me/10)*env)<<2
-   -- janky dewarping
-   -- scaling constant is 0.75*2*pi because???
-   --fc=4.71*fc/(1+fc)
-   local fc1=(0.48+3*fc)>>2
-   if gate then
-    -- 1/7 amp multiplier, 1/4 oversampling multiplier
-    ae+=(0.03572-ae)>>3
-    if ((nt>(nl>>1) and not sl) or nt>nl) gate=false
-   else
-    ae*=0.9974
-   end
-   if mr then
-    me+=(1-me)>>3
-    mr=me<=0.995
-   else
-    me*=med
-   end
-   odp+=todpr*(todp-odp)
-   local dodp,dodp2,out=odp*detune,odp*o2detune,0
-   _nt+=1
-
-   local aa_osc
-   if saw then
-    aa_osc=mix1*((op>>15)-pbstep((op+0x8000)/dodp))+mix2*((o2p>>15)-pbstep((o2p+0x8000)/dodp2))
-   else
-    aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
-   end
-   aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
-   op+=dodp
-   o2p+=dodp2
-
-   local out=0
-   for _=1,4 do
-    fosc+=(aa_osc-fosc)>>5
-    local osc=aa_osc-fosc
-    ffb+=(f4-ffb)>>4
-    osc-=fr*(f4-ffb-osc)
-    local m=osc>>31
-    osc=osc^^m>22.8 and 6^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
-
-    f1+=(osc-f1)*fc1
-    f2+=fc*(f1-f2)
-    f3+=fc*(f2-f3)
-    f4+=fc*(f3-f4)
-
-    out+=f4
-   end
-   b[i]=out*ae*(1+acc*me)*res_comp
-  end
-  _op,_odp,_gate,_o2p=op,odp,gate,o2p
-  _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf,_e1,_e2=f1,f2,f3,f4,fosc,ffb,fcbf,e1,e2
-  _me,_ae,_mr=me,ae,mr
+  assert(coresume(_update,b,first,last))
  end
 
  return obj

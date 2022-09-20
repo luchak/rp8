@@ -115,7 +115,8 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     local bias3x2=pow3(bias)<<1
     for i=first,last do
      local tmp_i=tmp[i]
-     local x1,xp1,x0=tmp_i,tmp_i,(tmp_i+xp1)>>1
+     local x1,x0=tmp_i,(tmp_i+xp1)>>1
+     xp1=tmp_i
      local pre=x1+x0
      x0=x0*odg+bias
      x1=x1*odg+bias
