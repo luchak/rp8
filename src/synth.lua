@@ -83,7 +83,7 @@ function synth_new(base)
  end
 
  local _update=cocreate(update)
- assert(coresume(_update))
+ coresume(_update)
 
  function obj:note(pat,patch,step,note_len)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
@@ -124,7 +124,7 @@ function synth_new(base)
  end
 
  function obj:update(b,first,last)
-  assert(coresume(_update,b,first,last))
+  coresume(_update,b,first,last)
  end
 
  return obj
