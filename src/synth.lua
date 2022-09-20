@@ -1,12 +1,9 @@
 -->8
 -- audio gen
 
-function pbstep(p,dp)
- p=(p>>16)+0.5
- dp>>=16
- if (p<dp) rp=p/dp return rp+rp-rp*rp-1
- if (p>1-dp) rp=(p-1)/dp return rp*rp+rp+rp+1
- return 0
+function pbstep(rp)
+ local m=rp>>31
+ return rp^^m<1 and rp+rp-((rp*rp+1)^^m) or 0
 end
 
 function synth_new(base)
@@ -22,7 +19,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is (50/(4*5512.5))*20
   _fc=0.05442*cut*cut
-  _fr=(res^1.2)*16
+  _fr=(res^1.2)*10
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
@@ -64,11 +61,11 @@ function synth_new(base)
   local env,saw,acc=_env,_saw,ac and _acc or 0
   local res_comp=16/(fr+16)
   local mix1,mix2=cos(o2mix),-sin(o2mix)
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/8
+  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/6
 
   for i=first,last do
    fcbf+=(fcb-fcbf)>>5
-   local fc=min(0.12,fcbf+(me/12)*env)<<2
+   local fc=min(0.12,fcbf+(me/10)*env)<<2
    -- janky dewarping
    -- scaling constant is 0.75*2*pi because???
    --fc=4.71*fc/(1+fc)
@@ -92,21 +89,21 @@ function synth_new(base)
 
    local aa_osc
    if saw then
-    aa_osc=mix1*((op>>15)-pbstep(op,dodp))+mix2*((o2p>>15)-pbstep(o2p,dodp2))
+    aa_osc=mix1*((op>>15)-pbstep((op+0x8000)/dodp))+mix2*((o2p>>15)-pbstep((o2p+0x8000)/dodp2))
    else
-    aa_osc=mix1*(sgn(op)-pbstep(op,dodp)+pbstep(op+0x8000,dodp))+mix2*(sgn(o2p)-pbstep(o2p,dodp2)+pbstep(o2p+0x8000,dodp2))
+    aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
    end
    op+=dodp
    o2p+=dodp2
 
    local out=0
    for _=1,4 do
-    fosc+=(aa_osc-fosc)>>7
+    fosc+=(aa_osc-fosc)>>5
     local osc=aa_osc-fosc
-    ffb+=(f4-ffb)>>3
+    ffb+=(f4-ffb)>>4
     osc-=fr*(f4-ffb-osc)
     local m=osc>>31
-    osc=osc^^m>30.4 and 8^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
+    osc=osc^^m>22.8 and 6^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
     f1+=(osc-f1)*fc1
     f2+=fc*(f1-f2)
