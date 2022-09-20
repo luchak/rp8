@@ -9,16 +9,16 @@ end
 function synth_new(base)
  local obj,_op,_odp,_todp,_todpr,_fc,_fr,_env,_acc,
        _detune,_f1,_f2,_f3,_f4,_fosc,_ffb,_me,_med,
-       _ae,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix={},
-       unpack_split'0,.001,.001,.999,.5,3.6,.5,.5,1,0,0,0,0,0,0,0,.99,0,900,900,0,0,1,0'
+       _ae,_nt,_nl,_fcbf,_o2p,_o2detune,_o2mix,_e1,_e2={},
+       unpack_split'0,.001,.001,.999,.5,3.6,.5,.5,1,0,0,0,0,0,0,0,.99,0,900,900,0,0,1,0,0,0'
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  function obj:note(pat,patch,step,note_len)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
-  -- constant is (50/(4*5512.5))*20
-  _fc=0.05442*cut*cut
+  -- constant is 1000/(4*5512.5)
+  _fc=0.04535*cut*cut
   _fr=(res^1.2)*10
   _env=env+0.02
   _acc=acc*1.9+0.1
@@ -54,7 +54,7 @@ function synth_new(base)
  function obj:update(b,first,last)
   local odp,op,detune,todp,todpr,o2p=_odp,_op,_detune,_todp,_todpr,_o2p
   local o2detune,o2mix=_o2detune,_o2mix>>2
-  local f1,f2,f3,f4,fosc,ffb=_f1,_f2,_f3,_f4,_fosc,_ffb
+  local f1,f2,f3,f4,fosc,ffb,e1,e2=_f1,_f2,_f3,_f4,_fosc,_ffb,_e1,_e2
   local fr,fcb,fcbf=_fr,_fc,_fcbf
   local ae,me,med,mr=_ae,_me,_med,_mr
   local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
@@ -93,6 +93,7 @@ function synth_new(base)
    else
     aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
    end
+   aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
    op+=dodp
    o2p+=dodp2
 
@@ -115,7 +116,7 @@ function synth_new(base)
    b[i]=out*ae*(1+acc*me)*res_comp
   end
   _op,_odp,_gate,_o2p=op,odp,gate,o2p
-  _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf=f1,f2,f3,f4,fosc,ffb,fcbf
+  _f1,_f2,_f3,_f4,_fosc,_ffb,_fcbf,_e1,_e2=f1,f2,f3,f4,fosc,ffb,fcbf,e1,e2
   _me,_ae,_mr=me,ae,mr
  end
 
