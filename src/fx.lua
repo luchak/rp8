@@ -67,18 +67,17 @@ eval--[[language::loaf]][[
 ]]
 
 function drum_mixer_new(srcs)
+ local fx=127
  return {
-  srcs=srcs,
-  fx=127,
-  note=function(self,patch) self.fx=patch[45] end,
+  note=function(self,patch) fx=patch[45] end,
   update=function(self,b,first,last,bypass)
    for i=first,last do
     b[i]=0
     bypass[i]=0
    end
 
-   for key,src in pairs(self.srcs) do
-    if (self.fx&dr_fx_masks[key]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
+   for key,src in pairs(srcs) do
+    if (fx&dr_fx_masks[key]>0) src:subupdate(b,first,last) else src:subupdate(bypass,first,last)
    end
   end
  }
@@ -150,10 +149,9 @@ end
 function comp_new(src,_th,_ratio,_att,_rel)
  local _env=0
  return {
-  src=src,
   th=_th,
   update=function(self,b,first,last)
-   self.src:update(b,first,last)
+   src:update(b,first,last)
    local env,att,rel=_env,_att,_rel
    local th,ratio=self.th,1/_ratio
    -- makeup targets 0.6
