@@ -16,8 +16,10 @@ function audio_update()
   for i=1,todo do
    -- dc filter and soft clipping
    local x=buf[i]<<8
-   dcf+=(x-dcf)>>9
-   x=mid(-1.5,(x-dcf)>>8,1.5)
+   x=(x-dcf)>>8
+   dcf+=x
+   local m=x>>31
+   x=x^^m<1.5 and x or 1.5^^m
    x-=0x0.25ee*x*x*x
    -- dither for nicer tails
    poke(0x42ff+i,(x*0x7f.5f80+(rnd()>>2)+128.375)&-1)

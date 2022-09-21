@@ -62,14 +62,15 @@ function synth_new(base)
     o2p+=dodp2
 
     for _=1,4 do
-     fosc+=(aa_osc-fosc)>>5
      local osc=aa_osc-fosc
-     ffb+=(f4-ffb)>>4
-     osc-=fr*(f4-ffb-osc)
+     fosc+=osc>>5
+     local ffb_diff=f4-ffb
+     ffb+=ffb_diff>>4
+     osc-=fr*(ffb_diff-osc)
      local m=osc>>31
      osc=osc^^m>22.8 and 6^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
 
-     f1+=(osc-f1)*fc1
+     f1+=fc1*(osc-f1)
      f2+=fc*(f1-f2)
      f3+=fc*(f2-f3)
      f4+=fc*(f3-f4)

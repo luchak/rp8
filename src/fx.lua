@@ -160,9 +160,8 @@ function comp_new(src,_th,_ratio,_att,_rel)
     local s=b[i]
     local x=s^^(s>>31)
     env+=(x>env and att or rel)*(x-env)
-    local g=makeup
-    local te=th/(env+0x0.0010)
-    if (env>th) g*=te+ratio*(1-te)
+    local g,te=makeup,th/(env+0x0.0010)
+    if (env>th) g*=te+ratio-te*ratio
     b[i]=s*g
    end
    _env=env
