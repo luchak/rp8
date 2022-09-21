@@ -365,6 +365,8 @@ the loop. The new bars are then filled with the copied sequence, just as with pa
 
 ## Audio Routing
 
+![The RP-8 audio architecture](img/orig/audio_arch.png)
+
 ## The Synths
 
 ## The Drum Machine
