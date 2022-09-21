@@ -29,12 +29,12 @@ function merge(base,new)
 end
 
 function enc_bytes(a)
- if (type(a)=='number') return a
+ if (type(a)!='table') return a
  return chr(unpack(a))
 end
 
 function dec_bytes(s)
- if (type(s)=='number') return s
+ if (type(s)!='string') return s
  return {ord(s,1,#s)}
 end
 
@@ -64,7 +64,7 @@ function stringify(v)
   for c in all(split(v,1)) do
    local o=ord(c)
    -- escape non-printables, ", and \
-   if o<35 or o==92 or o>126 then s..='\\'..chr(48+(o>>4&0x0f),48+(o&0x0f)) else s..=c end
+   if o<35 or o==92 or o>126 then s..='\\'..chr(48+(o>>4&0xf),48+(o&0xf)) else s..=c end
   end
   return s..'"'
  elseif t=='table' then
