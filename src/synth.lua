@@ -14,7 +14,7 @@ function synth_new(base)
 
  local function update(b,first,last)
   local f1,f2,f3,f4,fosc,ffb,e1,e2,odp,fcbf,ae,me=0,0,0,0,0,0,0,0,0,0.1,0,0
-  local tanh_over_x,tanh_scale=tanh_over_x,tanh_scale/6
+  local tanh,tanh_scale=tanh,tanh_scale_synth
 
   repeat
    b,first,last=yield()
@@ -68,7 +68,7 @@ function synth_new(base)
      ffb+=ffb_diff>>4
      osc-=fr*(ffb_diff-osc)
      local m=osc>>31
-     osc=osc^^m>22.8 and 6^^m or osc*tanh_over_x[(osc*tanh_scale+2048.5)&-1]
+     osc=osc^^m>22.8 and 6^^m or tanh[(osc*tanh_scale+2048.5)&-1]
 
      f1+=fc1*(osc-f1)
      f2+=fc*(f1-f2)

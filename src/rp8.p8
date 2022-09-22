@@ -231,9 +231,10 @@ function _init()
 (toggle_tooltips)
 (set_toast "press h for help" 180)
 (pal 10 135 1)
-(set tanh_over_x (pack))
+(set tanh (pack))
 (set tanh_scale 538.94737)
 (set tanh_scale_half (* $tanh_scale 0.5))
+(set tanh_scale_synth (* $tanh_scale 0.16666))
 
 (poke 24365 1)
 (poke 24412 5)
@@ -252,8 +253,9 @@ function _init()
  poke(0x5f36,@0x5f36^^0x20)
 
  for i=0,4096 do
-  local x2=((i-2048)/tanh_scale_half)^2
-  tanh_over_x[i]=50.41509*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)
+  local x=(i-2048)/tanh_scale_half
+  local x2=x*x
+  tanh[i]=151.24527*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)*x
  end
 
  local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[{
