@@ -165,7 +165,7 @@ function ui_new()
   save_band(0x9000,next_off)
   local hover=self.hover
   spr(15,mx,my)
-  if show_tooltips and self.hover_t>30 and hover and hover.active and hover.tt then
+  if tooltips_enabled() and self.hover_t>30 and hover and hover.active and hover.tt then
    local xp=mx<56 and mx+7 or mx-2-4*#hover.tt
    outline_text(hover.tt,xp+1,tt_my+1,12,1)
   end
