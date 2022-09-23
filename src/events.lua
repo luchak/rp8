@@ -145,12 +145,13 @@ function timeline_new(default_patch, savedata)
   local n=#seq
   for i=0,self.loop_len-1 do
    local bar_idx=self.loop_start+i
-   local bar=self.bars[bar_idx] or copy(self.def_bar)
-   local src_bar=seq[i%n+1]
+   local bar,src_bar=self.bars[bar_idx] or copy(self.def_bar),seq[i%n+1]
+   local t0,src_t0=dec_bytes(bar.t0),dec_bytes(src_bar.t0)
    for ctrl in all(ctrls) do
-    bar.t0=enc_bytes(merge(dec_bytes(bar.t0),{[ctrl]=dec_bytes(src_bar.t0)[ctrl]}))
+    t0=merge(t0,{[ctrl]=src_t0[ctrl]})
     bar.ev[ctrl]=src_bar.ev[ctrl]
    end
+   bar.t0=enc_bytes(t0)
    self.bars[bar_idx]=bar
   end
  end
