@@ -60,18 +60,17 @@ function timeline_new(default_patch, savedata)
    patch[k]=v[tick]
   end
   merge(patch,op)
-  local bar_events,bar_start=self.bar_events,self.bar_start
   if self.rec then
    for k,v in pairs(op) do
     if not no_event_params[k] then
-     local ek,bsk=bar_events[k],bar_start[k]
+     local ek,bsk=self.bar_events[k],self.bar_start[k]
      if v!=bsk then
       if not ek then
        ek={}
        for i=1,16 do
         ek[i]=bsk
        end
-       bar_events[k]=ek
+       self.bar_events[k]=ek
       end
       ek[tick]=v
      end
@@ -100,21 +99,19 @@ function timeline_new(default_patch, savedata)
  ))]](timeline)
 
  function timeline:toggle_rec()
-  local sr=self.rec
-  if sr then
+  if self.rec then
    if (self.has_override) self:_finalize_bar()
    self:clear_overrides()
   end
-  self.rec=not sr
+  self.rec=not self.rec
  end
 
  function timeline:cut_seq()
-  local ls,ll=self.loop_start,self.loop_len
-  local cut_end,c,nbs=ls+ll,self:copy_seq(),{}
+  local cut_end,c,nbs=self.loop_start+self.loop_len,self:copy_seq(),{}
   for i,b in pairs(self.bars) do
-   if i>=ls then
+   if i>=self.loop_start then
     if i>=cut_end then
-     nbs[i-ll]=b
+     nbs[i-self.loop_len]=b
     end
    else
     nbs[i]=b
@@ -125,10 +122,10 @@ function timeline_new(default_patch, savedata)
  end
 
  function timeline:copy_seq()
-  local c,bars={},self.bars
+  local c={}
   for i=1,self.loop_len do
    local bar=i+self.loop_start-1
-   c[i]=copy(bars[bar] or self.def_bar)
+   c[i]=copy(self.bars[bar] or self.def_bar)
   end
   return c
  end
@@ -157,21 +154,16 @@ function timeline_new(default_patch, savedata)
  end
 
  function timeline:commit_overrides()
-  local op=self.overrides
   local ctrls={}
-  for k,_ in pairs(op) do add(ctrls,k) end
-  self:paste_ctrls({{t0=enc_bytes(merge(dec_bytes(self.def_bar.t0), op)), ev={}}}, ctrls)
+  for k,_ in pairs(self.overrides) do add(ctrls,k) end
+  self:paste_ctrls({{t0=enc_bytes(merge(dec_bytes(self.def_bar.t0), self.overrides)), ev={}}}, ctrls)
   self:clear_overrides()
  end
 
  function timeline:insert_seq(seq)
-  local bs,ls,ll,nbs=
-   self.bars,
-   self.loop_start,
-   self.loop_len,
-   {}
-  for i,b in pairs(bs) do
-   nbs[i>=ls and i+ll or i]=b
+  local nbs={}
+  for i,b in pairs(self.bars) do
+   nbs[i>=self.loop_start and i+self.loop_len or i]=b
   end
   self.bars=nbs
   self:paste_seq(seq)
