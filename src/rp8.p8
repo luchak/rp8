@@ -43,7 +43,6 @@ eval--[[language::loaf]][[
   (let playing (@ $state playing))
   (let bar (@ $state bar))
   (set state (or (state_load $pd) $state))
-  (@= $seq_helper state $state)
   (set_toast "loaded from clipboard")
   ((@ $state go_to_bar) $state $bar)
   (if $playing ((@ $state toggle_playing) $state))
@@ -170,7 +169,6 @@ eval--[[language::loaf]][[
  `(fn () (enter_rename))
  `(fn ()
   (set state (state_new))
-  (@= $seq_helper state $state)
   (set_display_mode ui)
  )
 )))
@@ -284,7 +282,7 @@ function _init()
  local comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
 
  seq_helper=seq_helper_new(
-  state,comp,function()
+  comp,function()
    local patch,pseq,pstat=
     state.patch,
     state.pat_seqs,
@@ -314,8 +312,6 @@ function _init()
    delay.fb=sqrt(dl_fb)*0.98
 
    comp.th=0.05+0.95*comp_th*comp_th
-
-   if (state.playing) state:next_tick()
   end
  )
 
@@ -333,7 +329,6 @@ function _update60()
   if st then
    printh(s,'@clip')
    state=st
-   seq_helper.state=state
    set_toast"song loaded from file"
   else
    set_toast"could not load song"
