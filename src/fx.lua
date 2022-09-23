@@ -39,7 +39,6 @@ eval--[[language::loaf]][[
 (set dr_fx_masks (' {bd=1 sd=2 hh=4 cy=8 pc=16 fm=32}))
 
 (set svf_pats (' (
-"@///////////////"
 "@///////"
 "@///"
 "@/"
@@ -64,6 +63,7 @@ eval--[[language::loaf]][[
 "/@"
 ":///@/////:/@///"
 )))
+(@= $svf_pats 0 "@///////////////")
 ]]
 
 function drum_mixer_new(srcs)
