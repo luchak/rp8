@@ -2,6 +2,10 @@
 
 eval--[[language::loaf]][[
 (set no_event_params (' {10=true,11=true,26=true,27=true,42=true,43=true}))
+(set has_event_params_list (pack))
+(for 1 71 (fn (i)
+ (if (@ $no_event_params $i) (id) (add $has_event_params_list $i))
+))
 ]]
 
 function timeline_new(default_patch, savedata)
@@ -137,29 +141,25 @@ function timeline_new(default_patch, savedata)
   end
  end
 
- function timeline:paste_ctrl(seq,ctrl)
+ function timeline:paste_ctrls(seq,ctrls)
   local n=#seq
   for i=0,self.loop_len-1 do
    local bar_idx=self.loop_start+i
    local bar=self.bars[bar_idx] or copy(self.def_bar)
    local src_bar=seq[i%n+1]
-   bar.t0=enc_bytes(merge(dec_bytes(bar.t0),{[ctrl]=dec_bytes(src_bar.t0)[ctrl]}))
-   bar.ev[ctrl]=src_bar.ev[ctrl]
+   for ctrl in all(ctrls) do
+    bar.t0=enc_bytes(merge(dec_bytes(bar.t0),{[ctrl]=dec_bytes(src_bar.t0)[ctrl]}))
+    bar.ev[ctrl]=src_bar.ev[ctrl]
+   end
    self.bars[bar_idx]=bar
   end
  end
 
  function timeline:commit_overrides()
   local op=self.overrides
-  for i=0,self.loop_len-1 do
-   local bar_idx=self.loop_start+i
-   local bar=self.bars[bar_idx] or copy(self.def_bar)
-   bar.t0=enc_bytes(merge(dec_bytes(bar.t0),op))
-   for k,_ in pairs(op) do
-    bar.ev[k]=nil
-   end
-   self.bars[bar_idx]=bar
-  end
+  local ctrls={}
+  for k,_ in pairs(op) do add(ctrls,k) end
+  self:paste_ctrls({{t0=enc_bytes(merge(dec_bytes(self.def_bar.t0), op)), ev={}}}, ctrls)
   self:clear_overrides()
  end
 

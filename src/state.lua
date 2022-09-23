@@ -219,11 +219,11 @@ function state_new(savedata)
   end
  end
 
- function s:paste_seq()
+ function s:paste_seq(exclude_pats)
   if (not copy_buf_seq) return
   if self.song_mode then
    set_toast("loop pasted")
-   self.tl:paste_seq(copy_buf_seq)
+   if (exclude_pats) self.tl:paste_ctrls(copy_buf_seq, has_event_params_list) else self.tl:paste_seq(copy_buf_seq)
   else
    set_toast("pattern pasted")
    self.pat_patch=dec_bytes(copy_buf_seq[1].t0)
@@ -234,7 +234,7 @@ function state_new(savedata)
  function s:paste_ctrl(ctrl)
   if self.song_mode and copy_buf_seq and ctrl then
    set_toast("loop pasted (control only)")
-   self.tl:paste_ctrl(copy_buf_seq,ctrl)
+   self.tl:paste_ctrls(copy_buf_seq,{ctrl})
   end
   if (not self.playing) load_bar()
  end
