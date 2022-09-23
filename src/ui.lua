@@ -624,7 +624,7 @@ eval--[[language::loaf]][[
 (add_ui (merge
  (number_new 80 16 2 "filter pattern" (@ $get_set_filt_pat 1)
   (fn (s b)
-   ((@ $get_set_filt_pat 2) $s (mid 0 (+ ((@ $get_set_filt_pat 1) $s) $b) (~ (len $svf_pats) 1)))
+   ((@ $get_set_filt_pat 2) $s (mid 0 (+ ((@ $get_set_filt_pat 1) $s) $b) (len $svf_pats)))
   )
  )
  (' {drag_amt=0.02})
