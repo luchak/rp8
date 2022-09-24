@@ -187,13 +187,13 @@ function svf_new()
   note=function(self,patch,bar,tick)
    local r,gc_base,amt,dec,_
    _bp,gc_base,r,amt,_,dec=unpack_patch(patch,65,70)
-   r=r^0.5
+   r=r^0.25
    _rc=1-r*0.96
    local svf_pat=svf_pats[patch[69]]
    local pat_val=ord(svf_pat,(bar*16+tick-17)%#svf_pat+1)-48
    if (pat_val>=0 and state.playing) _fe=pat_val>>4
    _dec=1-((1-dec)*(1-dec)>>7)
-   _gc_base=pow3(gc_base)*0x0.fe+0x0.02
+   _gc_base=pow3(gc_base)*0x0.fc+0x0.04
    _gc_range=pow3(amt)*(1-_gc_base)
   end,
   update=function(self,b,first,last)

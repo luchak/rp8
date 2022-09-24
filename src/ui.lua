@@ -161,9 +161,8 @@ function ui_new()
 
   -- store rows behind mouse and draw mouse
   local tt_my=mid(0,my,121)
-  local next_off=tt_my<<6
+  local next_off,hover=tt_my<<6,self.hover
   save_band(0x9000,next_off)
-  local hover=self.hover
   spr(15,mx,my)
   if tooltips_enabled() and self.hover_t>30 and hover and hover.active and hover.tt then
    local xp=mx<56 and mx+7 or mx-2-4*#hover.tt
