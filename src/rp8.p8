@@ -260,11 +260,11 @@ function _init()
  end
 
  local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[{
-  bd=`(sweep_new 46 0.08 0.01 0.1667 0.85 0.006 0.03)
+  bd=`(sweep_new 46 2800 582.59507 0.1 0.8 0.0012 0.04)
   sd=`(snare_new)
   hh=`(hh_cy_new 52 1 0.8 0.75 0.4 -0.5 1.5)
   cy=`(hh_cy_new 55 1.15 0.65 0.55 0.28 -0.3 1.4)
-  pc=`(sweep_new 58 0.1 0.05 0.14 1 0.01 0.1)
+  pc=`(sweep_new 58 6553.6 3276.8 0.14 1 0.01 0.1)
   fm=`(fm_new 61)
  }]]
  local drum_mixer,delay,svf=drum_mixer_new(drums),delay_new(),svf_new()

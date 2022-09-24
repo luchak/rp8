@@ -142,24 +142,24 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    local ac
    ac,_tri=get_ac_mode(s)
    -- TODO: update params every step?
-   _detune=2^((18*tun+pat.dt[step]-73)/12)
-   _op,_dp=0,(_dp0<<15)*(1+_detune)
+   _op,_dp=0,_dp0*_detune*(2^((24*tun-12)/12))
    if (state.playing) _ae=lev*lev*boost*trn(ac,1.25,0.5)
    _aemax=_ae*0.6
-   _ted=(te_max+(te_min-te_max)*dec^0.5)
+   _ted=(te_max+(te_min-te_max)*dec)
    if (_tri) _ae*=1.5 else _ted*=1.2
    _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.5)
   end
  end
 
  function obj:subupdate(b,first,last)
-  local op,dp,dp1,ae,aed,ted,tri=_op,_dp,(_dp1<<16)*_detune,_ae,_aed,_ted,_tri
+  local op,dp,dp1,ae,aed,ted,tri=_op,_dp,_dp1*_detune,_ae,_aed,_ted,_tri
   local aemax=_aemax
   for i=first,last do
    op+=dp
    dp+=ted*(dp1-dp)
    ae*=aed
-   b[i]+=(aemax<ae and aemax or ae)*(tri and ((op>>14)^^(op>>31))-1 or sin(op>>16))
+   -- b[i]+=(aemax<ae and aemax or ae)*(tri and ((op>>14)^^(op>>31))-1 or sin(op>>16))
+   b[i]+=(ae)*(tri and ((op>>14)^^(op>>31))-1 or sin(op>>16))
   end
   _op,_dp,_ae=op,dp,ae
  end
