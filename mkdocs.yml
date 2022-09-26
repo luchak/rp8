@@ -1,0 +1,6 @@
+site_name: RP-8 Manual
+theme:
+  name: material
+markdown_extensions:
+  - attr_list
+  - md_in_html
