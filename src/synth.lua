@@ -91,8 +91,8 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
-  -- constant is 1000/(4*5512.5)
-  _fc=0.04535*cut*cut
+  -- range is approx. 110hz to 1200hz
+  _fc=0.005+0.05*cut*cut
   _fr=(res^1.2)*10+.5
   _env=env+0.02
   _acc=acc*1.9+0.1
