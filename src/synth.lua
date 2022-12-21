@@ -57,6 +57,7 @@ function synth_new(base)
     else
      aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
     end
+    -- coefs are polyblep compensation FIR
     aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
     op+=dodp
     o2p+=dodp2
