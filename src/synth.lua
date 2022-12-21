@@ -66,7 +66,7 @@ function synth_new(base)
      local osc=aa_osc-fosc
      fosc+=osc>>5
      local ffb_diff=f4-ffb
-     ffb+=ffb_diff>>4
+     ffb+=ffb_diff>>3
      osc-=fr*(ffb_diff-osc)
      local m=osc>>31
      osc=osc^^m>22.8 and 6^^m or tanh[(osc*tanh_scale+2048.5)&-1]
@@ -93,7 +93,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- constant is 1000/(4*5512.5)
   _fc=0.04535*cut*cut
-  _fr=(res^1.2)*10
+  _fr=(res^1.2)*10+.5
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
