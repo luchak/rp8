@@ -189,13 +189,13 @@ function snare_new()
     _hpmix=mode and 2 or 1
     _aes-=aeo
     _aen+=aeo
-    _aes*=lev2
+    _aes*=lev2*1.2
     _aen*=lev2*0.7
     _aemax=_aes>>1
-    local pd2=0.18-0.1625*dec^0.5
-    if (not mode) pd2*=1.3 _aen*=1.6
-    _aesd=0.992-0.02*pd2
-    _aend=1-0.05*pd2
+    local pd2=0.19-0.1725*dec^0.5
+    if (not mode) pd2*=1.7 _aen*=1.4 _aes*=.7 _aemax=_aes
+    _aesd=0.996-0.06*pd2
+    _aend=.9997-0.05*pd2
    end
   end
  end
