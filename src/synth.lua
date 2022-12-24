@@ -144,12 +144,14 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    ac,_tri=get_ac_mode(s)
    -- TODO: update params every step?
    _detune=2^((pat.dt[step]-64)/12)
-   _op,_dp=0,_dp0*_detune*(2^((24*tun-12)/12))
-   if (state.playing) _ae=lev*lev*boost*trn(ac,1.25,0.5)
-   _aemax=_ae*0.8
-   _ted=(te_max+(te_min-te_max)*dec^.8)
-   if (_tri) _ae*=1.5 else _ted*=1.2
-   _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.5)
+   _ted=te_max+(te_min-te_max)*dec^.8
+   if state.playing then
+    _op,_dp=0,_dp0*_detune*(2^((24*tun-12)/12))
+    _ae=lev*lev*boost*trn(ac,1.25,0.5)
+    _aemax=_ae*0.8
+    if (_tri) _ae*=1.5 else _ted*=1.2
+    _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.5)
+   end
   end
  end
 
@@ -184,14 +186,14 @@ function snare_new()
     local ac,mode=get_ac_mode(s)
     if (ac) _aes,_aen=1.9,1.1
     local lev2,aeo=lev*lev,(tun-0.5)*0.1
-    _hpmix=mode and 2 or 0
+    _hpmix=mode and 2 or 1
     _aes-=aeo
     _aen+=aeo
     _aes*=lev2
-    _aen*=lev2*0.6
+    _aen*=lev2*0.7
     _aemax=_aes>>1
     local pd2=0.18-0.1625*dec^0.5
-    if (not mode) pd2*=1.2 _aen*=1.6
+    if (not mode) pd2*=1.3 _aen*=1.6
     _aesd=0.992-0.02*pd2
     _aend=1-0.05*pd2
    end
