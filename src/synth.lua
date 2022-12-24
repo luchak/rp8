@@ -146,7 +146,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    _detune=2^((pat.dt[step]-64)/12)
    _op,_dp=0,_dp0*_detune*(2^((24*tun-12)/12))
    if (state.playing) _ae=lev*lev*boost*trn(ac,1.25,0.5)
-   _aemax=_ae*0.6
+   _aemax=_ae*0.8
    _ted=(te_max+(te_min-te_max)*dec^.8)
    if (_tri) _ae*=1.5 else _ted*=1.2
    _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.5)
@@ -161,7 +161,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    dp+=ted*(dp1-dp)
    ae*=aed
    -- b[i]+=(aemax<ae and aemax or ae)*(tri and ((op>>14)^^(op>>31))-1 or sin(op>>16))
-   b[i]+=(ae)*(tri and ((op>>14)~(op>>31))-1 or sin(op>>16))
+   b[i]+=tri and (aemax<ae and aemax or ae)*(((op>>14)~(op>>31))-1) or ae*sin(op>>16)
   end
   _op,_dp,_ae=op,dp,ae
  end
