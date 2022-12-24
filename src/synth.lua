@@ -30,11 +30,11 @@ function synth_new(base)
 
    for i=first,last do
     fcbf+=(fcb-fcbf)>>5
-    local fc=min(0.12,fcbf+(me/10)*env)<<2
+    local fc=min(0.1,fcbf+(me/10)*env)<<2
     -- janky dewarping
     -- scaling constant is 0.75*2*pi because???
     --fc=4.71*fc/(1+fc)
-    local fc1=(0.48+3*fc)>>2
+    local fc1=(0.4+3*fc)>>2
     if gate then
      -- 1/7 amp multiplier, 1/4 oversampling multiplier
      ae+=(0.03572-ae)>>3
@@ -93,7 +93,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- range is approx. 110hz to 1200hz
   _fc=0.005+0.05*cut*cut
-  _fr=(res^1.2)*10+.5
+  _fr=res^1.1*11.5+.3
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0
