@@ -12,7 +12,7 @@ ALL_IMG_BASENAMES = synth.png drums.png header_section.png drum_step_btns.png \
 		    bd_sd_radio_btns.png synth_step_note_btns.png ptn_bank_btns.png ptn_copy_paste_btns.png \
 		    sound_design.png ps_mode_btn.png seq_copy_paste_btns.png transport.png \
 		    override_btns.png song_edit_btns.png drums_empty.png drum_btn_colors.png \
-		    synth_empty.png rp8_help.2048.png record_btn_states.png
+		    synth_empty.png rp8_help.2048.png record_btn_states.png mixer.png
 ALL_IMGS = $(ALL_IMG_BASENAMES:%.png=img/%.png)
 
 ## x.pdf depends on x.md, x.html depends on x.md, etc
@@ -101,6 +101,10 @@ img/record_btn_states.png: img/rp8_clear.2048.png img/rp8_playing.2048.png img/r
 		\( img/rp8_overrides.2048.png[128x128+128+0] \) -geometry +256+0 -composite \
 		\( img/rp8_recording.2048.png[128x128+128+0] \) -geometry +384+0 -composite \
 		$@
+
+img/mixer.png: img/rp8_clear.2048.png
+	magick -define png:exclude-chunks=date,time -extract 512x512+1536+0 $< $@
+
 
 clean:
 	rm -f *.html *.pdf *.tex *.aux *.log $(ALL_IMGS)

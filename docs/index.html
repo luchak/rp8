@@ -24,8 +24,6 @@
   <li><a href="#getting-started" id="toc-getting-started">Getting
   Started</a>
   <ul>
-  <li><a href="#your-first-song" id="toc-your-first-song">Your First
-  Song</a></li>
   <li><a href="#pattern-mode-composing-and-experimenting"
   id="toc-pattern-mode-composing-and-experimenting">Pattern Mode:
   Composing and Experimenting</a>
@@ -73,34 +71,19 @@
   </ul></li>
   <li><a href="#reference" id="toc-reference">Reference</a>
   <ul>
-  <li><a href="#devices" id="toc-devices">Devices</a></li>
   <li><a href="#modes" id="toc-modes">Modes</a></li>
   <li><a href="#pages" id="toc-pages">Pages</a></li>
   <li><a href="#advanced-arrangement-editing"
   id="toc-advanced-arrangement-editing">Advanced Arrangement
   Editing</a></li>
+  <li><a href="#devices" id="toc-devices">Devices</a>
+  <ul>
   <li><a href="#audio-routing" id="toc-audio-routing">Audio
   Routing</a></li>
   <li><a href="#synths" id="toc-synths">Synths</a></li>
-  <li><a href="#drum-machine" id="toc-drum-machine">Drum Machine</a>
-  <ul>
-  <li><a href="#bass-drum-bd" id="toc-bass-drum-bd">Bass Drum
-  (BD)</a></li>
-  <li><a href="#snare-drum-sd" id="toc-snare-drum-sd">Snare Drum
-  (SD)</a></li>
-  <li><a href="#hihat-hh" id="toc-hihat-hh">Hihat (HH)</a></li>
-  <li><a href="#cymbal-cy" id="toc-cymbal-cy">Cymbal (CY)</a></li>
-  <li><a href="#percussion-pc" id="toc-percussion-pc">Percussion
-  (PC)</a></li>
-  <li><a href="#fm-fm" id="toc-fm-fm">FM (FM)</a></li>
-  </ul></li>
-  <li><a href="#effects" id="toc-effects">Effects</a>
-  <ul>
-  <li><a href="#overdrive" id="toc-overdrive">Overdrive</a></li>
-  <li><a href="#delay" id="toc-delay">Delay</a></li>
-  <li><a href="#pattern-filter" id="toc-pattern-filter">Pattern
-  Filter</a></li>
-  <li><a href="#compressor" id="toc-compressor">Compressor</a></li>
+  <li><a href="#drum-machine" id="toc-drum-machine">Drum
+  Machine</a></li>
+  <li><a href="#effects" id="toc-effects">Effects</a></li>
   </ul></li>
   <li><a href="#keyboard-controls" id="toc-keyboard-controls">Keyboard
   Controls</a></li>
@@ -116,18 +99,19 @@ sequencing, effects, a pattern mode for immediate hands-on control, and
 a song mode for recording music. Unlike the original, the audio output
 is crunchy 8 bit 5.5kHz mono sound, and the user interface is rendered
 in 16 colors at a chunky 128x128 resolution.</p>
-<p>Thanks for trying RP-8, and let me know if you have any
-thoughts!<span
-class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
-class="sidenote">To download RP-8, check out <a
-href="https://luchak.itch.io/rp8">the RP-8 page on Itch</a>. For
-feedback, get in touch with via <a
-href="https://luchak.itch.io/rp8">Itch</a> or via your favorite
-ActivityPub client <a href="https://6t.vc/@luchak">here</a>.<br />
-<br />
-</span></span></p>
+<p>This guide is written in two main parts: a tutorial-style <a
+href="#getting-started">Getting Started</a> section that walks you
+through writing a short song in RP-8, and a <a
+href="#reference">Reference</a> section that explains the different main
+components of RP-8 in more detail. If you ever get lost, remember that
+you can toggle tooltips on and off with <code>t</code>, and access
+keyboard shortcut reminders with <code>h</code>.</p>
+<p>Thanks for trying RP-8, and let me know if you have any thoughts! If
+you have thoughts, feedback, or would like help, get in touch with me
+via <a href="https://luchak.itch.io/rp8">Itch</a>, the <a
+href="https://discord.gg/kGJJcpEkgv">RP-8 Discord</a> or <a
+href="https://6t.vc/@luchak">your favorite ActivityPub service</a>.</p>
 <h1 id="getting-started">Getting Started</h1>
-<h2 id="your-first-song">Your First Song</h2>
 <p>This section will walk you through writing a simple song in RP-8:
 everything you need to know to make your own music. There are two main
 things you’ll learn: how to compose music in pattern mode, and how to
@@ -193,7 +177,7 @@ play notes as normal, but yellow steps are <em>slides</em>. Slide notes
 are longer and allow you to smoothly slide between pitch on adjacent
 steps. Dimmer steps are played normally, brighter steps are
 accented.<span
-class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
 class="sidenote">RP-8 tries to approximate the accent behavior of the
 TB-303, but it’s a loose resemblance at best.<br />
 <br />
@@ -295,7 +279,7 @@ button</figcaption>
 <p>The most important change from song mode to pattern mode is that you
 are no longer in direct control of the sound design or of which patterns
 are playing.<span
-class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
 class="sidenote">Note that this does not include pattern contents (notes
 and steps). These are shared with pattern mode, and changing them still
 works exactly like pattern mode.<br />
@@ -324,13 +308,13 @@ operations in RP-8 that perform an operation only on the bars contained
 in the current loop.</p>
 <p><strong>TASK:</strong> Since we are starting a new song, let’s set
 our loop to start at bar 1<span
-class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
 class="sidenote">It’s okay to start at bar 1 even if we think we might
 want to add an introduction, there are ways to move bars around
 later.<br />
 <br />
 </span></span> and be either 4 or 8 bars long.<span
-class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
 class="sidenote">If you forget which control is loop start and which is
 loop length, you can turn on tooltips with <code>t</code> for a
 reminder.<br />
@@ -389,7 +373,7 @@ buttons</figcaption>
 <p>Whenver you have uncommitted changes (i.e. the record button is
 yellow) the change discard/commit buttons will light up. The discard
 button clears your changes, just like stopping playback.<span
-class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
 class="sidenote">If RP-8 is playing, control values will reset at the
 start of the next bar, if it is paused, they will reset
 immediately.<br />
@@ -397,7 +381,7 @@ immediately.<br />
 </span></span> The commit button, on the other hand, will keep your
 changes: each control you have modified will now keep its current
 position everywhere in your loop.<span
-class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
 class="sidenote">But only its current position - if you want more
 flexible recording, you’ll have to read on.<br />
 <br />
@@ -447,7 +431,7 @@ select the patterns you want to play on that bar. Then use the the
 want to play on that bar. If you want to keep the same patterns for
 multiple bars, you can just skip through them, you do not need to click
 the pattern buttons again.<span
-class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-6" class="margin-toggle"/><span
 class="sidenote">You can also use the mouse to drag the song position
 control to navigate, but you need to be careful. Every control modified
 in the current recording session will be written to every bar you visit!
@@ -507,7 +491,7 @@ file on your desktop containing your exported audio.</p>
 make more!</p>
 <p>For more information on how the devices work and what specific
 controls do, see the <a href="#reference">Reference</a> section.<span
-class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
 class="sidenote">Once I write it….<br />
 <br />
 </span></span> For quick reminders in RP-8, remember that you can turn
@@ -516,44 +500,6 @@ on tooltips.</p>
 out via the <a href="https://www.lexaloffle.com/bbs/?tid=47284">BBS
 thread</a>.</p>
 <h1 id="reference">Reference</h1>
-<p>This section is extremely incomplete</p>
-<h2 id="devices">Devices</h2>
-<p>Sound in RP-8 is generated by its 3 devices: two identical
-2-ocillator synthesizers loosely inspired by the <a
-href="https://en.wikipedia.org/wiki/Roland_TB-303">Roland TB-303</a> and
-one drum machine that is even more loosely inspired by the <a
-href="https://en.wikipedia.org/wiki/Roland_TR-808">Roland TR-808</a>.
-These devices are explained in more detail in their own sections.</p>
-<figure>
-<img src="img/synth.png" alt="A synth" />
-<figcaption aria-hidden="true">A synth</figcaption>
-</figure>
-<figure>
-<img src="img/drums.png" alt="The drum machine" />
-<figcaption aria-hidden="true">The drum machine</figcaption>
-</figure>
-<p>In general, you should use the synthesizers for tonal elements in
-your songs, like melody or bass lines, and you should use the drum
-machine for rhythmic elements. However, all the drums have a tuning
-adjustment knob, and many of the sounds can have a strong tonal
-character, so stay open-minded!<span
-class="sidenote-wrapper"><label for="sn-9" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-9" class="margin-toggle"/><span
-class="sidenote">TR-808 bass drums with long decay times are often used
-as bass sounds. The FM and percussion tracks of the drum machine can
-also easily be used as additional tonal voices.<br />
-<br />
-</span></span> Each device is controlled by a pattern sequencer, which
-plays back sequences of notes or drum hits from a user-programmable bank
-of patterns. Patterns are 16 step (1 bar) series of notes or drum hits,
-and are the building blocks of music in RP-8.</p>
-<p>RP-8 also has a header section at the top of the display, which
-houses controls that affect the whole song or pattern: the song/pattern
-mode switch, song transport controls, effects controls, and the
-mixer.</p>
-<figure>
-<img src="img/header_section.png" alt="The header section" />
-<figcaption aria-hidden="true">The header section</figcaption>
-</figure>
 <h2 id="modes">Modes</h2>
 <p>RP-8 has two modes: <strong>pattern mode</strong> and <strong>song
 mode</strong>. All the same devices and sound creation machinery are
@@ -614,7 +560,46 @@ loop’s old contents are now located just after the loop. The new bars
 are then filled with the copied sequence, just as with paste.</p>
 </dd>
 </dl>
-<h2 id="audio-routing">Audio Routing</h2>
+<h2 id="devices">Devices</h2>
+<p>Sound in RP-8 is generated by its 3 devices: two identical
+2-ocillator synthesizers loosely inspired by the <a
+href="https://en.wikipedia.org/wiki/Roland_TB-303">Roland TB-303</a> and
+one drum machine that is even more loosely inspired by the <a
+href="https://en.wikipedia.org/wiki/Roland_TR-808">Roland TR-808</a>.
+These devices are explained in more detail in their own sections.</p>
+<figure>
+<img src="img/synth.png" alt="A synth" />
+<figcaption aria-hidden="true">A synth</figcaption>
+</figure>
+<figure>
+<img src="img/drums.png" alt="The drum machine" />
+<figcaption aria-hidden="true">The drum machine</figcaption>
+</figure>
+<p>In general, you should use the synthesizers for tonal elements in
+your songs, like melody or bass lines, and you should use the drum
+machine for rhythmic elements. However, all the drums have a tuning
+adjustment knob, and many of the sounds can have a strong tonal
+character, so stay open-minded!<span
+class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
+class="sidenote">TR-808 bass drums with long decay times are often used
+as bass sounds. The FM and percussion tracks of the drum machine can
+also easily be used as additional tonal voices.<br />
+<br />
+</span></span> Each device is controlled by a pattern sequencer, which
+plays back sequences of notes or drum hits from a user-programmable bank
+of patterns. Patterns are 16 step (1 bar) series of notes or drum hits,
+and are the building blocks of music in RP-8.</p>
+<p>RP-8 also has a mixer and transport section at the top of the
+display, which houses controls that affect the whole song or pattern:
+the song/pattern mode switch, song transport controls, effects controls,
+and the mixer.</p>
+<figure>
+<img src="img/header_section.png"
+alt="The mixer and transport section" />
+<figcaption aria-hidden="true">The mixer and transport
+section</figcaption>
+</figure>
+<h3 id="audio-routing">Audio Routing</h3>
 <figure>
 <img src="img/orig/audio_arch.png" alt="The RP-8 audio architecture" />
 <figcaption aria-hidden="true">The RP-8 audio architecture</figcaption>
@@ -627,8 +612,8 @@ mixed with the dry signal and sent to the compressor. Finally, soft
 saturation is applied to the signal before it is output to the
 speaker.</p>
 <p>This routing can be varied in two ways:</p>
-<h2 id="synths">Synths</h2>
-<h2 id="drum-machine">Drum Machine</h2>
+<h3 id="synths">Synths</h3>
+<h3 id="drum-machine">Drum Machine</h3>
 <p>The drum machine offers six different drum tracks. Each track offers
 two different drum sounds, each at two different volume levels. Sound
 selection is indicated by step color: one sound is red, one sound is
@@ -648,7 +633,7 @@ separately. When effects are bypassed for a track, that track is not
 processed by overdrive, not processed by the pattern filter (if the
 pattern filter is set to <strong>DR</strong> mode), and not sent to the
 delay send bus.</p>
-<h3 id="bass-drum-bd">Bass Drum (BD)</h3>
+<p><strong>Bass Drum (BD)</strong></p>
 <p>The bass drum sounds use simple waveforms that start out at high
 volume and pitch, then rapidly decay to low volume and low pitch. The
 <strong>Tn</strong> knob controls the starting pitch, and the
@@ -656,26 +641,24 @@ volume and pitch, then rapidly decay to low volume and low pitch. The
 decay. When not transposed, the ending pitch is approximately 49 Hz
 (G1). Transposing the drums affects both the starting and ending
 pitch.</p>
-<p><strong>Red sound:</strong> This is an approximately 808-style bass
-drum using a sine wave and simple exponential envelopes.</p>
-<p><strong>Yellow sound:</strong> This is closer to a 909-style bass
-drum. It uses a triangle wave, and the exponential envelopes are limited
-at the start of the drum hit, in order to approximate a compressed
-sound.</p>
-<h3 id="snare-drum-sd">Snare Drum (SD)</h3>
+<p><em>Red sound:</em> This is an approximately 808-style bass drum
+using a sine wave and simple exponential envelopes.</p>
+<p><em>Yellow sound:</em> This is closer to a 909-style bass drum. It
+uses a triangle wave, and the exponential envelopes are limited at the
+start of the drum hit, in order to approximate a compressed sound.</p>
+<p><strong>Snare Drum (SD)</strong></p>
 <p>The snare drum mixes a sine wave exponentially decaying in pitch and
 volume, like the bass drum, with exponentially decaying noise. This
 whole signal is then sent through a gentle highpass filter. The
 <strong>Tn</strong> knob controls the pitch of the sine wave, and the
 <strong>Dc</strong> knob controls the decay time of the envelopes.</p>
-<p><strong>Red sound:</strong> This is a short, snappy, noisy snare
-drum. The tonal sine wave component is fairly quiet, and the decay times
-are relatively short.</p>
-<p><strong>Yellow sound:</strong> This is a slightly heavier, darker
-snare. The tonal component is louder, the decay is longer, and the
-highpass filter is set slightly lower to retain more midrange
-frequencies.</p>
-<h3 id="hihat-hh">Hihat (HH)</h3>
+<p><em>Red sound:</em> This is a short, snappy, noisy snare drum. The
+tonal sine wave component is fairly quiet, and the decay times are
+relatively short.</p>
+<p><em>Yellow sound:</em> This is a slightly heavier, darker snare. The
+tonal component is louder, the decay is longer, and the highpass filter
+is set slightly lower to retain more midrange frequencies.</p>
+<p><strong>Hihat (HH)</strong></p>
 <p>The hihat is a short burst of noise, mixed with several high-pitch
 detuned square waves at inharmonic frequency ratios. All of these are
 highpass filtered, and decay exponentially in volume. The
@@ -684,28 +667,26 @@ highpass filtered, and decay exponentially in volume. The
 hihats are on this track, so playing a closed hihat will cut off an open
 hihat sound (and vice versa), allowing you to achieve a classic hihat
 choke effect.</p>
-<p><strong>Red sound:</strong> This is a closed hihat with shorter
-decay.</p>
-<p><strong>Yellow sound</strong> This is an open hihat, with a longer
-decay.</p>
-<h3 id="cymbal-cy">Cymbal (CY)</h3>
+<p><em>Red sound:</em> This is a closed hihat with shorter decay.</p>
+<p><em>Yellow sound</em> This is an open hihat, with a longer decay.</p>
+<p><strong>Cymbal (CY)</strong></p>
 <p>The cymbal sound is generated identically to the hihat
 (<strong>HH</strong>) sound, but this track is tuned for longer decay
 times and slightly higher pitches. The knobs work identically to the
 hihat knobs. Like the hihats, the cymbals will mute each other - this is
 not a typical effect, but try it out and see what happens!</p>
-<p><strong>Red sound:</strong> This is a cymbal with a shorter decay,
-like a ride.</p>
-<p><strong>Yellow sound:</strong> This is a cymbal with a longer decay,
-like a crash.</p>
-<h3 id="percussion-pc">Percussion (PC)</h3>
+<p><em>Red sound:</em> This is a cymbal with a shorter decay, like a
+ride.</p>
+<p><em>Yellow sound:</em> This is a cymbal with a longer decay, like a
+crash.</p>
+<p><strong>Percussion (PC)</strong></p>
 <p>This sound is synthesized identically to the bass drum
 (<strong>BD</strong>), but at higher pitches and with shorter decay
 times. By changing the tuning you can create sounds similar to toms,
 congas, rimshots, and more. Play around and see what you get!</p>
-<p><strong>Red sound:</strong> Same as <strong>BD</strong>.</p>
-<p><strong>Yellow sound:</strong> Same as <strong>BD</strong>.</p>
-<h3 id="fm-fm">FM (FM)</h3>
+<p><em>Red sound:</em> Same as <strong>BD</strong>.</p>
+<p><em>Yellow sound:</em> Same as <strong>BD</strong>.</p>
+<p><strong>FM (FM)</strong></p>
 <p>This is an FM sound made from two sine wave operators. You can use
 this to make metallic or other tonal percussive sounds. The pitches of
 each operator remain constant during each drum hit, but both the volume
@@ -720,16 +701,16 @@ values that are multiples of 8, 16, or 32 will produce less dissonant
 sounds. Try the <strong>shift+up arrow</strong> and <strong>shift+down
 arrow</strong> hotkeys to step through <strong>Tn</strong> knob settings
 in steps of 16.</p>
-<p><strong>Red sound:</strong> Light modulation intensity, producing
-cleaner, simpler sounds.</p>
-<p><strong>Yellow sound:</strong> Heavy modulation intensity producing
-harsher, more complex sounds.</p>
-<h2 id="effects">Effects</h2>
+<p><em>Red sound:</em> Light modulation intensity, producing cleaner,
+simpler sounds.</p>
+<p><em>Yellow sound:</em> Heavy modulation intensity producing harsher,
+more complex sounds.</p>
+<h3 id="effects">Effects</h3>
 <p>RP-8 contains several effects to help shape the sound of the synths
 and drum machine. Please refer to the audio routing diagram from the <a
 href="#audio-routing">Audio Routing</a> section for more
 information.</p>
-<h3 id="overdrive">Overdrive</h3>
+<p><strong>Overdrive</strong></p>
 <p>There are three overdrive units, one for each of the two synths and
 for the drum machine. Each one independently distorts the audio for its
 device. The <strong>OD</strong> knobs in the mixer section control the
@@ -738,7 +719,7 @@ intensity of the overdrive effect for each device, and the
 <strong>S</strong>hape) controls the tone and color of all three
 overdrive units. Higher values produce thinner, scratchier overdriven
 tones with more odd harmonics.</p>
-<h3 id="delay">Delay</h3>
+<p><strong>Delay</strong></p>
 <p>The delay unit is a tempo-synced digital delay on a shared send bus.
 The delay times can be set in 16th notes (shown as number of 16th notes,
 1-16), 16th note triplets (shown as 1T-16T), or dotted 16th notes (a
@@ -746,7 +727,7 @@ number of 16th notes plus a 32nd note, shown as 0D-15D). The
 <strong>FB</strong> control controls the amount of delay feedback. There
 is a small amount of highpass filtering in the delay feedback loop so
 the delayed sound does not become too muddy.</p>
-<h3 id="pattern-filter">Pattern Filter</h3>
+<p><strong>Pattern Filter</strong></p>
 <p>The pattern filter is a 2 pole state variable filter with lowpass and
 bandpass modes. It differs from the other effects in that it can take
 its signal from several possible different sources. These are controlled
@@ -769,7 +750,7 @@ if the knob is all the way up, the strongest triggers will always bring
 the filter up to its maximum frequency (at least momentarily). If the
 knob is all the way down, the pattern will have no effect. The
 <strong>DEC</strong> knob controls the filter envelope decay time.</p>
-<h3 id="compressor">Compressor</h3>
+<p><strong>Compressor</strong></p>
 <p>The compressor is applied last of all RP-8’s effects. There is only
 one control, the <strong>CT</strong> knob, which controls the compressor
 threshold. By default, the knob is all the way up, which means that the
