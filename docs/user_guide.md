@@ -2,6 +2,8 @@
 title: "RP-8 User Guide"
 ...
 
+# Introduction
+
 RP-8 is a Pico-8 demake of Propellerhead Software's [ReBirth RB-338](https://en.wikipedia.org/wiki/ReBirth_RB-338).
 Like the original, it provides two synth voices, drums, pattern-based sequencing, effects, a pattern mode for immediate
 hands-on control, and a song mode for recording music. Unlike the original, the audio output is crunchy 8 bit 5.5kHz
@@ -12,9 +14,7 @@ short song in RP-8, and a [Reference] section that explains the different main c
 you ever get lost, remember that you can toggle tooltips on and off with `t`, and access keyboard shortcut reminders
 with `h`.
 
-Thanks for trying RP-8, and let me know if you have any thoughts! If you have thoughts, feedback, or would like help,
-get in touch with me via [Itch](https://luchak.itch.io/rp8), the [RP-8 Discord](https://discord.gg/kGJJcpEkgv) or [your
-favorite ActivityPub service](https://6t.vc/@luchak).
+Thanks for trying RP-8, and please feel free to [get in touch!][Contact]
 
 # Getting Started
 
@@ -304,15 +304,38 @@ to the end, and press `e` when done. You'll see a new .WAV file on your desktop 
 
 Congratulations! You've just made a very short song with RP-8. Go make more!
 
-For more information on how the devices work and what specific controls do, see the [Reference][] section.^[Once I
-write it....] For quick reminders in RP-8, remember that you can turn on tooltips.
+For more information on how the devices work and what specific controls do, see the [Reference] section.  For quick
+reminders in RP-8, remember that you can turn on tooltips with `t` or access help with `h`.
 
-If you get stuck or encounter what seems to be a bug, please reach out via the [BBS thread](https://www.lexaloffle.com/bbs/?tid=47284).
+If you get stuck or encounter what seems to be a bug, please [get in touch][Contact]!
 
 # Reference
 
+## Basic Usage
 
-## Modes
+Most controls on the screen respond to one of a small number of gestures: clicks, vertical drags, and double clicks.
+Generally, clicking either activate a button's effect or toggle a button's state, dragging will alter the value of a
+knob or a numeric control, and double-clicking will reset a knob to its default value. There are also a few buttons for
+manipulating pattern data that respond to vertical drags (the transpose and rotate pattern buttons).
+
+When you click or drag a control, it becomes highlighted in blue. This indicates that the control is now selected, and
+will respond to control-specific keyboard commands, such as the up and down arrow keys for altering step, note, or knob
+values. If a control does not get a blue highlight, that means it is disabled in the current mode -- for example, you
+cannot change the song position in pattern mode.
+
+## Transport
+
+![The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop
+start, loop enable, loop length, and file menu.](img/transport_ref.png){width=100%}
+
+The transport provides control over RP-8's playback and overall behavior. In pattern mode, you can start or pause the
+sequencer, change between pattern mode and song mode (see [Modes]), switch sequencer pages (see [Pages]), and access
+the file menu (see [File Menu]). In song mode, the position control, loop enable/start/length controls, and record
+button will also become available.
+
+To change the numeric controls, click and drag up/down to increase/decrease the values, or use the arrow keys.
+
+### Modes
 
 RP-8 has two modes: **pattern mode** and **song mode**. All the same devices and sound creation machinery are available
 in both, however, they have different purposes. Pattern mode gives you immediate direct control of every parameter, so
@@ -320,17 +343,44 @@ it is ideal for learning, experimentation, and coming up with new ideas. Song mo
 recording, editing, and replay of parameter changes, and so is best for when you want to start recording multi-bar
 sequences and complex automation.
 
-## Pages
+### Pages
 
-The RP-8 UI also has two sequencer pages, each accessible in both pattern and song modes. You can toggle between them with the `tab` key, or by clicking the `P1` / `P2` button near the top of the screen. Each page shows a different set of pitch controls for each pattern.
+The RP-8 UI also has two sequencer pages, each accessible in both pattern and song modes. You can toggle between them
+with the `tab` key, or by clicking the `P1` / `P2` button near the top of the screen. Each page shows a different set
+of pitch controls for each pattern.
 
 RP-8 starts on page 1. This page lets you control the pitch of oscillator 1 on both synths, and shows the drum pattern step buttons.
 
-Page 2 contains secondary / relative pitch controls. These controls let you detune each drum (on the drum machine) or the second oscillator (on each synth) relative to the main pitch for each device. For the synth, this means you are detuning oscillator 2 relative to oscillator 1. For the drums, you are detuning each drum relative to whatever pitch is determined by the sound controls. (The base pitch of each drum with all knobs at their default positions is usually G in some octave.)
+Page 2 shows secondary / relative pitch controls for all three devices. These controls let you detune each drum (on the
+drum machine) or the second oscillator (on each synth) relative to the main pitch for each device. For the synth, this
+means you are detuning oscillator 2 relative to oscillator 1. For the drums, you are detuning each drum relative to
+whatever pitch is determined by the sound controls. (The base pitch of each drum with all knobs at their default
+positions is usually G in some octave.)
 
-## Advanced Arrangement Editing
+### Loading and Saving
 
-![Song edit buttons, from top left: copy, cut, insert, paste](img/song_edit_btns.png){width=12.5%}
+To load a song, drag the song file onto the RP-8 window. Alternatively, you can copy the song data to your clipboard,
+paste it into RP-8 (using ctrl-v on Windows/Linux or cmd-v on MacOS), and use the `o` hotkey to load from the
+clipboard.
+
+To save songs, you can use the file menu.
+
+![The RP-8 file menu](img/rp8_file_menu.2048.png){width=50%}
+
+This screen allows you to name your song and save it, as well as open the RP-8 data folder (which, depending on your OS
+and how you are running RP-8, may be difficult to find otherwise). Use the up and down arrow keys to select an option,
+then the enter key to act. You can access this menu by clicking the disk icon by the transport controls, or by using
+the `f` key.
+
+## Arrangement Editing
+
+Below the transport, on the left side of the screen, are buttons for editing song arrangements. Copy and paste are
+available in all modes, the rest are available in song mode only.
+
+![Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear,
+paste.](img/arrangement_btns.png)
+
+The buttons act as follows:
 
 Copy sequence
 
@@ -353,12 +403,33 @@ Insert sequence
 : Inserts new bars into the song to fill the current loop, so that the loop's old contents are now located just after
 the loop. The new bars are then filled with the copied sequence, just as with paste.
 
+Commit overrides
+
+: Commits the values of all currently-overridden controls to the loop. This will overwrite any automation for those
+controls.
+
+Clear overrides
+
+: Clears all control overrides and returns any overridden controls to their values as recorded in the song. This action
+takes effect at the start of the next bar.
+
+There are also a two keyboard-only arrangement commands. `[` acts like the paste button, but applies only to the
+currently-selected control. This allows you to selectively transfer automation for only some controls. `]` also acts
+like the paste button, but does not transfer pattern selections (transfers sound controls only). This lets you copy
+sound design from one part of your song to another without overwriting the pattern arrangement.
+
+## Tempo, Shuffle and Volume
+
+![The tempo, shuffle, and volume controls (highlighted).](img/tempo_shuffle_volume.png)
+
+Tempo
+
 ## Devices
 
 Sound in RP-8 is generated by its 3 devices: two identical 2-ocillator synthesizers loosely inspired by the [Roland
 TB-303](https://en.wikipedia.org/wiki/Roland_TB-303) and one drum machine that is even more loosely inspired by the
 [Roland TR-808](https://en.wikipedia.org/wiki/Roland_TR-808). These devices are explained in more detail in their own
-sections.
+sections below.
 
 ![A synth](img/synth.png)
 
@@ -372,10 +443,10 @@ Each device is controlled by a pattern sequencer, which plays back sequences of 
 user-programmable bank of patterns. Patterns are 16 step (1 bar) series of notes or drum hits, and are the building
 blocks of music in RP-8.
 
-RP-8 also has a mixer and transport section at the top of the display, which houses controls that affect the whole song
-or pattern: the song/pattern mode switch, song transport controls, effects controls, and the mixer.
+RP-8 also has effects units and a mixer, whose controls are all located in the transport and mixer section at the top of
+the screen.
 
-![The mixer and transport section](img/header_section.png)
+![The transport and mixer section](img/header_section.png)
 
 ### Audio Routing
 
@@ -386,7 +457,7 @@ to the mixer, which separately mixes these voices into a dry signal and a delay 
 sent to the delay effect, whose output is then mixed with the dry signal and sent to the compressor. Finally, soft
 saturation is applied to the signal before it is output to the speaker.
 
-This routing can be varied in two ways: 
+The drum machine and the pattern filter can vary this routing a little bit, see their sections for more details.
 
 ### Synths
 
@@ -567,3 +638,9 @@ key         | action
 `]`         | paste sound only (controls but not pattern selections)
 `,`         | previous bar
 `.`         | next bar
+
+# Contact
+
+If you have thoughts, feedback, ideas, bug reports, or if you would like help, you can reach me via
+[Itch](https://luchak.itch.io/rp8), the [RP-8 Discord](https://discord.gg/kGJJcpEkgv) or [your favorite ActivityPub
+service](https://6t.vc/@luchak).

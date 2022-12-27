@@ -21,6 +21,8 @@
     <strong>Contents</strong><label for="contents">⊕</label>
   <input type="checkbox" id="contents">
   <ul>
+  <li><a href="#introduction"
+  id="toc-introduction">Introduction</a></li>
   <li><a href="#getting-started" id="toc-getting-started">Getting
   Started</a>
   <ul>
@@ -71,11 +73,18 @@
   </ul></li>
   <li><a href="#reference" id="toc-reference">Reference</a>
   <ul>
+  <li><a href="#basic-usage" id="toc-basic-usage">Basic Usage</a></li>
+  <li><a href="#transport" id="toc-transport">Transport</a>
+  <ul>
   <li><a href="#modes" id="toc-modes">Modes</a></li>
   <li><a href="#pages" id="toc-pages">Pages</a></li>
-  <li><a href="#advanced-arrangement-editing"
-  id="toc-advanced-arrangement-editing">Advanced Arrangement
-  Editing</a></li>
+  <li><a href="#loading-and-saving" id="toc-loading-and-saving">Loading
+  and Saving</a></li>
+  </ul></li>
+  <li><a href="#arrangement-editing"
+  id="toc-arrangement-editing">Arrangement Editing</a></li>
+  <li><a href="#tempo-shuffle-and-volume"
+  id="toc-tempo-shuffle-and-volume">Tempo, Shuffle and Volume</a></li>
   <li><a href="#devices" id="toc-devices">Devices</a>
   <ul>
   <li><a href="#audio-routing" id="toc-audio-routing">Audio
@@ -88,10 +97,12 @@
   <li><a href="#keyboard-controls" id="toc-keyboard-controls">Keyboard
   Controls</a></li>
   </ul></li>
+  <li><a href="#contact" id="toc-contact">Contact</a></li>
   </ul>
 </nav>
 
 <main>
+<h1 id="introduction">Introduction</h1>
 <p>RP-8 is a Pico-8 demake of Propellerhead Software’s <a
 href="https://en.wikipedia.org/wiki/ReBirth_RB-338">ReBirth RB-338</a>.
 Like the original, it provides two synth voices, drums, pattern-based
@@ -106,11 +117,8 @@ href="#reference">Reference</a> section that explains the different main
 components of RP-8 in more detail. If you ever get lost, remember that
 you can toggle tooltips on and off with <code>t</code>, and access
 keyboard shortcut reminders with <code>h</code>.</p>
-<p>Thanks for trying RP-8, and let me know if you have any thoughts! If
-you have thoughts, feedback, or would like help, get in touch with me
-via <a href="https://luchak.itch.io/rp8">Itch</a>, the <a
-href="https://discord.gg/kGJJcpEkgv">RP-8 Discord</a> or <a
-href="https://6t.vc/@luchak">your favorite ActivityPub service</a>.</p>
+<p>Thanks for trying RP-8, and please feel free to <a
+href="#contact">get in touch!</a></p>
 <h1 id="getting-started">Getting Started</h1>
 <p>This section will walk you through writing a simple song in RP-8:
 everything you need to know to make your own music. There are two main
@@ -490,17 +498,44 @@ file on your desktop containing your exported audio.</p>
 <p>Congratulations! You’ve just made a very short song with RP-8. Go
 make more!</p>
 <p>For more information on how the devices work and what specific
-controls do, see the <a href="#reference">Reference</a> section.<span
-class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
-class="sidenote">Once I write it….<br />
-<br />
-</span></span> For quick reminders in RP-8, remember that you can turn
-on tooltips.</p>
-<p>If you get stuck or encounter what seems to be a bug, please reach
-out via the <a href="https://www.lexaloffle.com/bbs/?tid=47284">BBS
-thread</a>.</p>
+controls do, see the <a href="#reference">Reference</a> section. For
+quick reminders in RP-8, remember that you can turn on tooltips with
+<code>t</code> or access help with <code>h</code>.</p>
+<p>If you get stuck or encounter what seems to be a bug, please <a
+href="#contact">get in touch</a>!</p>
 <h1 id="reference">Reference</h1>
-<h2 id="modes">Modes</h2>
+<h2 id="basic-usage">Basic Usage</h2>
+<p>Most controls on the screen respond to one of a small number of
+gestures: clicks, vertical drags, and double clicks. Generally, clicking
+either activate a button’s effect or toggle a button’s state, dragging
+will alter the value of a knob or a numeric control, and double-clicking
+will reset a knob to its default value. There are also a few buttons for
+manipulating pattern data that respond to vertical drags (the transpose
+and rotate pattern buttons).</p>
+<p>When you click or drag a control, it becomes highlighted in blue.
+This indicates that the control is now selected, and will respond to
+control-specific keyboard commands, such as the up and down arrow keys
+for altering step, note, or knob values. If a control does not get a
+blue highlight, that means it is disabled in the current mode – for
+example, you cannot change the song position in pattern mode.</p>
+<h2 id="transport">Transport</h2>
+<figure>
+<img src="img/transport_ref.png" style="width:100.0%"
+alt="The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop start, loop enable, loop length, and file menu." />
+<figcaption aria-hidden="true">The RP-8 transport controls (from left):
+play/pause, record, rewind, page toggle, mode toggle, song position,
+loop start, loop enable, loop length, and file menu.</figcaption>
+</figure>
+<p>The transport provides control over RP-8’s playback and overall
+behavior. In pattern mode, you can start or pause the sequencer, change
+between pattern mode and song mode (see <a href="#modes">Modes</a>),
+switch sequencer pages (see <a href="#pages">Pages</a>), and access the
+file menu (see [File Menu]). In song mode, the position control, loop
+enable/start/length controls, and record button will also become
+available.</p>
+<p>To change the numeric controls, click and drag up/down to
+increase/decrease the values, or use the arrow keys.</p>
+<h3 id="modes">Modes</h3>
 <p>RP-8 has two modes: <strong>pattern mode</strong> and <strong>song
 mode</strong>. All the same devices and sound creation machinery are
 available in both, however, they have different purposes. Pattern mode
@@ -509,7 +544,7 @@ for learning, experimentation, and coming up with new ideas. Song mode
 records enables several features for recording, editing, and replay of
 parameter changes, and so is best for when you want to start recording
 multi-bar sequences and complex automation.</p>
-<h2 id="pages">Pages</h2>
+<h3 id="pages">Pages</h3>
 <p>The RP-8 UI also has two sequencer pages, each accessible in both
 pattern and song modes. You can toggle between them with the
 <code>tab</code> key, or by clicking the <code>P1</code> /
@@ -518,20 +553,43 @@ different set of pitch controls for each pattern.</p>
 <p>RP-8 starts on page 1. This page lets you control the pitch of
 oscillator 1 on both synths, and shows the drum pattern step
 buttons.</p>
-<p>Page 2 contains secondary / relative pitch controls. These controls
-let you detune each drum (on the drum machine) or the second oscillator
-(on each synth) relative to the main pitch for each device. For the
-synth, this means you are detuning oscillator 2 relative to oscillator
-1. For the drums, you are detuning each drum relative to whatever pitch
-is determined by the sound controls. (The base pitch of each drum with
-all knobs at their default positions is usually G in some octave.)</p>
-<h2 id="advanced-arrangement-editing">Advanced Arrangement Editing</h2>
+<p>Page 2 shows secondary / relative pitch controls for all three
+devices. These controls let you detune each drum (on the drum machine)
+or the second oscillator (on each synth) relative to the main pitch for
+each device. For the synth, this means you are detuning oscillator 2
+relative to oscillator 1. For the drums, you are detuning each drum
+relative to whatever pitch is determined by the sound controls. (The
+base pitch of each drum with all knobs at their default positions is
+usually G in some octave.)</p>
+<h3 id="loading-and-saving">Loading and Saving</h3>
+<p>To load a song, drag the song file onto the RP-8 window.
+Alternatively, you can copy the song data to your clipboard, paste it
+into RP-8 (using ctrl-v on Windows/Linux or cmd-v on MacOS), and use the
+<code>o</code> hotkey to load from the clipboard.</p>
+<p>To save songs, you can use the file menu.</p>
 <figure>
-<img src="img/song_edit_btns.png" style="width:12.5%"
-alt="Song edit buttons, from top left: copy, cut, insert, paste" />
-<figcaption aria-hidden="true">Song edit buttons, from top left: copy,
-cut, insert, paste</figcaption>
+<img src="img/rp8_file_menu.2048.png" style="width:50.0%"
+alt="The RP-8 file menu" />
+<figcaption aria-hidden="true">The RP-8 file menu</figcaption>
 </figure>
+<p>This screen allows you to name your song and save it, as well as open
+the RP-8 data folder (which, depending on your OS and how you are
+running RP-8, may be difficult to find otherwise). Use the up and down
+arrow keys to select an option, then the enter key to act. You can
+access this menu by clicking the disk icon by the transport controls, or
+by using the <code>f</code> key.</p>
+<h2 id="arrangement-editing">Arrangement Editing</h2>
+<p>Below the transport, on the left side of the screen, are buttons for
+editing song arrangements. Copy and paste are available in all modes,
+the rest are available in song mode only.</p>
+<figure>
+<img src="img/arrangement_btns.png"
+alt="Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear, paste." />
+<figcaption aria-hidden="true">Arrangement editing buttons
+(highlighted), clockwise from top left: copy, cut, insert, commit,
+clear, paste.</figcaption>
+</figure>
+<p>The buttons act as follows:</p>
 <dl>
 <dt>Copy sequence</dt>
 <dd>
@@ -559,14 +617,41 @@ automation).</p>
 loop’s old contents are now located just after the loop. The new bars
 are then filled with the copied sequence, just as with paste.</p>
 </dd>
+<dt>Commit overrides</dt>
+<dd>
+<p>Commits the values of all currently-overridden controls to the loop.
+This will overwrite any automation for those controls.</p>
+</dd>
+<dt>Clear overrides</dt>
+<dd>
+<p>Clears all control overrides and returns any overridden controls to
+their values as recorded in the song. This action takes effect at the
+start of the next bar.</p>
+</dd>
 </dl>
+<p>There are also a two keyboard-only arrangement commands.
+<code>[</code> acts like the paste button, but applies only to the
+currently-selected control. This allows you to selectively transfer
+automation for only some controls. <code>]</code> also acts like the
+paste button, but does not transfer pattern selections (transfers sound
+controls only). This lets you copy sound design from one part of your
+song to another without overwriting the pattern arrangement.</p>
+<h2 id="tempo-shuffle-and-volume">Tempo, Shuffle and Volume</h2>
+<figure>
+<img src="img/tempo_shuffle_volume.png"
+alt="The tempo, shuffle, and volume controls (highlighted)." />
+<figcaption aria-hidden="true">The tempo, shuffle, and volume controls
+(highlighted).</figcaption>
+</figure>
+<p>Tempo</p>
 <h2 id="devices">Devices</h2>
 <p>Sound in RP-8 is generated by its 3 devices: two identical
 2-ocillator synthesizers loosely inspired by the <a
 href="https://en.wikipedia.org/wiki/Roland_TB-303">Roland TB-303</a> and
 one drum machine that is even more loosely inspired by the <a
 href="https://en.wikipedia.org/wiki/Roland_TR-808">Roland TR-808</a>.
-These devices are explained in more detail in their own sections.</p>
+These devices are explained in more detail in their own sections
+below.</p>
 <figure>
 <img src="img/synth.png" alt="A synth" />
 <figcaption aria-hidden="true">A synth</figcaption>
@@ -580,7 +665,7 @@ your songs, like melody or bass lines, and you should use the drum
 machine for rhythmic elements. However, all the drums have a tuning
 adjustment knob, and many of the sounds can have a strong tonal
 character, so stay open-minded!<span
-class="sidenote-wrapper"><label for="sn-8" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-8" class="margin-toggle"/><span
+class="sidenote-wrapper"><label for="sn-7" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-7" class="margin-toggle"/><span
 class="sidenote">TR-808 bass drums with long decay times are often used
 as bass sounds. The FM and percussion tracks of the drum machine can
 also easily be used as additional tonal voices.<br />
@@ -589,14 +674,12 @@ also easily be used as additional tonal voices.<br />
 plays back sequences of notes or drum hits from a user-programmable bank
 of patterns. Patterns are 16 step (1 bar) series of notes or drum hits,
 and are the building blocks of music in RP-8.</p>
-<p>RP-8 also has a mixer and transport section at the top of the
-display, which houses controls that affect the whole song or pattern:
-the song/pattern mode switch, song transport controls, effects controls,
-and the mixer.</p>
+<p>RP-8 also has effects units and a mixer, whose controls are all
+located in the transport and mixer section at the top of the screen.</p>
 <figure>
 <img src="img/header_section.png"
-alt="The mixer and transport section" />
-<figcaption aria-hidden="true">The mixer and transport
+alt="The transport and mixer section" />
+<figcaption aria-hidden="true">The transport and mixer
 section</figcaption>
 </figure>
 <h3 id="audio-routing">Audio Routing</h3>
@@ -611,7 +694,8 @@ The delay send signal is sent to the delay effect, whose output is then
 mixed with the dry signal and sent to the compressor. Finally, soft
 saturation is applied to the signal before it is output to the
 speaker.</p>
-<p>This routing can be varied in two ways:</p>
+<p>The drum machine and the pattern filter can vary this routing a
+little bit, see their sections for more details.</p>
 <h3 id="synths">Synths</h3>
 <h3 id="drum-machine">Drum Machine</h3>
 <p>The drum machine offers six different drum tracks. Each track offers
@@ -893,6 +977,12 @@ caps lock off.</p>
 </tr>
 </tbody>
 </table>
+<h1 id="contact">Contact</h1>
+<p>If you have thoughts, feedback, ideas, bug reports, or if you would
+like help, you can reach me via <a
+href="https://luchak.itch.io/rp8">Itch</a>, the <a
+href="https://discord.gg/kGJJcpEkgv">RP-8 Discord</a> or <a
+href="https://6t.vc/@luchak">your favorite ActivityPub service</a>.</p>
 </main>
 
 <script>
