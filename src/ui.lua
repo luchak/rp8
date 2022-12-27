@@ -247,7 +247,7 @@ function ui_new()
 end
 
 function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
- return merge(parse--[[language::loon]][[{drag_amt=0.05 tt="note (drag)" bigstep=12}]], {
+ return merge(parse--[[language::loon]][[{drag_amt=0.05 tt=note bigstep=12}]], {
   grp=grp,step=step,x=x,y=y,
   get_sprite=function(self,state)
    return sp0-nt0+state.ui_pats[syn][key][step]
@@ -283,7 +283,7 @@ function step_btn_new(grp,x,y,syn,step,sprites)
  -- last sprite is for current step
  local n=#sprites-1
  return {
-  grp=grp,step=step,x=x,y=y,tt='step edit',click_act=true,
+  grp=grp,step=step,x=x,y=y,tt='step '..step,click_act=true,
   get_sprite=function(self,state)
    if (state.playing and state.ui_pticks[syn]==step) return sprites[n+1]
    local v=state.ui_pats[syn].st[step]
@@ -481,7 +481,7 @@ eval--[[language::loaf]][[
  )
 ))
 (foreach (' (
- {x=64,o=6,tt="global tune"}
+ {x=64,o=6,tt="synth detune"}
  {x=72,o=8,tt="osc 2 fine"}
  {x=80,o=9,tt="osc mix"}
  {x=88,o=10,tt="filter cutoff"}
@@ -511,11 +511,11 @@ eval--[[language::loaf]][[
 (add_ui (merge (push_new 8 96 192 (fn ()) "") (' {active=false})) 1)
 (add_ui (merge (push_new 16 96 239
  (fn (state b) (rotate_pat (@ $state ui_pats dr) (' (st dt)) $b))
- "rotate (drag)"
+ "rotate pattern"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
 (add_ui (merge (push_new 8 96 111
  (fn (state b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
- "transpose (drag)"
+ transpose
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui (merge
  (spin_btn_new 0 96 $pat_lens "pattern length" (state_make_get_set_pat_len dr))
@@ -578,9 +578,9 @@ eval--[[language::loaf]][[
 )
 
 (add_ui (toggle_new
- 0 0 6 7 "play/pause (space)" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
+ 0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
-(add_ui (merge (spin_btn_new 24 0 (' (189 190)) "ui page (tab)" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
+(add_ui (merge (spin_btn_new 24 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (toggle_new
  32 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
 ))
@@ -588,7 +588,7 @@ eval--[[language::loaf]][[
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
  (make_obj_cb toggle_rec)
 ) 196 $no_uncommitted true) 233)
-(song_only (push_new 16 0 5 $rewind "rewind (backspace)") 5)
+(song_only (push_new 16 0 5 $rewind rewind) 5)
 
 (add_ui (push_new 96 0 191 $enter_file "file menu"))
 (add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
