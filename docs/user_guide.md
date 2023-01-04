@@ -422,7 +422,7 @@ sound design from one part of your song to another without overwriting the patte
 
 ![The tempo, shuffle, and volume controls (highlighted).](img/tempo_shuffle_volume.png)
 
-Tempo
+**TODO**
 
 ## Devices
 
@@ -461,7 +461,7 @@ The drum machine and the pattern filter can vary this routing a little bit, see 
 
 ### Synths
 
-
+**TODO**
 
 ### Drum Machine
 
