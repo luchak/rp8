@@ -595,7 +595,7 @@ effect. Reducing the compressor threshold should help make your song sound more 
 drum sounds and synth sounds fit together better. There's just one knob - try adjusting it and see if you like the
 results!
 
-The technical details: this compressor uses linear scaling (not logarithmic) with a hard knee, a fixed ratio of 4, and
+Technical details: this compressor uses linear scaling (not logarithmic) with a hard knee, a fixed ratio of 4, and
 fixed attack and release times of approximately 2.5ms and 60ms, respectively.
 
 ## Keyboard Controls
