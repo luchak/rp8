@@ -17,7 +17,7 @@ function delay_new()
    local x,y=b[i],dl[tap]
    b[i]=y
    y=x+fb*y
-   f1+=(y-f1)>>4
+   f1+=(y-f1)>>5
    dl[p]=y-f1
    p=(p+1)&0x7fff
    tap=(tap+1)&0x7fff
