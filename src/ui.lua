@@ -160,7 +160,7 @@ function ui_new()
   end
 
   -- store rows behind mouse and draw mouse
-  local tt_my=mid(0,my,121)
+  local tt_my=mid(my,121)
   local next_off,hover=tt_my<<6,self.hover
   save_band(0x9000,next_off)
   spr(15,mx,my)
@@ -173,7 +173,7 @@ function ui_new()
   local focus_off=(f and f.y+9 or 0)<<6
   save_band(0x9400,focus_off)
   if self.ftoast_w==f and self.ftoast_t>0 then
-   outline_text(self.ftoast,mid(0,f.x-2,116),f.y+10,12,0)
+   outline_text(self.ftoast,mid(f.x-2,116),f.y+10,12,0)
    self.ftoast_t-=1
   end
 
@@ -184,7 +184,7 @@ function ui_new()
   if (display_mode!='ui') return
   local input,nav=0
 
-  self.mx,self.my=mid(0,stat(32),127),mid(0,stat(33),127)
+  self.mx,self.my=mid(stat(32),127),mid(stat(33),127)
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
@@ -232,7 +232,7 @@ function ui_new()
    poke(0x5f2d,1)
   end
 
-  self.click_t=max(self.click_t-1,0)
+  self.click_t=max(self.click_t-1)
 
   if new_focus then
    input+=new_focus.drag_amt>0 and stat(36) or 0
@@ -309,7 +309,7 @@ function dial_new(x,y,s0,bins,param_idx,tt)
    return s0+(get(state)>>7)*bins
   end,
   input=function(self,state,b)
-   local val=mid(0,128,get(state)+b)
+   local val=mid(128,get(state)+b)
    local s=tostr(val)
    while (#s<3) s=' '..s
    set_ftoast(self,s)
@@ -597,11 +597,11 @@ eval--[[language::loaf]][[
 (song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
 
 (add_ui (wrap_override
- (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides (c)")
+ (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides")
  204 $has_uncommitted)
 )
 (add_ui (wrap_override
- (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides (x)")
+ (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides")
  206 $has_uncommitted)
 )
 
@@ -623,7 +623,7 @@ eval--[[language::loaf]][[
 (add_ui (merge
  (number_new 80 16 2 "filter pattern" (@ $get_set_filt_pat 1)
   (fn (s b)
-   ((@ $get_set_filt_pat 2) $s (mid 0 (+ ((@ $get_set_filt_pat 1) $s) $b) (len $svf_pats)))
+   ((@ $get_set_filt_pat 2) $s (mid (+ ((@ $get_set_filt_pat 1) $s) $b) (len $svf_pats)))
   )
  )
  (' {drag_amt=0.02})
