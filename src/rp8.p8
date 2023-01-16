@@ -249,7 +249,6 @@ function _init()
 ))
 ]]
 
- -- yes mouse / faster repeat
  -- no output lpf
  poke(0x5f36,@0x5f36^^0x20)
 
@@ -337,21 +336,21 @@ function _update60()
   audio_wait(10)
  end
 
- local t0=stat(1)
+ --local t0=stat(1)
  audio_update()
- t_audio=stat(1)-t0
+ --t_audio=stat(1)-t0
  if pause_t<=0 then
-  t0=stat(1)
+  --t0=stat(1)
   ui:update(state)
   audio_root=seq_helper
-  t_ui=stat(1)-t0
+  --t_ui=stat(1)-t0
  else
   pause_t-=1
  end
 end
 
 function _draw()
- local t0=stat(1)
+ --local t0=stat(1)
  if display_mode=='ui' then
   ui:draw(state)
  elseif display_mode=='rename' then
@@ -361,7 +360,7 @@ function _draw()
  else
   draw_help()
  end
- t_draw=stat(1)-t0
+ --t_draw=stat(1)-t0
  --log('times',t_audio,t_ui,t_draw)
 end
 
