@@ -128,6 +128,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
      local tmp_i=tmp[i]
      local x1,x0=tmp_i,(tmp_i+xp1)>>1
      xp1=tmp_i
+     local pre=x0+x1
 
      local s0=x0>>31
      local s1=x1>>31
@@ -143,7 +144,9 @@ function mixer_new(_srcs,_fx,_filt,_lev)
       x1=s1^^(m1^^(m1>>31))
      end
 
-     tmp[i]=(x0+x1)*slev
+     -- gotta apply the difference only or we end up lowpass filtering everything
+     -- yes it's offset by half a sample but undoing that is probably too many tokens
+     tmp[i]=(tmp_i+tmp_i+x0+x1-pre)*slev
     end
     _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
