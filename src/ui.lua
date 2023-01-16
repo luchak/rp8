@@ -565,9 +565,12 @@ eval--[[language::loaf]][[
 ))
 
 (set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
+(set rewind_t 0)
 (set rewind (fn ()
  ((@ $state go_to_bar) $state
-  (if (gt (@ $state tl bar) (@ $state tl loop_start)) (@ $state tl loop_start) 1)
+  (let r0 $rewind_t)
+  (set rewind_t (time))
+  (if (gt (~ $rewind_t $r0) 0.2) (@ $state tl loop_start) 1)
  )
 ))
 
