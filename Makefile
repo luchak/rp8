@@ -12,6 +12,9 @@ build/rp8_debug.p8: $(SRC)
 	python3 shrinko8/shrinko8.py --minify --count --no-minify-rename --no-minify-spaces \
 		--no-minify-lines --no-minify-comments --script tools/rp8.py src/rp8.p8 $@
 
+lint:
+	python3 shrinko8/shrinko8.py --lint --script tools/rp8.py src/rp8.p8
+
 clean:
 	rm -rf build
 
