@@ -123,7 +123,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     local t2=2*t
     local sh=0.34+_shape*.32
     local sh2=2*sh
-    slev/=2-od*(.2+sh)*1.2 -- divide by two since we need to average later
+    slev/=2-od*(.3+sh)*1.7 -- divide by two since we need to average later
     for i=first,last do
      local tmp_i=tmp[i]
      local x1,x0=tmp_i,(tmp_i+xp1)>>1
