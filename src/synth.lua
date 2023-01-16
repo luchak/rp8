@@ -93,7 +93,7 @@ function synth_new(base)
   _o2mix=o2mix
   -- range is approx. 110hz to 1200hz
   _fc=0.005+0.05*cut*cut
-  _fr=res^1.1*11.5+.3
+  _fr=res^1.1*11+.2
   _env=env+0.02
   _acc=acc*1.9+0.1
   _saw=saw>0

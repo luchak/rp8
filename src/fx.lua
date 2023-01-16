@@ -119,24 +119,31 @@ function mixer_new(_srcs,_fx,_filt,_lev)
    for k,src in pairs(_srcs) do
     local slev,od,fx,xp1,hpf=src.lev,src.od,src.fx,unpack(_state[k])
     src.obj:update(tmp,first,last,bypass)
-    local odg=0.2+79.8*od*od
-    local odgi=(1+9*od*od)/odg
-    local bias=_shape*od*1.5
-    local bias3x2=pow3(bias)<<1
+    local t=1-.98*od^0.04
+    local t2=2*t
+    local sh=0.34+_shape*.32
+    local sh2=2*sh
+    slev/=2-od*(.2+sh)*1.2 -- divide by two since we need to average later
     for i=first,last do
      local tmp_i=tmp[i]
      local x1,x0=tmp_i,(tmp_i+xp1)>>1
      xp1=tmp_i
-     local pre=x1+x0
-     x0=x0*odg+bias
-     x1=x1*odg+bias
-     local m0,m1=x0>>31,x1>>31
-     if (x0^^m0>1.5) x0=1.5^^m0
-     if (x1^^m1>1.5) x1=1.5^^m1
-     local diff=(odgi*(x0+x1-bias-bias-0.148148*(1+bias)*(x0*x0*x0+x1*x1*x1-bias3x2))-pre)>>1
-     local err=diff-hpf
-     tmp[i]=(tmp_i+err)*slev
-     hpf+=err>>8
+
+     local s0=x0>>31
+     local s1=x1>>31
+     local c0=(x0^^s0)<t and x0 or t^^s0
+     local c1=(x1^^s1)<t and x1 or t^^s1
+     x0+=sh2*(c0-x0)
+     x1+=sh2*(c1-x1)
+
+     if sh>.5 then
+      local m0=(x0+t)%t2-t
+      local m1=(x1+t)%t2-t
+      x0=s0^^(m0^^(m0>>31))
+      x1=s1^^(m1^^(m1>>31))
+     end
+
+     tmp[i]=(x0+x1)*slev
     end
     _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
