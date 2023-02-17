@@ -123,30 +123,22 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     local t2=2*t
     local sh=0.33+_shape*.34
     local sh2=2*sh
-    slev/=2-od*(.9+min(_shape,.5))*1 -- includes a divide by two since we need to average later
+    slev/=1-od*(.9+min(_shape,.5))*.5
     for i=first,last do
-     local tmp_i=tmp[i]
-     local x1,x0=tmp_i,(tmp_i+xp1)>>1
-     xp1=tmp_i
-     local pre=x0+x1
+     local x0=tmp[i]
 
      local s0=x0>>31
-     local s1=x1>>31
      local c0=(x0^^s0)<t and x0 or t^^s0
-     local c1=(x1^^s1)<t and x1 or t^^s1
      x0+=sh2*(c0-x0)
-     x1+=sh2*(c1-x1)
 
      if sh>.5 then
       local m0=(x0+t)%t2-t
-      local m1=(x1+t)%t2-t
       x0=s0^^(m0^^(m0>>31))
-      x1=s1^^(m1^^(m1>>31))
      end
 
      -- gotta apply the difference only or we end up lowpass filtering everything
      -- yes it's offset by half a sample but undoing that is probably too many tokens
-     tmp[i]=(tmp_i+tmp_i+x0+x1-pre)*slev
+     tmp[i]=x0*slev
     end
     _state[k]={xp1,hpf}
     if (filtmap[k]==filtsrc) _filt:update(tmp,first,last)
