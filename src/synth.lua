@@ -54,10 +54,15 @@ function synth_new(base)
     local dodp,dodp2,out,aa_osc=odp*detune,odp*o2detune,0
     _nt+=1
 
+    local opr=op+0x8000
+    local o2pr=o2p+0x8000
     if saw then
-     aa_osc=mix1*((op>>15)-pbstep((op+0x8000)/dodp))+mix2*((o2p>>15)-pbstep((o2p+0x8000)/dodp2))
+     aa_osc=mix1*((op>>15)-pbstep(opr/dodp))+mix2*((o2p>>15)-pbstep(o2pr/dodp2))
     else
-     aa_osc=mix1*((1^^(op>>31))-pbstep((op+0x8000)/dodp)+pbstep(op/dodp))+mix2*((1^^(o2p>>31))-pbstep((o2p+0x8000)/dodp2)+pbstep(o2p/dodp2))
+     local c1=(opr^^(opr>>31))<dodp and -pbstep(opr/dodp) or pbstep(op/dodp)
+     local c2=(o2pr^^(o2pr>>31))<dodp2 and -pbstep(o2pr/dodp2) or pbstep(o2p/dodp2)
+     aa_osc=mix1*((1^^(op>>31))+c1)+
+            mix2*((1^^(o2p>>31))+c2)
     end
     -- coefs are polyblep compensation FIR
     aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
