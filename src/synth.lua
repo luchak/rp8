@@ -1,6 +1,8 @@
 -->8
 -- audio gen
 
+_lfsr=0.5
+
 function pbstep(rp)
  local m=rp>>31
  return rp^^m<1 and rp+rp-((rp*rp+1)^^m) or 0
@@ -205,16 +207,18 @@ function snare_new()
   local op,dp,dp1,f1,hpmix=_op,_dp,_dp1*_detune,_f1,_hpmix
   local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
   local aemax=_aemax
+  local lfsr=_lfsr
   for i=first,last do
    op+=dp
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   local v=(aemax<aes and aemax or aes)*sin(op)+aen*(rnd()-0.5)
+   lfsr=lfsr~(lfsr*0x70.00f)
+   local v=(aemax<aes and aemax or aes)*sin(op)+aen*((lfsr&0x0.ffff)-0.5)
    f1+=(v-f1)>>1
    b[i]+=v-(f1>>hpmix)
   end
-  _dp,_op,_aes,_aen,_f1=dp,op,aes,aen,f1
+  _dp,_op,_aes,_aen,_f1,_lfsr=dp,op,aes,aen,f1,lfsr
  end
 
  return obj
@@ -241,11 +245,13 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
   local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
+  local lfsr=_lfsr
 
   for i=first,last do
    local osc=(op1&0.5)+(op2&0.5)+(op3&0.5)+(op4&0.5)-1
 
-   local r=nlev*((rnd()&0.5)-0.25)+tlev*osc
+   lfsr=lfsr~(lfsr*0x70.00f)
+   local r=nlev*((lfsr&0.5)-0.25)+tlev*osc
    f1+=0.98*(r-f1)
    f2+=0.98*(f1-f2)
    ae*=aed
@@ -255,6 +261,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    op3+=odp3
    op4+=odp4
   end
+  _lfsr=lfsr
   _ae,_f1,_f2=ae,f1,f2
   _op1,_op2,_op3,_op4=op1,op2,op3,op4
  end
