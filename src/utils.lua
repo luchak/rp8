@@ -210,6 +210,7 @@ function _eval_scope(ast,locals,start)
 
   local v1,v2,v3=unpack(vals)
 
+  -- would be nice to make this a table but the function wrappers aren't worth it
   if cmd=='seq'     then return vals[#vals]
   elseif cmd=='+'   then return v1+v2
   elseif cmd=='*'   then return v1*v2
@@ -248,7 +249,6 @@ function take(i,...)
 end
 
 function pow3(x) return x*x*x end
-function pow4(x) return pow3(x)*x end
 
 eval--[[language::loaf]][[
 (set unpack_split (fn (s) (unpack (split $s)) ))

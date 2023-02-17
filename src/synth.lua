@@ -25,7 +25,7 @@ function synth_new(base)
    local med,mr=_med,_mr
    local gate,nt,nl,sl,ac=_gate,_nt,_nl,_sl,_ac
    local env,saw,acc=_env,_saw,ac and _acc or 0
-   local res_comp=16/(fr+16)
+   local res_comp=(saw and 16 or 11)/(fr+16)
    local mix1,mix2=cos(o2mix),-sin(o2mix)
 
    for i=first,last do
@@ -91,7 +91,7 @@ function synth_new(base)
   local patstep,saw,tun,_,o2fine,o2mix,cut,res,env,dec,acc=pat.st[step],unpack_patch(patch,base+5,base+14)
 
   _o2mix=o2mix
-  -- range is approx. 110hz to 1200hz
+  -- range is approx. 110hz to 1750Hz
   _fc=0.005+0.075*cut^2.5
   _fr=res^1.1*11+.2
   _env=env+0.02
@@ -100,6 +100,7 @@ function synth_new(base)
   local pd=1-dec
   _lsl,_ac,_sl=_sl,get_ac_mode(patstep)
   _sl=_sl and state.playing
+  if(base==23)log(_lsl,_sl)
   if (_ac) pd=0.8+0.2*pd
   _med=0.9997-0.005*pd*pd
   _nt,_nl=0,note_len
@@ -194,8 +195,8 @@ function snare_new()
     _aemax=_aes>>1
     local pd2=0.19-0.1725*dec^0.5
     if (not mode) pd2*=1.7 _aen*=1.4 _aes*=.7 _aemax=_aes
-    _aesd=0.996-0.06*pd2
-    _aend=.9997-0.05*pd2
+    _aesd=.996-.06*pd2
+    _aend=.9997-.05*pd2
    end
   end
  end
@@ -233,7 +234,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   end
 
   _detune=2^(tbase+tscale*tun+(pat.dt[step]-64)/12)
-  _aed=1-0.04*pow4(dbase-dscale*(dec*0.5+_dec_mod))
+  _aed=1-0.04*(dbase-dscale*(dec*0.5+_dec_mod))^4
  end
 
  function obj:subupdate(b,first,last)
@@ -274,8 +275,8 @@ function fm_new(base)
    _amp=lev*lev*trn(ac,0.7,0.3)*(_mode and 0.85 or 1)
    _mamp=_mode and 4 or 1
   end
-  _adec=1-pow4(0.32-0.17*dec)
-  _mdec=1-pow4(0.28-0.18*dec)
+  _adec=1-(0.32-0.17*dec)^4
+  _mdec=1-(0.28-0.18*dec)^4
   tun<<=2
   local ratio=(0.25<<(tun&7))*(1+(tun&0x0.ffff))
   _mdet=_cdet*ratio

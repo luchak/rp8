@@ -28,7 +28,7 @@ skim the tutorial, since RP-8 does not function identically to ReBirth.
 
 Let's begin!
 
-## Pattern Mode: Composing and Experimenting
+## Pattern Mode Tutorial: Composing and Experimenting
 
 In RP-8, you compose music by writing patterns, which are sequences of up to 16 notes that you can play back in various
 orders to make songs. RP-8 starts up in pattern mode, which gives you direct control over every aspect of what RP-8
@@ -422,7 +422,16 @@ sound design from one part of your song to another without overwriting the patte
 
 ![The tempo, shuffle, and volume controls (highlighted).](img/tempo_shuffle_volume.png)
 
-**TODO**
+The tempo control, marked with a little note symbol, displays the current tempo in beats per minute. RP-8 supports
+tempo settings from 60 to 188 bpm in 1 bpm increments. Tempo can be automated over a song just like any other control.
+
+Shuffle, marked with **SH**, offsets the position of every other 16th note step - pushing each one later. For triplet
+swing, set shuffle about 2/3 of the way to its maximum position. Shuffle is applied to all instruments.
+
+The volume control, marked with a small speaker symbol, controls the level of RP-8's output. RP-8 applies soft
+saturation at the output to avoid clipping, so you can also use this as a second distortion effect on the main mix. You
+can separately control the level of Pico-8's main output via the pause menu, accessed with `enter`: the volume control
+is located in a submenu under the Options heading.
 
 ## Devices
 
@@ -459,9 +468,32 @@ saturation is applied to the signal before it is output to the speaker.
 
 The drum machine and the pattern filter can vary this routing a little bit, see their sections for more details.
 
+### Device Pattern Controls
+
+There are several controls that are shared by both the synths and the drum machine, although with slightly different
+layouts.
+
+**Device enable.**
+
+**Pattern select.**
+
+**Pattern copy.**
+
+**Pattern paste.**
+
+**Pattern length.**
+
+**Pattern transpose.**
+
+**Pattern rotate.**
+
 ### Synths
 
-**TODO**
+The two synthesizers are two-oscillator paraphonic synths with 24 db/octave lowpass filters and built-in step
+sequencers. (**Paraphonic** means, in this case, that the oscillator pitches can be sequenced separately.) The filter
+cutoff frequency is modulated by a simple one-stage envelope.
+
+There are
 
 ### Drum Machine
 
