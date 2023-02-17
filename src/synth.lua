@@ -4,8 +4,7 @@
 _lfsr=0.5
 
 function pbstep(rp)
- local m=rp>>31
- return rp^^m<1 and rp+rp-((rp*rp+1)^^m) or 0
+ return rp+rp-((rp*rp+1)^^(rp>>31))
 end
 
 function synth_new(base)
@@ -56,13 +55,15 @@ function synth_new(base)
 
     local opr=op+0x8000
     local o2pr=o2p+0x8000
+    local c1r=(opr^^(opr>>31))<dodp and pbstep(opr/dodp) or 0
+    local c2r=(o2pr^^(o2pr>>31))<dodp2 and pbstep(o2pr/dodp2) or 0
     if saw then
-     aa_osc=mix1*((op>>15)-pbstep(opr/dodp))+mix2*((o2p>>15)-pbstep(o2pr/dodp2))
+     aa_osc=mix1*((op>>15)-c1r)+mix2*((o2p>>15)-c2r)
     else
-     local c1=(opr^^(opr>>31))<dodp and -pbstep(opr/dodp) or pbstep(op/dodp)
-     local c2=(o2pr^^(o2pr>>31))<dodp2 and -pbstep(o2pr/dodp2) or pbstep(o2p/dodp2)
-     aa_osc=mix1*((1^^(op>>31))+c1)+
-            mix2*((1^^(o2p>>31))+c2)
+     local c1=(op^^(op>>31))<dodp and pbstep(op/dodp) or 0
+     local c2=(o2p^^(o2p>>31))<dodp2 and pbstep(o2p/dodp2) or 0
+     aa_osc=mix1*((1^^(op>>31))+c1-c1r)+
+            mix2*((1^^(o2p>>31))+c2-c2r)
     end
     -- coefs are polyblep compensation FIR
     aa_osc,e1,e2=-0.1469*(aa_osc+e2)+1.2674*e1,aa_osc,e1
@@ -211,14 +212,13 @@ function snare_new()
  function obj:subupdate(b,first,last)
   local op,dp,dp1,f1,hpmix=_op,_dp,_dp1*_detune,_f1,_hpmix
   local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
-  local aemax=_aemax
-  local lfsr=_lfsr
+  local aemax,lfsr=_aemax,_lfsr
   for i=first,last do
    op+=dp
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   lfsr=lfsr~(lfsr*0x70.00f)
+   lfsr^^=lfsr*0x70.00f
    local v=(aemax<aes and aemax or aes)*sin(op)+aen*((lfsr&0x0.ffff)-0.5)
    f1+=(v-f1)>>1
    b[i]+=v-(f1>>hpmix)
@@ -249,13 +249,12 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  function obj:subupdate(b,first,last)
   local ae,f1,f2,aed,tlev,nlev=_ae,_f1,_f2,_aed,_tlev,_nlev
   local op1,op2,op3,op4,detune=_op1,_op2,_op3,_op4,_detune
-  local odp1,odp2,odp3,odp4=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune
-  local lfsr=_lfsr
+  local odp1,odp2,odp3,odp4,lfsr=_odp1*detune,_odp2*detune,_odp3*detune,_odp4*detune,_lfsr
 
   for i=first,last do
    local osc=(op1&0.5)+(op2&0.5)+(op3&0.5)+(op4&0.5)-1
 
-   lfsr=lfsr~(lfsr*0x70.00f)
+   lfsr^^=lfsr*0x70.00f
    local r=nlev*((lfsr&0.5)-0.25)+tlev*osc
    f1+=0.98*(r-f1)
    f2+=0.98*(f1-f2)
@@ -266,9 +265,8 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    op3+=odp3
    op4+=odp4
   end
-  _lfsr=lfsr
   _ae,_f1,_f2=ae,f1,f2
-  _op1,_op2,_op3,_op4=op1,op2,op3,op4
+  _op1,_op2,_op3,_op4,_lfsr=op1,op2,op3,op4,lfsr
  end
 
  return obj
