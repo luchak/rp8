@@ -13,7 +13,9 @@ ALL_IMG_BASENAMES = synth.png drums.png header_section.png drum_step_btns.png \
 		    sound_design.png ps_mode_btn.png seq_copy_paste_btns.png transport.png \
 		    override_btns.png song_edit_btns.png drums_empty.png drum_btn_colors.png \
 		    synth_empty.png rp8_help.2048.png record_btn_states.png mixer.png transport_ref.png \
-		    rp8_file_menu.2048.png arrangement_btns.png tempo_shuffle_volume.png
+		    rp8_file_menu.2048.png arrangement_btns.png tempo_shuffle_volume.png \
+		    device_pattern_controls.png
+
 ALL_IMGS = $(ALL_IMG_BASENAMES:%.png=img/%.png)
 
 ## x.pdf depends on x.md, x.html depends on x.md, etc
@@ -119,6 +121,10 @@ img/tempo_shuffle_volume.png: img/rp8_clear.2048.png
 	\( +clone -evaluate set 40% -draw "rectangle 256,128 767,255" \
 	-draw "rectangle 256,256 511,383" \) \
 	-compose multiply -composite $@
+
+img/device_pattern_controls.png: img/rp8_clear.2048.png
+	convert -define png:exclude-chunks=date,time -font helvetica -fill white -stroke black \
+		-pointsize 80 -draw "text 128,128 'test'" $< $@
 
 clean:
 	rm -f *.html *.pdf *.tex *.aux *.log $(ALL_IMGS)
