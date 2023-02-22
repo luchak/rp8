@@ -202,7 +202,7 @@ function snare_new()
     _aen*=lev2*0.7
     _aemax=_aes>>1
     local pd2=0.19-0.1725*dec^0.5
-    if (not mode) pd2*=1.7 _aen*=1.4 _aes*=.7 _aemax=_aes
+    if (not mode) pd2*=1.8 _aen*=1.4 _aes*=.7 _aemax=_aes
     _aesd=.996-.06*pd2
     _aend=.9997-.05*pd2
    end

@@ -121,7 +121,7 @@ function mixer_new(_srcs,_fx,_filt,_lev)
     src.obj:update(tmp,first,last,bypass)
     local t=1-.98*od^0.05
     local t2=2*t
-    local sh=0.35+_shape*.65
+    local sh=0.3+_shape*.65
     local sh2=sh<<1
     slev/=2-od*(1.2+min(_shape,.2)) -- includes a divide by two since we need to average later
     for i=first,last do
