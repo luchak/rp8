@@ -259,7 +259,7 @@ function _init()
  end
 
  local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[{
-  bd=`(sweep_new 46 3400 582.59507 0.1 0.8 0.0018 0.04)
+  bd=`(sweep_new 46 6800 582.59507 0.15 0.8 0.0018 0.04)
   sd=`(snare_new)
   hh=`(hh_cy_new 52 1 0.8 0.8 0.45 -0.5 1.5)
   cy=`(hh_cy_new 55 1.15 0.65 0.55 0.28 -0.3 1.4)

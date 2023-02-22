@@ -153,13 +153,13 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    ac,_tri=get_ac_mode(s)
    -- TODO: update params every step?
    _detune=2^((pat.dt[step]-64)/12)
-   _ted=te_max+(te_min-te_max)*dec^.8
+   _ted=te_max+(te_min-te_max)*dec
    if state.playing then
-    _op,_dp=0,_dp0*_detune*(2^((24*tun-12)/12))
+    _op,_dp=0,_dp0*_detune*(2^((36*tun-18)/12))
     _ae=lev*lev*boost*trn(ac,1.25,0.5)
     _aemax=_ae*0.8
-    if (_tri) _ae*=1.5 else _ted*=1.2
-    _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.5)
+    if (_tri) _ae*=1.7 else _ted*=1.2
+    _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.6)
    end
   end
  end
