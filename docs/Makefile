@@ -18,26 +18,7 @@ ALL_IMG_BASENAMES = synth.png drums.png header_section.png drum_step_btns.png \
 
 ALL_IMGS = $(ALL_IMG_BASENAMES:%.png=img/%.png)
 
-## x.pdf depends on x.md, x.html depends on x.md, etc
-PDF=$(SRC:.md=.pdf)
-HTML=$(SRC:.md=.html) index.html
-
-## Rules -- make all, make pdf, make html. The `clean` rule is below.
-all:    $(HTML) $(PDF)
-pdf:    clean $(PDF)
-html:   clean $(HTML)
-
-index.html: user_guide.html
-	cp user_guide.html index.html
-
-%.html: %.md $(ALL_IMGS)
-	./build_html.sh $< $@
-
-%.tex:  %.md $(ALL_IMGS)
-	pandoc --standalone --toc --template=eisvogel -o $@ $<
-
-%.pdf:  %.md $(ALL_IMGS)
-	pandoc --standalone --toc --template=eisvogel -o $@ $<
+all: $(ALL_IMGS)
 
 img/%.2048.png: img/orig/%.png
 	convert -define png:exclude-chunks=date,time $< -scale 2048x2048 +dither -colors 255 $@
@@ -127,7 +108,7 @@ img/device_pattern_controls.png: img/rp8_clear.2048.png
 		-pointsize 80 -draw "text 128,128 'test'" $< $@
 
 clean:
-	rm -f *.html *.pdf *.tex *.aux *.log $(ALL_IMGS)
+	rm -f $(ALL_IMGS)
 
 watch:
 	ls $(SRC) $(ALL_IMGS) | entr make
