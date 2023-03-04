@@ -157,8 +157,8 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
    if state.playing then
     _op,_dp=0,_dp0*_detune*(2^((36*tun-18)/12))
     _ae=lev*lev*boost*trn(ac,1.25,0.5)
-    _aemax=_ae*0.8
-    if (_tri) _ae*=1.7 else _ted*=1.2
+    _aemax=_ae*0.85
+    if (_tri) _ae*=2.0 else _ted*=1.2
     _aed=1-ae_ratio*_ted*(_tri and 1.0 or 0.6)
    end
   end
