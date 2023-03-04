@@ -79,7 +79,7 @@ img/ps_mode_btn.png: img/rp8_recording.2048.png
 img/seq_copy_paste_btns.png: img/rp8_overrides.2048.png
 	magick -define png:exclude-chunks=date,time -extract 128x256+0+128 $< $@
 
-img/transport.png: img/rp8_playing.2048.png
+img/transport.png: img/rp8_overrides.2048.png
 	magick -define png:exclude-chunks=date,time -extract 1024x128+512+0 $< $@
 
 img/override_btns.png: img/rp8_overrides.2048.png

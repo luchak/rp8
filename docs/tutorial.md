@@ -1,6 +1,4 @@
-# Getting Started
-
-This section will walk you through writing a simple song in RP-8: everything you need to know to make your own music.
+This document will walk you through writing a simple song in RP-8: everything you need to know to make your own music.
 There are two main things you'll learn: how to compose music in pattern mode, and how to arrange it in song mode. This
 workflow closely resembles how I begin new tracks in RP-8, and it might be a good starting point for you too.
 
@@ -10,7 +8,7 @@ skim the tutorial, since RP-8 does not function identically to ReBirth.
 
 Let's begin!
 
-## Pattern Mode Tutorial: Composing and Experimenting
+## Pattern Mode: Composing and Experimenting
 
 In RP-8, you compose music by writing patterns, which are sequences of up to 16 notes that you can play back in various
 orders to make songs. RP-8 starts up in pattern mode, which gives you direct control over every aspect of what RP-8
@@ -21,13 +19,19 @@ does, and is perfect for basic composition tasks and experimenting with sound de
 Drums are never a bad place to start, so let's make a drum pattern. The drum machine is at the bottom of the screen and
 looks like this:
 
-![The drum machine](img/drums_empty.png)
+<figure markdown>
+  ![The drum machine](img/drums_empty.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The drum machine</figcaption>
+</figure>
 
 At the bottom of the drum machine are the step buttons, which control what kind of sound (if any) plays on each step.
 Click a few step buttons - you'll see that they light up - then click the play button at the top-left of the screen.
 You should hear a bass drum playing the steps that you clicked.
 
-![Different drum step colors](img/drum_btn_colors.png){width=31.25%}
+<figure markdown>
+   ![Different drum step colors](img/drum_btn_colors.png){style="display:block;width:31.25%;margin-left:auto;margin-right:auto"}
+  <figcaption>Different drum step colors</figcaption>
+</figure>
 
 You may have noticed that the buttons can light up in different colors. For the drum machine, red and yellow are
 different variations of the sound, and the intensity of the light indicates the volume of the hit (brighter means
@@ -44,7 +48,10 @@ editing a different drum in the same pattern.
 You should be all set for drums at this point, at least for one bar. How about a melody or a bassline? For this you'll
 probably want to use one of the two synths, which look like this:
 
-![A synth](img/synth_empty.png)
+<figure markdown>
+  ![A synth](img/synth_empty.png)
+  <figcaption>A synth</figcaption>
+</figure>
 
 Like the drum machine, these have step buttons, but below the step buttons are note controls, which control what pitch
 the synth plays at each step. You can drag up and down on the note controls to change which note plays on each step.
@@ -53,8 +60,11 @@ the synth plays at each step. You can drag up and down on the note controls to c
 
 Like the drum machine, the step buttons light up in different colors, but the meaning of the red and yellow colors is
 different. Red steps play notes as normal, but yellow steps are _slides_. Slide notes are longer and allow you to
-smoothly slide between pitch on adjacent steps. Dimmer steps are played normally, brighter steps are accented.^[RP-8
-tries to approximate the accent behavior of the TB-303, but it's a loose resemblance at best.]
+smoothly slide between pitch on adjacent steps. Dimmer steps are played normally, brighter steps are accented. Accented
+steps are louder, with shorter filter decay times but greater filter modulation. The amount of this effect can be
+controlled with the accent knob.[^1]
+
+[^1]: RP-8 tries to approximate the accent behavior of the TB-303, but it's a loose resemblance.
 
 ### Name and Save Your Song
 
@@ -74,7 +84,10 @@ press `o` to quickload from the clipboard.
 By now you have probably noticed that RP-8 uses hotkeys for many features. You can press `h` at any point to view a
 help screen with a list of hotkeys (and the URL to this user guide).
 
-![The RP-8 help screen](img/rp8_help.2048.png){width=50%}
+<figure markdown>
+  ![The RP-8 help screen](img/rp8_help.2048.png){style="display:block;width:50%;margin-left:auto;margin-right:auto"}
+  <figcaption>The RP-8 help screen</figcaption>
+</figure>
 
 You can also press `t` in the main view to toggle tooltips on and off.
 
@@ -85,7 +98,10 @@ You can also press `t` in the main view to toggle tooltips on and off.
 Ok, let's get back to making music. You've made a couple of loops, but you might find that the overall sound is a
 little ... uninspiring. The good news is that you can make it better! RP-8 is packed with sound design controls.
 
-![All of RP-8's sound design controls, highlighted](img/sound_design.png){width=70%}
+<figure markdown>
+  ![All of RP-8's sound design controls, highlighted](img/sound_design.png){style="display:block;width:70%;margin-left:auto;margin-right:auto"}
+  <figcaption>All of RP-8's sound design controls, highlighted</figcaption>
+</figure>
 
 Both the synths and the drum machines have tons of knobs that affect the character of the sounds that they make, and
 the section at the top of the screen lets you mix and apply effects to these sounds. Use can use tooltips for more
@@ -98,7 +114,10 @@ information on what each knob does.
 RP-8 supports multiple patterns to allow for variations and longer phrases. You can switch between patterns using the
 pattern and bank selector buttons:
 
-![Bank selector and pattern buttons. The current pattern is highlighted.](img/ptn_bank_btns.png){width=25%}
+<figure markdown>
+  ![Bank selector and pattern buttons. The current pattern is highlighted.](img/ptn_bank_btns.png){style="display:block;width:37.5%;margin-left:auto;margin-right:auto"}
+  <figcaption>Bank selector and pattern buttons. The current pattern is highlighted.</figcaption>
+</figure>
 
 There 8 banks (A-H) of 6 patterns each. You can drag on the bank selector to change banks, and click the number buttons
 to pick a pattern in the bank. If RP-8 is paused, the pattern will change instantly, if it is playing, then the pattern
@@ -107,7 +126,10 @@ will change at the beginning of the next bar.
 If you get lost and can't figure out which bank the current pattern is in, you can press `b` at any time to jump each
 bank selector to the current pattern's bank.
 
-![Pattern copy (left) and paste (right) buttons](img/ptn_copy_paste_btns.png){width=12.5%}
+<figure markdown>
+  ![Pattern copy (left) and paste (right) buttons](img/ptn_copy_paste_btns.png){style="display:block;width:25%;margin-left:auto;margin-right:auto"}
+  <figcaption>Pattern copy (left) and paste (right) buttons</figcaption>
+</figure>
 
 If you want to make a new variation of a pattern, you can use the pattern copy/paste buttons on the synths and the drum
 machine to duplicate a pattern to a new slot for further editing. You can copy patterns between the two synths, but not
@@ -125,11 +147,14 @@ Sometimes one bar of music just isn't enough. That's when it's time for song mod
 bars of music and record control movements. You can switch into song mode using the mode selector button, or by
 pressing `m`.
 
-![Pattern/song mode selector button](img/ps_mode_btn.png){width=6.25%}
+<figure markdown>
+  ![Pattern/song mode selector button](img/ps_mode_btn.png){style="display:block;width:12.5%;margin-left:auto;margin-right:auto"}
+  <figcaption>Pattern/song mode selector button</figcaption>
+</figure>
 
 The most important change from song mode to pattern mode is that you are no longer in direct control of the sound
-design or of which patterns are playing.^[Note that this does not include pattern contents (notes and steps). These are
-shared with pattern mode, and changing them still works exactly like pattern mode.] Instead, the RP-8 sequencer
+design or of which patterns are playing. (Note that this does not include pattern contents, i.e. notes and steps. These are
+shared with pattern mode, and changing them still works exactly like pattern mode.) Instead, the RP-8 sequencer
 controls these, and any changes you make will be lost until you take special steps to record them. The sections below
 explain three different recording methods you can use.
 
@@ -140,15 +165,19 @@ process.
 
 In song mode, you'll find song position and loop controls at the top of the screen. Each control's value is measured in bars:
 
-![Transport controls (from left): song position, loop enable, loop start, loop length. Drag the numbers to change them.](img/transport.png){width=50%}
+<figure markdown>
+  ![Transport controls (from left): song position, loop enable, loop start, loop length. Drag the numbers to change them.](img/transport.png){style="display:block;width:50%;margin-left:auto;margin-right:auto"}
+  <figcaption>Transport controls (from left): song position, loop enable, loop start, loop length. Drag the numbers to change them.</figcaption>
+</figure>
 
 These controls are essential in song mode. Not only do these controls let you choose which part of the song you are
 play back, but the loop controls also act as a "selection" in the song: there are many operations in RP-8 that perform
 an operation only on the bars contained in the current loop.
 
-**TASK:** Since we are starting a new song, let's set our loop to start at bar 1^[It's okay to start at bar 1 even if we think we
-might want to add an introduction, there are ways to move bars around later.] and be either 4 or 8 bars long.^[If you
-forget which control is loop start and which is loop length, you can turn on tooltips with `t` for a reminder.] 
+**TASK:** Since we are starting a new song, let's set our loop to start at bar 1 and be either 4 or 8 bars long.  It's
+okay to start at bar 1 even if we think we might want to add an introduction, since RP-8's editing tools provide ways
+to move bars around later. If you forget which control is loop start and which is loop length, you can turn on tooltips
+with `t` for a reminder.
 
 ### Copy A Loop From Pattern Mode
 
@@ -156,7 +185,11 @@ You've probably noticed that, in song mode, all your sound edits from pattern mo
 manually, let's copy them over. You'll that there are copy/paste buttons not just on each device, but also near
 the top of the screen:
 
-![Sequence copy (top) and paste (bottom) buttons](img/seq_copy_paste_btns.png){width=6.25%}
+<figure markdown>
+  ![Sequence copy (top) and paste (bottom) buttons](img/seq_copy_paste_btns.png){style="display:block;width:12.5%;margin-left:auto;margin-right:auto"}
+  <figcaption>Sequence copy (top) and paste (bottom) buttons</figcaption>
+</figure>
+
 
 We can use these buttons to copy information about all the sound controls.
 
@@ -177,7 +210,10 @@ You'll notice that your changes look like they stay in effect ... until you paus
 reset. You may also have noticed that the dark red record button next to the play button turns yellow when you start
 making changes. What's going on here?
 
-![Record button states: disabled (pattern mode), no changes, uncommitted changes, recording](img/record_btn_states.png){width=25%}
+<figure markdown>
+  ![Record button states: disabled (pattern mode), no changes, uncommitted changes, recording](img/record_btn_states.png){style="display:block;width:37.5%;margin-left:auto;margin-right:auto"}
+  <figcaption>Record button states: disabled (pattern mode), no changes, uncommitted changes, recording</figcaption>
+</figure>
 
 When you start making changes, RP-8 notices that you've departed from the recorded sequence, and turns the record light
 yellow to warn you. Any controls you have changed will stay where you left them, but any controls you have not touched
@@ -186,13 +222,15 @@ resets their values.
 
 But what if you like your changes?
 
-![Change discard (left) and commit (right) buttons](img/override_btns.png){width=12.5%}
+<figure markdown>
+  ![Change discard (left) and commit (right) buttons](img/override_btns.png){style="display:block;width:25%;margin-left:auto;margin-right:auto"}
+  <figcaption>Change discard (left) and commit (right) buttons</figcaption>
+</figure>
 
 Whenver you have uncommitted changes (i.e. the record button is yellow) the change discard/commit buttons will light
-up. The discard button clears your changes, just like stopping playback.^[If RP-8 is playing, control values will reset
-at the start of the next bar, if it is paused, they will reset immediately.] The commit button, on the other hand, will
-keep your changes: each control you have modified will now keep its current position everywhere in your loop.^[But only
-its current position - if you want more flexible recording, you'll have to read on.]
+up. The discard button clears your changes, just like stopping playback. If RP-8 is playing, control values will reset
+at the start of the next bar, if it is paused, they will reset immediately. The commit button, on the other hand, will
+keep your changes: each control you have modified will now keep its current position everywhere in your loop.
 
 **TASK:** Try making some more changes to the sound in your loop. Then use the loop controls to select one or two bars
 within your loop, and change the sound only in those bars. Set your loop back to its original length again and listen
@@ -234,21 +272,25 @@ changes to each new bar.
 **TASK:** Sequence all the pattern changes you want in your loop! Go to the first bar of your loop and enter record
 mode. Then select the patterns you want to play on that bar. Then use the the `.` key to move one bar forward and
 select the patterns you want to play on that bar. If you want to keep the same patterns for multiple bars, you can just
-skip through them, you do not need to click the pattern buttons again.^[You can also use the mouse to drag the song
-position control to navigate, but you need to be careful. Every control modified in the current recording session will
-be written to every bar you visit! You can easily overwrite many bars worth of sequencer data if you're not careful.]
-If you make a mistake, you can backtrack with the `,` key to fix it, or if you make a big mistake, press `o` to
-quickload your last checkpoint.
+skip through them, you do not need to click the pattern buttons again. If you make a mistake, you can backtrack with the `,` key to fix it, or if you make a big mistake, press `o` to quickload your last checkpoint.
 
-Congratulations! You now have a fully-sequenced loop. Let's finish this all off by copying your loop and making a
-variation.
+!!! note
+
+    You can also use the mouse to drag the song position control to navigate while recording is active, but, if you try
+    this, use extreme care. Every control modified in the current recording session will be written to every bar you visit!
+    You can easily overwrite many bars worth of sequencer data if you're not careful.
+
+Nice work! You now have a fully-sequenced loop. Let's finish this all off by copying your loop and making a variation.
 
 ### Duplicate Your Loop
 
 To make major changes to the arrangement, we need to use the song editing tools near the top of the screen. Two of
 these, copy and paste, should be familiar from earlier, since we used them to initialize our loop from patern mode.
 
-![Song edit buttons, clockwise from top left: copy, cut, insert, paste](img/song_edit_btns.png){width=12.5%}
+<figure markdown>
+  ![Song edit buttons, clockwise from top left: copy, cut, insert, paste](img/song_edit_btns.png){style="display:block;width:25%;margin-left:auto;margin-right:auto"}
+  <figcaption>Song edit buttons, clockwise from top left: copy, cut, insert, paste</figcaption>
+</figure>
 
 All of these features use the current loop as their active selection.
 
@@ -257,7 +299,7 @@ bars into the current loop, moving the current loop and all later bars back to m
 duplicate of the loop! Keeping the loop length the same, advance the loop start to the end of the current loop, so we
 can start editing the duplicated content.
 
-**TASK:** Use what you have learned so far to write a B section to this tiny song!
+**TASK:** Use what you have learned so far to write a B section to this tiny song.
 
 ### Create an ABA Structure
 
@@ -289,5 +331,5 @@ Congratulations! You've just made a very short song with RP-8. Go make more!
 For more information on how the devices work and what specific controls do, see the [Reference] section.  For quick
 reminders in RP-8, remember that you can turn on tooltips with `t` or access help with `h`.
 
-If you get stuck or encounter what seems to be a bug, please [get in touch][Contact]!
+If you get stuck or encounter what seems to be a bug, please [get in touch](contact.md).
 

@@ -12,12 +12,14 @@ cannot change the song position in pattern mode.
 
 ## Transport
 
-![The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop
-start, loop enable, loop length, and file menu.](img/transport_ref.png){width=100%}
+<figure markdown>
+  ![The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop start, loop enable, loop length, and file menu.](img/transport_ref.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop start, loop enable, loop length, and file menu.</figcaption>
+</figure>
 
 The transport provides control over RP-8's playback and overall behavior. In pattern mode, you can start or pause the
-sequencer, change between pattern mode and song mode (see [Modes]), switch sequencer pages (see [Pages]), and access
-the file menu (see [File Menu]). In song mode, the position control, loop enable/start/length controls, and record
+sequencer, change between pattern mode and song mode (see [Modes](#modes)), switch sequencer pages (see [Pages](#pages)), and access
+the file menu (see [Loading and Saving](#loading-and-saving)). In song mode, the position control, loop enable/start/length controls, and record
 button will also become available.
 
 To change the numeric controls, click and drag up/down to increase/decrease the values, or use the arrow keys.
@@ -52,10 +54,13 @@ clipboard.
 
 To save songs, you can use the file menu.
 
-![The RP-8 file menu](img/rp8_file_menu.2048.png){width=50%}
+<figure markdown>
+  ![The RP-8 file menu](img/rp8_file_menu.2048.png){style="display:block;width:50%;margin-left:auto;margin-right:auto"}
+  <figcaption>The RP-8 file menu</figcaption>
+</figure>
 
-This screen allows you to name your song and save it, as well as open the RP-8 data folder (which, depending on your OS
-and how you are running RP-8, may be difficult to find otherwise). Use the up and down arrow keys to select an option,
+This screen allows you to name your song and save it, as well as open the RP-8 data folder - which, depending on your OS
+and how you are running RP-8, may be difficult to find otherwise. Use the up and down arrow keys to select an option,
 then the enter key to act. You can access this menu by clicking the disk icon by the transport controls, or by using
 the `f` key.
 
@@ -64,8 +69,10 @@ the `f` key.
 Below the transport, on the left side of the screen, are buttons for editing song arrangements. Copy and paste are
 available in all modes, the rest are available in song mode only.
 
-![Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear,
-paste.](img/arrangement_btns.png)
+<figure markdown>
+  ![Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear, paste.](img/arrangement_btns.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear, paste.</figcaption>
+</figure>
 
 The buttons act as follows:
 
@@ -107,7 +114,10 @@ sound design from one part of your song to another without overwriting the patte
 
 ## Tempo, Shuffle and Volume
 
-![The tempo, shuffle, and volume controls (highlighted).](img/tempo_shuffle_volume.png)
+<figure markdown>
+  ![The tempo, shuffle, and volume controls (highlighted).](img/tempo_shuffle_volume.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The tempo, shuffle, and volume controls (highlighted).</figcaption>
+</figure>
 
 The tempo control, marked with a little note symbol, displays the current tempo in beats per minute. RP-8 supports
 tempo settings from 60 to 188 bpm in 1 bpm increments. Tempo can be automated over a song just like any other control.
@@ -127,26 +137,38 @@ TB-303](https://en.wikipedia.org/wiki/Roland_TB-303) and one drum machine that i
 [Roland TR-808](https://en.wikipedia.org/wiki/Roland_TR-808). These devices are explained in more detail in their own
 sections below.
 
-![A synth](img/synth.png)
+<figure markdown>
+  ![A synth](img/synth_empty.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>A synth</figcaption>
+</figure>
 
-![The drum machine](img/drums.png)
+<figure markdown>
+  ![The drum machine](img/drums_empty.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The drum machine</figcaption>
+</figure>
 
 In general, you should use the synthesizers for tonal elements in your songs, like melody or bass lines, and you should
 use the drum machine for rhythmic elements. However, all the drums have a tuning adjustment knob, and many of the
-sounds can have a strong tonal character, so stay open-minded!^[TR-808 bass drums with long decay times are often used
-as bass sounds. The FM and percussion tracks of the drum machine can also easily be used as additional tonal voices.]
-Each device is controlled by a pattern sequencer, which plays back sequences of notes or drum hits from a
-user-programmable bank of patterns. Patterns are 16 step (1 bar) series of notes or drum hits, and are the building
-blocks of music in RP-8.
+sounds can have a strong tonal character, so stay open-minded![^1] Each device is controlled by a pattern sequencer,
+which plays back sequences of notes or drum hits from a user-programmable bank of patterns. Patterns are 16 step (1
+bar) series of notes or drum hits, and are the building blocks of music in RP-8.
+
+[^1]: TR-808 bass drums with long decay times are often used as bass sounds. The FM and percussion tracks of the drum machine can also easily be used as additional tonal voices.
 
 RP-8 also has effects units and a mixer, whose controls are all located in the transport and mixer section at the top of
 the screen.
 
-![The transport and mixer section](img/header_section.png)
+<figure markdown>
+  ![The transport and mixer section](img/header_section.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The transport and mixer section</figcaption>
+</figure>
 
-### Audio Routing
+### Audio Signal Flow
 
-![The RP-8 audio architecture](img/orig/audio_arch.png)
+<figure markdown>
+  ![A schematic of the RP-8 audio architecture](img/orig/audio_arch.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>RP-8 audio signal flow</figcaption>
+</figure>
 
 Each of the two synthesizers and the drum machine is routed into its own overdrive unit. The overdrive outputs are sent
 to the mixer, which separately mixes these voices into a dry signal and a delay send signal. The delay send signal is

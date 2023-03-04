@@ -1,8 +1,9 @@
 site_name: RP-8 User Guide
 nav:
   - Introduction: index.md
-  - Getting Started: getting_started.md
+  - Tutorial: tutorial.md
   - Reference: reference.md
+  - Contact: contact.md
 theme:
   name: material
   features:
@@ -13,7 +14,9 @@ theme:
     - navigation.tracking
     - toc.follow
 markdown_extensions:
+  - admonition
   - attr_list
+  - footnotes
   - md_in_html
   - toc:
       permalink: True
