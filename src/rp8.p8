@@ -314,7 +314,7 @@ function _init()
   end
  )
 
- log'init complete'
+ --log'init complete'
 end
 
 function _update60()
