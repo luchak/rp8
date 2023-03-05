@@ -10,4 +10,7 @@ in RP-8, and a [reference](reference.md) section that explains the different mai
 you ever get lost, remember that you can toggle tooltips on and off with `t`, and access keyboard shortcut reminders
 with `h`.
 
-Thanks for trying RP-8, and please feel free to [get in touch!](contact.md)
+If you are reading the downloadable version of this guide, an [online version](https://luchak.github.io/rp8/) is also
+available with a better table of contents and a search feature.
+
+Thanks for trying RP-8, and please feel free to [get in touch](contact.md)!

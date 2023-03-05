@@ -10,3 +10,4 @@ cp -r /tmp/rp8.bin ./exports
 rm -f ./exports/rp8_html.zip
 zip -j ./exports/rp8_html.zip exports/html/index.html exports/html/rp8.js
 cp ./build/rp8_min.p8.png exports/rp8.p8.png
+make docs
