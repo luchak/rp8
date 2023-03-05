@@ -14,7 +14,7 @@ ALL_IMG_BASENAMES = synth.png drums.png header_section.png drum_step_btns.png \
 		    override_btns.png song_edit_btns.png drums_empty.png drum_btn_colors.png \
 		    synth_empty.png rp8_help.2048.png record_btn_states.png mixer.png transport_ref.png \
 		    rp8_file_menu.2048.png arrangement_btns.png tempo_shuffle_volume.png \
-		    device_pattern_controls.png
+		    device_pattern_controls.png rp8_p2.2048.png
 
 ALL_IMGS = $(ALL_IMG_BASENAMES:%.png=img/%.png)
 
@@ -103,9 +103,18 @@ img/tempo_shuffle_volume.png: img/rp8_clear.2048.png
 	-draw "rectangle 256,256 511,383" \) \
 	-compose multiply -composite $@
 
-img/device_pattern_controls.png: img/rp8_clear.2048.png
-	convert -define png:exclude-chunks=date,time -font helvetica -fill white -stroke black \
-		-pointsize 80 -draw "text 128,128 'test'" $< $@
+img/device_pattern_controls.png: img/rp8_p2.2048.png
+	convert -define png:exclude-chunks=date,time -extract 512x384+0+1536\
+		-font helvetica -fill white -stroke black -pointsize 96 \
+		-draw "text 72,1612 'A'" \
+		-draw "text 200,1612 'B'" \
+		-draw "text 328,1612 'C'" \
+		-draw "text 72,1740 'D'" \
+		-draw "text 200,1740 'E'" \
+		-draw "text 328,1740 'F'" \
+		-draw "text 72,1868 'G'" \
+		-draw "text 200,1868 'H'" \
+		$< $@
 
 clean:
 	rm -f $(ALL_IMGS)

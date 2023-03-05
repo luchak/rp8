@@ -173,19 +173,37 @@ The drum machine and the pattern filter can vary this routing a little bit, see 
 There are several controls that are shared by both the synths and the drum machine, although with slightly different
 layouts.
 
-**Device enable.**
+<figure markdown>
+  ![Device pattern controls on the drum machine](img/device_pattern_controls.png){style="display:block;width:50%;margin-left:auto;margin-right:auto"}
+  <figcaption>The device pattern controls on the drum machine. Similar controls are available on the synths. The letters are referenced in the descriptions below.</figcaption>
+</figure>
 
-**Pattern select.**
+A. **Pattern length.** This setting controls how many steps are played each time the pattern repeats, and is stored
+separately for each pattern. It can be used to create interesting rhythmic effects when set to values smaller than 16,
+since the pattern will repeat starting at different points in each bar. With patterns shorter than 16 steps, where the
+pattern starts in each bar is fixed and cannot be changed. On the drum mahcine, each drum can have a different value.
 
-**Pattern copy.**
+B. **Pattern transpose.** Dragging up and down on this button allows you to transpose the notes in the pattern. On the
+drum machine, it is only available when viewing sequencer page 2, when the drum machine step buttons are replaced with
+interval controls, and it applies only to the selected drum track. `shift+up` and `shift+down` when this button is
+selected allows transposing by octaves.
 
-**Pattern paste.**
+C. **Pattern rotate.** This function is only available on the drum machine. Dragging up/down on this control rotates
+the steps for the selected drum in the current pattern right/left on the step grid.
 
-**Pattern length.**
+D. **Device enable.** This button controls whether the device's sequencer is active. When inactive, the device will not
+play any new notes. If you change this value in the middle of a bar, it will take effect at the start of the next bar.
 
-**Pattern transpose.**
+E. **Pattern copy.** This button copies the currently selected pattern. The two synths share a copy buffer, allowing
+you to copy patterns between the synths. The drum machine has a separate copy buffer.
 
-**Pattern rotate.**
+F. **Pattern paste.** This pastes the copied pattern into the currently selected pattern.
+
+G. **Pattern bank select.** Dragging up and down on this control lets you move through the 8 pattern banks. You can
+also press `b` to jump each device's bank selector to the bank containing the currently selected pattern.
+
+H. **Pattern select.** These buttons select which pattern is currently playing/active. Any selections made in the
+middle of a bar will take effect at the beginning of the next bar.
 
 ### Synths
 
