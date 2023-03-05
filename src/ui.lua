@@ -188,13 +188,13 @@ function ui_new()
   local click,mx,my=stat(34),self.mx,self.my
   local hover=self.mtiles[mx\4 + (my\4)*32]
 
-  local focus=self.focus
-  local new_focus=trn(focus and focus.active,focus,nil)
-
   local hotkey,shift=stat(30) and stat(31),stat(28,225) or stat(28,229)
   local hotkey_action=hotkey_map[ord(hotkey)]
   if (hotkey_action) hotkey_action()
+  -- if this is positioned differently it causes a bug with focus on page switch
+  local focus=self.focus
   if (focus and focus.on_num and is_digit(hotkey)) focus.on_num(state,tonum(hotkey))
+  local new_focus=trn(focus and focus.active,focus,nil)
 
   local step=(shift and focus and focus.bigstep) or 1
   if (btnp(2)) input+=step
@@ -417,8 +417,11 @@ end
 
 function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
 function has_uncommitted(s) return not no_uncommitted(s) end
-function get_page() return ui.page end
-function set_page(_,p) ui:set_page(p) end
+
+eval--[[language::loaf]][[
+(set set_page (fn (_ p) ((@ $ui set_page) $ui $p)))
+(set get_page (fn () (@ $ui page)))
+]]
 
 eval--[[language::loaf]][[
 (set transport_number_new (fn (x y w obj key tt input) (wrap_override

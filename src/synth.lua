@@ -108,7 +108,7 @@ function synth_new(base)
   local pd=1-dec
   _lsl,_ac,_sl=_sl,get_ac_mode(patstep)
   _sl=_sl and state.playing
-  if(base==23)log(_lsl,_sl)
+  --if(base==23)log(_lsl,_sl)
   if (_ac) pd=0.8+0.2*pd
   _med=0.9997-0.005*pd*pd
   _nt,_nl=0,note_len

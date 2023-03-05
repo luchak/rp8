@@ -4,7 +4,6 @@
 _dcf=0
 
 function audio_update()
- log(stat(108))
  if stat(108)<768 then
   local todo,buf,dcf,lfsr=94,{},_dcf,_lfsr
   if audio_root then
