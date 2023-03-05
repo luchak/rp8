@@ -26,6 +26,8 @@ button will also become available.
 
 To change the numeric controls, click and drag up/down to increase/decrease the values, or use the arrow keys.
 
+The rewind button will jump to the start of the loop with a single click, or to bar 1 with a double click.
+
 ### Modes
 
 RP-8 has two modes: **pattern mode** and **song mode**. All the same devices and sound creation machinery are available
@@ -409,7 +411,7 @@ key           | action
 
 key         | action
 ------------|-------
-`backspace` | rewind song
+`backspace` | rewind to beginning of loop (single tap) or bar 1 (double tap)
 `l`         | toggle loop on/off
 `r`         | toggle recording on/off
 `x`         | clear control overrides
