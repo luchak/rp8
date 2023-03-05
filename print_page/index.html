@@ -1,0 +1,1028 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.13">
+    
+    
+      
+        <title>RP-8 User Guide - RP-8 User Guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ffa9267a.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings1.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings2.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings3.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings4.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings5.css">
+    
+      <link rel="stylesheet" href="../css/print-site-enum-headings6.css">
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  
+        <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            remove_material_navigation();remove_mkdocs_theme_navigation();generate_toc();
+        })
+        </script>
+        </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="RP-8 User Guide" class="md-header__button md-logo" aria-label="RP-8 User Guide" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            RP-8 User Guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              RP-8 User Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="RP-8 User Guide" class="md-nav__button md-logo" aria-label="RP-8 User Guide" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    RP-8 User Guide
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        Tutorial
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contact/" class="md-nav__link">
+        Contact
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#" class="md-nav__link">
+    1. Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial" class="md-nav__link">
+    2. Tutorial
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference" class="md-nav__link">
+    3. Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contact" class="md-nav__link">
+    4. Contact
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<div id="print-site-page" class="print-site-enumerate-headings print-site-enumerate-figures">
+        <section class="print-page">
+            <div id="print-page-toc" data-toc-depth="3">
+                <nav role='navigation' class='print-page-toc-nav'>
+                <h1 class='print-page-toc-title'>Table of Contents</h1>
+                </nav>
+            </div>
+        </section>
+        <section class="print-page" id="index"><h1 id="index-introduction">Introduction<a class="headerlink" href="#index-introduction" title="Permanent link">&para;</a></h1>
+<p>RP-8 is a Pico-8 demake of Propellerhead Software's <a href="https://en.wikipedia.org/wiki/ReBirth_RB-338">ReBirth RB-338</a>.
+Like the original, it provides two synth voices, drums, pattern-based sequencing, effects, a pattern mode for immediate
+hands-on control, and a song mode for recording music. Unlike the original, the audio output is crunchy 8-bit 5.5kHz
+mono sound, and the user interface is rendered in 16 colors at a chunky 128x128 resolution.</p>
+<p>This guide is written in two main parts: a <a href="#tutorial">tutorial</a> section that walks you through writing a short song
+in RP-8, and a <a href="#reference">reference</a> section that explains the different main components of RP-8 in more detail. If
+you ever get lost, remember that you can toggle tooltips on and off with <code>t</code>, and access keyboard shortcut reminders
+with <code>h</code>.</p>
+<p>If you are reading the downloadable version of this guide, an <a href="https://luchak.github.io/rp8/">online version</a> is also
+available with a better table of contents and a search feature.</p>
+<p>Thanks for trying RP-8, and please feel free to <a href="#contact">get in touch</a>!</p></section><section class="print-page" id="tutorial"><h1 id="tutorial-tutorial">Tutorial<a class="headerlink" href="#tutorial-tutorial" title="Permanent link">&para;</a></h1>
+<p>This document will walk you through writing a simple song in RP-8: everything you need to know to make your own music.
+There are two main things you'll learn: how to compose music in pattern mode, and how to arrange it in song mode. This
+workflow closely resembles how I begin new tracks in RP-8, and it might be a good starting point for you too.</p>
+<p>If you have never used ReBirth before, I highly recommend you follow this tutorial, as it introduces several important
+ideas that are foundational to how RP-8 works. If you have used ReBirth, it's still probably a good idea to at least
+skim the tutorial, since RP-8 does not function identically to ReBirth.</p>
+<p>Let's begin!</p>
+<h2 id="tutorial-pattern-mode-composing-and-experimenting">Pattern Mode: Composing and Experimenting<a class="headerlink" href="#tutorial-pattern-mode-composing-and-experimenting" title="Permanent link">&para;</a></h2>
+<p>In RP-8, you compose music by writing patterns, which are sequences of up to 16 notes that you can play back in various
+orders to make songs. RP-8 starts up in pattern mode, which gives you direct control over every aspect of what RP-8
+does, and is perfect for basic composition tasks and experimenting with sound design.</p>
+<h3 id="tutorial-make-a-drum-pattern">Make A Drum Pattern<a class="headerlink" href="#tutorial-make-a-drum-pattern" title="Permanent link">&para;</a></h3>
+<p>Drums are never a bad place to start, so let's make a drum pattern. The drum machine is at the bottom of the screen and
+looks like this:</p>
+<figure>
+<p><img alt="The drum machine" src="../img/drums_empty.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The drum machine</figcaption>
+</figure>
+<p>At the bottom of the drum machine are the step buttons, which control what kind of sound (if any) plays on each step.
+Click a few step buttons - you'll see that they light up - then click the play button at the top-left of the screen.
+You should hear a bass drum playing the steps that you clicked.</p>
+<figure>
+<p><img alt="Different drum step colors" src="../img/drum_btn_colors.png" style="display:block;width:31.25%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Different drum step colors</figcaption>
+</figure>
+<p>You may have noticed that the buttons can light up in different colors. For the drum machine, red and yellow are
+different variations of the sound, and the intensity of the light indicates the volume of the hit (brighter means
+louder). You can click a button multiple times to cycle through the options.</p>
+<p>You have probably also noticed that the <strong>BD</strong> button on the drum machine is lit. There are 5 other similar buttons,
+each representing a different drum. If you click one, you'll see that the steps get cleared: this is because you're now
+editing a different drum in the same pattern.</p>
+<p><strong>TASK:</strong> Make a drum pattern using all 6 drums.</p>
+<h3 id="tutorial-make-a-synth-pattern">Make A Synth Pattern<a class="headerlink" href="#tutorial-make-a-synth-pattern" title="Permanent link">&para;</a></h3>
+<p>You should be all set for drums at this point, at least for one bar. How about a melody or a bassline? For this you'll
+probably want to use one of the two synths, which look like this:</p>
+<figure>
+<p><img alt="A synth" src="../img/synth_empty.png" />
+  </p>
+<figcaption>A synth</figcaption>
+</figure>
+<p>Like the drum machine, these have step buttons, but below the step buttons are note controls, which control what pitch
+the synth plays at each step. You can drag up and down on the note controls to change which note plays on each step.</p>
+<p><strong>TASK:</strong> Try making a one-bar melody.</p>
+<p>Like the drum machine, the step buttons light up in different colors, but the meaning of the red and yellow colors is
+different. Red steps play notes as normal, but yellow steps are <em>slides</em>. Slide notes are longer and allow you to
+smoothly slide between pitch on adjacent steps. Dimmer steps are played normally, brighter steps are accented. Accented
+steps are louder, with shorter filter decay times but greater filter modulation. The amount of this effect can be
+controlled with the accent knob.<sup id="tutorial-fnref:1"><a class="footnote-ref" href="#tutorial-fn:1">1</a></sup></p>
+<h3 id="tutorial-name-and-save-your-song">Name and Save Your Song<a class="headerlink" href="#tutorial-name-and-save-your-song" title="Permanent link">&para;</a></h3>
+<p>Now that you've done some work, it's probably good to save your song so you don't lose it.</p>
+<p><strong>TASK</strong>: Press <code>f</code> or click on the disk icon to bring up the file menu, then use the arrow keys to navigate down to
+<strong>Rename Song</strong>, then press enter to open the song rename screen.. Enter a name for your song, and then (once you are
+back at the main RP-8 screen) press <code>s</code> to save your song. The song has been saved to the folder that RP-8 is in. To
+open this folder, you can go back to the file menu with <code>f</code> and select <strong>Open Folder</strong>.</p>
+<p>You can also press <code>p</code> to quicksave your song to the clipboard. This is useful for quickly checkpointing your work.
+RP-8 does not have undo, so use this feature often, especially before you make changes you're not sure about! You can
+press <code>o</code> to quickload from the clipboard.</p>
+<h3 id="tutorial-check-out-the-integrated-help">Check Out the Integrated Help<a class="headerlink" href="#tutorial-check-out-the-integrated-help" title="Permanent link">&para;</a></h3>
+<p>By now you have probably noticed that RP-8 uses hotkeys for many features. You can press <code>h</code> at any point to view a
+help screen with a list of hotkeys (and the URL to this user guide).</p>
+<figure>
+<p><img alt="The RP-8 help screen" src="../img/rp8_help.2048.png" style="display:block;width:50%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The RP-8 help screen</figcaption>
+</figure>
+<p>You can also press <code>t</code> in the main view to toggle tooltips on and off.</p>
+<p><strong>TASK:</strong> Try turning on tooltips and checking out some of the control labels.</p>
+<h3 id="tutorial-change-the-sound">Change the Sound<a class="headerlink" href="#tutorial-change-the-sound" title="Permanent link">&para;</a></h3>
+<p>Ok, let's get back to making music. You've made a couple of loops, but you might find that the overall sound is a
+little ... uninspiring. The good news is that you can make it better! RP-8 is packed with sound design controls.</p>
+<figure>
+<p><img alt="All of RP-8's sound design controls, highlighted" src="../img/sound_design.png" style="display:block;width:70%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>All of RP-8's sound design controls, highlighted</figcaption>
+</figure>
+<p>Both the synths and the drum machines have tons of knobs that affect the character of the sounds that they make, and
+the section at the top of the screen lets you mix and apply effects to these sounds. Use can use tooltips for more
+information on what each knob does.</p>
+<p><strong>TASK:</strong> Play around with the sound and dial in something you like!</p>
+<h3 id="tutorial-make-more-patterns">Make More Patterns<a class="headerlink" href="#tutorial-make-more-patterns" title="Permanent link">&para;</a></h3>
+<p>RP-8 supports multiple patterns to allow for variations and longer phrases. You can switch between patterns using the
+pattern and bank selector buttons:</p>
+<figure>
+<p><img alt="Bank selector and pattern buttons. The current pattern is highlighted." src="../img/ptn_bank_btns.png" style="display:block;width:37.5%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Bank selector and pattern buttons. The current pattern is highlighted.</figcaption>
+</figure>
+<p>There 8 banks (A-H) of 6 patterns each. You can drag on the bank selector to change banks, and click the number buttons
+to pick a pattern in the bank. If RP-8 is paused, the pattern will change instantly, if it is playing, then the pattern
+will change at the beginning of the next bar.</p>
+<p>If you get lost and can't figure out which bank the current pattern is in, you can press <code>b</code> at any time to jump each
+bank selector to the current pattern's bank.</p>
+<figure>
+<p><img alt="Pattern copy (left) and paste (right) buttons" src="../img/ptn_copy_paste_btns.png" style="display:block;width:25%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Pattern copy (left) and paste (right) buttons</figcaption>
+</figure>
+<p>If you want to make a new variation of a pattern, you can use the pattern copy/paste buttons on the synths and the drum
+machine to duplicate a pattern to a new slot for further editing. You can copy patterns between the two synths, but not
+between the synths and the drum machine.</p>
+<p><strong>TASK:</strong> Make a few more patterns: maybe a bassline on one synth, a few bars worth of melody on the other synth, and one or two
+drum loop variations on the drum machine.</p>
+<p>If you're having fun - keep going! It'll be helpful to be fairly comfortable in pattern mode before moving on to
+arrangement in song mode.</p>
+<h2 id="tutorial-song-mode-arranging-and-automating">Song Mode: Arranging and Automating<a class="headerlink" href="#tutorial-song-mode-arranging-and-automating" title="Permanent link">&para;</a></h2>
+<p>Sometimes one bar of music just isn't enough. That's when it's time for song mode, which allows you to arrange multiple
+bars of music and record control movements. You can switch into song mode using the mode selector button, or by
+pressing <code>m</code>.</p>
+<figure>
+<p><img alt="Pattern/song mode selector button" src="../img/ps_mode_btn.png" style="display:block;width:12.5%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Pattern/song mode selector button</figcaption>
+</figure>
+<p>The most important change from song mode to pattern mode is that you are no longer in direct control of the sound
+design or of which patterns are playing. (Note that this does not include pattern contents, i.e. notes and steps. These are
+shared with pattern mode, and changing them still works exactly like pattern mode.) Instead, the RP-8 sequencer
+controls these, and any changes you make will be lost until you take special steps to record them. The sections below
+explain three different recording methods you can use.</p>
+<p>Don't worry if this doesn't make total sense yet. Let's start arranging our song, and everything should become clearer in the
+process.</p>
+<h3 id="tutorial-choose-a-loop-length">Choose A Loop Length<a class="headerlink" href="#tutorial-choose-a-loop-length" title="Permanent link">&para;</a></h3>
+<p>In song mode, you'll find song position and loop controls at the top of the screen. Each control's value is measured in bars:</p>
+<figure>
+<p><img alt="Transport controls (from left): song position, loop enable, loop start, loop length. Drag the numbers to change them." src="../img/transport.png" style="display:block;width:50%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Transport controls (from left): song position, loop enable, loop start, loop length. Drag the numbers to change them.</figcaption>
+</figure>
+<p>These controls are essential in song mode. Not only do these controls let you choose which part of the song you are
+play back, but the loop controls also act as a "selection" in the song: there are many operations in RP-8 that perform
+an operation only on the bars contained in the current loop.</p>
+<p><strong>TASK:</strong> Since we are starting a new song, let's set our loop to start at bar 1 and be either 4 or 8 bars long.  It's
+okay to start at bar 1 even if we think we might want to add an introduction, since RP-8's editing tools provide ways
+to move bars around later. If you forget which control is loop start and which is loop length, you can turn on tooltips
+with <code>t</code> for a reminder.</p>
+<h3 id="tutorial-copy-a-loop-from-pattern-mode">Copy A Loop From Pattern Mode<a class="headerlink" href="#tutorial-copy-a-loop-from-pattern-mode" title="Permanent link">&para;</a></h3>
+<p>You've probably noticed that, in song mode, all your sound edits from pattern mode have been lost. Instead of recreating them
+manually, let's copy them over. You'll that there are copy/paste buttons not just on each device, but also near
+the top of the screen:</p>
+<figure>
+<p><img alt="Sequence copy (top) and paste (bottom) buttons" src="../img/seq_copy_paste_btns.png" style="display:block;width:12.5%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Sequence copy (top) and paste (bottom) buttons</figcaption>
+</figure>
+<p>We can use these buttons to copy information about all the sound controls.</p>
+<p><strong>TASK:</strong> Switch back to pattern mode (by clicking the mode button or pressing <code>m</code>) and click the copy button, then
+switch back to song mode, and click the paste button. Your loop should now be filled with the same control
+configuration you had in pattern mode!</p>
+<h3 id="tutorial-recording-3-ways">Recording, 3 Ways<a class="headerlink" href="#tutorial-recording-3-ways" title="Permanent link">&para;</a></h3>
+<p>We're now going to use three different recording methods to build up some changes and structure in your loop.</p>
+<h3 id="tutorial-change-the-sound-again">Change the Sound (Again)<a class="headerlink" href="#tutorial-change-the-sound-again" title="Permanent link">&para;</a></h3>
+<p>This section demonstrates the first recording method: change-and-commit.</p>
+<p>Try playing your new loop. (Make sure the loop enable control is turned on.) Now try changing some of the controls.
+You'll notice that your changes look like they stay in effect ... until you pause playback. Then all your changes are
+reset. You may also have noticed that the dark red record button next to the play button turns yellow when you start
+making changes. What's going on here?</p>
+<figure>
+<p><img alt="Record button states: disabled (pattern mode), no changes, uncommitted changes, recording" src="../img/record_btn_states.png" style="display:block;width:37.5%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Record button states: disabled (pattern mode), no changes, uncommitted changes, recording</figcaption>
+</figure>
+<p>When you start making changes, RP-8 notices that you've departed from the recorded sequence, and turns the record light
+yellow to warn you. Any controls you have changed will stay where you left them, but any controls you have not touched
+will stay under sequencer control. When you pause playback, RP-8 puts all controls back under sequencer control and
+resets their values.</p>
+<p>But what if you like your changes?</p>
+<figure>
+<p><img alt="Change discard (left) and commit (right) buttons" src="../img/override_btns.png" style="display:block;width:25%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Change discard (left) and commit (right) buttons</figcaption>
+</figure>
+<p>Whenver you have uncommitted changes (i.e. the record button is yellow) the change discard/commit buttons will light
+up. The discard button clears your changes, just like stopping playback. If RP-8 is playing, control values will reset
+at the start of the next bar, if it is paused, they will reset immediately. The commit button, on the other hand, will
+keep your changes: each control you have modified will now keep its current position everywhere in your loop.</p>
+<p><strong>TASK:</strong> Try making some more changes to the sound in your loop. Then use the loop controls to select one or two bars
+within your loop, and change the sound only in those bars. Set your loop back to its original length again and listen
+to your new control automation!</p>
+<h3 id="tutorial-automate-the-sound">Automate the Sound<a class="headerlink" href="#tutorial-automate-the-sound" title="Permanent link">&para;</a></h3>
+<p>This section demonstrates the second recording method: realtime recording.</p>
+<p>The technique above is easy, but only lets you make changes in full-bar chunks. If you want a nice filter sweep, you'll
+have to use realtime recording instead. When you turn on record mode, by clicking the record button or pressing <code>r</code>,
+the record button will light up bright red, and RP-8 will begin immediately recording all control changes you make to
+the song.</p>
+<p>If looping is enabled, RP-8 will forget about all changed controls each time playback loops. This allows you to record
+automation for multiple controls in the same recording session, and means that you don't have to quickly hit stop to
+avoid recording over the start of your loop.</p>
+<p>When you pause playback, RP-8 will automatically exit record mode. You can also exit record mode by clicking the record
+button.</p>
+<p><strong>TASK:</strong> Press <code>p</code> to quicksave your song in case something goes wrong or you record something you don't mean to.</p>
+<p><strong>TASK:</strong> Go to the beginning of your loop, enable recording, and hit play. Move the synth filter cutoff knobs. Each
+time the song loops is a new take, so keep trying as long as you like!</p>
+<h3 id="tutorial-sequence-your-patterns">Sequence Your Patterns<a class="headerlink" href="#tutorial-sequence-your-patterns" title="Permanent link">&para;</a></h3>
+<p>This section demonstrates the third recording method: step recording.</p>
+<p>We're now going to record some pattern changes in your loop. You could do this using either of the previous two
+methods, but for pattern recording you often want to set patterns across many bars quickly. This is easy to do with
+step recording. When record mode is active, any changed controls are written to any bar you visit, <em>even when paused</em>.
+This means that you can enable recording, make some changes, and step forward or backward in the song to write those
+changes to each new bar.</p>
+<p><strong>TASK:</strong> Press <code>p</code> to quicksave.</p>
+<p><strong>TASK:</strong> Sequence all the pattern changes you want in your loop! Go to the first bar of your loop and enter record
+mode. Then select the patterns you want to play on that bar. Then use the the <code>.</code> key to move one bar forward and
+select the patterns you want to play on that bar. If you want to keep the same patterns for multiple bars, you can just
+skip through them, you do not need to click the pattern buttons again. If you make a mistake, you can backtrack with the <code>,</code> key to fix it, or if you make a big mistake, press <code>o</code> to quickload your last checkpoint.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can also use the mouse to drag the song position control to navigate while recording is active, but, if you try
+this, use extreme care. Every control modified in the current recording session will be written to every bar you visit!
+You can easily overwrite many bars worth of sequencer data if you're not careful.</p>
+</div>
+<p>Nice work! You now have a fully-sequenced loop. Let's finish this all off by copying your loop and making a variation.</p>
+<h3 id="tutorial-duplicate-your-loop">Duplicate Your Loop<a class="headerlink" href="#tutorial-duplicate-your-loop" title="Permanent link">&para;</a></h3>
+<p>To make major changes to the arrangement, we need to use the song editing tools near the top of the screen. Two of
+these, copy and paste, should be familiar from earlier, since we used them to initialize our loop from patern mode.</p>
+<figure>
+<p><img alt="Song edit buttons, clockwise from top left: copy, cut, insert, paste" src="../img/song_edit_btns.png" style="display:block;width:25%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Song edit buttons, clockwise from top left: copy, cut, insert, paste</figcaption>
+</figure>
+<p>All of these features use the current loop as their active selection.</p>
+<p><strong>TASK:</strong> Click the copy button to copy the current loop. Then click the insert button, which will insert the copied
+bars into the current loop, moving the current loop and all later bars back to make space. You have just created a
+duplicate of the loop! Keeping the loop length the same, advance the loop start to the end of the current loop, so we
+can start editing the duplicated content.</p>
+<p><strong>TASK:</strong> Use what you have learned so far to write a B section to this tiny song.</p>
+<h3 id="tutorial-create-an-aba-structure">Create an ABA Structure<a class="headerlink" href="#tutorial-create-an-aba-structure" title="Permanent link">&para;</a></h3>
+<p>Let's do one more sequence edit, to add a copy of the original loop at the end of your B section, for a very brief ABA
+structure.</p>
+<p><strong>TASK:</strong> Move the loop back to the beginning of the song, and copy your original loop. Then advance your loop point
+just past your B section and click paste.</p>
+<h3 id="tutorial-export-to-audio">Export To Audio<a class="headerlink" href="#tutorial-export-to-audio" title="Permanent link">&para;</a></h3>
+<p>All right, we're ready to finish this off! Now we just need to use the .WAV export feature to render your song to
+audio. There are two steps: first, prep your song for export by creating a few silent bars at the end. Then just enable
+export and play your song from the start.</p>
+<p><strong>TASK:</strong> Add some silent bars at the end of your song. Move the loop past the end of the song and use change+commit
+recording to disable all three instruments for this section (click the red circle on the left side of the instrument to
+toggle whether it is enabled). Leave this loop enabled at the end of the song - you want to "trap" the playback
+position here after export so you don't get unexpected sounds at the end of your recording.</p>
+<p><strong>TASK:</strong> Go back to the beginning of your song, and, while paused, press <code>e</code> to enable export. Then play your song
+to the end, and press <code>e</code> when done. You'll see a new .WAV file on your desktop containing your exported audio.</p>
+<h2 id="tutorial-closing-thoughts">Closing Thoughts<a class="headerlink" href="#tutorial-closing-thoughts" title="Permanent link">&para;</a></h2>
+<p>Congratulations! You've just made a very short song with RP-8. Go make more!</p>
+<p>For more information on how the devices work and what specific controls do, see the [Reference] section.  For quick
+reminders in RP-8, remember that you can turn on tooltips with <code>t</code> or access help with <code>h</code>.</p>
+<p>If you get stuck or encounter what seems to be a bug, please <a href="#contact">get in touch</a>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="tutorial-fn:1">
+<p>RP-8 tries to approximate the accent behavior of the TB-303, but it's a loose resemblance.&#160;<a class="footnote-backref" href="#tutorial-fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div></section><section class="print-page" id="reference"><h1 id="reference-reference">Reference<a class="headerlink" href="#reference-reference" title="Permanent link">&para;</a></h1>
+<h2 id="reference-basic-usage">Basic Usage<a class="headerlink" href="#reference-basic-usage" title="Permanent link">&para;</a></h2>
+<p>Most controls on the screen respond to one of a small number of gestures: clicks, vertical drags, and double clicks.
+Generally, clicking either activate a button's effect or toggle a button's state, dragging will alter the value of a
+knob or a numeric control, and double-clicking will reset a knob to its default value. There are also a few buttons for
+manipulating pattern data that respond to vertical drags (the transpose and rotate pattern buttons).</p>
+<p>When you click or drag a control, it becomes highlighted in blue. This indicates that the control is now selected, and
+will respond to control-specific keyboard commands, such as the up and down arrow keys for altering step, note, or knob
+values. If a control does not get a blue highlight, that means it is disabled in the current mode -- for example, you
+cannot change the song position in pattern mode.</p>
+<h2 id="reference-transport">Transport<a class="headerlink" href="#reference-transport" title="Permanent link">&para;</a></h2>
+<figure>
+<p><img alt="The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop start, loop enable, loop length, and file menu." src="../img/transport_ref.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The RP-8 transport controls (from left): play/pause, record, rewind, page toggle, mode toggle, song position, loop start, loop enable, loop length, and file menu.</figcaption>
+</figure>
+<p>The transport provides control over RP-8's playback and overall behavior. In pattern mode, you can start or pause the
+sequencer, change between pattern mode and song mode (see <a href="#reference-modes">Modes</a>), switch sequencer pages (see <a href="#reference-pages">Pages</a>), and access
+the file menu (see <a href="#reference-loading-and-saving">Loading and Saving</a>). In song mode, the position control, loop enable/start/length controls, and record
+button will also become available.</p>
+<p>To change the numeric controls, click and drag up/down to increase/decrease the values, or use the arrow keys.</p>
+<h3 id="reference-modes">Modes<a class="headerlink" href="#reference-modes" title="Permanent link">&para;</a></h3>
+<p>RP-8 has two modes: <strong>pattern mode</strong> and <strong>song mode</strong>. All the same devices and sound creation machinery are available
+in both, however, they have different purposes. Pattern mode gives you immediate direct control of every parameter, so
+it is ideal for learning, experimentation, and coming up with new ideas. Song mode records enables several features for
+recording, editing, and replay of parameter changes, and so is best for when you want to start recording multi-bar
+sequences and complex automation.</p>
+<h3 id="reference-pages">Pages<a class="headerlink" href="#reference-pages" title="Permanent link">&para;</a></h3>
+<p>The RP-8 UI also has two sequencer pages, each accessible in both pattern and song modes. You can toggle between them
+with the <code>tab</code> key, or by clicking the <code>P1</code> / <code>P2</code> button near the top of the screen. Each page shows a different set
+of pitch controls for each pattern.</p>
+<p>RP-8 starts on page 1. This page lets you control the pitch of oscillator 1 on both synths, and shows the drum pattern step buttons.</p>
+<p>Page 2 shows secondary / relative pitch controls for all three devices. These controls let you detune each drum (on the
+drum machine) or the second oscillator (on each synth) relative to the main pitch for each device. For the synth, this
+means you are detuning oscillator 2 relative to oscillator 1. For the drums, you are detuning each drum relative to
+whatever pitch is determined by the sound controls. (The base pitch of each drum with all knobs at their default
+positions is usually G in some octave.)</p>
+<h3 id="reference-loading-and-saving">Loading and Saving<a class="headerlink" href="#reference-loading-and-saving" title="Permanent link">&para;</a></h3>
+<p>To load a song, drag the song file onto the RP-8 window. Alternatively, you can copy the song data to your clipboard,
+paste it into RP-8 (using ctrl-v on Windows/Linux or cmd-v on MacOS), and use the <code>o</code> hotkey to load from the
+clipboard.</p>
+<p>To save songs, you can use the file menu.</p>
+<figure>
+<p><img alt="The RP-8 file menu" src="../img/rp8_file_menu.2048.png" style="display:block;width:50%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The RP-8 file menu</figcaption>
+</figure>
+<p>This screen allows you to name your song and save it, as well as open the RP-8 data folder - which, depending on your OS
+and how you are running RP-8, may be difficult to find otherwise. Use the up and down arrow keys to select an option,
+then the enter key to act. You can access this menu by clicking the disk icon by the transport controls, or by using
+the <code>f</code> key.</p>
+<h2 id="reference-arrangement-editing">Arrangement Editing<a class="headerlink" href="#reference-arrangement-editing" title="Permanent link">&para;</a></h2>
+<p>Below the transport, on the left side of the screen, are buttons for editing song arrangements. Copy and paste are
+available in all modes, the rest are available in song mode only.</p>
+<figure>
+<p><img alt="Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear, paste." src="../img/arrangement_btns.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>Arrangement editing buttons (highlighted), clockwise from top left: copy, cut, insert, commit, clear, paste.</figcaption>
+</figure>
+<p>The buttons act as follows:</p>
+<p><strong>Copy sequence.</strong> Copies the current pattern and control settings (if in pattern mode) or loop, including all automation
+(if in song mode).</p>
+<p><strong>Cut sequence.</strong> Acts identically to copy sequence, except it removes the current loop's bars from the song. Later bars are moved up
+to fill the empty space.</p>
+<p><strong>Paste sequence.</strong> Fills the current loop with the last copied sequence. If the copied sequence is shorter than the
+current loop, it is repeated to fit. If the copied sequence is longer, it is truncated. Sequences copied from pattern
+mode are treated as one-bar loops with no automation, and sequences pasted into pattern mode use only the first bar
+(and no automation).</p>
+<p><strong>Insert sequence.</strong> Inserts new bars into the song to fill the current loop, so that the loop's old contents are now
+located just after the loop. The new bars are then filled with the copied sequence, just as with paste.</p>
+<p><strong>Commit overrides.</strong> Commits the values of all currently-overridden controls to the loop. This will overwrite any
+automation for those controls.</p>
+<p><strong>Clear overrides.</strong> Clears all control overrides and returns any overridden controls to their values as recorded in
+the song. This action takes effect at the start of the next bar.</p>
+<p>There are also a two keyboard-only arrangement commands. <code>[</code> acts like the paste button, but applies only to the
+currently-selected control. This allows you to selectively transfer automation for only some controls. <code>]</code> also acts
+like the paste button, but does not transfer pattern selections (transfers sound controls only). This lets you copy
+sound design from one part of your song to another without overwriting the pattern arrangement.</p>
+<h2 id="reference-tempo-shuffle-and-volume">Tempo, Shuffle and Volume<a class="headerlink" href="#reference-tempo-shuffle-and-volume" title="Permanent link">&para;</a></h2>
+<figure>
+<p><img alt="The tempo, shuffle, and volume controls (highlighted)." src="../img/tempo_shuffle_volume.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The tempo, shuffle, and volume controls (highlighted).</figcaption>
+</figure>
+<p>The tempo control, marked with a little note symbol, displays the current tempo in beats per minute. RP-8 supports
+tempo settings from 60 to 188 bpm in 1 bpm increments. Tempo can be automated over a song just like any other control.</p>
+<p>Shuffle, marked with <strong>SH</strong>, offsets the position of every other 16th note step - pushing each one later. For triplet
+swing, set shuffle about 2/3 of the way to its maximum position. Shuffle is applied to all instruments.</p>
+<p>The volume control, marked with a small speaker symbol, controls the level of RP-8's output. RP-8 applies soft
+saturation at the output to avoid clipping, so you can also use this as a second distortion effect on the main mix. You
+can separately control the level of Pico-8's main output via the pause menu, accessed with <code>enter</code>: the volume control
+is located in a submenu under the Options heading.</p>
+<h2 id="reference-devices">Devices<a class="headerlink" href="#reference-devices" title="Permanent link">&para;</a></h2>
+<p>Sound in RP-8 is generated by its 3 devices: two identical 2-ocillator synthesizers loosely inspired by the <a href="https://en.wikipedia.org/wiki/Roland_TB-303">Roland
+TB-303</a> and one drum machine that is even more loosely inspired by the
+<a href="https://en.wikipedia.org/wiki/Roland_TR-808">Roland TR-808</a>. These devices are explained in more detail in their own
+sections below.</p>
+<figure>
+<p><img alt="A synth" src="../img/synth_empty.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>A synth</figcaption>
+</figure>
+<figure>
+<p><img alt="The drum machine" src="../img/drums_empty.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The drum machine</figcaption>
+</figure>
+<p>In general, you should use the synthesizers for tonal elements in your songs, like melody or bass lines, and you should
+use the drum machine for rhythmic elements. However, all the drums have a tuning adjustment knob, and many of the
+sounds can have a strong tonal character, so stay open-minded!<sup id="reference-fnref:1"><a class="footnote-ref" href="#reference-fn:1">1</a></sup> Each device is controlled by a pattern sequencer,
+which plays back sequences of notes or drum hits from a user-programmable bank of patterns. Patterns are 16 step (1
+bar) series of notes or drum hits, and are the building blocks of music in RP-8.</p>
+<p>RP-8 also has effects units and a mixer, whose controls are all located in the transport and mixer section at the top of
+the screen.</p>
+<figure>
+<p><img alt="The transport and mixer section" src="../img/header_section.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>The transport and mixer section</figcaption>
+</figure>
+<h3 id="reference-audio-signal-flow">Audio Signal Flow<a class="headerlink" href="#reference-audio-signal-flow" title="Permanent link">&para;</a></h3>
+<figure>
+<p><img alt="A schematic of the RP-8 audio architecture" src="../img/orig/audio_arch.png" style="display:block;width:100%;margin-left:auto;margin-right:auto" />
+  </p>
+<figcaption>RP-8 audio signal flow</figcaption>
+</figure>
+<p>Each of the two synthesizers and the drum machine is routed into its own overdrive unit. The overdrive outputs are sent
+to the mixer, which separately mixes these voices into a dry signal and a delay send signal. The delay send signal is
+sent to the delay effect, whose output is then mixed with the dry signal and sent to the compressor. Finally, soft
+saturation is applied to the signal before it is output to the speaker.</p>
+<p>The drum machine and the pattern filter can vary this routing a little bit, see their sections for more details.</p>
+<h3 id="reference-device-pattern-controls">Device Pattern Controls<a class="headerlink" href="#reference-device-pattern-controls" title="Permanent link">&para;</a></h3>
+<p>There are several controls that are shared by both the synths and the drum machine, although with slightly different
+layouts.</p>
+<p><strong>Device enable.</strong></p>
+<p><strong>Pattern select.</strong></p>
+<p><strong>Pattern copy.</strong></p>
+<p><strong>Pattern paste.</strong></p>
+<p><strong>Pattern length.</strong></p>
+<p><strong>Pattern transpose.</strong></p>
+<p><strong>Pattern rotate.</strong></p>
+<h3 id="reference-synths">Synths<a class="headerlink" href="#reference-synths" title="Permanent link">&para;</a></h3>
+<p>The two synthesizers are two-oscillator paraphonic synths with 24 db/octave lowpass filters and built-in step
+sequencers. (<strong>Paraphonic</strong> means, in this case, that the oscillator pitches can be sequenced separately.) The filter
+cutoff frequency is modulated by a simple one-stage envelope.</p>
+<p>There are</p>
+<h3 id="reference-drum-machine">Drum Machine<a class="headerlink" href="#reference-drum-machine" title="Permanent link">&para;</a></h3>
+<p>The drum machine offers six different drum tracks. Each track offers two different drum sounds, each at two different
+volume levels. Sound selection is indicated by step color: one sound is red, one sound is yellow. Sound intensity is
+indicated by button light intensity: brighter steps are louder, or accented.</p>
+<p>Each sound has two different controls: <strong>Tn</strong> (tune) and <strong>Dc</strong> (decay). These controls work slightly differently for
+each sound. Each track also has its own step pattern with its own length, and you can use step patterns of different
+lengths to create polyrhythms. The drums can be transposed by semitone in the second sequencer page.</p>
+<p>By default, all of the six tracks are processed through the overdrive and delay effects, as well as the pattern filter
+if its source is set to DR. You can cycle through the <strong>FX</strong> button settings for each pair of tracks to turn on or off
+the effects for each track separately. When effects are bypassed for a track, that track is not processed by overdrive,
+not processed by the pattern filter (if the pattern filter is set to <strong>DR</strong> mode), and not sent to the delay send bus.</p>
+<p><strong>Bass Drum (BD)</strong></p>
+<p>The bass drum sounds use simple waveforms that start out at high volume and pitch, then rapidly decay to low volume and
+low pitch. The <strong>Tn</strong> knob controls the starting pitch, and the <strong>Dc</strong> knob controls now rapidly the volume and pitch
+decay. When not transposed, the ending pitch is approximately 49 Hz (G1). Transposing the drums affects both the
+starting and ending pitch.</p>
+<p><em>Red sound:</em> This is an approximately 808-style bass drum using a sine wave and simple exponential envelopes.</p>
+<p><em>Yellow sound:</em> This is closer to a 909-style bass drum. It uses a triangle wave, and the exponential envelopes are
+limited at the start of the drum hit, in order to approximate a compressed sound.</p>
+<p><strong>Snare Drum (SD)</strong></p>
+<p>The snare drum mixes a sine wave exponentially decaying in pitch and volume, like the bass drum, with exponentially
+decaying noise. This whole signal is then sent through a gentle highpass filter. The <strong>Tn</strong> knob controls the pitch of
+the sine wave, and the <strong>Dc</strong> knob controls the decay time of the envelopes.</p>
+<p><em>Red sound:</em> This is a short, snappy, noisy snare drum. The tonal sine wave component is fairly quiet, and the decay
+times are relatively short.</p>
+<p><em>Yellow sound:</em> This is a slightly heavier, darker snare. The tonal component is louder, the decay is longer, and the
+highpass filter is set slightly lower to retain more midrange frequencies.</p>
+<p><strong>Hihat (HH)</strong></p>
+<p>The hihat is a short burst of noise, mixed with several high-pitch detuned square waves at inharmonic frequency ratios.
+All of these are highpass filtered, and decay exponentially in volume. The <strong>Tn</strong> knob controls the pitch of the square
+waves, and the <strong>Dc</strong> knob controls the decay time. Both closed and open hihats are on this track, so playing a closed
+hihat will cut off an open hihat sound (and vice versa), allowing you to achieve a classic hihat choke effect.</p>
+<p><em>Red sound:</em> This is a closed hihat with shorter decay.</p>
+<p><em>Yellow sound</em> This is an open hihat, with a longer decay.</p>
+<p><strong>Cymbal (CY)</strong></p>
+<p>The cymbal sound is generated identically to the hihat (<strong>HH</strong>) sound, but this track is tuned for longer decay times and
+slightly higher pitches. The knobs work identically to the hihat knobs. Like the hihats, the cymbals will mute each
+other - this is not a typical effect, but try it out and see what happens!</p>
+<p><em>Red sound:</em> This is a cymbal with a shorter decay, like a ride.</p>
+<p><em>Yellow sound:</em> This is a cymbal with a longer decay, like a crash.</p>
+<p><strong>Percussion (PC)</strong></p>
+<p>This sound is synthesized identically to the bass drum (<strong>BD</strong>), but at higher pitches and with shorter decay times. By
+changing the tuning you can create sounds similar to toms, congas, rimshots, and more. Play around and see what you
+get!</p>
+<p><em>Red sound:</em> Same as <strong>BD</strong>.</p>
+<p><em>Yellow sound:</em> Same as <strong>BD</strong>.</p>
+<p><strong>FM (FM)</strong></p>
+<p>This is an FM sound made from two sine wave operators. You can use this to make metallic or other tonal percussive
+sounds. The pitches of each operator remain constant during each drum hit, but both the volume and the amount of
+modulation decay exponentially. The <strong>Tn</strong> knob controls the operator frequency ratio, and the <strong>Dc</strong> knob controls the
+envelope decay times.</p>
+<p>The frequency ratios range from 1/4 (at the bottom end of the knob range) to 4 (at the top end of
+the range). Each increment of 32 in the knob value doubles the frequency ratio, so the default position of 64
+corresponds to a frequency ratio of 1, and <strong>Tn</strong> knob values that are multiples of 8, 16, or 32 will produce less
+dissonant sounds. Try the <strong>shift+up arrow</strong> and <strong>shift+down arrow</strong> hotkeys to step through <strong>Tn</strong> knob settings in
+steps of 16.</p>
+<p><em>Red sound:</em> Light modulation intensity, producing cleaner, simpler sounds.</p>
+<p><em>Yellow sound:</em> Heavy modulation intensity producing harsher, more complex sounds.</p>
+<h3 id="reference-effects">Effects<a class="headerlink" href="#reference-effects" title="Permanent link">&para;</a></h3>
+<p>RP-8 contains several effects to help shape the sound of the synths and drum machine. Please refer to the audio routing
+diagram from the [Audio Routing] section for more information.</p>
+<p><strong>Overdrive</strong></p>
+<p>There are three overdrive units, one for each of the two synths and for the drum machine. Each one independently
+distorts the audio for its device. The <strong>OD</strong> knobs in the mixer section control the intensity of the overdrive effect
+for each device, and the <strong>ODS</strong> knob (<strong>O</strong>ver<strong>D</strong>rive <strong>S</strong>hape) controls the tone and color of all three overdrive
+units. Higher values produce thinner, scratchier overdriven tones with more odd harmonics.</p>
+<p><strong>Delay</strong></p>
+<p>The delay unit is a tempo-synced digital delay on a shared send bus. The delay times can be set in 16th notes (shown as
+number of 16th notes, 1-16), 16th note triplets (shown as 1T-16T), or dotted 16th notes (a number of 16th notes plus a
+32nd note, shown as 0D-15D). The <strong>FB</strong> control controls the amount of delay feedback. There is a small amount of
+highpass filtering in the delay feedback loop so the delayed sound does not become too muddy.</p>
+<p><strong>Pattern Filter</strong></p>
+<p>The pattern filter is a 2 pole state variable filter with lowpass and bandpass modes. It differs from the other effects
+in that it can take its signal from several possible different sources. These are controlled by the <strong>SRC</strong> control.
+The possible sources are <strong>- -</strong>, or disabled, <strong>S1</strong>, <strong>S2</strong>, and <strong>DR</strong>, for the synths and the drum machine, and
+<strong>MA</strong>, for the main audio output after the mixer.</p>
+<p>The <strong>MD</strong> control selects the filter mode: lowpass (shelf shaped) or bandpass (peaked). <strong>FRQ</strong> controls the cutoff
+frequency, <strong>RES</strong> the resonance, <strong>PT</strong> selects the filter pattern, and <strong>AMT</strong> and <strong>DEC</strong> affect how that filter
+pattern is applied.</p>
+<p>The filter patterns control a filter modulation envelope. Each pattern is a different sequence of triggers of different
+intensities and timings. Different patterns have different lengths: some are 16 steps, and so line up neatly with the
+bar length, but other patterns are odd lengths that can help you create complex rhythmic effects. The <strong>AMT</strong> knob
+controls how strong the pattern triggers are: if the knob is all the way up, the strongest triggers will always bring
+the filter up to its maximum frequency (at least momentarily). If the knob is all the way down, the pattern will have
+no effect. The <strong>DEC</strong> knob controls the filter envelope decay time.</p>
+<p><strong>Compressor</strong></p>
+<p>The compressor is applied last of all RP-8's effects. There is only one control, the <strong>CT</strong> knob, which controls the
+compressor threshold. By default, the knob is all the way up, which means that the compressor will rarely have any
+effect. Reducing the compressor threshold should help make your song sound more even in volume, and should help your
+drum sounds and synth sounds fit together better. There's just one knob - try adjusting it and see if you like the
+results!</p>
+<p>Technical details: this compressor uses linear scaling (not logarithmic) with a hard knee, a fixed ratio of 4, and
+fixed attack and release times of approximately 2.5ms and 60ms, respectively.</p>
+<h2 id="reference-keyboard-controls">Keyboard Controls<a class="headerlink" href="#reference-keyboard-controls" title="Permanent link">&para;</a></h2>
+<p>You can press <code>h</code> at any time to get a list of these shortcuts in RP-8. If keyboard shortcuts appear to not be
+working, check to see if you have caps lock enabled: these shortcuts only work with caps lock off.</p>
+<p><strong>All Modes</strong></p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>t</code></td>
+<td>toggle tooltips on/off</td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td>save song to RP-8 folder and to clipboard</td>
+</tr>
+<tr>
+<td><code>o</code></td>
+<td>load song from clipboard</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>save song to clipboard only</td>
+</tr>
+<tr>
+<td><code>tab</code></td>
+<td>switch sequencer page</td>
+</tr>
+<tr>
+<td><code>space</code></td>
+<td>toggle play/pause</td>
+</tr>
+<tr>
+<td><code>m</code></td>
+<td>toggle song/pattern mode</td>
+</tr>
+<tr>
+<td><code>e</code></td>
+<td>stop/start exporting audio</td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td>change each bank control to the current pattern's bank</td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td>open the file menu</td>
+</tr>
+<tr>
+<td><code>up</code></td>
+<td>increase selected control one step</td>
+</tr>
+<tr>
+<td><code>down</code></td>
+<td>decrease selected control one step</td>
+</tr>
+<tr>
+<td><code>shift+up</code></td>
+<td>increase selected control multiple steps</td>
+</tr>
+<tr>
+<td><code>shift+down</code></td>
+<td>decrease selected control multiple steps</td>
+</tr>
+<tr>
+<td><code>left</code></td>
+<td>go to previous pattern step</td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td>go to next pattern step</td>
+</tr>
+<tr>
+<td><code>0-4</code></td>
+<td>on pattern buttons: set step type</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Song Mode Only</strong></p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backspace</code></td>
+<td>rewind song</td>
+</tr>
+<tr>
+<td><code>l</code></td>
+<td>toggle loop on/off</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>toggle recording on/off</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>clear control overrides</td>
+</tr>
+<tr>
+<td><code>c</code></td>
+<td>commit control overrides to loop</td>
+</tr>
+<tr>
+<td><code>[</code></td>
+<td>paste to selected control only</td>
+</tr>
+<tr>
+<td><code>]</code></td>
+<td>paste sound only (controls but not pattern selections)</td>
+</tr>
+<tr>
+<td><code>,</code></td>
+<td>previous bar</td>
+</tr>
+<tr>
+<td><code>.</code></td>
+<td>next bar</td>
+</tr>
+</tbody>
+</table>
+<div class="footnote">
+<hr />
+<ol>
+<li id="reference-fn:1">
+<p>TR-808 bass drums with long decay times are often used as bass sounds. The FM and percussion tracks of the drum machine can also easily be used as additional tonal voices.&#160;<a class="footnote-backref" href="#reference-fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div></section><section class="print-page" id="contact"><h1 id="contact-contact">Contact<a class="headerlink" href="#contact-contact" title="Permanent link">&para;</a></h1>
+<p>If you have thoughts, feedback, ideas, bug reports, or if you would like help, you can reach me via
+<a href="https://luchak.itch.io/rp8">Itch</a>, the <a href="https://discord.gg/kGJJcpEkgv">RP-8 Discord</a>, or <a href="https://6t.vc/@luchak">your favorite ActivityPub
+service</a>.</p></section></div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "/", "features": ["navigation.expand", "navigation.instant", "navigation.path", "navigation.top", "navigation.tracking", "toc.follow"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.2a6f1dda.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+    
+  </body>
+</html>
