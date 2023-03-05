@@ -1,3 +1,5 @@
+# Introduction
+
 RP-8 is a Pico-8 demake of Propellerhead Software's [ReBirth RB-338](https://en.wikipedia.org/wiki/ReBirth_RB-338).
 Like the original, it provides two synth voices, drums, pattern-based sequencing, effects, a pattern mode for immediate
 hands-on control, and a song mode for recording music. Unlike the original, the audio output is crunchy 8-bit 5.5kHz

@@ -22,11 +22,8 @@ markdown_extensions:
       permalink: True
 plugins:
   - search
-  - pdf-export:
-      verbose: True
-      media_type: print
-      combined: True
-      combined_output_path: pdf/combined.pdf
-      enabled_if_env: ENABLE_PDF_EXPORT
   - minify:
       minify_html: true
+  - print-site:
+      print_page_title: 'RP-8 User Guide'
+      toc_depth: 3

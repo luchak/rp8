@@ -4,6 +4,7 @@ __pycache__/
 
 build/
 exports/
+site/
 
 rp8_debug.p8
 rp8_min.p8

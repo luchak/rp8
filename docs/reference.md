@@ -1,3 +1,5 @@
+# Reference
+
 ## Basic Usage
 
 Most controls on the screen respond to one of a small number of gestures: clicks, vertical drags, and double clicks.
@@ -76,36 +78,25 @@ available in all modes, the rest are available in song mode only.
 
 The buttons act as follows:
 
-Copy sequence
-
-: Copies the current pattern and control settings (if in pattern mode) or loop, including all automation
+**Copy sequence.** Copies the current pattern and control settings (if in pattern mode) or loop, including all automation
 (if in song mode).
 
-Cut sequence
-
-: Acts identically to copy sequence, except it removes the current loop's bars from the song. Later bars are moved up
+**Cut sequence.** Acts identically to copy sequence, except it removes the current loop's bars from the song. Later bars are moved up
 to fill the empty space.
 
-Paste sequence
+**Paste sequence.** Fills the current loop with the last copied sequence. If the copied sequence is shorter than the
+current loop, it is repeated to fit. If the copied sequence is longer, it is truncated. Sequences copied from pattern
+mode are treated as one-bar loops with no automation, and sequences pasted into pattern mode use only the first bar
+(and no automation).
 
-: Fills the current loop with the last copied sequence. If the copied sequence is shorter than the current loop, it is
-repeated to fit. If the copied sequence is longer, it is truncated. Sequences copied from pattern mode are treated as
-one-bar loops with no automation, and sequences pasted into pattern mode use only the first bar (and no automation).
+**Insert sequence.** Inserts new bars into the song to fill the current loop, so that the loop's old contents are now
+located just after the loop. The new bars are then filled with the copied sequence, just as with paste.
 
-Insert sequence
+**Commit overrides.** Commits the values of all currently-overridden controls to the loop. This will overwrite any
+automation for those controls.
 
-: Inserts new bars into the song to fill the current loop, so that the loop's old contents are now located just after
-the loop. The new bars are then filled with the copied sequence, just as with paste.
-
-Commit overrides
-
-: Commits the values of all currently-overridden controls to the loop. This will overwrite any automation for those
-controls.
-
-Clear overrides
-
-: Clears all control overrides and returns any overridden controls to their values as recorded in the song. This action
-takes effect at the start of the next bar.
+**Clear overrides.** Clears all control overrides and returns any overridden controls to their values as recorded in
+the song. This action takes effect at the start of the next bar.
 
 There are also a two keyboard-only arrangement commands. `[` acts like the paste button, but applies only to the
 currently-selected control. This allows you to selectively transfer automation for only some controls. `]` also acts

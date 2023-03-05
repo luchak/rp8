@@ -15,8 +15,15 @@ build/rp8_debug.p8: $(SRC)
 lint:
 	python3 shrinko8/shrinko8.py --lint --script tools/rp8.py src/rp8.p8
 
+build/user_guide.html: $(wildcard docs/*.md)
+	mkdir -p build
+	mkdocs build
+	htmlark site/print_page/index.html -o build/user_guide.html
+
+docs: build/user_guide.html
+
 clean:
-	rm -rf build
+	rm -rf build site
 
 watch:
 	ls $(SRC) | entr make

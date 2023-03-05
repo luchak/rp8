@@ -1,3 +1,5 @@
+# Tutorial
+
 This document will walk you through writing a simple song in RP-8: everything you need to know to make your own music.
 There are two main things you'll learn: how to compose music in pattern mode, and how to arrange it in song mode. This
 workflow closely resembles how I begin new tracks in RP-8, and it might be a good starting point for you too.
