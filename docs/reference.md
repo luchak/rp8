@@ -211,7 +211,37 @@ The two synthesizers are two-oscillator paraphonic synths with 24 db/octave lowp
 sequencers. (**Paraphonic** means, in this case, that the oscillator pitches can be sequenced separately.) The filter
 cutoff frequency is modulated by a simple one-stage envelope.
 
-There are
+#### Sound Controls
+
+There are several sound controls on the synth: a waveform selector and a bank of knobs.
+
+**Waveform selector.** The waveform selector allows you to toggle between a square wave and a saw wave.
+
+**Tn.** Synth tuning in a +/- 12 semitone range.
+
+**Fn.** Fine tuning of the second oscillator in a +/- 1/2 semitone range.
+
+**Mx.** The mix between oscillators 1 and 2.
+
+**Ct.** Filter cutoff.
+
+**Rs.** Filter resonance.
+
+**En.** Filter envelope depth.
+
+**Dc.** Filter envelope decay.
+
+**Ac.** Filter accent depth.
+
+#### Sequencing
+
+The synth is sequenced using the standard step buttons, with 5 different step types (off, dim red, bright red, dim
+yellow, bright yellow). Bright steps are accented, dim steps are unaccented. Red steps are played normally, yellow
+steps are slides. A slide step will slide smoothly to the next step's pitch, and will prevent any envelopes from
+retriggering on the next step.
+
+The step pitch controls are below the step buttons. On sequencer page 1, these control the pitch of oscillator 1. On
+sequencer page 2, they control the coarse tuning of oscillator 2 relative to oscillator 1.
 
 ### Drum Machine
 
