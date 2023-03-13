@@ -133,7 +133,6 @@ function _update()
   if st then
    local c=compress(s)
    assert(#c>0)
-   log(#c,'bytes to store')
    memset(0x8000,0,0x4300)
    poke2(0x8000,#c)
    for i=1,#c do
