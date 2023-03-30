@@ -94,17 +94,19 @@ function timeline_new(default_patch, savedata)
   self.has_override=true
  end
 
- eval--[[language::loaf]][[(fn (timeline) (@= $timeline clear_overrides
- (fn (self) (@= $self overrides (pack)) (@= $self has_override false))
- ))]](timeline)
+ eval--[[language::loaf]][[(fn (timeline)
+  (@= $timeline clear_overrides
+   (fn (self) (@= $self overrides (pack)) (@= $self has_override false))
+  )
 
- function timeline:toggle_rec()
-  if self.rec then
-   if (self.has_override) self:_finalize_bar()
-   self:clear_overrides()
-  end
-  self.rec=not self.rec
- end
+  (@= $timeline toggle_rec (fn (self)
+   (if (@ $self rec) (seq
+    (if (@ $self has_override) ((@ $self _finalize_bar) $self))
+    ((@ $self clear_overrides) $self)
+   ))
+   (@= $self rec (not (@ $self rec)))
+  ))
+ )]](timeline)
 
  function timeline:cut_seq()
   local cut_end,c,nbs=self.loop_start+self.loop_len,self:copy_seq(),{}
