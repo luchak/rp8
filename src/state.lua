@@ -152,20 +152,22 @@ function state_new(savedata)
   seq_helper:reset()
  end
 
- function s:toggle_loop()
-  self.tl.loop=not self.tl.loop
- end
-
- function s:toggle_rec()
-  self.tl:toggle_rec()
- end
-
- function s:toggle_song_mode()
-  if (self.song_mode) self.tl:clear_overrides()
-  self.song_mode=not self.song_mode
-  self:stop_playing()
-  load_bar()
- end
+ eval--[[language::loaf]][[(fn (state)
+  (@= $state toggle_loop
+   (fn (self) (@= (@ $self tl) loop (not (@ $self tl loop))))
+  )
+  (@= $state toggle_rec
+   (fn (self) ((@ $self tl toggle_rec) (@ $self tl)))
+  )
+  (@= $state toggle_song_mode
+   (fn (self)
+    (if (@ $self song_mode) ((@ $self tl clear_overrides) (@ $self tl)))
+    (@= $self song_mode (not (@ $self song_mode)))
+    ((@ $self stop_playing) $self)
+    ((@ $self load_bar) $self)
+   )
+  )
+ )]](s)
 
  function s:go_to_bar(bar)
   load_bar(mid(1,bar,999))
