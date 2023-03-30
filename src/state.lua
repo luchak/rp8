@@ -167,11 +167,12 @@ function state_new(savedata)
     ((@ $self load_bar) $self)
    )
   )
+  (@= $state go_to_bar
+   (fn (self bar)
+    ((@ $self load_bar) $self ($mid 1 $bar 999))
+   )
+  )
  )]](s)
-
- function s:go_to_bar(bar)
-  load_bar(mid(1,bar,999))
- end
 
  function s:update_ui_vars()
   -- pats are aliased, always editing current
