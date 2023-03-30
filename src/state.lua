@@ -60,9 +60,9 @@ function state_new(savedata)
   (@= $s tl (timeline_new $default_patch (@ $dat tl)))
   (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
   (@= $s song_mode (@ $dat song_mode))
-  (@= (@ $s pat_store) b0 (map_table (@ (@ $dat pat_store) b0) $dec_bytes 1))
-  (@= (@ $s pat_store) b1 (map_table (@ (@ $dat pat_store) b1) $dec_bytes 1))
-  (@= (@ $s pat_store) dr (map_table (@ (@ $dat pat_store) dr) $dec_bytes 2))
+  (@= (@ $s pat_store) b0 (map_table (@ $dat pat_store b0) $dec_bytes 1))
+  (@= (@ $s pat_store) b1 (map_table (@ $dat pat_store b1) $dec_bytes 1))
+  (@= (@ $s pat_store) dr (map_table (@ $dat pat_store dr) $dec_bytes 2))
  )))
  (set_song_name (@ $s name))
  )]](s,savedata)
@@ -259,9 +259,9 @@ function state_new(savedata)
  return s
 end
 
-state_load=eval--[[language::loaf]][[(fn (s)
+eval--[[language::loaf]][[(set state_load (fn (s)
  (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
-)]]
+))]]
 
 function transpose_pat(pat,key,d,vmin,vmax)
  for i=1,16 do
