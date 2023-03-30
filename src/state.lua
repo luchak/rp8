@@ -163,7 +163,7 @@ function state_new(savedata)
    (fn (self)
     (if (@ $self song_mode) ((@ $self tl clear_overrides) (@ $self tl)))
     (@= $self song_mode (not (@ $self song_mode)))
-    ((@ $self stop_playing) $self)
+    (if (@ $self playing) ((@ $self toggle_playing) $self))
     ((@ $self load_bar) $self)
    )
   )
@@ -195,10 +195,6 @@ function state_new(savedata)
     dr=map_table(self.pat_store.dr,enc_bytes,2),
    }
   })
- end
-
- function s:stop_playing()
-  if (self.playing) self:toggle_playing()
  end
 
  function s:cut_seq()
