@@ -225,25 +225,29 @@ function state_new(savedata)
     ))
    )
   )
+  (@= $state insert_seq
+   (fn (self)
+    (if $copy_buf_seq (seq
+     (set_toast "loop inserted")
+     ((@ $self tl insert_seq) (@ $self tl) $copy_buf_seq)
+     (if (not (@ $self playing)) ((@ $self load_bar) $self))
+    ))
+   )
+  )
+  (@= $state clear_overrides
+   (fn (self)
+    (set_toast "overrides cleared")
+    ((@ $self tl clear_overrides) (@ $self tl))
+    (if (not (@ $self playing)) ((@ $self load_bar) $self))
+   )
+  )
+  (@= $state commit_overrides
+   (fn (self)
+    (set_toast "overrides committed")
+    ((@ $self tl commit_overrides) (@ $self tl))
+   )
+  )
  )]](s)
-
- function s:insert_seq()
-  if (not copy_buf_seq) return
-  set_toast("loop inserted")
-  self.tl:insert_seq(copy_buf_seq)
-  if (not self.playing) load_bar()
- end
-
- function s:clear_overrides()
-  set_toast("overrides cleared")
-  self.tl:clear_overrides()
-  if (not self.playing) load_bar()
- end
-
- function s:commit_overrides()
-  set_toast("overrides committed")
-  self.tl:commit_overrides()
- end
 
  function s:update_ui_vars()
   -- pats are aliased, always editing current
