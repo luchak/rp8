@@ -172,7 +172,78 @@ function state_new(savedata)
     ((@ $self load_bar) $self ($mid 1 $bar 999))
    )
   )
+  (@= $state cut_seq
+   (fn (self)
+    (set_toast "loop cut")
+    (set copy_buf_seq ((@ $self tl cut_seq) (@ $self tl)))
+    (if (not (@ $self playing)) ((@ $self load_bar) $self))
+   )
+  )
+  (@= $state copy_seq
+   (fn (self)
+    (if (@ $self song_mode)
+     (seq
+      (set_toast "loop copied")
+      (set copy_buf_seq ((@ $self tl copy_seq) (@ $self tl)))
+     )
+     (seq
+      (set_toast "pattern copied")
+      (set copy_buf_seq (pack))
+      (let copy_bar (pack))
+      (@= $copy_bar t0 ($enc_bytes (@ $self pat_patch)))
+      (@= $copy_bar ev (pack))
+      (add $copy_buf_seq $copy_bar)
+     )
+    )
+   )
+  )
+  (@= $state paste_seq
+   (fn (self exclude_pats)
+    (if $copy_buf_seq (seq
+     (if (@ $self song_mode)
+      (seq
+       (set_toast "loop pasted")
+       (if $exclude_pats
+        ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq $has_event_params_list)
+        ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq)
+       )
+      )
+      (seq
+       (set_toast "pattern pasted")
+       (@= $self pat_patch (dec_bytes (@ $copy_buf_seq 1 t0)))
+      )
+     )
+     (if (not (@ $self playing)) ((@ $self load_bar) $self))
+    ))
+   )
+  )
+  (@= $state paste_ctrl
+   (fn (self ctrl)
+    (if (and (and (@ $self song_mode) ($copy_buf_seq)) $ctrl) (seq
+     (set_toast "loop pasted (control only)")
+     ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq (pack $ctrl))
+    ))
+   )
+  )
  )]](s)
+
+ function s:insert_seq()
+  if (not copy_buf_seq) return
+  set_toast("loop inserted")
+  self.tl:insert_seq(copy_buf_seq)
+  if (not self.playing) load_bar()
+ end
+
+ function s:clear_overrides()
+  set_toast("overrides cleared")
+  self.tl:clear_overrides()
+  if (not self.playing) load_bar()
+ end
+
+ function s:commit_overrides()
+  set_toast("overrides committed")
+  self.tl:commit_overrides()
+ end
 
  function s:update_ui_vars()
   -- pats are aliased, always editing current
@@ -196,63 +267,6 @@ function state_new(savedata)
     dr=map_table(self.pat_store.dr,enc_bytes,2),
    }
   })
- end
-
- function s:cut_seq()
-  set_toast("loop cut")
-  copy_buf_seq=self.tl:cut_seq()
-  if (not self.playing) load_bar()
- end
-
- function s:copy_seq()
-  if self.song_mode then
-   set_toast("loop copied")
-   copy_buf_seq=self.tl:copy_seq()
-  else
-   set_toast("pattern copied")
-   copy_buf_seq={{
-    t0=enc_bytes(self.pat_patch),
-    ev={}
-   }}
-  end
- end
-
- function s:paste_seq(exclude_pats)
-  if (not copy_buf_seq) return
-  if self.song_mode then
-   set_toast("loop pasted")
-   if (exclude_pats) self.tl:paste_ctrls(copy_buf_seq, has_event_params_list) else self.tl:paste_seq(copy_buf_seq)
-  else
-   set_toast("pattern pasted")
-   self.pat_patch=dec_bytes(copy_buf_seq[1].t0)
-  end
-  if (not self.playing) load_bar()
- end
-
- function s:paste_ctrl(ctrl)
-  if self.song_mode and copy_buf_seq and ctrl then
-   set_toast("loop pasted (control only)")
-   self.tl:paste_ctrls(copy_buf_seq,{ctrl})
-  end
-  if (not self.playing) load_bar()
- end
-
- function s:insert_seq()
-  if (not copy_buf_seq) return
-  set_toast("loop inserted")
-  self.tl:insert_seq(copy_buf_seq)
-  if (not self.playing) load_bar()
- end
-
- function s:clear_overrides()
-  set_toast("overrides cleared")
-  self.tl:clear_overrides()
-  if (not self.playing) load_bar()
- end
-
- function s:commit_overrides()
-  set_toast("overrides committed")
-  self.tl:commit_overrides()
  end
 
  load_bar()
