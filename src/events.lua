@@ -2,7 +2,7 @@
 
 eval--[[language::loaf]][[
 (set no_event_params (' {10=true,11=true,26=true,27=true,42=true,43=true}))
-(set has_event_params_list (pack))
+(set has_event_params_list (tab))
 (for 1 71 (fn (i)
  (if (@ $no_event_params $i) (id) (add $has_event_params_list $i))
 ))
