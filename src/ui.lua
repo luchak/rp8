@@ -448,6 +448,17 @@ eval--[[language::loaf]][[
  (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
  "rotate (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
+(add_ui (push_new 40 (+ $yp 8) 63
+ (fn (state b)
+  (let pat (@ $state pat_seqs $key))
+  (for 1 16 (fn (i)
+   (@= (@ $pat st) $i (rnd (' (64 64 64 64 65 65 65 65 66 66 67 67 68))))
+   (@= (@ $pat nt) $i (flr (rnd 37)))
+   (@= (@ $pat dt) $i 64)
+  ))
+ )
+ "randomize"
+))
 (add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose (drag)"
