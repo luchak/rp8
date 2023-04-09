@@ -41,14 +41,13 @@ function pf_decompress_block(r)
  end
  while true do
   if r.bit()<1 then
-   local p=((r.gamma()-1)<<3)|(r.num(3))
+   local p=((r.gamma()-1)<<3)|r.num(3)
    if (p==257) return s
-   local v=mtf[p]
+   local v=deli(mtf,p)
    s..=chr(v)
-   deli(mtf,p)
    add(mtf,v,1)
   else
-   local o=((r.gamma()-1)<<11)|(r.num(11))
+   local o=((r.gamma()-1)<<11)|r.num(11)
    local l=r.gamma()+2
    for _=1,l do
     s..=s[-o]
@@ -60,10 +59,10 @@ end
 function decompress(c)
  local r=pf_make_r(c)
  local s=''
- while true do
+ repeat
   local last=r.bit()>0
   s..=pf_decompress_block(r)
   if (last) return s
- end
+ until false
 end
 

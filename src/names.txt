@@ -42,3 +42,7 @@
 *.toggle_playing
 *.toggle_rec
 *.toggle_song_mode
+*.text
+*.sel
+*.desel
+*.act

@@ -6,6 +6,13 @@ __lua__
 
 #include utils.lua
 
+function make_draw_menu_item(items,y)
+ return function(i)
+  local item=items[i]
+  print(item.text,0,y+12*i,trn(menu_pos==i,item.sel,item.desel))
+ end
+end
+
 -- settle audio before starting synthesis
 eval--[[language::loaf]][[
 (cartdata luchak_rp8_v0)
@@ -124,6 +131,12 @@ eval--[[language::loaf]][[
  false
 ))
 
+(set enter_config (fn ()
+ (set_display_mode config)
+ (set menu_pos 1)
+ false
+))
+
 (set draw_help (fn ()
  (if (stat 30) (seq
   (let k (stat 31))
@@ -163,42 +176,53 @@ eval--[[language::loaf]][[
 ))
 
 (set file_menu_opts (' (
- `(fn () (set_display_mode ui))
- `(fn () (extcmd folder) (set_display_mode ui))
- `(fn () (copy_state) (set_display_mode ui))
- `(fn () (enter_rename))
- `(fn ()
-  (set state (state_new))
-  (set_display_mode ui)
- )
+ {text="gO bACK" sel=7 desel=6 act=`(fn () (set_display_mode ui))}
+ {text="oPEN fOLDER" sel=7 desel=6 act=`(fn () (extcmd folder) (set_display_mode ui))}
+ {text="sAVE sONG" sel=7 desel=6 act=`(fn () (copy_state) (set_display_mode ui))}
+ {text="rENAME sONG" sel=7 desel=6 act=`(fn () (enter_rename))}
+ {text="cLEAR sONG" sel=8 desel=2 act=`(fn () (set state (state_new)) (set_display_mode ui))}
 )))
 
-(set draw_file (fn ()
+(set draw_menu (fn (title title_y items)
+ (let menu_len (len $items))
+ (let draw_item (make_draw_menu_item $items (+ $title_y 8)))
  (cls)
  (fillp 42405)
- (print "fILE mANAGEMENT\00" 0 22 10)
- (print "\83\94 <ENTER>" 0 30 5)
- (print "gO bACK" 0 42 (if (eq $menu_pos 1) 7 6))
- (print "oPEN fOLDER" 0 54 (if (eq $menu_pos 2) 7 6))
- (print "sAVE sONG" 0 66 (if (eq $menu_pos 3) 7 6))
- (print "rENAME sONG" 0 78 (if (eq $menu_pos 4) 7 6))
- (print "cLEAR sONG" 0 90 (if (eq $menu_pos 5) 8 2))
- (let ytop (+ (* $menu_pos 12) 27))
+ (print $title 0 $title_y 10)
+ (print "\83\94 <ENTER>" 0 (+ $title_y 8) 5)
+ (for 1 $menu_len $draw_item)
+ (let ytop (+ (* $menu_pos 12) (+ $title_y 5)))
  (let ybot (+ $ytop 10))
  (line 0 $ytop 128 $ytop 5)
  (line 0 $ybot 128 $ybot 5)
- (if (btnp 2) (set menu_pos (max (~ $menu_pos 1) 1)))
- (if (btnp 3) (set menu_pos (min (+ $menu_pos 1) 5)))
+ (if (btnp 2) (set menu_pos (~ $menu_pos 1)))
+ (if (btnp 3) (set menu_pos (+ $menu_pos 1)))
+ (set menu_pos (mid 1 $menu_pos $menu_len))
  (if (stat 30) (seq
   (let k (stat 31))
   (let o (ord $k))
   (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
   (if (eq $o 13)
-   ((@ $file_menu_opts $menu_pos))
+   (seq (log (len $items)) (log $menu_pos (@ $items $menu_pos text)) ((@ $items $menu_pos act)))
    (set_display_mode ui)
   )
  ))
  (fillp 0)
+))
+
+(set draw_file (fn ()
+ (draw_menu "fILE mANAGEMENT" 22 $file_menu_opts)
+))
+
+(set draw_config (fn ()
+ (cls)
+ (print (cat "scale: " $scale_type))
+ (if (stat 30)
+  (seq
+   (stat 31)
+   (set_display_mode ui)
+  )
+ )
 ))
 
 (set t_audio 0)
@@ -215,6 +239,7 @@ end
 function _init()
  eval--[[language::loaf]][[
 (cls)
+(set scale_type chromatic)
 (set ui (ui_new))
 (set set_toast (fn (text frames)
  (@= $ui toast $text)
@@ -357,6 +382,8 @@ function _draw()
   draw_rename()
  elseif display_mode=='file' then
   draw_file()
+ elseif display_mode=='config' then
+  draw_config()
  else
   draw_help()
  end

@@ -734,6 +734,7 @@ eval--[[language::loaf]][[
  46=`(fn () ((@ $state go_to_bar) $state (+ (@ $state tl bar) 1)))
  91=`(fn () (if (@ $ui focus) ((@ $state paste_ctrl) $state (@ $ui focus param))))
  93=`(fn () ((@ $state paste_seq) $state true))
+ 96=`(id $enter_config)
  98=`(id $jump_to_banks)
  99=`(fn () (mcall $state commit_overrides))
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
