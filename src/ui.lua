@@ -452,7 +452,6 @@ eval--[[language::loaf]][[
   (for 1 16 (fn (i)
    (@= (@ $pat st) $i (rnd (' (64 64 64 64 65 65 65 65 66 66 67 67 68))))
    (@= (@ $pat nt) $i (flr (rnd 37)))
-   (@= (@ $pat dt) $i 64)
   ))
  )
  "randomize"
@@ -563,6 +562,15 @@ eval--[[language::loaf]][[
 ))
 (add_ui (push_new
  16 104 10 (fn (state) (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
+))
+(add_ui (push_new 24 104 "?,5,6,2"
+ (fn (state b)
+  (let pat (@ $state ui_pats dr))
+  (for 1 16 (fn (i)
+   (@= (@ $pat st) $i (rnd (' (64 64 64 64 65 65 65 65 66 66 67 67 68))))
+  ))
+ )
+ "randomize"
 ))
 (add_ui (toggle_new
  0 104 109 110 on/off (state_make_get_set_param_bool 42)
