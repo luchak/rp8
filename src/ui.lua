@@ -47,7 +47,7 @@ function ui_new()
   help_on=false
   overlays={}
   page=1
-  pages=({} {} {})
+  pages=({} {})
   visible={}
   ftoast_t=0
   toast_t=0
@@ -60,7 +60,7 @@ function ui_new()
  -- hover
  -- overlay
 
- function obj:add_widget(w,pages)
+ function obj:add_widget(w,page)
   w=merge(copy(widget_defaults),w)
   local widgets=self.widgets
   add(widgets,w)
@@ -72,15 +72,11 @@ function ui_new()
     add(w.tiles,tile)
    end
   end
-  if (type(pages)=='number') pages={pages}
-  for page in all(pages or {}) do
-   add(self.pages[page],w)
-   if page==self.page then self:show_widget(w) end
-  end
+  if (page) add(self.pages[page],w)
   if w.grp then
    add(self.grps[w.grp],w)
   end
-  if not pages then self:show_widget(w) end
+  if not page or self.page==page then self:show_widget(w) end
  end
 
  function obj:set_page(p)
@@ -438,7 +434,7 @@ eval--[[language::loaf]][[
 (@= (@ $ui grps) (cat sst $key) (pack))
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
- (add_ui (note_btn_new (cat sn1 $key) $xp (+ $yp 24) $key nt $i 64 0 0 36) (' (1 3)))
+ (add_ui (note_btn_new (cat sn1 $key) $xp (+ $yp 24) $key nt $i 64 0 0 36) 1)
  (add_ui (note_btn_new (cat sn2 $key) $xp (+ $yp 24) $key dt $i 50 64 52 76) 2)
  (add_ui (step_btn_new (cat sst $key) $xp (+ $yp 16) $key $i (' (16 17 33 18 34 32))))
 ))
@@ -450,12 +446,7 @@ eval--[[language::loaf]][[
  (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
  "rotate (drag)"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
-(add_ui (push_new 16 $yp "X,6,5,2"
- (fn ()
- )
- "clear"
-) 3)
-(add_ui (push_new 8 $yp "?,6,5,2"
+(add_ui (push_new 40 (+ $yp 8) "?,6,5,2"
  (fn (state b)
   (let pat (@ $state pat_seqs $key))
   (for 1 16 (fn (i)
@@ -465,7 +456,7 @@ eval--[[language::loaf]][[
   ))
  )
  "randomize"
-) 3)
+))
 (add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose (drag)"
@@ -479,14 +470,12 @@ eval--[[language::loaf]][[
   (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))) (set_toast "synth pattern copied"))
   "copy pattern"
  )
- (' (1 2))
 )
 (add_ui
  (push_new 16 $yp 27
   (fn (state) (if $copy_buf_syn (seq (merge (@ $state pat_seqs $key) $copy_buf_syn) (set_toast "synth pattern pasted"))))
   "paste pattern"
  )
- (' (1 2))
 )
 (add_ui
  (toggle_new 0 $yp 107 108 on/off
@@ -528,10 +517,10 @@ eval--[[language::loaf]][[
 (@= (@ $ui grps) drn (pack))
 (for 1 16 (fn (i)
  (let xp (* (~ $i 1) 8))
- (add_ui (step_btn_new drs $xp 120 dr $i (' (19 20 36 21 37 35))) (' (1 3)))
+ (add_ui (step_btn_new drs $xp 120 dr $i (' (19 20 36 21 37 35))) 1)
  (add_ui (note_btn_new drn $xp 120 dr dt $i 50 64 52 76) 2)
 ))
-(add_ui (merge (push_new 8 96 192 (fn ()) "") (' {active=false})) (' (1 3)))
+(add_ui (merge (push_new 8 96 192 (fn ()) "") (' {active=false})) 1)
 (add_ui (merge (push_new 16 96 239
  (fn (state b) (rotate_pat (@ $state ui_pats dr) (' (st dt)) $b))
  "rotate pattern"
@@ -571,10 +560,10 @@ eval--[[language::loaf]][[
 )
 (add_ui (push_new
  8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
-) (' (1 2)))
+))
 (add_ui (push_new
  16 104 10 (fn (state) (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
-) (' (1 2)))
+))
 (add_ui (toggle_new
  0 104 109 110 on/off (state_make_get_set_param_bool 42)
 ))
@@ -587,7 +576,7 @@ eval--[[language::loaf]][[
 (map 0 8 0 96 16 4)
 ))
 
-(set next_page (fn () (set_page false (+ 1 (% (@ $ui page) 3)))))
+(set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
 (set rewind_t 0)
 (set rewind (fn ()
  ((@ $state go_to_bar) $state
@@ -606,7 +595,7 @@ eval--[[language::loaf]][[
 (add_ui (toggle_new
  0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
 ))
-(add_ui (merge (spin_btn_new 24 0 (' (189 190 63)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
+(add_ui (merge (spin_btn_new 24 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (toggle_new
  32 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
 ))
