@@ -215,6 +215,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='+'   then return v1+v2
   elseif cmd=='*'   then return v1*v2
   elseif cmd=='~'   then return v1-v2
+  elseif cmd=='%'   then return v1%v2
   elseif cmd=='not' then return not v1
   elseif cmd=='or'  then return v1 or v2
   elseif cmd=='and'  then return v1 and v2

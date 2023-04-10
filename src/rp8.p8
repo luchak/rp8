@@ -9,7 +9,8 @@ __lua__
 function make_draw_menu_item(items,y)
  return function(i)
   local item=items[i]
-  print(item.text,0,y+12*i,trn(menu_pos==i,item.sel,item.desel))
+  local s=item.txt
+  print(s,0,y+12*i,trn(menu_pos==i,item.ac,item.dc))
  end
 end
 
@@ -175,35 +176,26 @@ eval--[[language::loaf]][[
  ))
 ))
 
-(set file_menu_opts (' (
- {text="gO bACK" sel=7 desel=6 act=`(fn () (set_display_mode ui))}
- {text="oPEN fOLDER" sel=7 desel=6 act=`(fn () (extcmd folder) (set_display_mode ui))}
- {text="sAVE sONG" sel=7 desel=6 act=`(fn () (copy_state) (set_display_mode ui))}
- {text="rENAME sONG" sel=7 desel=6 act=`(fn () (enter_rename))}
- {text="cLEAR sONG" sel=8 desel=2 act=`(fn () (set state (state_new)) (set_display_mode ui))}
-)))
-
 (set draw_menu (fn (title title_y items)
- (let menu_len (len $items))
  (let draw_item (make_draw_menu_item $items (+ $title_y 8)))
  (cls)
  (fillp 42405)
  (print $title 0 $title_y 10)
  (print "\83\94 <ENTER>" 0 (+ $title_y 8) 5)
- (for 1 $menu_len $draw_item)
+ (for 1 (len $items) $draw_item)
  (let ytop (+ (* $menu_pos 12) (+ $title_y 5)))
  (let ybot (+ $ytop 10))
  (line 0 $ytop 128 $ytop 5)
  (line 0 $ybot 128 $ybot 5)
  (if (btnp 2) (set menu_pos (~ $menu_pos 1)))
  (if (btnp 3) (set menu_pos (+ $menu_pos 1)))
- (set menu_pos (mid 1 $menu_pos $menu_len))
+ (set menu_pos (mid 1 $menu_pos (len $items)))
  (if (stat 30) (seq
   (let k (stat 31))
   (let o (ord $k))
   (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
   (if (eq $o 13)
-   (seq (log (len $items)) (log $menu_pos (@ $items $menu_pos text)) ((@ $items $menu_pos act)))
+   ((@ $items $menu_pos act))
    (set_display_mode ui)
   )
  ))
@@ -211,17 +203,22 @@ eval--[[language::loaf]][[
 ))
 
 (set draw_file (fn ()
- (draw_menu "fILE mANAGEMENT" 22 $file_menu_opts)
+ (draw_menu "fILE mANAGEMENT" 22 
+  (' (
+   {txt="gO bACK" ac=7 dc=6 act=`(fn () (set_display_mode ui))}
+   {txt="oPEN fOLDER" ac=7 dc=6 act=`(fn () (extcmd folder) (set_display_mode ui))}
+   {txt="sAVE sONG" ac=7 dc=6 act=`(fn () (copy_state) (set_display_mode ui))}
+   {txt="rENAME sONG" ac=7 dc=6 act=`(fn () (enter_rename))}
+   {txt="cLEAR sONG" ac=8 dc=2 act=`(fn () (set state (state_new)) (set_display_mode ui))}
+  ))
+ )
 ))
 
 (set draw_config (fn ()
- (cls)
- (print (cat "scale: " $scale_type))
- (if (stat 30)
-  (seq
-   (stat 31)
-   (set_display_mode ui)
-  )
+ (draw_menu "cONFIG" 22
+  (' (
+   {txt="gO bACK" ac=7 dc=6 act=`(fn () (set_display_mode ui))}
+  ))
  )
 ))
 
@@ -279,8 +276,8 @@ function _init()
 
  for i=0,4096 do
   local x=(i-2048)/tanh_scale_half
-  local x2=x*x
-  tanh[i]=151.24527*(x2+48.48639)/(x2+242.61531)/(x2+10.08525)*x
+  local e=2.71828^x
+  tanh[i]=6*(e-1)/(e+1)
  end
 
  local syn0,syn1,drums=synth_new(7),synth_new(23),parse--[[language::loon]][[{
