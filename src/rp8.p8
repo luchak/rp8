@@ -197,7 +197,6 @@ eval--[[language::loaf]][[
   (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
   (if (eq $o 13)
    ((@ $items $menu_pos act))
-   (set_display_mode ui)
   )
  ))
  (fillp 0)
@@ -215,17 +214,19 @@ eval--[[language::loaf]][[
  )
 ))
 
-(set densities (' (0.25 0.5 0.75 1.0)))
-(set rnd_density 3)
+(set probs (' (0 0.25 0.5 0.75 1)))
+(set step_prob 4)
+(set change_prob 5)
 
 (set config_menu_opts
  (' (
   {txt="gO bACK" act=`(fn () (set_display_mode ui))}
-  {txt="rANDOM dENSITY" val=0.75 act=`(fn () (set rnd_density (+ (% $rnd_density 4) 1)) (@= (@ $config_menu_opts 2) val (@ $densities $rnd_density)))}
+  {txt="p(CHANGE)" val=1 act=`(fn () (set change_prob (+ (% $change_prob 5) 1)) (@= (@ $config_menu_opts 2) val (@ $probs $change_prob)))}
+  {txt="p(STEP)" val=0.75 act=`(fn () (set step_prob (+ (% $step_prob 5) 1)) (@= (@ $config_menu_opts 3) val (@ $probs $step_prob)))}
  ))
 )
 (set draw_config (fn ()
- (draw_menu "cONFIG" 22 $config_menu_opts)
+ (draw_menu "rANDOMIZER cONFIG" 22 $config_menu_opts)
 ))
 
 (set t_audio 0)

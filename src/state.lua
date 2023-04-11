@@ -68,9 +68,8 @@ function state_new(savedata)
  )]](s,savedata)
 
  local function _init_tick()
-  local patch=s.patch
-  local nl=5512.5*(15/(60+patch[1]))
-  local shuf_diff=nl*(patch[2]>>7)*(0.5-(s.tick&1))
+  local nl=5512.5*(15/(60+s.patch[1]))
+  local shuf_diff=nl*(s.patch[2]>>7)*(0.5-(s.tick&1))
   s.note_len,s.base_note_len=flr(0.5+nl+shuf_diff),nl
   local gtick=s.tick+s.bar*16-17
   s.ptick.b0=gtick%(s.pat_seqs.b0.l or 16)+1
@@ -108,7 +107,7 @@ function state_new(savedata)
  function s:load_bar(i)
   local tl=self.tl
   if self.song_mode then
-   self.tl:load_bar(self.patch,i)
+   tl:load_bar(self.patch,i)
    self.tick,self.bar=tl.tick,tl.bar
   else
    self.patch=copy(self.pat_patch)
@@ -221,7 +220,7 @@ function state_new(savedata)
   (@= $state paste_ctrl
    (fn (self ctrl)
     (if (and (and (@ $self song_mode) $copy_buf_seq) $ctrl) (seq
-     (set_toast "loop pasted (control only)")
+     (set_toast "loop pasted (ctrl only)")
      ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq (pack $ctrl))
      (if (not (@ $self playing)) ((@ $self load_bar) $self))
     ))
@@ -249,7 +248,11 @@ function state_new(savedata)
     ((@ $self tl commit_overrides) (@ $self tl))
    )
   )
+  (set state_load (fn (st)
+   (if (eq (sub $st 1 4) rp80) (state_new (parse (sub $st 5))))
+  ))
  )]](s)
+
 
  function s:update_ui_vars()
   -- pats are aliased, always editing current
@@ -278,10 +281,6 @@ function state_new(savedata)
  load_bar()
  return s
 end
-
-eval--[[language::loaf]][[(set state_load (fn (s)
- (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
-))]]
 
 function transpose_pat(pat,key,d,vmin,vmax)
  for i=1,16 do

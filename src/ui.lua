@@ -419,9 +419,7 @@ function has_uncommitted(s) return not no_uncommitted(s) end
 eval--[[language::loaf]][[
 (set set_page (fn (_ p) ((@ $ui set_page) $ui $p)))
 (set get_page (fn () (@ $ui page)))
-]]
 
-eval--[[language::loaf]][[
 (set transport_number_new (fn (x y w obj key tt input) (wrap_override
  (number_new $x $y $w $tt (take 1 (state_make_get_set $obj $key)) $input)
  "--,0,15"
@@ -449,9 +447,13 @@ eval--[[language::loaf]][[
 (add_ui (push_new 40 (+ $yp 8) "?,6,5,2"
  (fn (state b)
   (let pat (@ $state pat_seqs $key))
+  (let dens (@ $probs $step_prob))
+  (let change (@ $probs $change_prob))
   (for 1 16 (fn (i)
-   (@= (@ $pat st) $i (rnd (' (64 64 64 64 65 65 65 65 66 66 67 67 68))))
-   (@= (@ $pat nt) $i (flr (rnd 37)))
+   (if (gt $change (rnd)) (seq
+    (@= (@ $pat st) $i (if (gt $dens (rnd)) (rnd (' (65 65 65 65 66 66 67 67 68))) 64))
+    (@= (@ $pat nt) $i (flr (rnd 37)))
+   ))
   ))
  )
  "randomize"
@@ -566,8 +568,9 @@ eval--[[language::loaf]][[
 (add_ui (push_new 24 104 "?,5,6,2"
  (fn (state b)
   (let pat (@ $state ui_pats dr))
+  (let dens (@ $probs $step_prob))
   (for 1 16 (fn (i)
-   (@= (@ $pat st) $i (rnd (' (64 64 64 64 65 65 65 65 66 66 67 67 68))))
+   (@= (@ $pat st) $i (if (gt $dens (rnd)) (rnd (' (65 65 65 65 66 66 67 67 68))) 64))
   ))
  )
  "randomize"
