@@ -254,7 +254,6 @@ function pow3(x) return x*x*x end
 
 eval--[[language::loaf]][[
 (set unpack_split (fn (s) (unpack (split $s)) ))
-(set make_obj_cb (fn (n) (fn (o) ((@ $o $n) $o))))
 (set mcall (fn (obj m) ((@ $obj $m) $obj)))
 (set rep (fn (n x)
  (let a (pack))

@@ -54,7 +54,7 @@ eval--[[language::loaf]][[
   (set state (or (state_load $pd) $state))
   (set_toast "loaded from clipboard")
   ((@ $state go_to_bar) $state $bar)
-  (if $playing ((@ $state toggle_playing) $state))
+  (if $playing (toggle_playing))
  ))
 ))
 (set tooltips_enabled (fn ()

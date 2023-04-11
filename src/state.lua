@@ -116,7 +116,6 @@ function state_new(savedata)
   _sync_pats()
   _init_tick()
  end
- local load_bar=function(i) s:load_bar(i) end
 
  s._apply_diff=function(k,v)
   s.patch[k]=v
@@ -139,120 +138,6 @@ function state_new(savedata)
   end
   if (self.tick>before) _init_tick()
  end
-
- function s:toggle_playing()
-  local tl=self.tl
-  if self.playing then
-   if (tl.rec) tl:toggle_rec()
-   tl:clear_overrides()
-  end
-  self.playing=not self.playing
-  load_bar()
-  seq_helper:reset()
- end
-
- eval--[[language::loaf]][[(fn (state)
-  (@= $state toggle_loop
-   (fn (self) (@= (@ $self tl) loop (not (@ $self tl loop))))
-  )
-  (@= $state toggle_rec
-   (fn (self) ((@ $self tl toggle_rec) (@ $self tl)))
-  )
-  (@= $state toggle_song_mode
-   (fn (self)
-    (if (@ $self song_mode) ((@ $self tl clear_overrides) (@ $self tl)))
-    (@= $self song_mode (not (@ $self song_mode)))
-    (if (@ $self playing) ((@ $self toggle_playing) $self))
-    ((@ $self load_bar) $self)
-   )
-  )
-  (@= $state go_to_bar
-   (fn (self bar)
-    ((@ $self load_bar) $self ($mid 1 $bar 999))
-   )
-  )
-  (@= $state cut_seq
-   (fn (self)
-    (set_toast "loop cut")
-    (set copy_buf_seq ((@ $self tl cut_seq) (@ $self tl)))
-    (if (not (@ $self playing)) ((@ $self load_bar) $self))
-   )
-  )
-  (@= $state copy_seq
-   (fn (self)
-    (if (@ $self song_mode)
-     (seq
-      (set_toast "loop copied")
-      (set copy_buf_seq ((@ $self tl copy_seq) (@ $self tl)))
-     )
-     (seq
-      (set_toast "pattern copied")
-      (let copy_bar (tab))
-      (@= $copy_bar t0 (enc_bytes (@ $self pat_patch)))
-      (@= $copy_bar ev (tab))
-      (set copy_buf_seq (tab))
-      (add $copy_buf_seq $copy_bar)
-      (log (stringify $copy_buf_seq))
-     )
-    )
-   )
-  )
-  (@= $state paste_seq
-   (fn (self exclude_pats)
-    (if $copy_buf_seq (seq
-     (if (@ $self song_mode)
-      (seq
-       (set_toast "loop pasted")
-       (if $exclude_pats
-        ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq $has_event_params_list)
-        ((@ $self tl paste_seq) (@ $self tl) $copy_buf_seq)
-       )
-      )
-      (seq
-       (set_toast "pattern pasted")
-       (@= $self pat_patch (dec_bytes (@ $copy_buf_seq 1 t0)))
-      )
-     )
-     (if (not (@ $self playing)) ((@ $self load_bar) $self))
-    ))
-   )
-  )
-  (@= $state paste_ctrl
-   (fn (self ctrl)
-    (if (and (and (@ $self song_mode) $copy_buf_seq) $ctrl) (seq
-     (set_toast "loop pasted (ctrl only)")
-     ((@ $self tl paste_ctrls) (@ $self tl) $copy_buf_seq (pack $ctrl))
-     (if (not (@ $self playing)) ((@ $self load_bar) $self))
-    ))
-   )
-  )
-  (@= $state insert_seq
-   (fn (self)
-    (if $copy_buf_seq (seq
-     (set_toast "loop inserted")
-     ((@ $self tl insert_seq) (@ $self tl) $copy_buf_seq)
-     (if (not (@ $self playing)) ((@ $self load_bar) $self))
-    ))
-   )
-  )
-  (@= $state clear_overrides
-   (fn (self)
-    (set_toast "overrides cleared")
-    ((@ $self tl clear_overrides) (@ $self tl))
-    (if (not (@ $self playing)) ((@ $self load_bar) $self))
-   )
-  )
-  (@= $state commit_overrides
-   (fn (self)
-    (set_toast "overrides committed")
-    ((@ $self tl commit_overrides) (@ $self tl))
-   )
-  )
-  (set state_load (fn (st)
-   (if (eq (sub $st 1 4) rp80) (state_new (parse (sub $st 5))))
-  ))
- )]](s)
-
 
  function s:update_ui_vars()
   -- pats are aliased, always editing current
@@ -278,9 +163,125 @@ function state_new(savedata)
   })
  end
 
- load_bar()
+ s:load_bar()
  return s
 end
+
+function load_bar(i) state:load_bar(i) end
+eval--[[language::loaf]][[
+(set toggle_loop
+ (fn () (@= (@ $state tl) loop (not (@ $state tl loop))))
+)
+(set toggle_rec
+ (fn () ((@ $state tl toggle_rec) (@ $state tl)))
+)
+(set toggle_song_mode
+ (fn ()
+  (if (@ $state song_mode) ((@ $state tl clear_overrides) (@ $state tl)))
+  (@= $state song_mode (not (@ $state song_mode)))
+  (if (@ $state playing) (toggle_playing))
+  (load_bar)
+ )
+)
+(set go_to_bar
+ (fn (bar)
+  (load_bar ($mid 1 $bar 999))
+ )
+)
+(set cut_seq
+ (fn ()
+  (set_toast "loop cut")
+  (set copy_buf_seq ((@ $state tl cut_seq) (@ $state tl)))
+  (if (not (@ $state playing)) (load_bar))
+ )
+)
+(set copy_seq
+ (fn ()
+  (if (@ $state song_mode)
+   (seq
+    (set_toast "loop copied")
+    (set copy_buf_seq ((@ $state tl copy_seq) (@ $state tl)))
+   )
+   (seq
+    (set_toast "pattern copied")
+    (let copy_bar (tab))
+    (@= $copy_bar t0 (enc_bytes (@ $state pat_patch)))
+    (@= $copy_bar ev (tab))
+    (set copy_buf_seq (tab))
+    (add $copy_buf_seq $copy_bar)
+   )
+  )
+ )
+)
+(set paste_seq
+ (fn (exclude_pats)
+  (if $copy_buf_seq (seq
+   (if (@ $state song_mode)
+    (seq
+     (set_toast "loop pasted")
+     (if $exclude_pats
+      ((@ $state tl paste_ctrls) (@ $state tl) $copy_buf_seq $has_event_params_list)
+      ((@ $state tl paste_seq) (@ $state tl) $copy_buf_seq)
+     )
+    )
+    (seq
+     (set_toast "pattern pasted")
+     (@= $state pat_patch (dec_bytes (@ $copy_buf_seq 1 t0)))
+    )
+   )
+   (if (not (@ $state playing)) (load_bar))
+  ))
+ )
+)
+(set paste_ctrl
+ (fn (ctrl)
+  (if (and (and (@ $state song_mode) $copy_buf_seq) $ctrl) (seq
+   (set_toast "loop pasted (ctrl only)")
+   ((@ $state tl paste_ctrls) (@ $state tl) $copy_buf_seq (pack $ctrl))
+   (if (not (@ $state playing)) (load_bar))
+  ))
+ )
+)
+(set insert_seq
+ (fn ()
+  (if $copy_buf_seq (seq
+   (set_toast "loop inserted")
+   ((@ $state tl insert_seq) (@ $state tl) $copy_buf_seq)
+   (if (not (@ $state playing)) (load_bar))
+  ))
+ )
+)
+(set clear_overrides
+ (fn ()
+  (set_toast "overrides cleared")
+  ((@ $state tl clear_overrides) (@ $state tl))
+  (if (not (@ $state playing)) (load_bar))
+ )
+)
+(set commit_overrides
+ (fn ()
+  (set_toast "overrides committed")
+  ((@ $state tl commit_overrides) (@ $state tl))
+ )
+)
+(set state_load (fn (st)
+ (if (eq (sub $st 1 4) rp80) (state_new (parse (sub $st 5))))
+))
+]]
+
+
+
+function toggle_playing()
+ local tl=state.tl
+ if state.playing then
+  if (tl.rec) tl:toggle_rec()
+  tl:clear_overrides()
+ end
+ state.playing=not state.playing
+ load_bar()
+ seq_helper:reset()
+end
+
 
 function transpose_pat(pat,key,d,vmin,vmax)
  for i=1,16 do

@@ -608,30 +608,30 @@ eval--[[language::loaf]][[
 )
 
 (add_ui (toggle_new
- 0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) (make_obj_cb toggle_playing)
+ 0 0 6 7 "play/pause" (take 1 (state_make_get_set playing)) $toggle_playing
 ))
 (add_ui (merge (spin_btn_new 24 0 (' (189 190)) "ui page" $get_page $set_page) (' {click_act=true drag_amt=0 wrap=true})))
 (add_ui (toggle_new
- 32 0 105 106 "pattern/song mode" $state_is_song_mode (make_obj_cb toggle_song_mode)
+ 32 0 105 106 "pattern/song mode" $state_is_song_mode $toggle_song_mode
 ))
 (song_only (wrap_override (toggle_new
  8 0 231 232 "record automation" (take 1 (state_make_get_set tl rec))
- (make_obj_cb toggle_rec)
+ $toggle_rec
 ) 196 $no_uncommitted true) 233)
 (song_only (push_new 16 0 5 $rewind rewind) 5)
 
 (add_ui (push_new 96 0 191 $enter_file "file menu"))
-(add_ui (push_new 0 8 201 (make_obj_cb copy_seq) "copy loop"))
-(song_only (push_new 8 8 199 (make_obj_cb cut_seq) "cut loop") 198)
-(add_ui (push_new 0 16 197 (make_obj_cb paste_seq) "fill loop"))
-(song_only (push_new 8 16 203 (make_obj_cb insert_seq) "insert loop") 202)
+(add_ui (push_new 0 8 201 $copy_seq "copy loop"))
+(song_only (push_new 8 8 199 $cut_seq "cut loop") 198)
+(add_ui (push_new 0 16 197 $paste_seq "fill loop"))
+(song_only (push_new 8 16 203 $insert_seq "insert loop") 202)
 
 (add_ui (wrap_override
- (push_new 8 24 205 (make_obj_cb commit_overrides) "commit overrides")
+ (push_new 8 24 205 $commit_overrides "commit overrides")
  204 $has_uncommitted)
 )
 (add_ui (wrap_override
- (push_new 0 24 207 (make_obj_cb clear_overrides) "clear overrides")
+ (push_new 0 24 207 $clear_overrides "clear overrides")
  206 $has_uncommitted)
 )
 
@@ -652,8 +652,8 @@ eval--[[language::loaf]][[
 (let get_set_filt_pat (pack (state_make_get_set_param 69)))
 (add_ui (merge
  (number_new 80 16 2 "filter pattern" (@ $get_set_filt_pat 1)
-  (fn (s b)
-   ((@ $get_set_filt_pat 2) $s (mid (+ ((@ $get_set_filt_pat 1) $s) $b) (len $svf_pats)))
+  (fn (b)
+   ((@ $get_set_filt_pat 2) (mid (+ ((@ $get_set_filt_pat 1)) $b) (len $svf_pats)))
   )
  )
  (' {drag_amt=0.02})
@@ -664,7 +664,7 @@ eval--[[language::loaf]][[
 ))
 (let get_set_tempo (pack (state_make_get_set_param 1)))
 (add_ui (merge
- (spin_btn_new 16 8 $tempos "song tempo" (fn (s) (+ ((@ $get_set_tempo 1) $s) 1)) (fn (s b) ((@ $get_set_tempo 2) $s (~ $b 1))))
+ (spin_btn_new 16 8 $tempos "song tempo" (fn () (+ ((@ $get_set_tempo 1)) 1)) (fn (b) ((@ $get_set_tempo 2) (~ $b 1))))
  (' {w=3 drag_amt=0.2})
 ))
 (let dts (pack))
@@ -694,14 +694,14 @@ eval--[[language::loaf]][[
  ))
 ))
 
-(add_ui (merge (transport_number_new 40 0 4 tl bar "song position" (fn (s b)
- ((@ $s go_to_bar) $s (+ (@ $state tl bar) $b))
+(add_ui (merge (transport_number_new 40 0 4 tl bar "song position" (fn (b)
+ ((@ $state go_to_bar) $state (+ (@ $state tl bar) $b))
 )) (' {bigstep=4})))
 
 (song_only (toggle_new 56 0 193 194 "loop on/off" (state_make_get_set tl loop)) 195)
 
-(add_ui (merge (transport_number_new 64 0 4 tl loop_start "loop start" (fn (s b)
- (let tl (@ $s tl))
+(add_ui (merge (transport_number_new 64 0 4 tl loop_start "loop start" (fn (b)
+ (let tl (@ $state tl))
  (let ns (+ (@ $tl loop_start) $b))
  (@= $tl loop_start (mid 1 $ns 999))
  (@= $tl loop_len (mid 1 (@ $tl loop_len) (~ 1000 $ns)))
@@ -712,8 +712,8 @@ eval--[[language::loaf]][[
 ))
 
 (let loop_len_ctrl
- (transport_number_new 84 0 3 tl loop_len "loop length" (fn (s b)
-  (let tl (@ $s tl))
+ (transport_number_new 84 0 3 tl loop_len "loop length" (fn (b)
+  (let tl (@ $state tl))
   (set_loop_len $tl (+ (@ $tl loop_len) $b))
  ))
 )
@@ -742,26 +742,26 @@ eval--[[language::loaf]][[
 (set hotkey_map (' {
  8=`(id $rewind)
  9=`(id $next_page)
- 32=`(fn () (mcall $state toggle_playing))
+ 32=`(id $toggle_playing)
  44=`(fn () ((@ $state go_to_bar) $state (~ (@ $state tl bar) 1)))
  46=`(fn () ((@ $state go_to_bar) $state (+ (@ $state tl bar) 1)))
- 91=`(fn () (if (@ $ui focus) ((@ $state paste_ctrl) $state (@ $ui focus param))))
- 93=`(fn () ((@ $state paste_seq) $state true))
+ 91=`(fn () (if (@ $ui focus) (paste_ctrl (@ $ui focus param))))
+ 93=`(fn () (paste_seq true))
  96=`(id $enter_config)
  98=`(id $jump_to_banks)
- 99=`(fn () (mcall $state commit_overrides))
+ 99=`(id $commit_overrides)
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
  102=`(id $enter_file)
  104=`(id $enter_help)
- 108=`(fn () (mcall $state toggle_loop))
- 109=`(fn () (mcall $state toggle_song_mode))
+ 108=`(id $toggle_loop)
+ 109=`(id $toggle_song_mode)
  110=`(id $enter_rename)
  111=`(id $paste_state)
  112=`(fn () (poke 24368 1) (copy_state true))
- 114=`(fn () (if (@ $state song_mode) (mcall $state toggle_rec)))
+ 114=`(fn () (if (@ $state song_mode) (toggle_rec)))
  115=`(id $copy_state)
  116=`(id $toggle_tooltips)
  118=`(id $toggle_tooltips)
- 120=`(fn () (mcall $state clear_overrides))
+ 120=`(id $clear_overrides)
 }))
 ]]
