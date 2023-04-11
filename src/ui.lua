@@ -377,7 +377,7 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
    local bank,pending=get_bank(state),get_pat(state)
    local pat=state.pat_status[syn].idx
    local val=bank*bank_size-bank_size+pib
-   local col=pat==val and c_on or c_off
+   local col=trn(pat==val,c_on,c_off)
    if (pending==val and pending!=pat) col=c_next
    return ret_prefix..col
   end,
@@ -444,17 +444,25 @@ eval--[[language::loaf]][[
  (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
  "rotate"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
+(set randomize_pattern (fn (pat)
+ (for 1 16 (fn (i)
+  (if (gt $change_step_prob (rnd)) (seq
+   (let v 64)
+   (if (gt $step_prob (rnd)) (seq
+    (let v 65)
+    (if (gt $yellow_prob (rnd)) (let v (+ $v 2)))
+    (if (gt $accent_prob (rnd)) (let v (+ $v 1)))
+   ))
+   (@= (@ $pat st) $i $v)
+  ))
+  (if (and (@ $pat nt) (gt $change_note_prob (rnd)))
+   (@= (@ $pat nt) $i (+ (rnd (@ $scale_notes $scale)) (* 12 (flr (rnd 3)))))
+  )
+ ))
+))
 (add_ui (push_new 40 (+ $yp 8) "?,6,5,2"
  (fn (state b)
-  (let pat (@ $state pat_seqs $key))
-  (let dens (@ $probs $step_prob))
-  (let change (@ $probs $change_prob))
-  (for 1 16 (fn (i)
-   (if (gt $change (rnd)) (seq
-    (@= (@ $pat st) $i (if (gt $dens (rnd)) (rnd (' (65 65 65 65 66 66 67 67 68))) 64))
-    (@= (@ $pat nt) $i (flr (rnd 37)))
-   ))
-  ))
+  (randomize_pattern (@ $state pat_seqs $key))
  )
  "randomize"
 ))
@@ -567,11 +575,7 @@ eval--[[language::loaf]][[
 ))
 (add_ui (push_new 24 104 "?,5,6,2"
  (fn (state b)
-  (let pat (@ $state ui_pats dr))
-  (let dens (@ $probs $step_prob))
-  (for 1 16 (fn (i)
-   (@= (@ $pat st) $i (if (gt $dens (rnd)) (rnd (' (65 65 65 65 66 66 67 67 68))) 64))
-  ))
+  (randomize_pattern (@ $state ui_pats dr))
  )
  "randomize"
 ))

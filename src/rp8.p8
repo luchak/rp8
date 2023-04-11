@@ -197,6 +197,7 @@ eval--[[language::loaf]][[
   (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
   (if (eq $o 13)
    ((@ $items $menu_pos act))
+   (set_display_mode ui)
   )
  ))
  (fillp 0)
@@ -214,25 +215,34 @@ eval--[[language::loaf]][[
  )
 ))
 
-(set probs (' (0 0.25 0.5 0.75 1)))
-(set step_prob 4)
-(set change_prob 5)
+(set change_step_prob 1)
+(set change_note_prob 1)
+(set step_prob 0.75)
+(set yellow_prob 0.25)
+(set accent_prob 0.25)
+
+(set scales (' ("aLL" "wHITE KEYS" "bLACK KEYS")))
+(set scale 1)
+(set scale_notes (' (
+ (0 1 2 3 4 5 6 7 8 9 10 11)
+ (0 2 4 5 7 9 11)
+ (1 3 6 8 10)
+)))
 
 (set config_menu_opts
  (' (
   {txt="gO bACK" act=`(fn () (set_display_mode ui))}
-  {txt="p(CHANGE)" val=1 act=`(fn () (set change_prob (+ (% $change_prob 5) 1)) (@= (@ $config_menu_opts 2) val (@ $probs $change_prob)))}
-  {txt="p(STEP)" val=0.75 act=`(fn () (set step_prob (+ (% $step_prob 5) 1)) (@= (@ $config_menu_opts 3) val (@ $probs $step_prob)))}
+  {txt="p(CHANGE STEP)" val=1 act=`(fn () (set change_step_prob (% (+ 0.25 $change_step_prob) 1.25)) (@= (@ $config_menu_opts 2) val $change_step_prob))}
+  {txt="p(CHANGE NOTE)" val=1 act=`(fn () (set change_note_prob (% (+ 0.25 $change_note_prob) 1.25)) (@= (@ $config_menu_opts 3) val $change_note_prob))}
+  {txt="p(ON)" val=0.75 act=`(fn () (set step_prob (% (+ 0.25 $step_prob) 1.25)) (@= (@ $config_menu_opts 4) val $step_prob))}
+  {txt="p(YELLOW)" val=0.25 act=`(fn () (set yellow_prob (% (+ 0.25 $yellow_prob) 1.25)) (@= (@ $config_menu_opts 5) val $yellow_prob))}
+  {txt="p(ACCENT)" val=0.25 act=`(fn () (set accent_prob (% (+ 0.25 $accent_prob) 1.25)) (@= (@ $config_menu_opts 6) val $accent_prob))}
+  {txt="nOTES" val="aLL" act=`(fn () (set scale (+ (% $scale 3) 1)) (@= (@ $config_menu_opts 7) val (@ $scales $scale)))}
  ))
 )
 (set draw_config (fn ()
- (draw_menu "rANDOMIZER cONFIG" 22 $config_menu_opts)
+ (draw_menu "rANDOMIZER" 8 $config_menu_opts)
 ))
-
-(set t_audio 0)
-(set t_ui 0)
-(set t_draw 0)
-
 ]]
 
 -- can easily be called per-frame, so no scripting
@@ -278,8 +288,7 @@ function _init()
  poke(0x5f36,@0x5f36^^0x20)
 
  for i=0,4096 do
-  local x=(i-2048)/269.47369
-  local e=2.71828^x
+  local e=2.71828^((i-2048)/269.47369)
   tanh[i]=6*(e-1)/(e+1)
  end
 
@@ -361,21 +370,16 @@ function _update60()
   audio_wait(10)
  end
 
- --local t0=stat(1)
  audio_update()
- --t_audio=stat(1)-t0
  if pause_t<=0 then
-  --t0=stat(1)
   ui:update(state)
   audio_root=seq_helper
-  --t_ui=stat(1)-t0
  else
   pause_t-=1
  end
 end
 
 function _draw()
- --local t0=stat(1)
  if display_mode=='ui' then
   ui:draw(state)
  elseif display_mode=='rename' then
@@ -387,8 +391,6 @@ function _draw()
  else
   draw_help()
  end
- --t_draw=stat(1)-t0
- --log('times',t_audio,t_ui,t_draw)
 end
 
 #include driver.lua
