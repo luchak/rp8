@@ -214,6 +214,7 @@ function _eval_scope(ast,locals,start)
   if cmd=='seq'     then return vals[#vals]
   elseif cmd=='+'   then return v1+v2
   elseif cmd=='*'   then return v1*v2
+  elseif cmd=='%'   then return v1%v2
   elseif cmd=='~'   then return v1-v2
   elseif cmd=='not' then return not v1
   elseif cmd=='or'  then return v1 or v2

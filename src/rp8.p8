@@ -10,7 +10,8 @@ function make_draw_menu_item(items,y)
  return function(i)
   local item=items[i]
   local s=item.txt
-  print(s,0,y+12*i,trn(menu_pos==i,item.ac,item.dc))
+  if (item.val) s=s..': '..item.val
+  print(s,0,y+12*i,trn(menu_pos==i,item.ac or 7,item.dc or 6))
  end
 end
 
@@ -205,21 +206,26 @@ eval--[[language::loaf]][[
 (set draw_file (fn ()
  (draw_menu "fILE mANAGEMENT" 22 
   (' (
-   {txt="gO bACK" ac=7 dc=6 act=`(fn () (set_display_mode ui))}
-   {txt="oPEN fOLDER" ac=7 dc=6 act=`(fn () (extcmd folder) (set_display_mode ui))}
-   {txt="sAVE sONG" ac=7 dc=6 act=`(fn () (copy_state) (set_display_mode ui))}
-   {txt="rENAME sONG" ac=7 dc=6 act=`(fn () (enter_rename))}
+   {txt="gO bACK" act=`(fn () (set_display_mode ui))}
+   {txt="oPEN fOLDER" act=`(fn () (extcmd folder) (set_display_mode ui))}
+   {txt="sAVE sONG" act=`(fn () (copy_state) (set_display_mode ui))}
+   {txt="rENAME sONG" act=`(fn () (enter_rename))}
    {txt="cLEAR sONG" ac=8 dc=2 act=`(fn () (set state (state_new)) (set_display_mode ui))}
   ))
  )
 ))
 
+(set densities (' (0.25 0.5 0.75 1.0)))
+(set rnd_density 3)
+
+(set config_menu_opts
+ (' (
+  {txt="gO bACK" act=`(fn () (set_display_mode ui))}
+  {txt="rANDOM dENSITY" val=0.75 act=`(fn () (set rnd_density (+ (% $rnd_density 4) 1)) (@= (@ $config_menu_opts 2) val (@ $densities $rnd_density)))}
+ ))
+)
 (set draw_config (fn ()
- (draw_menu "cONFIG" 22
-  (' (
-   {txt="gO bACK" ac=7 dc=6 act=`(fn () (set_display_mode ui))}
-  ))
- )
+ (draw_menu "cONFIG" 22 $config_menu_opts)
 ))
 
 (set t_audio 0)
@@ -236,7 +242,6 @@ end
 function _init()
  eval--[[language::loaf]][[
 (cls)
-(set scale_type chromatic)
 (set ui (ui_new))
 (set set_toast (fn (text frames)
  (@= $ui toast $text)
@@ -255,9 +260,6 @@ function _init()
 (set_toast "press h for help" 180)
 (pal 10 135 1)
 (set tanh (pack))
-(set tanh_scale 538.94737)
-(set tanh_scale_half (* $tanh_scale 0.5))
-(set tanh_scale_synth (* $tanh_scale 0.16666))
 
 (poke 24365 1)
 (poke 24412 5)
@@ -275,7 +277,7 @@ function _init()
  poke(0x5f36,@0x5f36^^0x20)
 
  for i=0,4096 do
-  local x=(i-2048)/tanh_scale_half
+  local x=(i-2048)/269.47369
   local e=2.71828^x
   tanh[i]=6*(e-1)/(e+1)
  end
