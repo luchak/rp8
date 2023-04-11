@@ -5,11 +5,6 @@
 
 -- see note 003
 eval--[[language::loaf]][[
-(set n_off 64)
-(set n_on 65)
-(set n_ac 66)
-(set n_sl 67)
-(set n_ac_sl 68)
 (set default_patch (' (64 0 64 3 64 128 64 0 0 1 1 1 64 64 64 0 64 64 64 64 64 64 64 0 0 1 1 1 64 64 64 0 64 64 64 64 64 64 64 0 0 1 1 64 127 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 64 1 0 128 64 0 0 64 0)))
 (set syn_base_idx (' {b0=7,b1=23,dr=39,bd=46,sd=49,hh=52,cy=55,pc=58,fm=61}))
 (set pat_param_idx (' {b0=11,b1=27,dr=43}))
@@ -30,7 +25,7 @@ eval--[[language::loaf]][[
 ]]
 
 function get_ac_mode(note)
- return note==n_ac or note==n_ac_sl,note>=n_sl
+ return note==66 or note==68,note>=67
 end
 
 function state_new(savedata)
