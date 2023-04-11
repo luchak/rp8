@@ -444,7 +444,7 @@ eval--[[language::loaf]][[
 ))
 (add_ui (merge (push_new 40 $yp 238
  (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
- "rotate (drag)"
+ "rotate"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
 (add_ui (push_new 40 (+ $yp 8) "?,6,5,2"
  (fn (state b)
@@ -458,11 +458,11 @@ eval--[[language::loaf]][[
 ))
 (add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
- "transpose (drag)"
+ "transpose"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 1)
 (add_ui (merge (push_new 32 $yp 26
  (fn (state b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
- "transpose (drag)"
+ "transpose"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui
  (push_new 8 $yp 28

@@ -211,19 +211,17 @@ function snare_new()
 
  function obj:subupdate(b,first,last)
   local op,dp,dp1,f1,hpmix=_op,_dp,_dp1*_detune,_f1,_hpmix
-  local aes,aen,aesd,aend=_aes,_aen,_aesd,_aend
-  local aemax,lfsr=_aemax,_lfsr
+  local aes,aen,aesd,aend,aemax=_aes,_aen,_aesd,_aend,_aemax
   for i=first,last do
    op+=dp
    dp+=(dp1-dp)>>5
    aes*=aesd
    aen*=aend
-   lfsr^^=lfsr*0x70.00f
-   local v=(aemax<aes and aemax or aes)*sin(op)+aen*((lfsr&0x0.ffff)-0.5)
+   local v=(aemax<aes and aemax or aes)*sin(op)+aen*(rnd()-0.5)
    f1+=(v-f1)>>1
    b[i]+=v-(f1>>hpmix)
   end
-  _dp,_op,_aes,_aen,_f1,_lfsr=dp,op,aes,aen,f1,lfsr
+  _dp,_op,_aes,_aen,_f1=dp,op,aes,aen,f1
  end
 
  return obj
