@@ -109,7 +109,7 @@ function ui_new()
   add(obj.restores,{screen,scratch,448},1)
  end
 
- function obj:draw(state)
+ function obj:draw()
   state:update_ui_vars()
   -- restore screen from mouse
   local mx,my=self.mx,self.my
@@ -124,7 +124,7 @@ function ui_new()
 
   -- draw changed widgets
   for id,w in pairs(self.visible) do
-   local ns=w:get_sprite(state)
+   local ns=w:get_sprite()
    if ns!=self.sprites[id] or w==f or w==self.last_focus then
     self.sprites[id]=ns
     local sp=self.sprites[id]
@@ -177,7 +177,7 @@ function ui_new()
 
  end
 
- function obj:update(state)
+ function obj:update()
   state:update_ui_vars()
   if (display_mode!='ui') return
   local input,nav=0
@@ -191,7 +191,7 @@ function ui_new()
   if (hotkey_action) hotkey_action()
   -- if this is positioned differently it causes a bug with focus on page switch
   local focus=self.focus
-  if (focus and focus.on_num and is_digit(hotkey)) focus.on_num(state,tonum(hotkey))
+  if (focus and focus.on_num and is_digit(hotkey)) focus.on_num(tonum(hotkey))
   local new_focus=trn(focus and focus.active,focus,nil)
 
   local step=(shift and focus and focus.bigstep) or 1
@@ -222,7 +222,7 @@ function ui_new()
      if new_focus.click_act then
       input=click==1 and 1 or -1
      end
-     if (self.click_t>0 and new_focus.doubleclick) new_focus.doubleclick(state)
+     if (self.click_t>0 and new_focus.doubleclick) new_focus.doubleclick()
     end
     self.click_t=12
    end
@@ -234,7 +234,7 @@ function ui_new()
 
   if new_focus then
    input+=new_focus.drag_amt>0 and stat(36) or 0
-   if (input!=0) new_focus:input(state,input)
+   if (input!=0) new_focus:input(input)
   end
   if (self.hover==hover and click==0) self.hover_t+=1 else self.hover_t=0
 
@@ -247,10 +247,10 @@ end
 function note_btn_new(grp,x,y,syn,key,step,sp0,nt0,nmin,nmax)
  return merge(parse--[[language::loon]][[{drag_amt=0.05 tt=note bigstep=12}]], {
   grp=grp,step=step,x=x,y=y,
-  get_sprite=function(self,state)
+  get_sprite=function(self)
    return sp0-nt0+state.ui_pats[syn][key][step]
   end,
-  input=function(self,state,b)
+  input=function(self,b)
    local n=state.ui_pats[syn][key]
    n[step]=mid(nmin,nmax,n[step]+b)
   end
@@ -261,18 +261,18 @@ function spin_btn_new(x,y,sprites,tt,get,set)
  local n=#sprites
  return {
   x=x,y=y,tt=tt,drag_amt=0.01,
-  get_sprite=function(self,state)
-   local val=get(state)
+  get_sprite=function(self)
+   local val=get()
    return sprites[val>0 and val or n]
   end,
-  input=function(self,state,b)
-   local sval=get(state)+b
+  input=function(self,b)
+   local sval=get()+b
    if self.wrap then
     if sval>n then sval-=n end
    else
     sval=mid(1,sval,n)
    end
-   set(state,sval)
+   set(sval)
   end
  }
 end
@@ -282,16 +282,16 @@ function step_btn_new(grp,x,y,syn,step,sprites)
  local n=#sprites-1
  return {
   grp=grp,step=step,x=x,y=y,tt='step '..step,click_act=true,
-  get_sprite=function(self,state)
+  get_sprite=function(self)
    if (state.playing and state.ui_pticks[syn]==step) return sprites[n+1]
    local v=state.ui_pats[syn].st[step]
    return sprites[v-63]
   end,
-  input=function(self,state,b)
+  input=function(self,b)
    local st=state.ui_pats[syn].st
    st[step]=(st[step]+b-64)%n+64
   end,
-  on_num=function(state,num)
+  on_num=function(num)
    local st=state.ui_pats[syn].st
    st[step]=(num-65)%n+64
   end
@@ -303,18 +303,18 @@ function dial_new(x,y,s0,bins,param_idx,tt)
  bins-=0x0.0001
  return {
   x=x,y=y,tt=tt,drag_amt=0.33,bigstep=16,param=param_idx,
-  get_sprite=function(self,state)
-   return s0+(get(state)>>7)*bins
+  get_sprite=function(self)
+   return s0+(get()>>7)*bins
   end,
-  input=function(self,state,b)
-   local val=mid(128,get(state)+b)
+  input=function(self,b)
+   local val=mid(128,get()+b)
    local s=tostr(val)
    while (#s<3) s=' '..s
    set_ftoast(self,s)
-   set(state,val)
+   set(val)
   end,
-  doubleclick=function(state)
-   set(state,default_patch[param_idx])
+  doubleclick=function()
+   set(default_patch[param_idx])
   end
  }
 end
@@ -322,11 +322,11 @@ end
 function toggle_new(x,y,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
-  get_sprite=function(self,state)
-   return get(state) and s_on or s_off
+  get_sprite=function(self)
+   return get() and s_on or s_off
   end,
-  input=function(self,state)
-   set(state,not get(state))
+  input=function(self)
+   set(not get())
   end
  }
 end
@@ -334,11 +334,11 @@ end
 function multitoggle_new(x,y,states,tt,get,set)
  return {
   x=x,y=y,click_act=true,tt=tt,
-  get_sprite=function(self,state)
-   return states[get(state)+1]
+  get_sprite=function(self)
+   return states[get()+1]
   end,
-  input=function(self,state,b)
-   set(state,(get(state)+b+#states)%#states)
+  input=function(self,b)
+   set((get()+b+#states)%#states)
   end
  }
 end
@@ -349,8 +349,8 @@ function push_new(x,y,s,cb,tt)
   get_sprite=function()
    return s
   end,
-  input=function(self,state,b)
-   cb(state,b)
+  input=function(self,b)
+   cb(b)
   end
  }
 end
@@ -358,11 +358,11 @@ end
 function radio_btn_new(x,y,val,s_off,s_on,tt,get,set)
  return {
   x=x,y=y,tt=tt,click_act=true,
-  get_sprite=function(self,state)
-   return get(state)==val and s_on or s_off
+  get_sprite=function(self)
+   return get()==val and s_on or s_off
   end,
-  input=function(self,state)
-   set(state,val)
+  input=function(self)
+   set(val)
   end
  }
 end
@@ -373,18 +373,18 @@ function pat_btn_new(x,y,syn,bank_size,pib,c_off,c_on,c_next,c_bg)
  local ret_prefix=pib..','..c_bg..','
  return {
   x=x,y=y,tt='pattern select',w=1,click_act=true,
-  get_sprite=function(self,state)
-   local bank,pending=get_bank(state),get_pat(state)
+  get_sprite=function(self)
+   local bank,pending=get_bank(),get_pat()
    local pat=state.pat_status[syn].idx
    local val=bank*bank_size-bank_size+pib
    local col=trn(pat==val,c_on,c_off)
    if (pending==val and pending!=pat) col=c_next
    return ret_prefix..col
   end,
-  input=function(self,state)
-   local bank=get_bank(state)
+  input=function(self)
+   local bank=get_bank()
    local val=bank*bank_size-bank_size+pib
-   set_pat(state,val)
+   set_pat(val)
   end
  }
 end
@@ -392,19 +392,19 @@ end
 function number_new(x,y,w,tt,get,input)
  return {
   x=x,y=y,w=w,drag_amt=0.05,tt=tt,
-  get_sprite=function(self,state)
-   return tostr(get(state))..',0,15'
+  get_sprite=function(self)
+   return tostr(get())..',0,15'
   end,
-  input=function(self,state,b) input(state,b) end
+  input=function(self,b) input(b) end
  }
 end
 
 function wrap_override(w,s_override,get_not_override,override_active)
  local get_sprite=w.get_sprite
- w.get_sprite=function(self,state)
-  if get_not_override(state) then
+ w.get_sprite=function(self)
+  if get_not_override() then
    self.active=true
-   return get_sprite(self,state)
+   return get_sprite(self)
   else
    self.active=override_active
    return s_override
@@ -413,8 +413,8 @@ function wrap_override(w,s_override,get_not_override,override_active)
  return w
 end
 
-function no_uncommitted(s) return (not s.tl.has_override) or s.tl.rec end
-function has_uncommitted(s) return not no_uncommitted(s) end
+function no_uncommitted() return (not state.tl.has_override) or state.tl.rec end
+function has_uncommitted() return not no_uncommitted() end
 
 eval--[[language::loaf]][[
 (set set_page (fn (_ p) ((@ $ui set_page) $ui $p)))
@@ -441,7 +441,7 @@ eval--[[language::loaf]][[
  (' {w=2 drag_amt=0.03 bigstep=4})
 ))
 (add_ui (merge (push_new 40 $yp 238
- (fn (state b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
+ (fn (b) (rotate_pat (@ $state pat_seqs $key) (' (st nt dt)) $b))
  "rotate"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
 (set randomize_pattern (fn (pat)
@@ -461,28 +461,28 @@ eval--[[language::loaf]][[
  ))
 ))
 (add_ui (push_new 40 (+ $yp 8) "?,6,5,2"
- (fn (state b)
+ (fn (b)
   (randomize_pattern (@ $state pat_seqs $key))
  )
  "randomize"
 ))
 (add_ui (merge (push_new 32 $yp 26
- (fn (state b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
+ (fn (b) (transpose_pat (@ $state pat_seqs $key) nt $b 0 36))
  "transpose"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 1)
 (add_ui (merge (push_new 32 $yp 26
- (fn (state b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
+ (fn (b) (transpose_pat (@ $state pat_seqs $key) dt $b 52 76))
  "transpose"
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui
  (push_new 8 $yp 28
-  (fn (state) (set copy_buf_syn (copy (@ $state pat_seqs $key))) (set_toast "synth pattern copied"))
+  (fn () (set copy_buf_syn (copy (@ $state pat_seqs $key))) (set_toast "synth pattern copied"))
   "copy pattern"
  )
 )
 (add_ui
  (push_new 16 $yp 27
-  (fn (state) (if $copy_buf_syn (seq (merge (@ $state pat_seqs $key) $copy_buf_syn) (set_toast "synth pattern pasted"))))
+  (fn () (if $copy_buf_syn (seq (merge (@ $state pat_seqs $key) $copy_buf_syn) (set_toast "synth pattern pasted"))))
   "paste pattern"
  )
 )
@@ -531,11 +531,11 @@ eval--[[language::loaf]][[
 ))
 (add_ui (merge (push_new 8 96 192 (fn ()) "") (' {active=false})) 1)
 (add_ui (merge (push_new 16 96 239
- (fn (state b) (rotate_pat (@ $state ui_pats dr) (' (st dt)) $b))
+ (fn (b) (rotate_pat (@ $state ui_pats dr) (' (st dt)) $b))
  "rotate pattern"
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
 (add_ui (merge (push_new 8 96 111
- (fn (state b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
+ (fn (b) (transpose_pat (@ $state ui_pats dr) dt $b 52 76))
  transpose
 ) (' {click_act=false drag_amt=0.05 bigstep=12})) 2)
 (add_ui (merge
@@ -568,13 +568,13 @@ eval--[[language::loaf]][[
  )))
 )
 (add_ui (push_new
- 8 104 11 (fn (state) (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
+ 8 104 11 (fn () (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
 ))
 (add_ui (push_new
- 16 104 10 (fn (state) (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
+ 16 104 10 (fn () (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
 ))
 (add_ui (push_new 24 104 "?,5,6,2"
- (fn (state b)
+ (fn (b)
   (randomize_pattern (@ $state ui_pats dr))
  )
  "randomize"

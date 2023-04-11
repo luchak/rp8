@@ -302,8 +302,8 @@ function state_make_get_set_param(idx,lsb,size)
  size=size or 8
  local mask=(1<<(lsb+size))-(1<<lsb)
  return
-  function(state) return (state.patch[idx]&mask)>>lsb end,
-  function(state,val)
+  function() return (state.patch[idx]&mask)>>lsb end,
+  function(val)
    state._apply_diff(idx,((val<<lsb)&mask) | (state.patch[idx]&(~mask)))
   end
 end
@@ -311,27 +311,27 @@ end
 function state_make_get_set_param_bool(idx,bit)
  local get,set=state_make_get_set_param(idx,bit or 0,1)
  return
-  function(state) return get(state)>0 end,
-  function(state,val) set(state, val and 1 or 0) end
+  function() return get()>0 end,
+  function(val) set(val and 1 or 0) end
 end
 
 function state_make_get_set(a,b)
  if b then return
-  function(s) return s[a][b] end,
-  function(s,v) s[a][b]=v end
+  function() return state[a][b] end,
+  function(v) state[a][b]=v end
  else return
-  function(s) return s[a] end,
-  function(s,v) s[a]=v end
+  function() return state[a] end,
+  function(v) state[a]=v end
  end
 end
 
 function state_make_get_set_pat_len(syn)
  return
-  function(s) return s.ui_pats[syn].l or 16 end,
-  function(s,l) s.ui_pats[syn].l=l end
+  function() return state.ui_pats[syn].l or 16 end,
+  function(l) state.ui_pats[syn].l=l end
 end
 
-state_is_song_mode=function(state) return state.song_mode end
+state_is_song_mode=function() return state.song_mode end
 
 --taf=0.75
 
