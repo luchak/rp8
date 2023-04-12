@@ -47,3 +47,8 @@
 *.dc
 *.act
 *.val
+eq
+gt
+seq
+cat
+len

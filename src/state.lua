@@ -49,17 +49,17 @@ function state_new(savedata)
   pat_patch=`(copy $default_patch),
  }]]
 
- eval--[[language::loaf]][[(fn (s dat)
+ eval--[[language::loaf]][[(fn (st dat)
  (if $dat ((fn ()
-  (@= $s name (or (@ $dat name) (@ $s name)))
-  (@= $s tl (timeline_new $default_patch (@ $dat tl)))
-  (@= $s pat_patch (dec_bytes (@ $dat pat_patch)))
-  (@= $s song_mode (@ $dat song_mode))
-  (@= (@ $s pat_store) b0 (map_table (@ $dat pat_store b0) $dec_bytes 1))
-  (@= (@ $s pat_store) b1 (map_table (@ $dat pat_store b1) $dec_bytes 1))
-  (@= (@ $s pat_store) dr (map_table (@ $dat pat_store dr) $dec_bytes 2))
+  (@= $st name (or (@ $dat name) (@ $st name)))
+  (@= $st tl (timeline_new $default_patch (@ $dat tl)))
+  (@= $st pat_patch (dec_bytes (@ $dat pat_patch)))
+  (@= $st song_mode (@ $dat song_mode))
+  (@= (@ $st pat_store) b0 (map_table (@ $dat pat_store b0) $dec_bytes 1))
+  (@= (@ $st pat_store) b1 (map_table (@ $dat pat_store b1) $dec_bytes 1))
+  (@= (@ $st pat_store) dr (map_table (@ $dat pat_store dr) $dec_bytes 2))
  )))
- (set_song_name (@ $s name))
+ (set_song_name (@ $st name))
  )]](s,savedata)
 
  local function _init_tick()
@@ -99,14 +99,14 @@ function state_new(savedata)
  end
 
 
- function s:load_bar(i)
-  local tl=self.tl
-  if self.song_mode then
-   tl:load_bar(self.patch,i)
-   self.tick,self.bar=tl.tick,tl.bar
+ load_bar=function(i)
+  local tl=s.tl
+  if s.song_mode then
+   tl:load_bar(s.patch,i)
+   s.tick,s.bar=tl.tick,tl.bar
   else
-   self.patch=copy(self.pat_patch)
-   self.tick,self.bar=1,1
+   s.patch=copy(s.pat_patch)
+   s.tick,s.bar=1,1
   end
   _sync_pats()
   _init_tick()
@@ -158,11 +158,10 @@ function state_new(savedata)
   })
  end
 
- s:load_bar()
+ load_bar()
  return s
 end
 
-function load_bar(i) state:load_bar(i) end
 eval--[[language::loaf]][[
 (set toggle_loop
  (fn () (@= (@ $state tl) loop (not (@ $state tl loop))))

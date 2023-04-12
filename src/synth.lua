@@ -115,7 +115,7 @@ function synth_new(base)
   _gate=false
   _detune=2^(flr(24*tun-11.5)/12)
   _o2detune=_detune*2^((flr(pat.dt[step]-64)+o2fine-0.5)/12)
-  if (patstep==n_off or not state.playing) return
+  if (patstep==64 or not state.playing) return
 
   _gate=true
   -- constant is 55*65536/(5512.5 * 4)
@@ -148,7 +148,7 @@ function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  if s!=n_off then
+  if s!=64 then
    local ac
    ac,_tri=get_ac_mode(s)
    -- TODO: update params every step?
@@ -187,7 +187,7 @@ function snare_new()
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,49,51)
-  if s!=n_off then
+  if s!=64 then
    _detune=2^((12*tun-6+(pat.dt[step]-64))/12)
    _op,_dp=0,_dp0*_detune
    if state.playing then
@@ -235,7 +235,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
   local ac,mode=get_ac_mode(s)
-  if s!=n_off and state.playing then
+  if s!=64 and state.playing then
    _ae=lev*lev*trn(ac,9,3.6)
    _dec_mod=mode and 0.5 or 0
   end
@@ -276,7 +276,7 @@ function fm_new(base)
  function obj:note(pat,patch,step)
   local s=pat.st[step]
   local tun,dec,lev=unpack_patch(patch,base,base+2)
-  if s!=n_off and state.playing then
+  if s!=64 and state.playing then
    local ac
    ac,_mode=get_ac_mode(s)
    _cdet=2^((pat.dt[step]-64)/12)*0.07111

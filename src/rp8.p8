@@ -53,7 +53,7 @@ eval--[[language::loaf]][[
   (let bar (@ $state bar))
   (set state (or (state_load $pd) $state))
   (set_toast "loaded from clipboard")
-  ((@ $state go_to_bar) $state $bar)
+  (go_to_bar $bar)
   (if $playing (toggle_playing))
  ))
 ))
@@ -149,7 +149,7 @@ eval--[[language::loaf]][[
 ))
 
 (set set_song_name (fn (name)
- (if (id $state) (@= $state name $name))
+ (if $state (@= $state name $name))
  (extcmd set_title (cat "RP-8 - " $name))
 ))
 

@@ -563,9 +563,11 @@ eval--[[language::loaf]][[
 )
 (foreach
  (' ({x=32,b=0,tt="bd/sd "} {x=64,b=2,tt="hh/cy "} {x=96,b=4,tt="pc/fm "}))
- (fn (c) (add_ui (multitoggle_new
+ (fn (c)
+ (add_ui (multitoggle_new
   (@ $c x) 96 (' (101 102 103 104)) (cat (@ $c tt) "fx bypass") (state_make_get_set_param 45 (@ $c b) 2)
- )))
+ ))
+ )
 )
 (add_ui (push_new
  8 104 11 (fn () (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
