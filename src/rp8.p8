@@ -51,7 +51,7 @@ eval--[[language::loaf]][[
  (if (not (eq $pd "")) (seq
   (let playing (@ $state playing))
   (let bar (@ $state bar))
-  (set state (or (state_load $pd) $state))
+  (state_load $pd)
   (set_toast "loaded from clipboard")
   (go_to_bar $bar)
   (if $playing (toggle_playing))
@@ -210,7 +210,7 @@ eval--[[language::loaf]][[
    {txt="oPEN fOLDER" act=`(fn () (extcmd folder) (set_display_mode ui))}
    {txt="sAVE sONG" act=`(fn () (copy_state) (set_display_mode ui))}
    {txt="rENAME sONG" act=`(fn () (enter_rename))}
-   {txt="cLEAR sONG" ac=8 dc=2 act=`(fn () (set state (state_new)) (set_display_mode ui))}
+   {txt="cLEAR sONG" ac=8 dc=2 act=`(fn () (state_new) (set_display_mode ui))}
   ))
  )
 ))
@@ -258,7 +258,7 @@ function _init()
  (@= $ui toast $text)
  (@= $ui toast_t (or $frames 40))
 ))
-(set state (state_new))
+(state_new)
 (set add_ui (fn (w page) ((@ $ui add_widget) $ui $w $page)))
 (header_ui_init $add_ui)
 (syn_ui_init $add_ui b0 7 32)
@@ -358,10 +358,8 @@ function _update60()
    local n=serial(0x800,0x5100,0x800)
    s..=chr(peek(0x5100,n))
   end
-  local st=state_load(s)
-  if st then
+  if state_load(s) then
    printh(s,'@clip')
-   state=st
    set_toast"song loaded from file"
   else
    set_toast"could not load song"

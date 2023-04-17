@@ -28,6 +28,56 @@ function get_ac_mode(note)
  return note==66 or note==68,note>=67
 end
 
+function _init_tick()
+ local nl=5512.5*(15/(60+state.patch[1]))
+ local shuf_diff=nl*(state.patch[2]>>7)*(0.5-(state.tick&1))
+ state.note_len,state.base_note_len=flr(0.5+nl+shuf_diff),nl
+ local gtick=state.tick+state.bar*16-17
+ state.ptick.b0=gtick%(state.pat_seqs.b0.l or 16)+1
+ state.ptick.b1=gtick%(state.pat_seqs.b1.l or 16)+1
+ for k,p in pairs(state.pat_seqs.dr) do
+  state.ptick[k]=gtick%(p.l or 16)+1
+ end
+end
+
+function _sync_pats()
+ local ps,patch=state.pat_store,state.patch
+ for syn,param_idx in pairs(pat_param_idx) do
+  local syn_pats=ps[syn]
+  if not syn_pats then
+   syn_pats={}
+   state.pat_store[syn]=syn_pats
+  end
+  local pat_idx=patch[param_idx]
+  local pat=syn_pats[pat_idx]
+  if not pat then
+   pat=(syn=='b0' or syn=='b1') and copy(syn_pat_template) or copy(drum_pat_template)
+   syn_pats[pat_idx]=pat
+  end
+  state.pat_seqs[syn]=pat
+ end
+ for group,idx in pairs(pat_param_idx) do
+  state.pat_status[group]={
+   on=patch[idx-1]>0,
+   idx=patch[idx],
+  }
+ end
+end
+
+load_bar=function(i)
+ local tl=state.tl
+ if state.song_mode then
+  tl:load_bar(state.patch,i)
+  state.tick,state.bar=tl.tick,tl.bar
+ else
+  state.patch=copy(state.pat_patch)
+  state.tick,state.bar=1,1
+ end
+ _sync_pats()
+ _init_tick()
+end
+
+
 function state_new(savedata)
  local s=parse--[[language::loon]][[{
   name="new song",
@@ -61,56 +111,6 @@ function state_new(savedata)
  )))
  (set_song_name (@ $st name))
  )]](s,savedata)
-
- local function _init_tick()
-  local nl=5512.5*(15/(60+s.patch[1]))
-  local shuf_diff=nl*(s.patch[2]>>7)*(0.5-(s.tick&1))
-  s.note_len,s.base_note_len=flr(0.5+nl+shuf_diff),nl
-  local gtick=s.tick+s.bar*16-17
-  s.ptick.b0=gtick%(s.pat_seqs.b0.l or 16)+1
-  s.ptick.b1=gtick%(s.pat_seqs.b1.l or 16)+1
-  for k,p in pairs(s.pat_seqs.dr) do
-   s.ptick[k]=gtick%(p.l or 16)+1
-  end
- end
-
- local function _sync_pats()
-  local ps,patch=s.pat_store,s.patch
-  for syn,param_idx in pairs(pat_param_idx) do
-   local syn_pats=ps[syn]
-   if not syn_pats then
-    syn_pats={}
-    s.pat_store[syn]=syn_pats
-   end
-   local pat_idx=patch[param_idx]
-   local pat=syn_pats[pat_idx]
-   if not pat then
-    pat=(syn=='b0' or syn=='b1') and copy(syn_pat_template) or copy(drum_pat_template)
-    syn_pats[pat_idx]=pat
-   end
-   s.pat_seqs[syn]=pat
-  end
-  for group,idx in pairs(pat_param_idx) do
-   s.pat_status[group]={
-    on=patch[idx-1]>0,
-    idx=patch[idx],
-   }
-  end
- end
-
-
- load_bar=function(i)
-  local tl=s.tl
-  if s.song_mode then
-   tl:load_bar(s.patch,i)
-   s.tick,s.bar=tl.tick,tl.bar
-  else
-   s.patch=copy(s.pat_patch)
-   s.tick,s.bar=1,1
-  end
-  _sync_pats()
-  _init_tick()
- end
 
  s._apply_diff=function(k,v)
   s.patch[k]=v
@@ -158,8 +158,8 @@ function state_new(savedata)
   })
  end
 
+ state=s
  load_bar()
- return s
 end
 
 eval--[[language::loaf]][[
@@ -259,7 +259,7 @@ eval--[[language::loaf]][[
  )
 )
 (set state_load (fn (st)
- (if (eq (sub $st 1 4) rp80) (state_new (parse (sub $st 5))))
+ (if (eq (sub $st 1 4) rp80) (seq (state_new (parse (sub $st 5))) true) false)
 ))
 ]]
 
@@ -332,7 +332,7 @@ state_is_song_mode=function() return state.song_mode end
 
 -- splits blocks for sample-accurate note triggering
 function seq_helper_new(root,note_fn)
- local _t,_cost=state.note_len,3
+ local _t,_cost=0x7fff,3
  return {
   root=root,
   reset=function() _t=state.note_len note_fn() end,

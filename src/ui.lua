@@ -596,7 +596,7 @@ eval--[[language::loaf]][[
 (set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
 (set rewind_t 0)
 (set rewind (fn ()
- ((@ $state go_to_bar) $state
+ (go_to_bar
   (let r0 $rewind_t)
   (set rewind_t (time))
   (if (gt (~ $rewind_t $r0) 0.2) (@ $state tl loop_start) 1)
@@ -697,7 +697,7 @@ eval--[[language::loaf]][[
 ))
 
 (add_ui (merge (transport_number_new 40 0 4 tl bar "song position" (fn (b)
- ((@ $state go_to_bar) $state (+ (@ $state tl bar) $b))
+ (go_to_bar (+ (@ $state tl bar) $b))
 )) (' {bigstep=4})))
 
 (song_only (toggle_new 56 0 193 194 "loop on/off" (state_make_get_set tl loop)) 195)
@@ -721,7 +721,7 @@ eval--[[language::loaf]][[
 )
 
 (@= $loop_len_ctrl on_num
- (fn (s num) (set_loop_len (@ $s tl) (<< 1 $num)))
+ (fn (num) (set_loop_len (@ $state tl) (<< 1 $num)))
 )
 
 (@= $loop_len_ctrl bigstep 4)
@@ -745,8 +745,8 @@ eval--[[language::loaf]][[
  8=`(id $rewind)
  9=`(id $next_page)
  32=`(id $toggle_playing)
- 44=`(fn () ((@ $state go_to_bar) $state (~ (@ $state tl bar) 1)))
- 46=`(fn () ((@ $state go_to_bar) $state (+ (@ $state tl bar) 1)))
+ 44=`(fn () (go_to_bar (~ (@ $state tl bar) 1)))
+ 46=`(fn () (go_to_bar (+ (@ $state tl bar) 1)))
  91=`(fn () (if (@ $ui focus) (paste_ctrl (@ $ui focus param))))
  93=`(fn () (paste_seq true))
  96=`(id $enter_config)
