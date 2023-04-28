@@ -45,7 +45,6 @@ function ui_new()
   my=0
   hover_t=0
   help_on=false
-  overlays={}
   page=1
   pages=({} {})
   visible={}
@@ -625,7 +624,7 @@ eval--[[language::loaf]][[
 (add_ui (push_new 96 0 191 $enter_file "file menu"))
 (add_ui (push_new 0 8 201 $copy_seq "copy loop"))
 (song_only (push_new 8 8 199 $cut_seq "cut loop") 198)
-(add_ui (push_new 0 16 197 $paste_seq "fill loop"))
+(add_ui (push_new 0 16 197 (fn () (paste_seq false)) "fill loop"))
 (song_only (push_new 8 16 203 $insert_seq "insert loop") 202)
 
 (add_ui (wrap_override
