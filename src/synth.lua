@@ -72,19 +72,19 @@ function synth_new(base)
 
     for _=1,4 do
      local osc=aa_osc-fosc
-     fosc+=osc>>5
+     fosc=fosc+(osc>>5)
      local ffb_diff=f4-ffb
-     ffb+=ffb_diff>>3
-     osc-=fr*(ffb_diff-osc)
+     ffb=ffb+(ffb_diff>>3)
+     osc=osc-fr*(ffb_diff-osc)
      local m=osc>>31
      osc=osc^^m>22.8 and 6^^m or tanh[(osc*89.82456+2048.5)&-1]
 
-     f1+=fc1*(osc-f1)
-     f2+=fc*(f1-f2)
-     f3+=fc*(f2-f3)
-     f4+=fc*(f3-f4)
+     f1=f1+fc1*(osc-f1)
+     f2=f2+fc*(f1-f2)
+     f3=f3+fc*(f2-f3)
+     f4=f4+fc*(f3-f4)
 
-     out+=f4
+     out=out+f4
     end
     b[i]=out*ae*(1+acc*me)*res_comp
    end
