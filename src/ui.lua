@@ -52,6 +52,7 @@ function ui_new()
   toast_t=0
   click_t=0
   restores={}
+  rp=36864
   grps={}
  }]]
  -- focus
@@ -102,10 +103,11 @@ function ui_new()
   if (self.focus==w) self.focus=nil
  end
 
- local function save_band(scratch,screen)
+ local function save_band(screen)
   screen+=0x6000
-  memcpy(scratch,screen,448)
-  add(obj.restores,{screen,scratch,448},1)
+  memcpy(obj.rp,screen,448)
+  add(obj.restores,{screen,obj.rp,448},1)
+  obj.rp+=448
  end
 
  function obj:draw()
@@ -115,6 +117,7 @@ function ui_new()
   for r in all(self.restores) do
    memcpy(unpack(r))
   end
+  self.rp=36864
   self.restores={}
 
   palt(0,false)
@@ -150,7 +153,7 @@ function ui_new()
   end
 
   -- store rows behind toast and draw toast
-  save_band(0x9200,0xc0)
+  save_band(0xc0)
   if self.toast_t>0 then
    outline_text(self.toast,2,4,7,0)
    self.toast_t-=1
@@ -159,7 +162,7 @@ function ui_new()
   -- store rows behind mouse and draw mouse
   local tt_my=mid(my,121)
   local next_off,hover=tt_my<<6,self.hover
-  save_band(0x9000,next_off)
+  save_band(next_off)
   spr(15,mx,my)
   if tooltips_enabled() and self.hover_t>30 and hover and hover.active and hover.tt then
    local xp=mx<56 and mx+7 or mx-2-4*#hover.tt
@@ -168,7 +171,7 @@ function ui_new()
 
   -- store rows behind focus toast value and draw focus toast
   local focus_off=(f and f.y+9 or 0)<<6
-  save_band(0x9400,focus_off)
+  save_band(focus_off)
   if self.ftoast_w==f and self.ftoast_t>0 then
    outline_text(self.ftoast,mid(f.x-2,116),f.y+10,12,0)
    self.ftoast_t-=1
