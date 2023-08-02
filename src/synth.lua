@@ -14,7 +14,7 @@ function synth_new(base)
  local _mr,_ar,_gate,_saw,_ac,_sl,_lsl
 
  local function update(b,first,last)
-  local f1,f2,f3,f4,fosc,ffb,e1,e2,odp,fcbf,ae,me=0,0,0,0,0,0,0,0,0,0.1,0,0
+  local f1,f2,f3,f4,fosc,ffb,e1,e2,odp,fcbf,ae,me=0,0,0,0,0,0,0,0,0,.1,0,0
   local tanh=tanh
 
   repeat
@@ -143,7 +143,7 @@ end
 
 function sweep_new(base,_dp0,_dp1,ae_ratio,boost,te_min,te_max)
  local obj,_tri,_op,_dp,_ae,_aemax,_aed,_ted,_detune=
-  {},false,unpack_split'0,6553.6,0,0.6,0.995,0.05,1'
+  {},false,unpack_split'0,6553.6,0,.6,.995,.05,1'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -182,7 +182,7 @@ end
 
 function snare_new()
  local obj,_dp0,_dp1,_op,_dp,_aes,_aen,_detune,_aesd,_aend,_aemax,_f1,_hpmix=
-  {},unpack_split'0.07446,0.03273,0,.05,0,0,10,.99,.996,.4,0,0'
+  {},unpack_split'.07446,.03273,0,.05,0,0,10,.99,.996,.4,0,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]
@@ -229,7 +229,7 @@ end
 
 function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
  local obj,_ae,_f1,_f2,_op1,_odp1,_op2,_odp2,_op3,_odp3,_op4,_odp4,_aed,_detune,_dec_mod=
-  {},unpack_split'0,0,0,0,0.22278,0,0.25490,0,0.23804,0,0.24719,.995,1,0'
+  {},unpack_split'0,0,0,0,.22278,0,.25490,0,.23804,0,.24719,.995,1,0'
 
  function obj:note(pat,patch,step)
   local s=pat.st[step]

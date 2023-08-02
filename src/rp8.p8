@@ -312,7 +312,7 @@ function _init()
   svf,
   1.0
  )
- local comp=comp_new(mixer,unpack_split'0.5,4,0.05,0.002')
+ local comp=comp_new(mixer,unpack_split'.5,4,.05,.002')
 
  seq_helper=seq_helper_new(
   comp,function()
