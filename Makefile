@@ -4,7 +4,7 @@ all: build/rp8_min.p8.png build/rp8_debug.p8 build/player_min.p8.png build/playe
 
 build/rp8_min.p8.png: $(SRC) src/rp8.p8
 	mkdir -p build
-	python3 shrinko8/shrinko8.py --minify --count --preserve "$$(tr '\n' ',' < src/names.txt)" \
+	python3 shrinko8/shrinko8.py --minify --focus-compressed --count --preserve "$$(tr '\n' ',' < src/names.txt)" \
 		--script tools/rp8.py src/rp8.p8 $@
 
 build/rp8_debug.p8: $(SRC) src/rp8.p8
