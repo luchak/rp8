@@ -263,8 +263,7 @@ function hh_cy_new(base,_nlev,_tlev,dbase,dscale,tbase,tscale)
    op3+=odp3
    op4+=odp4
   end
-  _ae,_f1,_f2=ae,f1,f2
-  _op1,_op2,_op3,_op4,_lfsr=op1,op2,op3,op4,lfsr
+  _ae,_f1,_f2,_op1,_op2,_op3,_op4,_lfsr=ae,f1,f2,op1,op2,op3,op4,lfsr
  end
 
  return obj

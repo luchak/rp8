@@ -132,6 +132,15 @@ function timeline_new(default_patch, savedata)
   return c
  end
 
+ function timeline:copy_step(bar,step)
+  local b=self.bars[bar] or self.def_bar
+  local t0=dec_bytes(b.t0)
+  for i,ev in pairs(b.ev) do
+   t0[i]=dec_bytes(ev)[step]
+  end
+  return {{t0=enc_bytes(t0),ev={}}}
+ end
+
  function timeline:paste_seq(seq)
   local n=#seq
   for i=0,self.loop_len-1 do

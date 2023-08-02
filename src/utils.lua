@@ -219,7 +219,7 @@ function _eval_scope(ast,locals,start)
   elseif cmd=='not' then return not v1
   elseif cmd=='or'  then return v1 or v2
   elseif cmd=='and'  then return v1 and v2
-  elseif cmd=='@'   then if v3 then return v1[v2][v3] else return v1[v2] end
+  elseif cmd=='@'   then return v3 and v1[v2][v3] or v1[v2]
   elseif cmd=='@='  then v1[v2]=v3
   elseif cmd=='for' then for i=v1,v2 do v3(i) end
   elseif cmd=='set' then _ENV[v1]=v2

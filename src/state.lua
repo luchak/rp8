@@ -10,8 +10,8 @@ eval--[[language::loaf]][[
 (set pat_param_idx (' {b0=11,b1=27,dr=43}))
 (set syn_pat_template (' {
  nt=`(rep 16 19)
- dt=`(rep 16 64)
  st=`(rep 16 64)
+ dt=`(rep 16 64)
  l=16
 }))
 (set drum_pat_template (' {
@@ -203,6 +203,17 @@ eval--[[language::loaf]][[
     (@= $copy_bar ev (tab))
     (set copy_buf_seq (tab))
     (add $copy_buf_seq $copy_bar)
+   )
+  )
+ )
+)
+(set copy_loop_end
+ (fn ()
+  (if (@ $state song_mode)
+   (seq
+    (set_toast "loop end copied")
+    (let tl (@ $state tl))
+    (set copy_buf_seq ((@ $tl copy_step) $tl (~ (+ (@ $tl loop_start) (@ $tl loop_len)) 1) 16))
    )
   )
  )
