@@ -161,7 +161,7 @@ function state_new(savedata)
 end
 
 state_load=eval--[[language::loaf]][[(fn (s)
- (if (eq (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
+ (if (== (sub $s 1 4) rp80) (state_new (parse (sub $s 5))))
 )]]
 
 state_is_song_mode=function(state) return state.song_mode end

@@ -21,7 +21,7 @@ eval--[[language::loaf]][[
  (let s (tostr $s))
  (let r (pack ""))
  (for 1 (len $s) (fn (i)
-  (if (eq (@ $s $i) "1") (@= $r 1 (cat (@ $r 1) "|")) (@= $r 1 (cat (@ $r 1) (@ $s $i))))
+  (if (== (@ $s $i) "1") (@= $r 1 (cat (@ $r 1) "|")) (@= $r 1 (cat (@ $r 1) (@ $s $i))))
  ))
  (@ $r 1)
 ))
@@ -448,16 +448,16 @@ eval--[[language::loaf]][[
 ) (' {click_act=false drag_amt=0.05 bigstep=4})))
 (set randomize_pattern (fn (pat)
  (for 1 16 (fn (i)
-  (if (gt $change_step_prob (rnd)) (seq
+  (if (> $change_step_prob (rnd)) (seq
    (let v 64)
-   (if (gt $step_prob (rnd)) (seq
+   (if (> $step_prob (rnd)) (seq
     (let v 65)
-    (if (gt $yellow_prob (rnd)) (let v (+ $v 2)))
-    (if (gt $accent_prob (rnd)) (let v (+ $v 1)))
+    (if (> $yellow_prob (rnd)) (let v (+ $v 2)))
+    (if (> $accent_prob (rnd)) (let v (+ $v 1)))
    ))
    (@= (@ $pat st) $i $v)
   ))
-  (if (and (@ $pat nt) (gt $change_note_prob (rnd)))
+  (if (and (@ $pat nt) (> $change_note_prob (rnd)))
    (@= (@ $pat nt) $i (+ (rnd (@ $scale_notes $scale)) (* 12 (flr (rnd 3)))))
   )
  ))
@@ -601,7 +601,7 @@ eval--[[language::loaf]][[
  (go_to_bar
   (let r0 $rewind_t)
   (set rewind_t (time))
-  (if (gt (~ $rewind_t $r0) 0.2) (@ $state tl loop_start) 1)
+  (if (> (~ $rewind_t $r0) 0.2) (@ $state tl loop_start) 1)
  )
 ))
 
@@ -674,7 +674,7 @@ eval--[[language::loaf]][[
 (let dts (pack))
 (foreach (' ("" t d)) (fn (suffix)
  (for 1 16 (fn (dt)
-  (if (eq $suffix d) (let dt (~ $dt 1)))
+  (if (== $suffix d) (let dt (~ $dt 1)))
   (add $dts (cat (cat $dt $suffix) ",0,15"))
  ))
 ))

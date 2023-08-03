@@ -48,7 +48,7 @@ eval--[[language::loaf]][[
 (set paste_state (fn ()
  (audio_wait 2)
  (let pd (stat 4))
- (if (not (eq $pd "")) (seq
+ (if (not (== $pd "")) (seq
   (let playing (@ $state playing))
   (let bar (@ $state bar))
   (state_load $pd)
@@ -58,7 +58,7 @@ eval--[[language::loaf]][[
  ))
 ))
 (set tooltips_enabled (fn ()
- (eq (peek 24064) 0)
+ (== (peek 24064) 0)
 ))
 (set toggle_tooltips (fn ()
  (poke 24064 (~ 1 (peek 24064)))
@@ -82,11 +82,11 @@ eval--[[language::loaf]][[
 (set display_mode ui)
 
 (set set_display_mode (fn (new_mode)
- (if (eq $new_mode ui) (seq
+ (if (== $new_mode ui) (seq
   (memcpy 24576 40960 8192)
   (set display_mode ui)
  ) (seq
-  (if (eq $display_mode ui) (memcpy 40960 24576 8192))
+  (if (== $display_mode ui) (memcpy 40960 24576 8192))
   (set display_mode $new_mode)
  ))
 ))
@@ -143,7 +143,7 @@ eval--[[language::loaf]][[
  (if (stat 30) (seq
   (let k (stat 31))
   (let o (ord $k))
-  (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
+  (if (or (== $o 13) (== $k p)) (poke 24368 1))
   (set_display_mode ui)
  ))
 ))
@@ -166,12 +166,12 @@ eval--[[language::loaf]][[
  (if (stat 30) (seq
   (let k (stat 31))
   (let o (ord $k))
-  (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
-  (if (eq $o 13)
-   (seq (set_display_mode ui) (if (gt (len $new_song_name) 0) (set_song_name $new_song_name)))
-   (if (eq $o 8)
+  (if (or (== $o 13) (== $k p)) (poke 24368 1))
+  (if (== $o 13)
+   (seq (set_display_mode ui) (if (> (len $new_song_name) 0) (set_song_name $new_song_name)))
+   (if (== $o 8)
     (set new_song_name (sub $new_song_name 1 -2))
-    (if (not (or (eq $o 45) (or (gt $o 126) (gt 32 $o)))) (set new_song_name (sub (cat $new_song_name $k) 1 31)))
+    (if (not (or (== $o 45) (or (> $o 126) (> 32 $o)))) (set new_song_name (sub (cat $new_song_name $k) 1 31)))
    )
   )
  ))
@@ -194,8 +194,8 @@ eval--[[language::loaf]][[
  (if (stat 30) (seq
   (let k (stat 31))
   (let o (ord $k))
-  (if (or (eq $o 13) (eq $k p)) (poke 24368 1))
-  (if (eq $o 13)
+  (if (or (== $o 13) (== $k p)) (poke 24368 1))
+  (if (== $o 13)
    ((@ $items $menu_pos act))
    (set_display_mode ui)
   )

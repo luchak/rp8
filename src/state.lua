@@ -167,7 +167,7 @@ eval--[[language::loaf]][[
  (fn () (@= (@ $state tl) loop (not (@ $state tl loop))))
 )
 (set toggle_rec
- (fn () ((@ $state tl toggle_rec) (@ $state tl)))
+ (fn () (log a) ((@ $state tl toggle_rec) (@ $state tl)))
 )
 (set toggle_song_mode
  (fn ()
@@ -270,7 +270,7 @@ eval--[[language::loaf]][[
  )
 )
 (set state_load (fn (st)
- (if (eq (sub $st 1 4) rp80) (seq (state_new (parse (sub $st 5))) true) false)
+ (if (== (sub $st 1 4) rp80) (seq (state_new (parse (sub $st 5))) true) false)
 ))
 ]]
 
