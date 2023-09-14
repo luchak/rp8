@@ -391,7 +391,7 @@ clicking the question mark icon on the device whose pattern you want to randomiz
 parameters, accessed using the `` ` `` hotkey.
 
 <figure markdown>
-  ![The RP-8 pattern randomizer control screen](img/rp8_randomizer.2048.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  ![The RP-8 pattern randomizer control screen](img/rp8_randomizer.2048.png){style="display:block;width:50%;margin-left:auto;margin-right:auto"}
   <figcaption>The RP-8 pattern randomizer control screen</figcaption>
 </figure>
 
