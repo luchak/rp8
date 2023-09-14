@@ -190,8 +190,8 @@ drum machine, it is only available when viewing sequencer page 2, when the drum 
 interval controls, and it applies only to the selected drum track. `shift+up` and `shift+down` when this button is
 selected allows transposing by octaves.
 
-C. **Pattern rotate.** This function is only available on the drum machine. Dragging up/down on this control rotates
-the steps for the selected drum in the current pattern right/left on the step grid.
+C. **Pattern rotate.** Dragging up/down on this control rotates the steps for the current pattern right/left on the
+step grid. On the drum machine, it rotates the currently selected track only.
 
 D. **Device enable.** This button controls whether the device's sequencer is active. When inactive, the device will not
 play any new notes. If you change this value in the middle of a bar, it will take effect at the start of the next bar.
@@ -199,13 +199,17 @@ play any new notes. If you change this value in the middle of a bar, it will tak
 E. **Pattern copy.** This button copies the currently selected pattern. The two synths share a copy buffer, allowing
 you to copy patterns between the synths. The drum machine has a separate copy buffer.
 
-F. **Pattern paste.** This pastes the copied pattern into the currently selected pattern.
+F. **Pattern paste.** This pastes the copied pattern into the currently selected pattern. On the drum machine, left
+click will paste the entire pattern across all tracks, right click will paste the currently selected pattern only.
 
 G. **Pattern bank select.** Dragging up and down on this control lets you move through the 8 pattern banks. You can
 also press `b` to jump each device's bank selector to the bank containing the currently selected pattern.
 
 H. **Pattern select.** These buttons select which pattern is currently playing/active. Any selections made in the
 middle of a bar will take effect at the beginning of the next bar.
+
+I. **Randomize pattern.** This will randomize the currently selected pattern. On the drum machine, it randomizes the
+currently selected track only. See the [Pattern Randomizer] section for more information.
 
 ### Synths
 
@@ -380,6 +384,38 @@ results!
 Technical details: this compressor uses linear scaling (not logarithmic) with a hard knee, a fixed ratio of 4, and
 fixed attack and release times of approximately 2.5ms and 60ms, respectively.
 
+## Pattern Randomizer
+
+As a quick source of inspiration, RP-8 lets you quickly generate and alter your patterns. Use the randomizer by
+clicking the question mark icon on the device whose pattern you want to randomize. The randomizer has several different
+parameters, accessed using the `` ` `` hotkey.
+
+<figure markdown>
+  ![The RP-8 pattern randomizer control screen](img/rp8_randomizer.2048.png){style="display:block;width:100%;margin-left:auto;margin-right:auto"}
+  <figcaption>The RP-8 pattern randomizer control screen</figcaption>
+</figure>
+
+Navigate this screen with the up and down arrows, and use the enter key to toggle between the choices for each option.
+(More ergonomic controls may come in the future.) Select the "go back" option, or press any other key, to return to
+RP-8.
+
+The options work as follows:
+
+**P(change step):** The probability that each step in the pattern will have its type changed (e.g. from dark red to
+off, or dark yellow to bright yellow).
+
+**P(change note):** The probability that each note in the pattern will be changed. No effect for drums.
+
+**P(on):** If a step is changed, the probability that it will be on.
+
+**P(yellow):** If a step is changed and on, the probability that it will be yellow instead of red.
+
+**P(accent):** If a step is changed and on, the probability that it will be accented / bright instead of unaccented /
+dark.
+
+**notes:** If a note is changed, this controls which notes it can be changed to. Currently, the options are "white keys",
+"black keys", and "all". No effect for drums.
+
 ## Keyboard Controls
 
 You can press `h` at any time to get a list of these shortcuts in RP-8. If keyboard shortcuts appear to not be
@@ -397,7 +433,7 @@ key           | action
 `space`       | toggle play/pause
 `m`           | toggle song/pattern mode
 `e`           | stop/start exporting audio
-`b`           | change each bank control to the current pattern's bank
+`g`           | change each bank control to the current pattern's bank
 `f`           | open the file menu
 `up`          | increase selected control one step
 `down`        | decrease selected control one step
@@ -406,6 +442,7 @@ key           | action
 `left`        | go to previous pattern step
 `right`       | go to next pattern step
 `0-4`         | on pattern buttons: set step type
+`` ` ``       | configure randomizer
 
 **Song Mode Only**
 
@@ -416,6 +453,8 @@ key         | action
 `r`         | toggle recording on/off
 `x`         | clear control overrides
 `c`         | commit control overrides to loop
+`b`         | copy first step of current loop
+`n`         | copy last step of current loop
 `[`         | paste to selected control only
 `]`         | paste sound only (controls but not pattern selections)
 `,`         | previous bar

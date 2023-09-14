@@ -207,6 +207,17 @@ eval--[[language::loaf]][[
   )
  )
 )
+(set copy_loop_begin
+ (fn ()
+  (if (@ $state song_mode)
+   (seq
+    (set_toast "loop beginning copied")
+    (let tl (@ $state tl))
+    (set copy_buf_seq ((@ $tl copy_step) $tl (@ $tl loop_start) 1))
+   )
+  )
+ )
+)
 (set copy_loop_end
  (fn ()
   (if (@ $state song_mode)

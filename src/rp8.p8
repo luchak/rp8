@@ -110,7 +110,7 @@ eval--[[language::loaf]][[
  (print "\0<a<TAB>\0<6FLIP PAGE  \0<a<SPC>\0<6PLAY/PAUSE ")
  (print "\0<am    \0<6FLIP MODE  \0<ae    \0<6EXPORT wav ")
  (print "\0<ag    \0<6GOTO BANKS \0<af    \0<6FILE MENU  ")
- (print "")
+ (print "\0<a`       \0<6CONFIGURE RANDOMIZER")
  (print "\0<a\94/\83   \0<6INC/DEC SELECTED CTRL  ")
  (print "\0<aSHIFT   \0<6W/ABOVE TO GO FASTER   ")
  (print "\0<a\8;/\91   \0<6PREV/NEXT STEP         ")

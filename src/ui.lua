@@ -575,7 +575,12 @@ eval--[[language::loaf]][[
  8 104 11 (fn () (set copy_buf_drum (copy (@ $state pat_seqs dr))) (set_toast "drum pattern copied")) "copy pattern"
 ))
 (add_ui (push_new
- 16 104 10 (fn () (if $copy_buf_drum (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted")))) "paste pattern"
+ 16 104 10 (fn (b) (if $copy_buf_drum
+  (if (> $b 0)
+   (seq (merge (@ $state pat_seqs dr) $copy_buf_drum) (set_toast "drum pattern pasted"))
+   (seq (merge (@ (@ $state pat_seqs dr) (@ $state drum_sel)) (@ $copy_buf_drum (@ $state drum_sel))) (set_toast "drum track pasted"))
+  )
+ )) "paste pattern"
 ))
 (add_ui (push_new 24 104 "?,5,6,2"
  (fn (b)
@@ -752,6 +757,7 @@ eval--[[language::loaf]][[
  91=`(fn () (if (@ $ui focus) (paste_ctrl (@ $ui focus param))))
  93=`(fn () (paste_seq true))
  96=`(id $enter_config)
+ 98=`(id $copy_loop_begin)
  99=`(id $commit_overrides)
  101=`(fn () (if $audio_rec (stop_rec) (start_rec)))
  102=`(id $enter_file)

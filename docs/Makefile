@@ -14,7 +14,7 @@ ALL_IMG_BASENAMES = synth.png drums.png header_section.png drum_step_btns.png \
 		    override_btns.png song_edit_btns.png drums_empty.png drum_btn_colors.png \
 		    synth_empty.png rp8_help.2048.png record_btn_states.png mixer.png transport_ref.png \
 		    rp8_file_menu.2048.png arrangement_btns.png tempo_shuffle_volume.png \
-		    device_pattern_controls.png rp8_p2.2048.png
+		    device_pattern_controls.png rp8_p2.2048.png rp8_randomizer.2048.png
 
 ALL_IMGS = $(ALL_IMG_BASENAMES:%.png=img/%.png)
 
@@ -114,6 +114,7 @@ img/device_pattern_controls.png: img/rp8_p2.2048.png
 		-draw "text 328,1740 'F'" \
 		-draw "text 72,1868 'G'" \
 		-draw "text 200,1868 'H'" \
+		-draw "text 456,1740 'I'" \
 		$< $@
 
 clean:
