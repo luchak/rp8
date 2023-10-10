@@ -709,12 +709,14 @@ eval--[[language::loaf]][[
 
 (song_only (toggle_new 56 0 193 194 "loop on/off" (state_make_get_set tl loop)) 195)
 
-(add_ui (merge (transport_number_new 64 0 4 tl loop_start "loop start" (fn (b)
+(set inc_loop_start (fn (d)
  (let tl (@ $state tl))
- (let ns (+ (@ $tl loop_start) $b))
+ (let ns (+ (@ $tl loop_start) $d))
  (@= $tl loop_start (mid 1 $ns 999))
  (@= $tl loop_len (mid 1 (@ $tl loop_len) (~ 1000 $ns)))
-)) (' {bigstep=4})))
+))
+
+(add_ui (merge (transport_number_new 64 0 4 tl loop_start "loop start" $inc_loop_start) (' {bigstep=4})))
 
 (let set_loop_len (fn (tl l)
   (@= $tl loop_len (mid 1 $l (~ 1000 (@ $tl loop_start))))
@@ -754,6 +756,8 @@ eval--[[language::loaf]][[
  32=`(id $toggle_playing)
  44=`(fn () (go_to_bar (~ (@ $state tl bar) 1)))
  46=`(fn () (go_to_bar (+ (@ $state tl bar) 1)))
+ 60=`(fn () (inc_loop_start (~ 0 (@ $state tl loop_len))))
+ 62=`(fn () (inc_loop_start (@ $state tl loop_len)))
  91=`(fn () (if (@ $ui focus) (paste_ctrl (@ $ui focus param))))
  93=`(fn () (paste_seq true))
  96=`(id $enter_config)
