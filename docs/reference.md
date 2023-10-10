@@ -459,3 +459,5 @@ key         | action
 `]`         | paste sound only (controls but not pattern selections)
 `,`         | previous bar
 `.`         | next bar
+`<`         | move loop start backwards by loop length
+`>`         | move loop forwards by loop length
