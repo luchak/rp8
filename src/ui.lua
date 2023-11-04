@@ -419,7 +419,7 @@ function no_uncommitted() return (not state.tl.has_override) or state.tl.rec end
 function has_uncommitted() return not no_uncommitted() end
 
 eval--[[language::loaf]][[
-(set set_page (fn (_ p) ((@ $ui set_page) $ui $p)))
+(set set_page (fn (p) ((@ $ui set_page) $ui $p)))
 (set get_page (fn () (@ $ui page)))
 
 (set transport_number_new (fn (x y w obj key tt input) (wrap_override
@@ -600,7 +600,7 @@ eval--[[language::loaf]][[
 (map 0 8 0 96 16 4)
 ))
 
-(set next_page (fn () (set_page false (~ 3 (@ $ui page)))))
+(set next_page (fn () (set_page (~ 3 (@ $ui page)))))
 (set rewind_t 0)
 (set rewind (fn ()
  (go_to_bar
