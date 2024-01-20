@@ -1,4 +1,4 @@
-SRC = $(wildcard src/*.lua) src/names.txt tools/loaf.py tools/rp8.py
+SRC = $(wildcard src/*.p8.lua) src/names.txt tools/loaf.py tools/rp8.py
 
 all: build/rp8_min.p8.png build/rp8_debug.p8
 

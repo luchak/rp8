@@ -4,7 +4,7 @@ __lua__
 -- rp-8
 -- by luchak
 
-#include utils.lua
+#include utils.p8.lua
 
 function make_draw_menu_item(items,y)
  return function(i)
@@ -391,12 +391,12 @@ function _draw()
  end
 end
 
-#include driver.lua
-#include synth.lua
-#include fx.lua
-#include events.lua
-#include state.lua
-#include ui.lua
+#include driver.p8.lua
+#include synth.p8.lua
+#include fx.p8.lua
+#include events.p8.lua
+#include state.p8.lua
+#include ui.p8.lua
 
 __gfx__
 0000000000000000666666666666666600cc00000000000000000000000000000000000000000000555555555555555500000005000000000660660507000000
