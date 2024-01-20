@@ -1,6 +1,6 @@
 SRC = $(wildcard src/*.lua) src/names.txt tools/loaf.py tools/rp8.py
 
-all: build/rp8_min.p8.png build/rp8_debug.p8 build/player_min.p8.png build/player_debug.p8
+all: build/rp8_min.p8.png build/rp8_debug.p8
 
 build/rp8_min.p8.png: $(SRC) src/rp8.p8
 	mkdir -p build
@@ -11,16 +11,6 @@ build/rp8_debug.p8: $(SRC) src/rp8.p8
 	mkdir -p build
 	python3 shrinko8/shrinko8.py --minify --count --no-minify-rename --no-minify-spaces \
 		--no-minify-lines --no-minify-comments --script tools/rp8.py src/rp8.p8 $@
-
-build/player_min.p8.png: $(SRC) src/player.p8
-	mkdir -p build
-	python3 shrinko8/shrinko8.py --minify --count --preserve "$$(tr '\n' ',' < src/names.txt)" \
-		--script tools/rp8.py src/player.p8 $@
-
-build/player_debug.p8: $(SRC) src/player.p8
-	mkdir -p build
-	python3 shrinko8/shrinko8.py --minify --count --no-minify-rename --no-minify-spaces \
-		--no-minify-lines --no-minify-comments --script tools/rp8.py src/player.p8 $@
 
 lint:
 	python3 shrinko8/shrinko8.py --lint --script tools/rp8.py src/rp8.p8
@@ -36,6 +26,6 @@ clean:
 	rm -rf build site
 
 watch:
-	ls $(SRC) src/rp8.p8 src/player.p8 | entr make
+	ls $(SRC) src/rp8.p8 | entr make
 
 .PHONY: clean watch
